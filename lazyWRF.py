@@ -1,4 +1,4 @@
-# This script goes through post-processing of WRF
+# This script goes through processing of WPS and WRF (either, or both)
 # And submission of the job to a Rocks cluster if desired (edit to taste) 
 # Run it ("python lazyWRF.py") from your WPS folder.
 
@@ -31,9 +31,9 @@ import time
 # If switched on, this will do pre-processing (WPS)
 WPS = 1
 # If switched on, this will do WRF processing
-WRF = 1
+WRF = 0
 # If switched on, the script will submit jobs (edit as needed)
-submit_job = 1
+submit_job = 0
 
 # If switched on, existing wrfout files etc will be moved to a folder
 move_wrfout = 0 # WORK IN PROGRESS
@@ -43,6 +43,10 @@ pathtoWPS = '/ptmp/jrlawson/WPS/'
 pathtoWRF = '/ptmp/jrlawson/WRFV3/run/'
 # Path to move wrfout* files
 pathtowrfout = '/ptmp/jrlawson/home/path/to/store/wrfout/'
+
+# If you want error messages sent to an email, fill it here as a string; otherwise put '0'.
+# email = 'yourname@domain.edu'
+email = 0
 
 ##### WRF run SETTINGS #####
 # Start and end date in (YYYY,MM,DD,H,M,S)
@@ -172,6 +176,21 @@ def get_init_files(initdata,idate,fdate,pathtoinitdata):
             print 'Data for ' + fname_date + ' already exists.'
     return
 
+# This function runs a script and checks for errors; raises exception if one exists
+def intelligent_run(executable,email):
+    # email = if you want email sent to an address, fill it here
+    command = './' + executable + '.exe'
+    os.system(command)
+    logfile = open(executable + '.log').readlines() 
+    if "Successful completion" in logfile[-1]:
+        print '>>>>>>>> ' , executable, "has completed successfully. <<<<<<<<"
+    else:
+        print '!!!!!!!! ' , executable, "has failed. Exiting... !!!!!!!!"
+        if email:
+            os.system('tail '+logfile+' | mail -s "lazyWRF message: error in '+executable+'." '+email)
+        raise Exception
+    return
+
 ###############################
 #### BEGINNING OF CODE ########
 ###############################
@@ -226,7 +245,7 @@ if WPS:
     # Add your own here if wanting to change e.g. domain location, dx, dy from here...    
 
     # Run geogrid
-    os.system('./geogrid.exe')
+    intelligent_run('geogrid',email)
 
     # Check to see if initialisation files exist
     # If they don't, download into data directory
@@ -235,8 +254,8 @@ if WPS:
     # Link to, and ungrib, initialisation files
     os.system('./link_grib.csh ' + pathtoinitdata + init_prefix)
     os.system('ln -sf ungrib/Variable_Tables/Vtable.' + Vtable_suffix + ' Vtable')
-    os.system('./ungrib.exe')
-    os.system('./metgrid.exe')
+    intelligent_run('ungrib',email)
+    intelligent_run('metgrid',email)
 
 # Submit jobs (edit as needed)
 if WRF:
@@ -306,11 +325,11 @@ if WRF:
         p_real = subprocess.Popen('qsub -d'+pathtoWRF+' real_run.sh',cwd=pathtoWRF,shell=True,stdout=subprocess.PIPE)
         p_real.wait()
         print p_real.stdout.read()
-        jobid = p_real.stdout.read()[:5] # Assuming last five digits = job ID.
+        jobid = p_real.stdout.read()[:5] # Assuming first five digits = job ID.
         # Run WRF but wait until Real has finished without errors
         print 'Now submitting wrf.exe.'  
         # Again, change name of submission script if needed
-        p_wrf = subprocess.Popen('qsub -d'+pathtoWRF+' wrf_run.sh -W afterok=jobid',cwd=pathtoWRF)
+        p_wrf = subprocess.Popen('qsub -d'+pathtoWRF+' wrf_run.sh -W depend=afterok:'+jobid,cwd=pathtoWRF,shell=True)
         p_wrf.wait()
         print "real.exe and wrf.exe submitted. Exiting Python script."
 
