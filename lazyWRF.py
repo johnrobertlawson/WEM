@@ -12,7 +12,6 @@
 # If job submission is switched on, make sure namelist.input parameterisations are correct
 # This script will sync all namelist.wps settings with namelist.output
 
-##########################
 # IMPORTS
 import os
 import sys
@@ -23,26 +22,30 @@ import calendar
 import math
 import datetime
 import time
-###########################
 
-# Script SETTINGS
+######################################
+### EDIT BELOW HERE ##################
+######################################
+
+##### Script SETTINGS #####
 # If switched on, this will do pre-processing (WPS)
-WPS = 0
+WPS = 1
 # If switched on, this will do WRF processing
 WRF = 1
 # If switched on, the script will submit jobs (edit as needed)
 submit_job = 1
 
 # If switched on, existing wrfout files etc will be moved to a folder
-move_wrfout = 0
+move_wrfout = 0 # WORK IN PROGRESS
+
 # Path to WRF folder (absolute)
 pathtoWPS = '/ptmp/jrlawson/WPS/'
 pathtoWRF = '/ptmp/jrlawson/WRFV3/run/'
 # Path to move wrfout* files
 pathtowrfout = '/ptmp/jrlawson/home/path/to/store/wrfout/'
 
-# WRF run SETTINGS
-# Start,end date in (YYYY,MM,DD,H,M,S)
+##### WRF run SETTINGS #####
+# Start and end date in (YYYY,MM,DD,H,M,S)
 idate = (2006,05,26,0,0,0)
 fdate = (2006,05,27,12,0,0)
 domains = 1
@@ -62,9 +65,12 @@ pathtoinitdata = './gfsfiles/'
 # Intermediate file prefix (usually no need to change)
 int_prefix = "FILE"
 
-############################
+######################################
+### EDIT ABOVE HERE ##################
+######################################
 
 # FUNCTIONS
+
 def edit_namelist(old,new,incolumn=1):
     nwps = open('namelist.wps','r').readlines()
     for idx, line in enumerate(nwps):
@@ -121,7 +127,6 @@ def download_data(date,initdata,pathtoinitdata):
         suffix = '.grb'
     command = ('wget "http://nomads.ncdc.noaa.gov/data/' + prefix + '/' + date[:6] + '/' + date[:8] + 
                 '/' + prefix + '_' + n + '_' + date + '_000' + suffix + '" -P ' + pathtoinitdata)
-    #pdb.set_trace()
     os.system(command)
     return
 
@@ -167,8 +172,9 @@ def get_init_files(initdata,idate,fdate,pathtoinitdata):
             print 'Data for ' + fname_date + ' already exists.'
     return
 
-############################
-############################
+###############################
+#### BEGINNING OF CODE ########
+###############################
 
 # Open the WPS namelist; copy the old one in case of bugs
 os.system('cp namelist.wps{,.python_backup}')
