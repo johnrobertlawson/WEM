@@ -4,6 +4,10 @@ The lazyWRF project aims to simplify the WPS/WRF process for a few reasons:
   (3) It can maximise efficiency when submitting jobs to a server (i.e. it can do it overnight)
   
 Your main file is lazyWRF.py. This is the template for other clever ideas like looping, etc.
+It does the following:
+
+    (1)
+    (2)
 
 This is a work in progress, and comments as highly encouraged. The final goal is a portable and bug-free collection of standalone code that anyone can download, assuming basic Python package installs.
 
