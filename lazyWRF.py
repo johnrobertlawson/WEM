@@ -8,9 +8,12 @@
 # -------------IMPORTANT NOTES---------------
 # Remove met_em files if you don't want them overwritten (or hide them)
 # Make sure all SETTINGS are correct
+# Make sure you've read all the comments down to "Edit above here"
+# Make sure you've set other settings in both namelists that aren't covered in this script
 # Then run this script
 # If job submission is switched on, make sure namelist.input parameterisations are correct
 # This script will sync all namelist.wps settings with namelist.output
+# Submit issues and requests to the GitHub (https://github.com/johnrobertlawson/lazyWRF)
 
 # IMPORTS
 import os
@@ -68,6 +71,11 @@ init_data = 'gfs'
 pathtoinitdata = './gfsfiles/'
 # Intermediate file prefix (usually no need to change)
 int_prefix = "FILE"
+
+### NOTE:
+# Any settings you want to change that aren't in this box,
+# You need to manually change yourself in either namelist.
+# Submit a github request if you think it can be automated/is commonly changed
 
 ######################################
 ### EDIT ABOVE HERE ##################
