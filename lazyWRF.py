@@ -41,10 +41,10 @@ submit_job = 0
 # If switched on, existing wrfout files etc will be moved to a folder
 move_wrfout = 0 # WORK IN PROGRESS
 
-# Path to WRF folder (absolute)
+# Path to WRF, WPS folders (absolute) - end in a slash!
 pathtoWPS = '/ptmp/jrlawson/WPS/'
 pathtoWRF = '/ptmp/jrlawson/WRFV3/run/'
-# Path to move wrfout* files
+# Path to move wrfout* files - end in a slash!
 pathtowrfout = '/ptmp/jrlawson/home/path/to/store/wrfout/'
 
 # If you want error messages sent to an email, fill it here as a string; otherwise put '0'.
@@ -54,6 +54,7 @@ email = 0
 ##### WRF run SETTINGS #####
 # Start and end date in (YYYY,MM,DD,H,M,S)
 idate = (2006,05,26,0,0,0)
+interval = 6.0 # In hours, as a float
 fdate = (2006,05,27,12,0,0)
 domains = 1
 e_we = (500,) # Needs to be same length as number of domains
@@ -67,14 +68,14 @@ parent_grid_ratio = (1,) # Same length as num of domains; ratio of each parent t
 # Select initial data source
 # FROM: gfs, nam, (gefs --> use setup_gefs.py script for now)
 init_data = 'gfs'
-# Directory with initialisation data
+# Directory with initialisation data (absolute, or relative to WPS) - end in a slash!
 pathtoinitdata = './gfsfiles/'
 # Intermediate file prefix (usually no need to change)
 int_prefix = "FILE"
 
 ### NOTE:
-# Any settings you want to change that aren't in this box,
-# You need to manually change yourself in either namelist.
+# Any settings you want to change that aren't in this box (e.g. time step),
+# you need to manually change yourself in its relevant namelist.
 # Submit a github request if you think it can be automated/is commonly changed
 
 ######################################
@@ -142,13 +143,11 @@ def download_data(date,initdata,pathtoinitdata):
     os.system(command)
     return
 
-def get_init_files(initdata,idate,fdate,pathtoinitdata):
+def get_init_files(initdata,idate,interval,fdate,pathtoinitdata):
     # Let's assume all initdata possibilities start at 0000 UTC and the interval is an integer factor
     if initdata=='gfs':
-        interval = 6.0
         prefix = 'gfsanl'
     elif initdata=='nam':
-        interval = 6.0
         prefix = 'namanl'
 
     # First, convert dates to seconds-from-epoch time
@@ -211,20 +210,17 @@ nwps = open('namelist.wps','r').readlines()
 if init_data == 'gfs':
     atmos_levs = 27
     soil_levs = 4
-    interval = 6 # In hours
     Vtable_suffix = 'GFS'
     init_prefix = 'gfsanl'
 elif init_data == 'nam':
     atmos_levs = 40
     soil_levs = 4
-    interval = 6 # In hours
     Vtable_suffix = 'NAM'
     init_prefix = 'namanl'
 elif init_data == 'gefs': # WORK IN PROGRESS
     #ens = raw_input('Which ensemble member? (c00,p01...p10) ')
     #atmos_levs = 12
     #soil_levs = 4 # Uses GFS soil data
-    #interval = 3 # Interpolation happens after 90 h
     #Vtable_suffix = 'GEFSR2'
     print 'Work in progress - check back later.'
 
@@ -257,7 +253,7 @@ if WPS:
 
     # Check to see if initialisation files exist
     # If they don't, download into data directory
-    get_init_files(init_data,idate,fdate,pathtoinitdata)
+    get_init_files(init_data,idate,interval,fdate,pathtoinitdata)
 
     # Link to, and ungrib, initialisation files
     os.system('./link_grib.csh ' + pathtoinitdata + init_prefix)
