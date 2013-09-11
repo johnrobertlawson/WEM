@@ -12,10 +12,10 @@ It does the following:
         (i) This includes not having to duplicate everything for each domain
         (ii) And you don't have to work out run_hours etc for the namelist.input
     (3) Automatically downloaded GFS, NAM data you need for your run
+    (4) Intelligently check your logs to alert you via email of errors (and kill the script at this point)
 
 It will eventually:
 
-    (*) Intelligently check your logs to alert you of errors (and kill the script at this point)
     (*) Move existing wrfout*, namelist.input etc files from your previous run into a specific directory
     (*) Be suitable for looping through dates, parameterisation permutations, etc etc
     (*) Merge with other projects (creating ensembles with GEFS data; PyWRFPlus plotting package)
