@@ -34,9 +34,9 @@ import time
 # If switched on, this will do pre-processing (WPS)
 WPS = 1
 # If switched on, this will do WRF processing
-WRF = 0
+WRF = 1
 # If switched on, the script will submit jobs (edit as needed)
-submit_job = 0
+submit_job = 1
 
 # If switched on, existing wrfout files etc will be moved to a folder
 move_wrfout = 0 # WORK IN PROGRESS
@@ -66,7 +66,9 @@ j_start = (1,)
 parent_grid_ratio = (1,) # Same length as num of domains; ratio of each parent to its child
 
 # Select initial data source
-# FROM: gfs, nam, (gefs --> use setup_gefs.py script for now)
+# 'gfs' = GFS analyses
+# 'nam' = NAM analyses
+# (gefs --> use setup_gefs.py script for now)
 init_data = 'gfs'
 # Directory with initialisation data (absolute, or relative to WPS) - end in a slash!
 pathtoinitdata = './gfsfiles/'
@@ -235,7 +237,7 @@ if WPS:
     fdate_s = "'"+y2+"-"+mth2+"-"+d2+'_'+h2+':'+min2+":"+s2+"',"
     edit_namelist("end_date",fdate_s * domains, incolumn=0)
     edit_namelist("max_dom",str(domains)+',',incolumn=0)
-    edit_namelist("interval_seconds",str(interval*3600)+',', incolumn=0)
+    edit_namelist("interval_seconds",str(int(interval*3600))+',', incolumn=0)
     edit_namelist("parent_grid_ratio",', '.join([str(p) for p in parent_grid_ratio])+',')
     edit_namelist("i_parent_start", ', '.join([str(i) for i in i_start])+',')
     edit_namelist("j_parent_start", ', '.join([str(j) for j in j_start])+',')
@@ -294,10 +296,10 @@ if WRF:
             dys.append(child_dy)
 
     # If all namelist values begin on column 38:
-    edit_namelist_input("run_days","%01u" %days)
-    edit_namelist_input("run_hours","%01u" %hrs)
-    edit_namelist_input("run_minutes","%01u" %mins)
-    edit_namelist_input("run_seconds","%01u" %secs)
+    edit_namelist_input("run_days","%01u" %days + ',')
+    edit_namelist_input("run_hours","%01u" %hrs + ',')
+    edit_namelist_input("run_minutes","%01u" %mins + ',')
+    edit_namelist_input("run_seconds","%01u" %secs + ',')
     edit_namelist_input("start_year", (y1+', ')*domains)
     edit_namelist_input("start_month", (mth1+', ')*domains)
     edit_namelist_input("start_day", (d1+', ')*domains)
@@ -310,7 +312,7 @@ if WRF:
     edit_namelist_input("end_hour", (h2+', ')*domains)
     edit_namelist_input("end_minute", (min2+', ')*domains)
     edit_namelist_input("end_second", (s2+', ')*domains)
-    edit_namelist_input("interval_seconds", str(interval*3600)+',')
+    edit_namelist_input("interval_seconds", str(int(interval*3600))+',')
     edit_namelist_input("max_dom",str(domains)+',')
     edit_namelist_input("e_we", ', '.join([str(w) for w in e_we])+',')
     edit_namelist_input("e_sn", ', '.join([str(s) for s in e_sn])+',')
@@ -326,14 +328,13 @@ if WRF:
         print 'Namelist edited. Now submitting real.exe.'  
         # Run real, get ID number of job
         # Change name of submission script if needed
-        p_real = subprocess.Popen('qsub -d'+pathtoWRF+' real_run.sh',cwd=pathtoWRF,shell=True,stdout=subprocess.PIPE)
+        p_real = subprocess.Popen('qsub -d '+pathtoWRF+' real_run.sh',cwd=pathtoWRF,shell=True,stdout=subprocess.PIPE)
         p_real.wait()
-        print p_real.stdout.read()
         jobid = p_real.stdout.read()[:5] # Assuming first five digits = job ID.
         # Run WRF but wait until Real has finished without errors
         print 'Now submitting wrf.exe.'  
         # Again, change name of submission script if needed
-        p_wrf = subprocess.Popen('qsub -d'+pathtoWRF+' wrf_run.sh -W depend=afterok:'+jobid,cwd=pathtoWRF,shell=True)
+        p_wrf = subprocess.Popen('qsub -d '+pathtoWRF+' wrf_run.sh -W depend=afterok:'+jobid,cwd=pathtoWRF,shell=True)
         p_wrf.wait()
         print "real.exe and wrf.exe submitted. Exiting Python script."
 
