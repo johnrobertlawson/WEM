@@ -10,6 +10,7 @@
 # Make sure all SETTINGS are correct
 # Make sure you've read all the comments down to "Edit above here"
 # Make sure you've set other settings in both namelists that aren't covered in this script
+# (This script won't remove any bogus lines in either namelist, syntax errors etc)
 # Then run this script
 # If job submission is switched on, make sure namelist.input parameterisations are correct
 # This script will sync all namelist.wps settings with namelist.output
@@ -68,7 +69,6 @@ parent_grid_ratio = (1,) # Same length as num of domains; ratio of each parent t
 # Select initial data source
 # 'gfs' = GFS analyses
 # 'nam' = NAM analyses
-# (gefs --> use setup_gefs.py script for now)
 init_data = 'gfs'
 # Directory with initialisation data (absolute, or relative to WPS) - end in a slash!
 pathtoinitdata = './gfsfiles/'
@@ -219,12 +219,6 @@ elif init_data == 'nam':
     soil_levs = 4
     Vtable_suffix = 'NAM'
     init_prefix = 'namanl'
-elif init_data == 'gefs': # WORK IN PROGRESS
-    #ens = raw_input('Which ensemble member? (c00,p01...p10) ')
-    #atmos_levs = 12
-    #soil_levs = 4 # Uses GFS soil data
-    #Vtable_suffix = 'GEFSR2'
-    print 'Work in progress - check back later.'
 
 # Get nice strings for namelist writing
 y1,mth1,d1,h1,min1,s1 = str_from_date(idate,'indiv')
