@@ -11,5 +11,11 @@ import matplotlib as M
 # Custom imports
 import meteogeneral
 
-class sfc:
-    """This class contains all surface-based plots.
+class BirdsEye:
+    def __init__(self,config):
+        pass
+    
+    def plot2D(self,config):
+        # This looks a horrible way of doing this...
+        plot_args = 1 # How do I get plot_args?
+        eval('fig.' + plottype + '(' + plot_args + ')')

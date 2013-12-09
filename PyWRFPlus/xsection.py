@@ -11,11 +11,12 @@ This can be useful for creating composites
 # Imports
 import numpy as N
 
-class getCrossSection(config):
-    """
-    Create cross-section as specified in config (settings).
-    """
+class CrossSection:
 
     def __init__(self):
+        pass
+
+    def get_xy(self,config):
+        
         
      
