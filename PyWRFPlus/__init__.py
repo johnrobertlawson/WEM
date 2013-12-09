@@ -7,6 +7,7 @@ from birdseye import BirdsEye
 
 class PyWRFEnv:
     def __init__(self,config):
+        self.config = config
         self.wrftimes = WRFOut.get_wrf_times(config)
         self.dx = WRFOut.get_dx(config)
         self.dy = WRFOut.get_dy(config)
@@ -17,11 +18,11 @@ class PyWRFEnv:
         self.fig = plt.figure()
 
     def plot_CAPE(self,datatype='MLCAPE'):
-        if not config.width:
-            config.width = 8
-        if not config.height:
-            config.height = 8
-        fig.set_size_inches(config.width,config.height)
+        if not self.config.width:
+            self.config.width = 8
+        if not self.config.height:
+            self.config.height = 8
+        self.fig.set_size_inches(self.config.width,self.config.height)
         axes.setup(config)
     
     def plot_shear(self,upper=3,lower=0):
