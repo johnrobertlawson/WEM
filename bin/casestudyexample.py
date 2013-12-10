@@ -14,7 +14,7 @@ import os
 config = PyWRFSettings()
 ## PLOTTING
 # Time for first plots
-config.time = (2009,9,10,0,0,0)
+config.inittime = (2009,9,10,0,0,0)
 config.plottime = (2009,9,11,1,0,0)
 # set data folder - work out dynamically for looping etc
 config.datafolder = os.path.join('2009091000','GEFS','CTRL','c00')

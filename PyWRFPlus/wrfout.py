@@ -9,11 +9,12 @@ from meteogeneral.WRF import wrf_tools
 class WRFOut:
 
     def __init__(self,config):
+        self.timeseq = config.inittime
         self.fname = self.get_fname(config)
         wrfout_abspath = os.path.join(config.wrfout_rootdir,config.datafolder,self.fname)
         self.nc = Dataset(wrfout_abspath,'r')
         
-    def get_fname(self,config):
+    def get_fname(self,config): # This is redundant with to '__init__.padded_times()'
         yr = "%04u" % config.time[0]
         mth = "%02u" % config.time[1]
         day = "%02u" % config.time[2]
@@ -24,6 +25,10 @@ class WRFOut:
         datestr = '_'.join(('-'.join((yr,mth,day)),':'.join((hr,min,sec))))
         fname = '_'.join((config.wrfout_prefix,dom,datestr))
         return fname
+    
+    def format_time(self):
+        
+
  
     def get_wrf_times(self,config):
         self.times = self.nc.variables['Times'][:]        
@@ -38,8 +43,8 @@ class WRFOut:
         return dy
 
     def get_plot_time(self,config):
-        time = wrf_tools.find_time_index(self.times,config.plottime)
-        return time
+        self.time = wrf_tools.find_time_index(self.times,config.plottime)
+        return self.time
 
     def get_lvs(self,config):
         #nc.variables[
@@ -78,10 +83,10 @@ class WRFOut:
 
     def compute_comp_ref(self):
         T2 = self.var('T2')
-        QR = self.var('QR')
+        QR = self.var('QRAIN')
         PSFC = self.var('PSFC')
         try:
-            QS = self.var['QSNOW']
+            QS = self.var('QSNOW')
         except:
             QS = N.zeros(N.shape(QR))
         rhor = 1000.0
@@ -91,12 +96,12 @@ class WRFOut:
 
         no_rain = 8.0E6
         # How do I access this time?
-        no_snow = 2.0E6 * N.exp(-0.12*(T2[time]-273.15))
+        no_snow = 2.0E6 * N.exp(-0.12*(T2[self.time]-273.15))
         no_grau = 4.0E6
 
-        density = N.divide(PSFC[time],(287.0 * T2[time]))
-        Qra_all = QR[time]
-        Qsn_all = QS[time]
+        density = N.divide(PSFC[self.time],(287.0 * T2[self.time]))
+        Qra_all = QR[self.time]
+        Qsn_all = QS[self.time]
 
         for j in range(len(Qra_all[1,:,1])):
             curcol_r = []
@@ -106,18 +111,18 @@ class WRFOut:
                     maxsval = N.max(Qsn_all[:,j,i])
                     curcol_r.append(maxrval)
                     curcol_s.append(maxsval)
-            np_curcol_r = N.array(curcol_r)
-            np_curcol_s = N.array(curcol_s)
+            N_curcol_r = N.array(curcol_r)
+            N_curcol_s = N.array(curcol_s)
             if j == 0:
                 Qra = N_curcol_r
                 Qsn = N_curcol_s
             else:
-                Qra = N.row_stack((Qra, np_curcol_r))
-                Qsn = N.row_stack((Qsn, np_curcol_s))
+                Qra = N.row_stack((Qra, N_curcol_r))
+                Qsn = N.row_stack((Qsn, N_curcol_s))
 
         # Calculate slope factor lambda
         lambr = (N.divide((3.14159 * no_rain * rhor), N.multiply(density, Qra))) ** 0.25
-        lambs = N.exp(-0.0536 * (T2[time] - 273.15))
+        lambs = N.exp(-0.0536 * (T2[self.time] - 273.15))
 
         # Calculate equivalent reflectivity factor
         Zer = (720.0 * no_rain * (lambr ** -7.0)) * 1E18
@@ -125,7 +130,7 @@ class WRFOut:
         Zes_int = N.divide((lambs * Qsn * density), no_snow)
         Zes = ((0.224 * 720 * 1E18) / (3.14159 * rhor) ** 2) * Zes_int ** 2
 
-        Ze = np.add(Zer, Zes)
+        Ze = N.add(Zer, Zes)
         dBZ = N.nan_to_num(10*N.log10(Ze))
         return dBZ
 

@@ -1,30 +1,56 @@
 """Take config settings and run plotting scripts
 """
 import os
+import matplotlib as M
+M.use('Agg')
 import matplotlib.pyplot as plt
 
 from wrfout import WRFOut
 from axes import Axes
-from birdseye import BirdsEye
+from figure import Figure, BirdsEye, CrossSection
+import scales
 
 class PyWRFEnv:
     def __init__(self,config):
         self.config = config
-        # Set default if they don't appear in user's settings
-        self.config.domain = getattr(self.config,'domain',1)
 
-        # Create instance of WRFOut
-        wrff = WRFOut(self.config) # This instance is the wrfout file
-        fname = wrff.get_fname(self.config)
-        wrff.wrfout_abspath = os.path.join(config.wrfout_rootdir,config.datafolder,fname)
-        self.wrftimes = wrff.get_wrf_times(config)
-        self.dx = wrff.get_dx(config)
-        self.dy = wrff.get_dy(config)
-        self.lvs = wrff.get_lvs(config)
-        self.plottime = wrff.get_plot_time(config)
-        self.lats = wrff.get_wrf_lats(config)
-        self.lons = wrff.get_wrf_lons(config)
-        self.fig = plt.figure()
+        # Set defaults if they don't appear in user's settings
+        self.config.domain = getattr(self.config,'domain',1)
+        dflt_font_prop = {'family':'sans-serif','sans-serif':['Liberation Sans'],
+                         'weight':'normal','size':14}    # Make font size relative to figsize?
+        self.font_prop = getattr(self.config,'font_prop',dflt_font_prop)
+        self.usetex = getattr(self.config,'usetex',0)
+        self.dpi = getattr(self.config,'dpi',200)
+        self.title = getattr(self.config,'plot_title',1) 
+
+        # Set some general settings
+        M.rc('text',usetex=self.usetex)
+        M.rc('font',**self.font_prop)
+        M.rcParams['savefig.dpi'] = self.dpi
+
+        # Create instance representing wrfout file
+        # Will need way to have many wrfout files (for ensemble mean etc)
+        self.W = WRFOut(self.config)
+
+        # Same for figures
+        # Some figures may have multiple variables and times?
+        self.F = Figure()
+
+        # Assign padded strings for date and time for initialisation (wrfout) time
+        self.padded_time(self.W)
+
+
+        # Could edit this to put variables within W rather than self?
+        fname = self.W.get_fname(self.config)
+        self.W.wrfout_abspath = os.path.join(config.wrfout_rootdir,config.datafolder,fname)
+        self.wrftimes = self.W.get_wrf_times(config)
+        self.dx = self.W.get_dx(config)
+        self.dy = self.W.get_dy(config)
+        self.lvs = self.W.get_lvs(config)
+        self.plottime = self.W.get_plot_time(config)
+        self.lats = self.W.get_wrf_lats(config)
+        self.lons = self.W.get_wrf_lons(config)
+
 
     def plot_CAPE(self,datatype='MLCAPE'):
         if not self.config.width:
@@ -52,19 +78,26 @@ class PyWRFEnv:
         pass
     
     def plot_sim_ref(self,reftype='composite'):
-        map = BirdsEye(self.fig,wrff,data)
-        scale = scales.comp_ref # Import from dictionary in scales file
-        fig,x,y = map.basemap_setup()
+        self.figsize(8,8)   # Sets default width/height if user does not specify
+        map = BirdsEye(self.W)
+        scale, cmap = scales.comp_ref() # Import scale and cmap
+        self.bmap, x, y = map.basemap_setup()
         if reftype == 'composite':
-            data =  wrff.compute_comp_ref()
-            longtitle = 'Composite Simulated Reflectivity'
-        elif type(reftype) == 'int':
-            data = wrff.compute_simref_atlevel()
-            longtitle = 'Simulated Reflectivity at model level #' + str(reftype)
+            data = self.W.compute_comp_ref()
+            title = 'Composite Simulated Reflectivity'
+        elif isinstance(reftype,int):
+            data = self.W.compute_simref_atlevel()
+            title = 'Simulated Reflectivity at model level #' + str(reftype)
 
-        self.fig.contourf(x,y,data,scale)
+        self.bmap.contourf(x,y,data,scale)
+        if self.title:
+            plt.title(title)
         self.save_fig()
         
+    def title_time(self):
+        date_str = 
+        return date_str
+
     def plot_var(self,varlist):
         pass
         # This could be a combination of surface and upper-air data
@@ -81,15 +114,26 @@ class PyWRFEnv:
         pass 
     
     def save_fig(self):
-        loc = self.config.output_dir
+        loc = self.config.output_dir # For brevity
         self.trycreate(loc)
         fname = 'blah.png'
         fpath = os.path.join(loc,fname)
-        self.fig.savefig(fpath)
+        #self.fig.savefig(fpath)
+        plt.gcf().savefig(fpath,bbox_inches='tight')
+        
     
-    def trycreate(loc):
+    def trycreate(self,loc):
         try:
             os.stat(loc)
         except:
             os.makedirs(loc)
+    
+    def figsize(self,defwidth,defheight):
+        width = getattr(self.config,'width',defwidth)
+        height = getattr(self.config,'height',defheight)
+        self.fig.set_size_inches(width,height)
 
+    def padded_times(self,obj)
+        padded = ['{0:04d}'.format(t) for t in obj.timeseq]
+        obj.yr, obj.mth, obj.day, obj.hr, obj.min, obj.sec = padded
+ 
