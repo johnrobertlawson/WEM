@@ -9,19 +9,19 @@ from wrfout import WRFOut
 from axes import Axes
 from figure import Figure, BirdsEye, CrossSection
 import scales
+from defaults import Defaults
 
 class PyWRFEnv:
     def __init__(self,config):
         self.config = config
 
         # Set defaults if they don't appear in user's settings
-        self.config.domain = getattr(self.config,'domain',1)
-        dflt_font_prop = {'family':'sans-serif','sans-serif':['Liberation Sans'],
-                         'weight':'normal','size':14}    # Make font size relative to figsize?
-        self.font_prop = getattr(self.config,'font_prop',dflt_font_prop)
-        self.usetex = getattr(self.config,'usetex',0)
-        self.dpi = getattr(self.config,'dpi',200)
-        self.title = getattr(self.config,'plot_title',1) 
+        self.D = Defaults()
+        self.config.domain = getattr(self.config,'domain',self.D.domain)
+        self.font_prop = getattr(self.config,'font_prop',self.D.font_prop)
+        self.usetex = getattr(self.config,'usetex',self.D.usetex)
+        self.dpi = getattr(self.config,'dpi',self.D.dpi)
+        self.title = getattr(self.config,'plot_title',self.D.title) 
 
         # Set some general settings
         M.rc('text',usetex=self.usetex)
