@@ -3,55 +3,56 @@ import sys
 import os
 import numpy as N
 
-sys.path.append('/home/jrlawson/gitprojects/meteogeneral/')
-from meteogeneral.WRF import wrf_tools
+#sys.path.append('/home/jrlawson/gitprojects/meteogeneral/')
+#from meteogeneral.WRF import wrf_tools
 
 class WRFOut:
 
     def __init__(self,config):
-        self.timeseq = config.inittime
-        self.fname = self.get_fname(config)
-        wrfout_abspath = os.path.join(config.wrfout_rootdir,config.datafolder,self.fname)
+        self.C = config
+        self.timeseq = C.inittime
+        self.fname = self.get_fname(C)
+        wrfout_abspath = os.path.join(C.wrfout_rootdir,C.datafolder,self.fname)
         self.nc = Dataset(wrfout_abspath,'r')
         
-    def get_fname(self,config): # This is redundant with to '__init__.padded_times()'
-        yr = "%04u" % config.time[0]
-        mth = "%02u" % config.time[1]
-        day = "%02u" % config.time[2]
-        hr = "%02u" % config.time[3]
-        min = "%02u" % config.time[4]
-        sec = "%02u" % config.time[5]
-        dom = 'd0' + str(config.domain)
+    def get_fname(self,C): # This is redundant with '__init__.padded_times()'
+        yr = "%04u" % C.time[0]
+        mth = "%02u" % C.time[1]
+        day = "%02u" % C.time[2]
+        hr = "%02u" % C.time[3]
+        min = "%02u" % C.time[4]
+        sec = "%02u" % C.time[5]
+        dom = 'd0' + str(C.domain)
         datestr = '_'.join(('-'.join((yr,mth,day)),':'.join((hr,min,sec))))
-        fname = '_'.join((config.wrfout_prefix,dom,datestr))
+        fname = '_'.join((C.wrfout_prefix,dom,datestr))
         return fname
     
     def format_time(self):
         
 
  
-    def get_wrf_times(self,config):
+    def get_wrf_times(self,C):
         self.times = self.nc.variables['Times'][:]        
         return self.times
 
-    def get_dx(self,config):
+    def get_dx(self,C):
         dx = self.nc.DX 
         return dx
 
-    def get_dy(self,config):
+    def get_dy(self,C):
         dy = self.nc.DY 
         return dy
 
-    def get_plot_time(self,config):
-        self.time = wrf_tools.find_time_index(self.times,config.plottime)
+    def get_plot_time(self,C):
+        self.time = wrf_tools.find_time_index(self.times,C.plottime)
         return self.time
 
-    def get_lvs(self,config):
+    def get_lvs(self,C):
         #nc.variables[
         pass
 
-    def get_wrfout_fname(self,config):
-        f = ''.join((config.wrfout_rootdir, config.wrfout_prefix+config.wrfout_inittime,
+    def get_wrfout_fname(self,C):
+        f = ''.join((C.wrfout_rootdir, C.wrfout_prefix+C.wrfout_inittime,
                     ''))
         return f 
 
@@ -73,11 +74,11 @@ class WRFOut:
         pass
         return DTE
 
-    def get_wrf_lats(self,config):
+    def get_wrf_lats(self,C):
         lats = self.nc.variables['XLAT'][:]
         return lats
 
-    def get_wrf_lons(self,config):
+    def get_wrf_lons(self,C):
         lons = self.nc.variables['XLONG'][:]
         return lons
 

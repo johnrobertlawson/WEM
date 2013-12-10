@@ -11,8 +11,10 @@ import pdb
 import meteogeneral
 
 class Figure:
-    def __init__(self,config,wrff):
+    def __init__(self,config,wrfout):
         # wrff is details about the wrf files
         # config has user settings for plot etc
-        pass
+        self.C = config
+        self.W = wrfout
+        
 

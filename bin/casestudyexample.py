@@ -12,11 +12,12 @@ import os
 
 # Initialise configuration
 config = PyWRFSettings()
-## PLOTTING
-# Time for first plots
+
+# Initial time of WRF data file
 config.inittime = (2009,9,10,0,0,0)
-config.plottime = (2009,9,11,1,0,0)
-# set data folder - work out dynamically for looping etc
+# Desired time for plot
+config.plottime = (2009,9,11,9,0,0)
+# Set data folder - work out dynamically for looping etc
 config.datafolder = os.path.join('2009091000','GEFS','CTRL','c00')
 # Initialise plotting environment
 p = PyWRFEnv(config)
@@ -27,7 +28,4 @@ p.plot_sim_ref()
 timelist = [(2006,5,27,n,0,0) for n in range(1,7)]
 for t in timelist:
     pass
-    #config.time = t
-    #config.plottype = 'contourf'
-    #p.plot_var('sfc','dewpoint')
-
+    
