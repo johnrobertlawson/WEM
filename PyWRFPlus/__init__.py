@@ -7,13 +7,15 @@ import matplotlib.pyplot as plt
 
 from wrfout import WRFOut
 from axes import Axes
-from figure import Figure, BirdsEye, CrossSection
+from figure import Figure
+from birdseye import BirdsEye
 import scales
 from defaults import Defaults
+import utils
 
 class PyWRFEnv:
     def __init__(self,config):
-        self.config = config
+        self.C = config
 
         # Set defaults if they don't appear in user's settings
         self.D = Defaults()
@@ -39,7 +41,6 @@ class PyWRFEnv:
         # Assign padded strings for date and time for initialisation (wrfout) time
         self.padded_time(self.W)
 
-
         # Could edit this to put variables within W rather than self?
         fname = self.W.get_fname(self.config)
         self.W.wrfout_abspath = os.path.join(config.wrfout_rootdir,config.datafolder,fname)
@@ -51,14 +52,8 @@ class PyWRFEnv:
         self.lats = self.W.get_wrf_lats(config)
         self.lons = self.W.get_wrf_lons(config)
 
-
     def plot_CAPE(self,datatype='MLCAPE'):
-        if not self.config.width:
-            self.config.width = 8
-        if not self.config.height:
-            self.config.height = 8
-        self.fig.set_size_inches(self.config.width,self.config.height)
-        axes.setup(config)
+        pass
     
     def plot_shear(self,upper=3,lower=0):
         self.config.plottype = getattr(self.config,'plottype','contourf')
@@ -115,25 +110,16 @@ class PyWRFEnv:
     
     def save_fig(self):
         loc = self.config.output_dir # For brevity
-        self.trycreate(loc)
+        utils.trycreate(loc)
         fname = 'blah.png'
         fpath = os.path.join(loc,fname)
         #self.fig.savefig(fpath)
         plt.gcf().savefig(fpath,bbox_inches='tight')
         
-    
-    def trycreate(self,loc):
-        try:
-            os.stat(loc)
-        except:
-            os.makedirs(loc)
-    
     def figsize(self,defwidth,defheight):
         width = getattr(self.config,'width',defwidth)
         height = getattr(self.config,'height',defheight)
         self.fig.set_size_inches(width,height)
 
-    def padded_times(self,obj)
-        padded = ['{0:04d}'.format(t) for t in obj.timeseq]
-        obj.yr, obj.mth, obj.day, obj.hr, obj.min, obj.sec = padded
+
  
