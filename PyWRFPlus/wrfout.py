@@ -2,6 +2,7 @@ from netCDF4 import Dataset
 import sys
 import os
 import numpy as N
+import calendar
 
 #sys.path.append('/home/jrlawson/gitprojects/meteogeneral/')
 #from meteogeneral.WRF import wrf_tools
@@ -10,25 +11,26 @@ class WRFOut:
 
     def __init__(self,config):
         self.C = config
-        self.timeseq = C.inittime
-        self.fname = self.get_fname(C)
-        wrfout_abspath = os.path.join(C.wrfout_rootdir,C.datafolder,self.fname)
+        self.timeseq = self.C.inittime
+        self.fname = self.get_fname(self.C)
+        wrfout_abspath = os.path.join(self.C.wrfout_rootdir,self.C.datafolder,self.fname)
         self.nc = Dataset(wrfout_abspath,'r')
-        
+        self.wrftime = self.nc.variables['Times']
+ 
     def get_fname(self,C): # This is redundant with '__init__.padded_times()'
-        yr = "%04u" % C.time[0]
-        mth = "%02u" % C.time[1]
-        day = "%02u" % C.time[2]
-        hr = "%02u" % C.time[3]
-        min = "%02u" % C.time[4]
-        sec = "%02u" % C.time[5]
+        yr = "%04u" % C.inittime[0]
+        mth = "%02u" % C.inittime[1]
+        day = "%02u" % C.inittime[2]
+        hr = "%02u" % C.inittime[3]
+        min = "%02u" % C.inittime[4]
+        sec = "%02u" % C.inittime[5]
         dom = 'd0' + str(C.domain)
         datestr = '_'.join(('-'.join((yr,mth,day)),':'.join((hr,min,sec))))
         fname = '_'.join((C.wrfout_prefix,dom,datestr))
         return fname
     
     def format_time(self):
-        
+        pass 
 
  
     def get_wrf_times(self,C):
@@ -43,9 +45,25 @@ class WRFOut:
         dy = self.nc.DY 
         return dy
 
-    def get_plot_time(self,C):
-        self.time = wrf_tools.find_time_index(self.times,C.plottime)
-        return self.time
+    def get_plot_time_idx(self,timeseq):
+        self.timeseq = timeseq
+        self.reqtime = calendar.timegm(self.timeseq)
+        nt = self.wrftime.shape[0]
+        self.pytime = N.zeros([nt,1])
+        t = self.wrftime
+        # Now convert WRF time to Python time
+        for i in range(nt):
+            yr = int(''.join(t[i,0:4]))
+            mth = int(''.join(t[i,5:7]))
+            day = int(''.join(t[i,8:10]))
+            hr = int(''.join(t[i,11:13]))
+            min = int(''.join(t[i,14:16]))
+            sec = int(''.join(t[i,17:19]))
+            self.pytime[i] = calendar.timegm([yr,mth,day,hr,min,sec])
+
+        # Now find closest WRF time
+        self.time_idx = N.where(abs(self.pytime-self.reqtime) == abs(self.pytime-self.reqtime).min())[0][0]
+        return self.time_idx
 
     def get_lvs(self,C):
         #nc.variables[
@@ -82,7 +100,8 @@ class WRFOut:
         lons = self.nc.variables['XLONG'][:]
         return lons
 
-    def compute_comp_ref(self):
+    def compute_comp_ref(self,time):
+        self.time = time
         T2 = self.var('T2')
         QR = self.var('QRAIN')
         PSFC = self.var('PSFC')

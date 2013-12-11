@@ -1,15 +1,20 @@
 from figure import Figure
+import pdb
+import matplotlib.pyplot as plt
+from mpl_toolkits.basemap import Basemap
 
 class BirdsEye(Figure):
-    def __init__(self):
-        # wrfout file info etc is inherited from Figure class
-        pass
-        
+    def __init__(self,config,wrfout,):
+        self.C = config
+        self.W = wrfout
+        self.fig = plt.figure()
+        self.time_idx = self.W.get_plot_time_idx(self.C.plottime)
+    
     def plot2D(self):
         pass
 
     def basemap_setup(self):
-        nc = self.nc   # For brevity
+        nc = self.W.nc   # For brevity
         cen_lat = float(nc.CEN_LAT)
         cen_lon = float(nc.CEN_LON)
         truelat1 = float(nc.TRUELAT1)
@@ -39,3 +44,5 @@ class BirdsEye(Figure):
         #pdb.set_trace()
         x,y = m(xlong,xlat)
         return m, x, y
+
+    

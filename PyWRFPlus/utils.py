@@ -7,6 +7,9 @@ def trycreate(loc):
     except:
         os.makedirs(loc)
         
-def padded_times(obj):
+def padded_times(timeseq):
+    class obj: pass
     padded = ['{0:04d}'.format(t) for t in obj.timeseq]
     obj.yr, obj.mth, obj.day, obj.hr, obj.min, obj.sec = padded        
+    return obj
+ 

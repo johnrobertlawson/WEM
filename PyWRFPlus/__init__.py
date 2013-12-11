@@ -5,7 +5,7 @@ C = Config = configuration settings set by user, passed from user script
 D = Defaults = used when user does not specify a non-essential item
 W = Wrfout = wrfout file
 F = Figure = a superclass of figures
-    map = Birdseye = a lat--lon slice through data with basemap
+    mp = Birdseye = a lat--lon slice through data with basemap
     xs = CrossSection = distance--height slice through data with terrain 
 
 """
@@ -44,8 +44,8 @@ class PyWRFEnv:
         pass
     
         # Assign padded times for figures and wrfout file
-        for obj in objs:
-            utils.padded_times(obj)
+        #for obj in objs:
+        #    utils.padded_times(obj)
 
         # Create instance representing wrfout file
         # Will need way to have many wrfout files (for ensemble mean etc)
@@ -53,7 +53,7 @@ class PyWRFEnv:
 
         # Same for figures
         # Some figures may have multiple variables and times?
-        self.F = Figure(self.C)
+        self.F = Figure(self.C,self.W)
 
         # Could edit this to put variables within W rather than self?
         self.fname = self.W.get_fname(self.C)
@@ -87,26 +87,24 @@ class PyWRFEnv:
         pass
     
     def plot_sim_ref(self,reftype='composite'):
-        self.figsize(8,8)   # Sets default width/height if user does not specify
-        map = BirdsEye(self.W)
-        scale, cmap = scales.comp_ref() # Import scale and cmap
-        self.bmap, x, y = map.basemap_setup()
+        self.mp = BirdsEye(self.C,self.W,self.C.plottime)
+        self.mp.figsize(8,8)   # Sets default width/height if user does not specify
+        self.mp.scale, self.mp.cmap = scales.comp_ref() # Import scale and cmap
+        self.bmap, self.x, self.y = self.mp.basemap_setup()
+ 
         if reftype == 'composite':
-            data = self.W.compute_comp_ref()
-            title = 'Composite Simulated Reflectivity'
+            self.data = self.W.compute_comp_ref(self.mp.W.time_idx)
+            self.mp.title = 'Composite Simulated Reflectivity'
         elif isinstance(reftype,int):
-            data = self.W.compute_simref_atlevel()
-            title = 'Simulated Reflectivity at model level #' + str(reftype)
+            self.data = self.W.compute_simref_atlevel()
+            self.mp.title = 'Simulated Reflectivity at model level #' + str(reftype)
 
-        self.bmap.contourf(x,y,data,scale)
+        self.mp.title_time()  
+        self.bmap.contourf(self.x,self.y,self.data,self.mp.scale)
         if self.title:
-            plt.title(title)
-        self.save_fig()
+            plt.title(self.mp.title)
+        self.mp.save_fig()
         
-    def title_time(self):
-        date_str = 
-        return date_str
-
     def plot_var(self,varlist):
         pass
         # This could be a combination of surface and upper-air data
@@ -122,18 +120,4 @@ class PyWRFEnv:
         # Levels: isentropic, isobaric, geometric,
         pass 
     
-    def save_fig(self):
-        loc = self.C.output_dir # For brevity
-        utils.trycreate(loc)
-        fname = 'blah.png'
-        fpath = os.path.join(loc,fname)
-        #self.fig.savefig(fpath)
-        plt.gcf().savefig(fpath,bbox_inches='tight')
-        
-    def figsize(self,defwidth,defheight):
-        width = getattr(self.C,'width',defwidth)
-        height = getattr(self.C,'height',defheight)
-        self.fig.set_size_inches(width,height)
 
-
- 
