@@ -14,6 +14,7 @@ import os
 import matplotlib as M
 M.use('Agg')
 import matplotlib.pyplot as plt
+import collections
 
 from wrfout import WRFOut
 from axes import Axes
@@ -29,43 +30,75 @@ class PyWRFEnv:
 
         # Set defaults if they don't appear in user's settings
         self.D = Defaults()
-        self.C.domain = getattr(self.C,'domain',self.D.domain)
+        
         self.font_prop = getattr(self.C,'font_prop',self.D.font_prop)
         self.usetex = getattr(self.C,'usetex',self.D.usetex)
         self.dpi = getattr(self.C,'dpi',self.D.dpi)
-        self.title = getattr(self.C,'plot_title',self.D.title) 
+        self.plot_titles = getattr(self.C,'plot_titles',self.D.plot_titles) 
 
         # Set some general settings
         M.rc('text',usetex=self.usetex)
         M.rc('font',**self.font_prop)
         M.rcParams['savefig.dpi'] = self.dpi
 
-        # Assign filenames - will need to do for all files
-        pass
-    
-        # Assign padded times for figures and wrfout file
-        #for obj in objs:
-        #    utils.padded_times(obj)
-
-        # Create instance representing wrfout file
-        # Will need way to have many wrfout files (for ensemble mean etc)
-        self.W = WRFOut(self.C)
-
-        # Same for figures
-        # Some figures may have multiple variables and times?
-        self.F = Figure(self.C,self.W)
-
-        # Could edit this to put variables within W rather than self?
-        self.fname = self.W.get_fname(self.C)
-        #self.W.wrfout_abspath = os.path.join(C.wrfout_rootdir,C.datafolder,fname)
-        #self.wrftimes = self.W.get_wrf_times(C)
-        #self.dx = self.W.get_dx(C)
-        #self.dy = self.W.get_dy(C)
-        #self.lvs = self.W.get_lvs(C)
-        #self.plottime = self.W.get_plot_time(C)
-        #self.lats = self.W.get_wrf_lats(C)
-        #self.lons = self.W.get_wrf_lons(C)
-
+    def all_WRF_files_in(self,folder,prefix='wrfout'):
+        wrfouts = []
+        for root,dirs,files in os.walk(folder):
+            for fname in fnmatch.filder(files,prefix+'*'):
+                wrfouts.append(os.path.join(root, fname))
+        return wrfouts
+        
+    def plot_variable2D(va,it,pt,en,do,lv,da=0)
+        """Plot a longitude--latitude cross-section (bird's-eye-view).
+        Use Basemap to create geographical data
+        
+        va = variable(s)
+        it = initial time(s) of WRF run
+        pt = plot time(s)
+        en = ensemble member(s)
+        do = domain(s)
+        lv = level(s) 
+        da = smaller domain area(s)
+        """
+        
+        va = self.get_sequence(va)
+        it = self.get_sequence(it)
+        pt = self.get_sequence(pt)
+        en = self.get_sequence(en)
+        do = self.get_sequence(do)
+        lv = self.get_sequence(lv)
+        da = self.get_sequence(da)
+        
+        perms = self.make_iterator(va,it,pt,en,do,lv,da)
+        
+        # Find some way of looping over wrfout files first, avoiding need
+        # to create new W instances
+        
+        for n,x in enumerate(perms):
+            va,it,pt,en,do,lv,da = x
+            
+            W = WRFOut(en)    # wrfout file class using path
+            F = BirdsEye(self.C)    # 2D figure class
+            F.plot2D(va,it,pt,en,do,lv,da)  # Plot/save figure
+            print("Plotting #" + str(n) + " of " + str(len(perms)))
+        
+    def make_iterator(va,it,pt,en,do,lv,da):   
+        for v in va:
+            for i in it:
+                for p in pt:
+                    for e in en:
+                        for d in do:
+                            for l in lv:
+                                for a in da:
+                                    yield v,i,p,e,d,l,a
+        
+    def get_sequence(x):
+        """ Returns a sequence (tuple or list) for iteration."""
+        if isinstance(x, collections.Sequence) and not isinstance(x, basestring):
+            return x
+        else:
+            return (x)
+            
     def plot_CAPE(self,datatype='MLCAPE'):
         pass
     

@@ -16,7 +16,7 @@ class CrossSection:
     def __init__(self):
         pass
 
-    def get_xy(self,config):
+    def get_xy(self):
         
         
      

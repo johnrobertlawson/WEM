@@ -9,4 +9,5 @@ class Defaults:
                           'weight':'normal','size':14}
         self.usetex = 0
         self.dpi = 200
-        self.title = 1   # Generate a title for each plot
+        self.plot_titles = 1   # Generate a title for each plot
+        self.basemap_res = 'i'  # Resolution of basemap coasts etc

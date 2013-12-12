@@ -14,16 +14,11 @@ import utils
 
 class Figure:
     def __init__(self,config,wrfout):
-        # wrff is details about the wrf files
-        # config has user settings for plot etc
-        self.C = config
-        self.W = wrfout
-        #self.fig = plt.figure()        
+        pass        
      
     def title_time(self):
         self.T = utils.padded_times(self.timeseq) 
         pdb.set_trace()
-
 
     def figsize(self,defwidth,defheight):
         width = getattr(self.C,'width',defwidth)

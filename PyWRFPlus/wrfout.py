@@ -9,72 +9,56 @@ import calendar
 
 class WRFOut:
 
-    def __init__(self,config):
-        self.C = config
-        self.timeseq = self.C.inittime
-        self.fname = self.get_fname(self.C)
-        wrfout_abspath = os.path.join(self.C.wrfout_rootdir,self.C.datafolder,self.fname)
-        self.nc = Dataset(wrfout_abspath,'r')
-        self.wrftime = self.nc.variables['Times']
- 
-    def get_fname(self,C): # This is redundant with '__init__.padded_times()'
-        yr = "%04u" % C.inittime[0]
-        mth = "%02u" % C.inittime[1]
-        day = "%02u" % C.inittime[2]
-        hr = "%02u" % C.inittime[3]
-        min = "%02u" % C.inittime[4]
-        sec = "%02u" % C.inittime[5]
-        dom = 'd0' + str(C.domain)
-        datestr = '_'.join(('-'.join((yr,mth,day)),':'.join((hr,min,sec))))
-        fname = '_'.join((C.wrfout_prefix,dom,datestr))
-        return fname
-    
-    def format_time(self):
-        pass 
+    def __init__(self,fpath):
+        #self.C = config
+        self.nc = Dataset(fpath,'r')
 
- 
-    def get_wrf_times(self,C):
-        self.times = self.nc.variables['Times'][:]        
-        return self.times
+        self.wrf_times = self.get('Times')
+        self.dx = self.nc.DX
+        self.dy = self.nc.DY
+        #self.lvs = 
+        self.lats = self.get('XLAT')   # Need to get lat and lon into plottable formats
+        self.lons = self.get('XLONG')
+        
+        self.cen_lat = float(self.nc.CEN_LAT)
+        self.cen_lon = float(self.nc.CEN_LON)
+        self.truelat1 = float(self.nc.TRUELAT1)
+        self.truelat2 = float(self.nc.TRUELAT2)
+        self.x_dim = len(self.nc.dimensions['west_east'])
+        self.y_dim = len(self.nc.dimensions['south_north'])
+        
+    def get_plot_time_idx(self,plot_time_seq):
+        self.plot_time_seq = plot_time_seq
+        self.time_epoch = calendar.timegm(self.plot_time_seq)
+        nt = self.wrf_times.shape[0]
+        self.wrf_times_epoch = N.zeros([nt,1])
+        t = self.wrf_times   # For brevity
 
-    def get_dx(self,C):
-        dx = self.nc.DX 
-        return dx
-
-    def get_dy(self,C):
-        dy = self.nc.DY 
-        return dy
-
-    def get_plot_time_idx(self,timeseq):
-        self.timeseq = timeseq
-        self.reqtime = calendar.timegm(self.timeseq)
-        nt = self.wrftime.shape[0]
-        self.pytime = N.zeros([nt,1])
-        t = self.wrftime
-        # Now convert WRF time to Python time
         for i in range(nt):
             yr = int(''.join(t[i,0:4]))
             mth = int(''.join(t[i,5:7]))
             day = int(''.join(t[i,8:10]))
             hr = int(''.join(t[i,11:13]))
-            min = int(''.join(t[i,14:16]))
+            mins = int(''.join(t[i,14:16]))
             sec = int(''.join(t[i,17:19]))
-            self.pytime[i] = calendar.timegm([yr,mth,day,hr,min,sec])
+            self.wrf_times_epoch[i] = calendar.timegm([yr,mth,day,hr,mins,sec])
 
         # Now find closest WRF time
-        self.time_idx = N.where(abs(self.pytime-self.reqtime) == abs(self.pytime-self.reqtime).min())[0][0]
+        self.time_idx = N.where(abs(self.wrf_times_epoch-self.plot_time_epoch) == abs(self.wrf_times_epoch-self.plot_time_epoch).min())[0][0]
         return self.time_idx
+        
+    def get(self,var,time_idx):
+        if var=='pressure':
+            pass
+        elif var=='sim_ref':
+            data = self.compute_comp_ref(time_idx)
+        elif var=='shear':
+            data = self.compute_shear(0,3,time_idx)
+        else:
+            data = self.nc.variables[var][time_idx,...]
+        return data
 
-    def get_lvs(self,C):
-        #nc.variables[
-        pass
-
-    def get_wrfout_fname(self,C):
-        f = ''.join((C.wrfout_rootdir, C.wrfout_prefix+C.wrfout_inittime,
-                    ''))
-        return f 
-
-    def compute_shear(self,upper,lower):
+    def compute_shear(self,lower,upper):
         pass
         return shear
 
@@ -92,21 +76,13 @@ class WRFOut:
         pass
         return DTE
 
-    def get_wrf_lats(self,C):
-        lats = self.nc.variables['XLAT'][:]
-        return lats
-
-    def get_wrf_lons(self,C):
-        lons = self.nc.variables['XLONG'][:]
-        return lons
-
     def compute_comp_ref(self,time):
         self.time = time
-        T2 = self.var('T2')
-        QR = self.var('QRAIN')
-        PSFC = self.var('PSFC')
+        T2 = self.get('T2')
+        QR = self.get('QRAIN')
+        PSFC = self.get('PSFC')
         try:
-            QS = self.var('QSNOW')
+            QS = self.get('QSNOW')
         except:
             QS = N.zeros(N.shape(QR))
         rhor = 1000.0
@@ -158,9 +134,4 @@ class WRFOut:
         pass
         return data
 
-    def var(self,var):
-        if var=='P':
-            pass
-        else:
-            data = self.nc.variables[var]
-        return data
+
