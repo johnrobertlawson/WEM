@@ -1,3 +1,10 @@
+"""Compute or load data from netCDF file.
+
+Dimensions of 4D variable X are X.dimensions:
+(Time,bottom_top,south_north,west_east_stag)
+Time, levels, latitude, longitude
+"""
+
 from netCDF4 import Dataset
 import sys
 import os
@@ -13,12 +20,12 @@ class WRFOut:
         #self.C = config
         self.nc = Dataset(fpath,'r')
 
-        self.wrf_times = self.get('Times')
+        self.wrf_times = self.nc.variable['Times'][:]
         self.dx = self.nc.DX
         self.dy = self.nc.DY
         #self.lvs = 
-        self.lats = self.get('XLAT')   # Need to get lat and lon into plottable formats
-        self.lons = self.get('XLONG')
+        self.lats = self.nc.variables['XLAT'][0,...] # Might fail if only one time?
+        self.lons = self.nc.variables['XLONG'][0,...]
         
         self.cen_lat = float(self.nc.CEN_LAT)
         self.cen_lon = float(self.nc.CEN_LON)
@@ -44,19 +51,46 @@ class WRFOut:
             self.wrf_times_epoch[i] = calendar.timegm([yr,mth,day,hr,mins,sec])
 
         # Now find closest WRF time
-        self.time_idx = N.where(abs(self.wrf_times_epoch-self.plot_time_epoch) == abs(self.wrf_times_epoch-self.plot_time_epoch).min())[0][0]
+        self.time_idx = N.where(
+                        abs(self.wrf_times_epoch-self.plot_time_epoch) == 
+                        abs(self.wrf_times_epoch-self.plot_time_epoch).min()
+                        )[0][0]
         return self.time_idx
         
-    def get(self,var,time_idx):
+    def get(self,var,time_idx,lv_idx,lat_idx,lon_idx):
         if var=='pressure':
-            pass
+            if lv_idx == 0:
+                data = self.nc.variables['PSFC'][:]
         elif var=='sim_ref':
             data = self.compute_comp_ref(time_idx)
         elif var=='shear':
             data = self.compute_shear(0,3,time_idx)
+        elif var=='wind':
+            u = self.nc.variables['U'][time_idx,lv_idx,lat_idx,lon_idx]
+            v = self.nc.variables['V'][time_idx,lv_idx,lat_idx,lon_idx]
+            wind = N.sqrt(u**2 + v**2)
         else:
-            data = self.nc.variables[var][time_idx,...]
+            data = self.get_4D(var)[time_idx,lv_idx,lat_idx,lon_idx]
         return data
+
+    def get_4D(self,var):
+        data = self.nc.variables[var][:]
+        data4D = self.enforce_4D(data)
+        return data4D
+
+    def enforce_4D(self,data):
+        # Make sure variable with one level had an axis, length of 1
+        if data.ndim == 3:
+            data4D = N.expand_dims(data,axis=1)
+            return data4D
+        elif data.ndim == 4:
+            return data
+        else:
+            print('This data has dimension = ',str(data.ndim))
+            raise Exception
+
+    def check_destagger(self,data)
+     
 
     def compute_shear(self,lower,upper):
         pass

@@ -25,7 +25,7 @@ p.plot_sim_ref()
 # Things to loop over:
 plot_times = [(2009,9,11,n,0,0) for n in range(1,7)]
 init_times = [(2009,9,10,0,0,0)]
-variables = ['T2','shear_0_3']
+variables = ['T2','wind2']
 ens_members = [path_to_wrfouts]
 levels = [2000] # hPa levels would require pinterp rewrite into Python?
 domains = [1]
