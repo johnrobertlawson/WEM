@@ -7,15 +7,35 @@ class BirdsEye(Figure):
     def __init__(self,config,wrfout,):
         self.C = config
         self.W = wrfout
-        self.plot_time_idx = self.W.get_plot_time_idx(self.C.plottime)
-        self.plot_time =
-        self.plot_time_str =
     
-    def plot2D(self,va,it,pt,en,do,lv,da):
+    def plot2D(self,va,pt,en,do,lv,da):
         w,h = self.figsize(8,8)     # Create a default figure size if not set by user
         fig = plt.figure(figsize=(w,h))
         bmap,x,y = basemap_setup()
-        data = self.W.get(va,self.plot_time_idx)
+        
+        # Work out time, level, lats, lons index
+        
+        time_idx = self.W.get_time_idx(pt)
+        
+        if lv = 2000:
+            lv_idx = 0
+        else:
+            print("Non-surface levels not supported yet.")
+            raise Exception
+        
+        if da:  # Limited domain area 
+            N_idx = self.W.get_lat_idx(da['N'])
+            E_idx = self.W.get_lon_idx(da['E'])
+            S_idx = self.W.get_lat_idx(da['S'])
+            W_idx = self.W.get_lon_idx(da['W'])
+
+            lat_sl = slice(S_idx:N_idx)
+            lon_sl = slice(W_idx:E_idx)
+        else:
+            lat_sl = slice(None)
+            lon_sl = slice(None)
+            
+        data = self.W.get(va,time_idx,lv_idx,lat_sl,lon_sl)
         #scale_lvs =
         bmap.contourf(x,y,data,scale_lvs)
         fpath = self.get_fpath()

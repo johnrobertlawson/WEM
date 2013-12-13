@@ -34,9 +34,8 @@ class WRFOut:
         self.x_dim = len(self.nc.dimensions['west_east'])
         self.y_dim = len(self.nc.dimensions['south_north'])
         
-    def get_plot_time_idx(self,plot_time_seq):
-        self.plot_time_seq = plot_time_seq
-        self.time_epoch = calendar.timegm(self.plot_time_seq)
+    def get_time_idx(self,t):
+        t_epoch = calendar.timegm(t)
         nt = self.wrf_times.shape[0]
         self.wrf_times_epoch = N.zeros([nt,1])
         t = self.wrf_times   # For brevity
@@ -52,34 +51,70 @@ class WRFOut:
 
         # Now find closest WRF time
         self.time_idx = N.where(
-                        abs(self.wrf_times_epoch-self.plot_time_epoch) == 
-                        abs(self.wrf_times_epoch-self.plot_time_epoch).min()
+                        abs(self.wrf_times_epoch-t_epoch) == 
+                        abs(self.wrf_times_epoch-t_epoch).min()
                         )[0][0]
         return self.time_idx
         
-    def get(self,var,time_idx,lv_idx,lat_idx,lon_idx):
+    def get(self,var,t,lv,la,lo):
+        """ Fetch a numpy array containing variable data.
+        
+        Slice according to arguments.
+        
+        Destagger if required.
+    
+        Returns unstaggered, sliced data.
+        
+        var     :   netCDF variable name
+        t       :   time index
+        lv      :   level index
+        la      :   latitude slice indices
+        lo      :   longitude slice indices
+        
+        """
+        
         if var=='pressure':
             if lv_idx == 0:
-                data = self.nc.variables['PSFC'][:]
+                data = self.get4D('PSFC')
         elif var=='sim_ref':
-            data = self.compute_comp_ref(time_idx)
+            data = self.compute_comp_ref(t,lv,la,lo)
         elif var=='shear':
-            data = self.compute_shear(0,3,time_idx)
+            data = self.compute_shear(0,3,t,lv,la,lo)
         elif var=='wind':
-            u = self.nc.variables['U'][time_idx,lv_idx,lat_idx,lon_idx]
-            v = self.nc.variables['V'][time_idx,lv_idx,lat_idx,lon_idx]
-            wind = N.sqrt(u**2 + v**2)
+            u = self.nc.variables['U'][t,lv,la,lo]
+            v = self.nc.variables['V'][t,lv,la,lo]
+            data = N.sqrt(u**2 + v**2)
         else:
-            data = self.get_4D(var)[time_idx,lv_idx,lat_idx,lon_idx]
-        return data
+            data = self.get_4D(var)[t,lv,la,lo]
+        
+        data_out = check_destagger(var,data)
+        
+        return data_out
 
-    def get_4D(self,var):
-        data = self.nc.variables[var][:]
-        data4D = self.enforce_4D(data)
+    def get_4D(self,var,t,lv,la,lo):
+        data = self.nc.variables[var]
+        dims = data.dimensions
+        
+        # See which dimensions are present in netCDF file variable
+        time = 'Time' in dims
+        levels = 'bottom' in dims
+        lats = 'north' in dims
+        lons = 'west' in dims
+        
+        """ How to write logic that allows method to get correct slices?
+        """
+        
+        data4D = self.enforce_4D(data)[t,lv,la,lo]
+        data4D = self.enforce_4D(data4D)
         return data4D
 
     def enforce_4D(self,data):
-        # Make sure variable with one level had an axis, length of 1
+        """ Return a 4D numpy array of data.
+        
+        Some arrays may only have one time, level etc.
+        This might be before or after slicing.
+        
+        """
         if data.ndim == 3:
             data4D = N.expand_dims(data,axis=1)
             return data4D
@@ -89,8 +124,56 @@ class WRFOut:
             print('This data has dimension = ',str(data.ndim))
             raise Exception
 
-    def check_destagger(self,data)
-     
+    def check_destagger(self,var,data=0):
+        """ Looks up dimensions of netCDF file without loading data.
+        
+        Returns list of dimensions that require destaggering
+        
+        Optional argument data will run destagger data and return it instead of list of dims.
+        """
+        
+        for n,dname in enumerate(nc.variables[var].dimensions):
+            if 'stag' in dname:
+                stag_dim = n
+        
+        if not data:
+            return n
+        else:
+            if stag_dim:
+                data_destag = self.destagger(data,n)
+            else: 
+                data_destag = data
+            return data_destag
+
+    def destagger(self,data,ax):
+        """ Destagger data which needs it doing.
+        
+        data    :   numpy array of data requiring destaggering
+        ax      :   axis requiring destaggering
+        
+        Theta always has unstaggered points in all three spatial dimensions (axes=1,2,3).
+        
+        Data should be 4D but just the slice required to reduce unnecessary computation time.
+        """
+
+        #unstag_dims = nc.variables['T'].shape
+
+        nd = data.ndim
+        sl0 = []     # Slices to take place on staggered axis
+        sl1 = []
+        
+        for n in nd:
+            if n is not ax:
+                sl0.append(slice(None))
+                sl1.append(slice(None))
+            else:
+                sl0.append(slice(None,-1)
+                sl1.append(slice(1,None))
+                
+        #data_unstag = 0.5*(data[...,:-1] + data[...,1:])
+        data_unstag = 0.5*(data[sl0] + data[sl1])
+        
+        return data_unstag
 
     def compute_shear(self,lower,upper):
         pass
@@ -168,4 +251,39 @@ class WRFOut:
         pass
         return data
 
+    def get_XY(self,lat,lon):
+        """Return grid indices for lat/lon pair.
+        """
+      
+    def get_lat_idx(self,lat):
+        lat_idx = N.where(abs(self.lats-lat) == abs(self.lats-lat).min())[0][0]
+        return lat_idx
+        
+    def get_lon_idx(self,lon):
+        lon_idx = N.where(abs(self.lons-lon) == abs(self.lons-lon).min())[0][0]
+        return lon_idx
+        
+    def level_type(self,lv):
+        """ Check to see what type of level is requested by user.
+        
+        """
+        if lv.endswith('K'):
+            return 'isentropic'
+        elif lv < 1500:
+            return 'isobaric'
+        elif lv == 2000:
+            return 'surface'
+        elif lv.endswith('PVU'):
+            return 'PV-surface'
+        elif lv.endswith('km'):
+            return 'geometric'
+            
+            
 
+            
+            
+            
+            
+                        
+                        
+                        

@@ -27,9 +27,9 @@ plot_times = [(2009,9,11,n,0,0) for n in range(1,7)]
 init_times = [(2009,9,10,0,0,0)]
 variables = ['T2','wind2']
 ens_members = [path_to_wrfouts]
-levels = [2000] # hPa levels would require pinterp rewrite into Python?
-domains = [1]
-domain_areas = [] # ul, lr corners lat/lon to form box
+levels = 2000 # hPa levels would require pinterp rewrite into Python?
+domains = 1
+domain_areas = 0 # sequence of dictionaries with N,E,S,W representing lat/lon limits.
 
 """
 Perhaps load all wrfout files found in datafolder.
