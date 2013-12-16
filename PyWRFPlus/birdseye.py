@@ -1,24 +1,30 @@
-from figure import Figure
 import pdb
 import matplotlib.pyplot as plt
 from mpl_toolkits.basemap import Basemap
 
+from defaults import Defaults
+from figure import Figure
+import utils
+
 class BirdsEye(Figure):
-    def __init__(self,config,wrfout,):
+    def __init__(self,config,wrfout,p2p):
         self.C = config
         self.W = wrfout
+        self.D = Defaults()
+        self.p2p = p2p
     
-    def plot2D(self,va,pt,en,do,lv,da):
-        w,h = self.figsize(8,8)     # Create a default figure size if not set by user
-        fig = plt.figure(figsize=(w,h))
-        bmap,x,y = basemap_setup()
+    def plot2D(self,va,pt,en,lv,da,na):
+        self.fig = plt.figure()
+        self.fig = self.figsize(8,8,self.fig)     # Create a default figure size if not set by user
+        self.bmap,x,y = self.basemap_setup()
         
         # Work out time, level, lats, lons index
         
         time_idx = self.W.get_time_idx(pt)
         
-        if lv = 2000:
+        if lv == 2000:
             lv_idx = 0
+            lv = 'sfc' # For naming purposes
         else:
             print("Non-surface levels not supported yet.")
             raise Exception
@@ -29,19 +35,53 @@ class BirdsEye(Figure):
             S_idx = self.W.get_lat_idx(da['S'])
             W_idx = self.W.get_lon_idx(da['W'])
 
-            lat_sl = slice(S_idx:N_idx)
-            lon_sl = slice(W_idx:E_idx)
+            lat_sl = slice(S_idx,N_idx)
+            lon_sl = slice(W_idx,E_idx)
         else:
             lat_sl = slice(None)
             lon_sl = slice(None)
-            
-        data = self.W.get(va,time_idx,lv_idx,lat_sl,lon_sl)
-        #scale_lvs =
-        bmap.contourf(x,y,data,scale_lvs)
-        fpath = self.get_fpath()
-        fname = self.get_fname()
-        fig.savefig(fname,bbox_inches='tight')
-        fig.clf()
+        
+        # Plot settings
+        PS = {'t': time_idx, 'lv': lv_idx, 'la': lat_sl, 'lo': lon_sl} 
+        data = self.W.get(va,PS)
+
+        # Set user scale
+        # If not set, use default
+        # If no default, do auto-scale.
+
+        try: 
+            scale_lvs = self.C.scales[va]
+            SL = N.arange
+        except:
+            try:
+                scale_lvs = self.D.scales[va]
+            except:
+                scale_lvs = 0
+
+        #self.bmap.contourf(x,y,data,scale_lvs)
+        la_n = data.shape[-2]
+        lo_n = data.shape[-1]
+        if not scale_lvs:
+            self.bmap.contourf(x,y,data.reshape((la_n,lo_n))) # Dimension thing again...
+        else:
+            self.bmap.contourf(x,y,data.reshape((la_n,lo_n)),scale_lvs)
+        if self.C.plot_titles:
+            title = utils.string_from_time('title',pt)
+            plt.title(title)
+        if self.C.colorbar:
+            plt.colorbar(orientation='horizontal')
+
+        datestr = utils.string_from_time('output',pt)
+        if not na:
+            # Use default naming scheme
+            na = (va,lv,datestr)
+        else:
+            # Come up with scheme...
+            print("Coming soon: ability to create custom filenames")
+            raise Exception
+        self.fname = self.create_fname(na) # No da variable here
+        self.save(self.fig,self.p2p,self.fname)
+        self.fig.clf()
 
     def basemap_setup(self):
         # Fetch settings
@@ -53,7 +93,7 @@ class BirdsEye(Figure):
         m = Basemap(
             projection='lcc',width=width_m,height=height_m,
             lon_0=self.W.cen_lon,lat_0=self.W.cen_lat,lat_1=self.W.truelat1,
-            lat_2=self.W.truelat2,resolution=self.basemap_res,area_thresh=500
+            lat_2=self.W.truelat2,resolution=basemap_res,area_thresh=500
             )
         m.drawcoastlines() 
         m.drawstates()

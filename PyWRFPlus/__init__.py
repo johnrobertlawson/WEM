@@ -15,6 +15,8 @@ import matplotlib as M
 M.use('Agg')
 import matplotlib.pyplot as plt
 import collections
+import fnmatch
+import pdb
 
 from wrfout import WRFOut
 from axes import Axes
@@ -41,72 +43,114 @@ class PyWRFEnv:
         M.rc('font',**self.font_prop)
         M.rcParams['savefig.dpi'] = self.dpi
 
-    def all_WRF_files_in(self,folder,prefix='wrfout'):
+    def wrfout_files_in(self,folder,dom='notset',init_time='notset'):
+        w = 'wrfout' # Assume the prefix
+        if init_time=='notset':
+            suffix = '*'
+            # We assume the user has wrfout files in different folders for different times
+        else:
+            try:
+                it = self.string_from_time('wrfout',init_time)
+            except:
+                print("Not a valid wrfout initialisation time; try again.")
+                raise Error
+            suffix = '*' + it
+
+        if dom=='notset':
+            # Presume all domains are desired.
+            prefix = w + '_d'
+        elif (dom == 0) | (dom > 8):
+            print("Domain is out of range. Choose number between 1 and 8 inclusive.")
+            raise IndexError
+        else:
+            dom = 'd{0:02d}'.format(dom)
+            prefix = w + '_' + dom
+
         wrfouts = []
         for root,dirs,files in os.walk(folder):
-            for fname in fnmatch.filder(files,prefix+'*'):
+            for fname in fnmatch.filter(files,prefix+suffix):
                 wrfouts.append(os.path.join(root, fname))
         return wrfouts
-        
-    def plot_variable2D(va,it,pt,en,do,lv,da=0)
+
+    def dir_from_naming(self,*args):
+        l = [str(a) for a in args]
+        path = os.path.join(self.C.output_root,*l)
+        return path
+
+    def string_from_time(self,usage,t,dom=0,strlen=0,conven=0):
+        str = utils.string_from_time(usage=usage,t=t,dom=dom,strlen=strlen,conven=conven)
+        return str
+
+    def plot_variable2D(self,va,pt,en,lv,p2p,na=0,da=0):
         """Plot a longitude--latitude cross-section (bird's-eye-view).
         Use Basemap to create geographical data
         
+        ========
+        REQUIRED
+        ========
+
         va = variable(s)
-        it = initial time(s) of WRF run
         pt = plot time(s)
-        en = ensemble member(s)
-        do = domain(s)
+        nc = ensemble member(s)
         lv = level(s) 
-        da = smaller domain area(s)
+        p2p = path to plots
+
+        ========
+        OPTIONAL
+        ========
+
+        da = smaller domain area(s), needs dictionary || DEFAULT = 0
+        na = naming scheme for plot files || DEFAULT = get what you're given
+
         """
-        
         va = self.get_sequence(va)
-        it = self.get_sequence(it)
-        pt = self.get_sequence(pt)
+        pt = self.get_sequence(pt,SoS=1)
         en = self.get_sequence(en)
-        do = self.get_sequence(do)
         lv = self.get_sequence(lv)
         da = self.get_sequence(da)
-        
-        perms = self.make_iterator(va,it,pt,en,do,lv,da)
+
+        perms = self.make_iterator(va,pt,en,lv,da)
         
         # Find some way of looping over wrfout files first, avoiding need
         # to create new W instances
-        
-        for n,x in enumerate(perms):
-            va,it,pt,en,do,lv,da = x
-            
+        # print("Beginning plotting of {0} figures.".format(len(list(perms))))
+        #pdb.set_trace() 
+
+        for x in perms:
+            va,pt,en,lv,da = x
             W = WRFOut(en)    # wrfout file class using path
-            F = BirdsEye(self.C)    # 2D figure class
-            F.plot2D(va,it,pt,en,do,lv,da)  # Plot/save figure
-            print("Plotting #" + str(n) + " of " + str(len(perms)))
+            F = BirdsEye(self.C,W,p2p)    # 2D figure class
+            F.plot2D(va,pt,en,lv,da,na)  # Plot/save figure
+            pt_s = utils.string_from_time('title',pt)
+            print("Plotting from file {0}: \n variable = {1}" 
+                  " time = {2}, level = {3}, area = {4}.".format(en,va,pt_s,lv,da))
         
-    def make_iterator(va,it,pt,en,do,lv,da):   
+    def make_iterator(self,va,pt,en,lv,da):   
         for v in va:
-            for i in it:
-                for p in pt:
-                    for e in en:
-                        for d in do:
-                            for l in lv:
-                                for a in da:
-                                    yield v,i,p,e,d,l,a
-        
-    def get_sequence(x):
-        """ Returns a sequence (tuple or list) for iteration."""
-        if isinstance(x, collections.Sequence) and not isinstance(x, basestring):
+            for p in pt:
+                for e in en:
+                    for l in lv:
+                        for d in da:
+                            yield v,p,e,l,d
+    
+    def get_sequence(self,x,SoS=0):
+        """ Returns a sequence (tuple or list) for iteration.
+
+        SoS = 1 enables the check for a sequence of sequences (list of dates)
+        """
+
+
+        if SoS:
+            y = x[0]
+        else:
+            y = x
+
+        if isinstance(y, collections.Sequence) and not isinstance(y, basestring):
             return x
         else:
-            return (x)
-            
-    def plot_CAPE(self,datatype='MLCAPE'):
-        pass
-    
-    def plot_shear(self,upper=3,lower=0):
-        #self.C.plottype = getattr(self.C,'plottype','contourf')
-        #fig = axes.setup(C)
-        shear = WRFOut.compute_shear(upper,lower)
-    
+            return [x]
+        
+   
     def plot_cross_section(self,var,latA,lonA,latB,lonB):
         xs = CrossSection()
         xs.plot(var,latA,lonA,latB,lonB)
@@ -118,39 +162,6 @@ class PyWRFEnv:
     
     def plot_DTE(self):
         pass
-    
-    def plot_sim_ref(self,reftype='composite'):
-        self.mp = BirdsEye(self.C,self.W,self.C.plottime)
-        self.mp.figsize(8,8)   # Sets default width/height if user does not specify
-        self.mp.scale, self.mp.cmap = scales.comp_ref() # Import scale and cmap
-        self.bmap, self.x, self.y = self.mp.basemap_setup()
- 
-        if reftype == 'composite':
-            self.data = self.W.compute_comp_ref(self.mp.W.time_idx)
-            self.mp.title = 'Composite Simulated Reflectivity'
-        elif isinstance(reftype,int):
-            self.data = self.W.compute_simref_atlevel()
-            self.mp.title = 'Simulated Reflectivity at model level #' + str(reftype)
 
-        self.mp.title_time()  
-        self.bmap.contourf(self.x,self.y,self.data,self.mp.scale)
-        if self.title:
-            plt.title(self.mp.title)
-        self.mp.save_fig()
-        
-    def plot_var(self,varlist):
-        pass
-        # This could be a combination of surface and upper-air data
-    
-    def sfc_data(self,varlist):
-        # Varlist will be dictionary
-        # Key is variable; value is plot type (contour, contour fill)
-        # Some way of choosing plotting order?
-        for v,p in varlist:
-            # Plot data on top of each other in some order?
-            pass            
-    def upper_lev_data(self,level):
-        # Levels: isentropic, isobaric, geometric,
-        pass 
-    
+   
 

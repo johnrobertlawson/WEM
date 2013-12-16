@@ -10,6 +10,7 @@ import sys
 import os
 import numpy as N
 import calendar
+import pdb
 
 #sys.path.append('/home/jrlawson/gitprojects/meteogeneral/')
 #from meteogeneral.WRF import wrf_tools
@@ -20,7 +21,7 @@ class WRFOut:
         #self.C = config
         self.nc = Dataset(fpath,'r')
 
-        self.wrf_times = self.nc.variable['Times'][:]
+        self.wrf_times = self.nc.variables['Times'][:]
         self.dx = self.nc.DX
         self.dy = self.nc.DY
         #self.lvs = 
@@ -56,7 +57,7 @@ class WRFOut:
                         )[0][0]
         return self.time_idx
         
-    def get(self,var,t,lv,la,lo):
+    def get(self,var,PS):
         """ Fetch a numpy array containing variable data.
         
         Slice according to arguments.
@@ -66,84 +67,73 @@ class WRFOut:
         Returns unstaggered, sliced data.
         
         var     :   netCDF variable name
+        PS      :   Plot Settings, keys as follows:
+
         t       :   time index
         lv      :   level index
         la      :   latitude slice indices
         lo      :   longitude slice indices
         
         """
-        
+        # Check if computing required
+        # When data is loaded from nc, it is destaggered
         if var=='pressure':
             if lv_idx == 0:
-                data = self.get4D('PSFC')
+                data = self.load('PSFC',PS)
         elif var=='sim_ref':
-            data = self.compute_comp_ref(t,lv,la,lo)
+            data = self.compute_comp_ref(PS)
         elif var=='shear':
-            data = self.compute_shear(0,3,t,lv,la,lo)
+            data = self.compute_shear(0,3,PS)
         elif var=='wind':
-            u = self.nc.variables['U'][t,lv,la,lo]
-            v = self.nc.variables['V'][t,lv,la,lo]
+            u = self.load('U',PS)
+            v = self.load('V',PS)
             data = N.sqrt(u**2 + v**2)
         else:
-            data = self.get_4D(var)[t,lv,la,lo]
+            data = self.load(var,PS)
         
-        data_out = check_destagger(var,data)
-        
-        return data_out
+        return data
 
-    def get_4D(self,var,t,lv,la,lo):
-        data = self.nc.variables[var]
-        dims = data.dimensions
-        
+    def load(self,var,PS):
+    
+        # First, check dimension that is staggered (if any)
+        PS['destag_dim'] = self.check_destagger(var)
+
+        # Next, fetch dimension names
+        PS['dim_names'] = self.get_dims(var)
+
+        d = self.nc.variables[var]
+        sl = self.create_slice(PS)
+        data = self.destagger(d[sl],PS['destag_dim'])
+        return data
+
+    def create_slice(self,PS):
         # See which dimensions are present in netCDF file variable
-        time = 'Time' in dims
-        levels = 'bottom' in dims
-        lats = 'north' in dims
-        lons = 'west' in dims
+        sl = []
+        if any('Time' in p for p in PS['dim_names']):
+            sl.append(slice(PS['t'],PS['t']+1))
+        if any('bottom' in p for p in PS['dim_names']):
+            sl.append(slice(PS['lv'],PS['lv']+1))
+        if any('north' and 'west' in p for p in PS['dim_names']):
+            sl.append(PS['la']) 
+            sl.append(PS['lo']) 
         
-        """ How to write logic that allows method to get correct slices?
-        """
-        
-        data4D = self.enforce_4D(data)[t,lv,la,lo]
-        data4D = self.enforce_4D(data4D)
-        return data4D
+        return sl
 
-    def enforce_4D(self,data):
-        """ Return a 4D numpy array of data.
-        
-        Some arrays may only have one time, level etc.
-        This might be before or after slicing.
-        
-        """
-        if data.ndim == 3:
-            data4D = N.expand_dims(data,axis=1)
-            return data4D
-        elif data.ndim == 4:
-            return data
-        else:
-            print('This data has dimension = ',str(data.ndim))
-            raise Exception
-
-    def check_destagger(self,var,data=0):
+    def check_destagger(self,var):
         """ Looks up dimensions of netCDF file without loading data.
         
-        Returns list of dimensions that require destaggering
-        
-        Optional argument data will run destagger data and return it instead of list of dims.
+        Returns dimension number that requires destaggering
         """
-        
-        for n,dname in enumerate(nc.variables[var].dimensions):
+        stag_dim = None
+        for n,dname in enumerate(self.nc.variables[var].dimensions):
             if 'stag' in dname:
                 stag_dim = n
         
-        if not data:
-            return n
-        else:
-            if stag_dim:
-                data_destag = self.destagger(data,n)
-            else: 
-                data_destag = data
-            return data_destag
+        return stag_dim
+
+    def get_dims(self,var):
+        dims = self.nc.variables[var].dimensions
+        return dims
 
     def destagger(self,data,ax):
         """ Destagger data which needs it doing.
@@ -155,25 +145,23 @@ class WRFOut:
         
         Data should be 4D but just the slice required to reduce unnecessary computation time.
         """
-
-        #unstag_dims = nc.variables['T'].shape
-
-        nd = data.ndim
-        sl0 = []     # Slices to take place on staggered axis
-        sl1 = []
-        
-        for n in nd:
-            if n is not ax:
-                sl0.append(slice(None))
-                sl1.append(slice(None))
-            else:
-                sl0.append(slice(None,-1)
-                sl1.append(slice(1,None))
-                
-        #data_unstag = 0.5*(data[...,:-1] + data[...,1:])
-        data_unstag = 0.5*(data[sl0] + data[sl1])
-        
-        return data_unstag
+        if ax==None:
+            return data
+        else:
+            nd = data.ndim
+            sl0 = []     # Slices to take place on staggered axis
+            sl1 = []
+            
+            for n in range(nd):
+                if n is not ax:
+                    sl0.append(slice(None))
+                    sl1.append(slice(None))
+                else:
+                    sl0.append(slice(None,-1))
+                    sl1.append(slice(1,None))
+                    
+            data_unstag = 0.5*(data[sl0] + data[sl1])
+            return data_unstag
 
     def compute_shear(self,lower,upper):
         pass
@@ -193,13 +181,15 @@ class WRFOut:
         pass
         return DTE
 
-    def compute_comp_ref(self,time):
-        self.time = time
-        T2 = self.get('T2')
-        QR = self.get('QRAIN')
-        PSFC = self.get('PSFC')
+    def compute_comp_ref(self,PS):
+        """Amend this so variables obtain at start fetch only correct date, lats, lons
+        All levels need to be fetched as it's composite reflectivity
+        """
+        T2 = self.get('T2',PS)
+        QR = self.nc.variables['QRAIN'][PS['t'],:,PS['la'],PS['lo']]
+        PSFC = self.get('PSFC',PS)
         try:
-            QS = self.get('QSNOW')
+            QS = self.nc.variables['QRAIN'][PS['t'],:,PS['la'],PS['lo']]
         except:
             QS = N.zeros(N.shape(QR))
         rhor = 1000.0
@@ -209,12 +199,12 @@ class WRFOut:
 
         no_rain = 8.0E6
         # How do I access this time?
-        no_snow = 2.0E6 * N.exp(-0.12*(T2[self.time]-273.15))
+        no_snow = 2.0E6 * N.exp(-0.12*(T2-273.15))
         no_grau = 4.0E6
 
-        density = N.divide(PSFC[self.time],(287.0 * T2[self.time]))
-        Qra_all = QR[self.time]
-        Qsn_all = QS[self.time]
+        density = N.divide(PSFC,(287.0 * T2))
+        Qra_all = QR
+        Qsn_all = QS
 
         for j in range(len(Qra_all[1,:,1])):
             curcol_r = []
@@ -235,7 +225,7 @@ class WRFOut:
 
         # Calculate slope factor lambda
         lambr = (N.divide((3.14159 * no_rain * rhor), N.multiply(density, Qra))) ** 0.25
-        lambs = N.exp(-0.0536 * (T2[self.time] - 273.15))
+        lambs = N.exp(-0.0536 * (T2 - 273.15))
 
         # Calculate equivalent reflectivity factor
         Zer = (720.0 * no_rain * (lambr ** -7.0)) * 1E18
@@ -278,12 +268,3 @@ class WRFOut:
         elif lv.endswith('km'):
             return 'geometric'
             
-            
-
-            
-            
-            
-            
-                        
-                        
-                        

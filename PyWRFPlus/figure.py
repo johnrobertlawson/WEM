@@ -8,28 +8,35 @@ import matplotlib as M
 import matplotlib.pyplot as plt
 from mpl_toolkits.basemap import Basemap
 import pdb
+import os
 
 # Custom imports
 import utils
 
 class Figure:
     def __init__(self,config,wrfout):
-        pass        
-     
+        pass
+    
+    def create_fname(self,naming):
+        """Default naming should be:
+        Variable + time + level
+        """
+        fname = '_'.join([str(a) for a in naming]) 
+        return fname  
+ 
     def title_time(self):
         self.T = utils.padded_times(self.timeseq) 
         pdb.set_trace()
 
-    def figsize(self,defwidth,defheight):
+    def figsize(self,defwidth,defheight,fig):
         width = getattr(self.C,'width',defwidth)
         height = getattr(self.C,'height',defheight)
-        self.fig.set_size_inches(width,height)
+        fig.set_size_inches(width,height)
+        return fig
 
-    def save_fig(self):
-        loc = self.C.output_dir # For brevity
-        utils.trycreate(loc)
-        fname = 'blah.png'
-        fpath = os.path.join(loc,fname)
+    def save(self,fig,p2p,fname):
+        utils.trycreate(p2p)
+        fpath = os.path.join(p2p,fname)
         #self.fig.savefig(fpath)
         plt.gcf().savefig(fpath,bbox_inches='tight')
 
