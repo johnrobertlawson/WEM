@@ -167,19 +167,7 @@ class WRFOut:
         pass
         return shear
 
-    def compute_DTE(self,dims=1,upper=500,lower=None):
-        if dims==1:
-            pass
-        elif dims==2:
-            pass
-        else:
-            print "Dimensions for DTE computation are too large."
-            raise Exception
-        return DTE
 
-    def compute_DKE(self):
-        pass
-        return DTE
 
     def compute_comp_ref(self,PS):
         """Amend this so variables obtain at start fetch only correct date, lats, lons
@@ -253,18 +241,5 @@ class WRFOut:
         lon_idx = N.where(abs(self.lons-lon) == abs(self.lons-lon).min())[0][0]
         return lon_idx
         
-    def level_type(self,lv):
-        """ Check to see what type of level is requested by user.
-        
-        """
-        if lv.endswith('K'):
-            return 'isentropic'
-        elif lv < 1500:
-            return 'isobaric'
-        elif lv == 2000:
-            return 'surface'
-        elif lv.endswith('PVU'):
-            return 'PV-surface'
-        elif lv.endswith('km'):
-            return 'geometric'
+
             

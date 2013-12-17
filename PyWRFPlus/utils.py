@@ -53,3 +53,33 @@ def string_from_time(usage,t,dom=0,strlen=0,conven=0):
 def lookup_time(str):
     D = {'year':0, 'month':1, 'day':2, 'hour':3, 'minute':4, 'second':5}
     return D[str]
+
+def level_type(lv):
+    """ Check to see what type of level is requested by user.
+        
+    """
+    if lv.endswith('K'):
+        return 'isentropic'
+    elif lv < 1500:
+        return 'isobaric'
+    elif lv == 2000:
+        return 'surface'
+    elif lv.endswith('PVU'):
+        return 'PV-surface'
+    elif lv.endswith('km'):
+        return 'geometric'
+        
+def closest(arr2D,val):
+    """
+    Inputs:
+    val     :   required value
+    arr2D     :   2D array of values
+    
+    Output:
+    
+    idx     :   index of closest value
+    
+    """
+    idx = N.argmin(N.abs(arr2D - val))
+    return idx
+    

@@ -155,13 +155,156 @@ class PyWRFEnv:
         xs = CrossSection()
         xs.plot(var,latA,lonA,latB,lonB)
         
-    def plot_DKE(self,dims=1):
-        # dims = 1 leads to time series
-        # dims = 2 vertically integrates to xxx hPa or xx sigma level?
-        pass
-    
-    def plot_DTE(self):
-        pass
+    def compute_diff_energy(
+            self,ptype,energy,files,t_int,upper=None,lower=None):
+        """
+        This method computes difference kinetic energy (DKE)
+        or different total energy (DTE, including temp)
+        between two WRFout files for a given depth of the 
+        atmosphere, at given time intervals
+        
+        Inputs:
+        
+        ptype   :   'sum_z' or 'sum_xyz'
+        energy  :   'kinetic' or 'total'
+        upper   :   upper limit of vertical integration
+        lower   :   lower limit of vertical integration
+        files   :   abs paths to two wrfout files
+        t_int   :   time interval between computations
+        
+        Outputs:
+        
+        data    :   time series or list of 2D arrays
+        
+        ptype 'sum_z' integrates vertically between lower and
+        upper hPa and creates a time series.
+        
+        ptype 'sum_xyz' integrates over the 3D space (again between
+        the upper and lower bounds) and creates 2D arrays.
+        """
+        
+        if ptype == 'sum_z':
+            pass
+        elif ptype == 'sum_xyz':
+        
 
-   
+        
+        return DTE
 
+    def DKE_xyz(nc0,nc1,t_idx):
+        """
+        Computation for difference kinetic energy (DKE).
+        Sums DKE over the 3D space, returns a time series.
+        
+        Destaggering is not enabled as it introduces
+        computational cost that is of miniscule value considering
+        the magnitudes of output values.
+
+        Inputs:
+        
+        nc0     :   netCDF file
+        nc1     :   netCDF file
+        t_idx   :   times indices to difference
+        
+        Outputs:
+        
+        data    :   time series.
+        """
+        # Wind data
+        U0 = nc0.variables['U']
+        V0 = nc0.variables['V']
+        U1 = nc1.variables['U']
+        V1 = nc1.variables['V']
+
+        xlen = U0.shape[2]
+
+        DKE = []
+        for n,t in enumerate(t_idx):
+            print("Finding DKE at time {0} of {1}.".format(n,len(t)))
+            DKE_hr = 0   # Sum up all DKE for the 3D space
+            for i in range(xlen):
+                DKE_hr += N.sum(0.5*((U0[t,:,:,i]-U1[t,:,:,i])**2 +
+                                (V0[t,:,:-1,i]-V1[t,:,:-1,i])**2))
+            print("DTE at this time: {0}".format(DKE_hr)
+            DKE.append(DKE_hr)
+        return DKE 
+
+    def DKE_z(nc0,nc1,t_idx,lower,upper):
+        """
+        Computation for difference kinetic energy (DKE).
+        Sums DKE over all levels between lower and upper,
+        for each grid point, and returns a 2D array.
+        
+        Destaggering is not enabled as it introduces
+        computational cost that is of miniscule value considering
+        the magnitudes of output values.
+        
+        Method finds levels nearest lower/upper hPa and sums between
+        them inclusively.
+                
+        Inputs:
+        
+        nc0     :   netCDF file
+        nc1     :   netCDF file
+        t_idx   :   times indices to difference
+        lower   :   lowest level, hPa
+        upper   :   highest level, hPa
+        
+        Outputs:
+        
+        data    :   2D array.
+        """
+        
+        # Speed up script by only referencing data, not 
+        # loading it to a variable yet
+        
+        # WIND
+        U0 = nc0.variables['U']
+        V0 = nc0.variables['V']
+        U1 = nc1.variables['U']
+        V1 = nc1.variables['V']
+
+        # PERT and BASE PRESSURE
+        P0 = nc0.variables['P']
+        PB0 = nc0.variables['PB']
+        P1 = nc1.variables['P']
+        PB1 = nc1.variables['PB']
+
+        xlen = U0.shape[2] # 1 less than in V
+        ylen = V0.shape[3] # 1 less than in U
+        zlen = U0.shape[1] # identical in U & V
+        
+        # Generator for lat/lon points
+        def latlon(nlats,nlons):
+            for i in nlats:
+                for j in nlons:
+                    yield i,j
+                
+        gridpts = latlon((xlen,ylen))
+        
+        DKE = []
+        for n,t in enumerate(t_idx): 
+            DKE2D = N.zeros(xlen,ylen)
+            for gridpt in gridpts:
+                i,j = gridpt
+                
+                # Find closest level to 'lower', 'upper'
+                P_col = P0[t,:,i,j] + PB0[t,:,i,j]
+                if lower:
+                    low_idx = util.closest(P_col,lower)
+                else:
+                    low_idx = None
+                if upper:
+                    upp_idx = util.closest(P_col,upper)
+                else:
+                    upp_idx = None
+                
+                zidx = slice(low_idx,upp_idx+1) 
+                
+                # Integrate over all those points
+                DKE2D[i,j] = N.sum(0.5*((U0[t,zidx,i,j]-U1[t,zidx,i,j])**2 +
+                                (V0[t,zidx,i-1,j]-V1[t,zidx,i,j])**2))
+            DKE.append(DKE2D)
+        
+        return DKE
+        

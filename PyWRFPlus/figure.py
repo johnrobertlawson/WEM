@@ -40,3 +40,17 @@ class Figure:
         #self.fig.savefig(fpath)
         plt.gcf().savefig(fpath,bbox_inches='tight')
 
+    def get_limited_domain(self,da)
+        if da:  # Limited domain area 
+            N_idx = self.W.get_lat_idx(da['N'])
+            E_idx = self.W.get_lon_idx(da['E'])
+            S_idx = self.W.get_lat_idx(da['S'])
+            W_idx = self.W.get_lon_idx(da['W'])
+
+            lat_sl = slice(S_idx,N_idx)
+            lon_sl = slice(W_idx,E_idx)
+        else:
+            lat_sl = slice(None)
+            lon_sl = slice(None)
+            
+        return lat_sl, lon_sl
