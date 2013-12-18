@@ -3,9 +3,9 @@ WEM
 ===
 
 WRF Ensemble Management can help you create WRF ensembles from GEFS reanalysis
-data via submodule "lazyWRF". It can also post-process the data (such as 
+data via submodule **lazyWRF**. It can also post-process the data (such as 
 computing ensemble means, creating postage-stamp plots of all members, etc)
-via submodule "postWRF".
+via submodule **postWRF**.
 
 Where do I start?
 =================
@@ -25,7 +25,7 @@ Some files or methods contain attributions to other programmers whose
 code has been refactored to fit this project. In summary, thanks to:
 
 HootPy/PulsatrixWx project
---------------
+--------------------------
 
 URL: http://www.atmos.washington.edu/~lmadaus/pyscripts.html
 
@@ -37,5 +37,13 @@ PyWRF project (Monash)
 ----------------------
 
 URL: http://code.google.com/p/pywrf/
+
 URL: https://github.com/scaine1/pyWRF/
+
+PyWRFPlot project
+-----------------
+
+URL: https://code.google.com/p/pywrfplot/
+
+* Geir Arne Waagbø
 
