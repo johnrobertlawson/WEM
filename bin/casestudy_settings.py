@@ -1,10 +1,3 @@
-"""Default settings configuration file. 
-
-It is recommended you copy this file and edit that one, to leave this
-file as a reference.
-
-"""
-
 class Settings:
     def __init__(self):
         # Required settings:
