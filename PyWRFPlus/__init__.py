@@ -154,13 +154,25 @@ class PyWRFEnv:
     def plot_cross_section(self,var,latA,lonA,latB,lonB):
         xs = CrossSection()
         xs.plot(var,latA,lonA,latB,lonB)
+
+    def save_data(self,data,folder,fname)
+        # Ensure file suffix will be .npy
+        os.path.splitext(fname)[0]
+        # Check for folder and create if necessary
+        utils.trycreate(folder)
+        # Save in binary
+        fpath = os.path.join(folder,fname)
+        N.save(fpath,data)
         
+        print("Save file {0}.npy to {1}.".format(fname,folder))
+
     def compute_diff_energy(
-            self,ptype,energy,files,t_int,upper=None,lower=None):
+            self,ptype,energy,files,times,upper=None,lower=None,
+            d_save=1,d_return=1,d_fname='diff_energy_data'):
         """
         This method computes difference kinetic energy (DKE)
         or different total energy (DTE, including temp)
-        between two WRFout files for a given depth of the 
+        between WRFout files for a given depth of the 
         atmosphere, at given time intervals
         
         Inputs:
@@ -169,8 +181,11 @@ class PyWRFEnv:
         energy  :   'kinetic' or 'total'
         upper   :   upper limit of vertical integration
         lower   :   lower limit of vertical integration
-        files   :   abs paths to two wrfout files
-        t_int   :   time interval between computations
+        files   :   abs paths to all wrfout files
+        times   :   times for computations - tuple format
+        d_save  :   save dictionary to folder (path to folder)
+        d_return:   return dictionary (True or False)
+        d_fname :   custom filename
         
         Outputs:
         
@@ -182,16 +197,54 @@ class PyWRFEnv:
         ptype 'sum_xyz' integrates over the 3D space (again between
         the upper and lower bounds) and creates 2D arrays.
         """
+        if d_save = 1:
+            d_save = os.environ['HOME']
         
-        if ptype == 'sum_z':
-            pass
-        elif ptype == 'sum_xyz':
+        # First, save or output? Can't be neither!
+        if not d_save and not d_return:
+            print("Pick save or output, otherwise it's a waste of computer"
+                    "power")
+            raise Exception
         
+        # Look up the method to use depending on type of plot
+        PLOTS = {'sum_z':self.DE_z, 'sum_xyz':self.DE_xyz}
+        
+        # Creates sequence of times
+        ts = self.get_sequence(times)
 
+        # Dictionary of data
+        DATA = {}
         
-        return DTE
+        # Get all permutations of files
+        for perm in itertools.combinations(files,2):
+            DATA[perm] = {}
+            f1, f2 = perm
+            W1 = WRFOut(f1)
+            W2 = WRFOut(f2)
+        
+            # Make sure times are the same in both files
+            if not W1.wrf_times == W2.wrf_times:
+                print("Times are not identical between input files.")
+                raise Exception
+        
+            # Find indices of each time
+            t_idx = []
+            for t in ts:
+                t_idx.append(W1.get_time_idx(t))
+        
+            DATA[perm]['times'] = ts
+            DATA[perm]['values'] = PLOTS[ptype](nc0,nc1,t_idx,
+                                                energy,lower,upper)
+        
+        if d_return and not d_save:
+            return DATA
+        elif d_save and not d_return:
+            self.save(DATA,d_save,d_fname)
+        elif d_return and d_save:
+            self.save(DATA,d_save,d_fname)
+            return DATA
 
-    def DKE_xyz(nc0,nc1,t_idx):
+    def DE_xyz(self,nc0,nc1,t_idx,energy,*args):
         """
         Computation for difference kinetic energy (DKE).
         Sums DKE over the 3D space, returns a time series.
@@ -205,6 +258,8 @@ class PyWRFEnv:
         nc0     :   netCDF file
         nc1     :   netCDF file
         t_idx   :   times indices to difference
+        energy  :   kinetic or total
+        *args   :   to catch lower/upper boundary which isn't relevant here
         
         Outputs:
         
@@ -216,6 +271,13 @@ class PyWRFEnv:
         U1 = nc1.variables['U']
         V1 = nc1.variables['V']
 
+        if energy=='total':
+            T0 = nc0.variables['T']
+            T1 = nc1.variables['T']
+            R = 287.0 # Universal gas constant (J / deg K * kg)
+            Cp = 1004.0 # Specific heat of dry air at constant pressure (J / deg K * kg)
+            kappa = (R/Cp)
+
         xlen = U0.shape[2]
 
         DKE = []
@@ -223,13 +285,18 @@ class PyWRFEnv:
             print("Finding DKE at time {0} of {1}.".format(n,len(t)))
             DKE_hr = 0   # Sum up all DKE for the 3D space
             for i in range(xlen):
-                DKE_hr += N.sum(0.5*((U0[t,:,:,i]-U1[t,:,:,i])**2 +
+                if energy=='kinetic':
+                    DKE_hr += N.sum(0.5*((U0[t,:,:,i]-U1[t,:,:,i])**2 +
                                 (V0[t,:,:-1,i]-V1[t,:,:-1,i])**2))
+                elif energy=='total':
+                    DKE_hr += N.sum(0.5*((U0[t,:,:,i]-U1[t,:,:,i])**2 +
+                                (V0[t,:,:-1,i]-V1[t,:,:-1,i])**2 +
+                                kappa*(T0[t,:,:,i]-T1[t,:,:,i])**2))
             print("DTE at this time: {0}".format(DKE_hr)
             DKE.append(DKE_hr)
         return DKE 
 
-    def DKE_z(nc0,nc1,t_idx,lower,upper):
+    def DE_z(self,nc0,nc1,t_idx,energy,lower,upper):
         """
         Computation for difference kinetic energy (DKE).
         Sums DKE over all levels between lower and upper,
@@ -247,6 +314,7 @@ class PyWRFEnv:
         nc0     :   netCDF file
         nc1     :   netCDF file
         t_idx   :   times indices to difference
+        energy  :   kinetic or total
         lower   :   lowest level, hPa
         upper   :   highest level, hPa
         
@@ -270,6 +338,13 @@ class PyWRFEnv:
         P1 = nc1.variables['P']
         PB1 = nc1.variables['PB']
 
+        if energy=='total':
+            T0 = nc0.variables['T']
+            T1 = nc1.variables['T']
+            R = 287.0 # Universal gas constant (J / deg K * kg)
+            Cp = 1004.0 # Specific heat of dry air at constant pressure (J / deg K * kg)
+            kappa = (R/Cp)
+            
         xlen = U0.shape[2] # 1 less than in V
         ylen = V0.shape[3] # 1 less than in U
         zlen = U0.shape[1] # identical in U & V
@@ -301,9 +376,14 @@ class PyWRFEnv:
                 
                 zidx = slice(low_idx,upp_idx+1) 
                 
-                # Integrate over all those points
-                DKE2D[i,j] = N.sum(0.5*((U0[t,zidx,i,j]-U1[t,zidx,i,j])**2 +
-                                (V0[t,zidx,i-1,j]-V1[t,zidx,i,j])**2))
+                if energy=='kinetic':
+                    DKE2D[i,j] = N.sum(0.5*((U0[t,zidx,i,j]-U1[t,zidx,i,j])**2 +
+                                        (V0[t,zidx,i-1,j]-V1[t,zidx,i-1,j])**2))
+                elif energy=='total':
+                    DKE2D[i,j] = N.sum(0.5*((U0[t,zidx,i,j]-U1[t,zidx,i,j])**2 +
+                                        (V0[t,zidx,i-1,j]-V1[t,zidx,i-1,j])**2 +
+                                        kappa*(T0[t,zidx,i,j]-T1[t,zidx,i,j])**2))
+                                
             DKE.append(DKE2D)
         
         return DKE

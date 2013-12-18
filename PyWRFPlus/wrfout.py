@@ -35,8 +35,22 @@ class WRFOut:
         self.x_dim = len(self.nc.dimensions['west_east'])
         self.y_dim = len(self.nc.dimensions['south_north'])
         
-    def get_time_idx(self,t):
-        t_epoch = calendar.timegm(t)
+    def get_time_idx(self,t,tuple_format=1):
+        
+        """
+        Input:
+        
+        t           :   time, tuple format by default
+                        (otherwise t is in datenum)
+        
+        Output:
+        
+        time_idx    :   index of time in WRF file
+        """
+        if tuple_format:
+            t_epoch = calendar.timegm(t)
+        else:
+            t_epoch = t
         nt = self.wrf_times.shape[0]
         self.wrf_times_epoch = N.zeros([nt,1])
         t = self.wrf_times   # For brevity
