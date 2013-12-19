@@ -1,0 +1,4 @@
+*.py
+!casestudy.py
+!casestudy_settings.py
+!settings.py
