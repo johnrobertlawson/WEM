@@ -5,15 +5,15 @@ The class PyWRFSettings (in settings.py, same folder) is used to create config, 
 
 import sys
 sys.path.append('../')
-from PyWRFPlus import PyWRFEnv
+from postWRF import WRFEnviron
 from casestudy_settings import Settings
 import pdb
 import os
 
 # Initialise configuration
-config = PyWRFSettings()
+config = Settings()
 # Initialise plotting environment
-p = PyWRFEnv(config)
+p = WRFEnviron(config)
 
 #config.datafolder = os.path.join('2009091000','GEFS','CTRL','c00')
 

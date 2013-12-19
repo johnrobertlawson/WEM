@@ -2,7 +2,7 @@
 of data stored to disc. This is then plotted using the package.
 """
 
-from compute_settings import Settings
+from DKE_settings import Settings
 
 # Initialise settings and environment
 config = Settings()
