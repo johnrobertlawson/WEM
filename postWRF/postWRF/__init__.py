@@ -167,14 +167,23 @@ class WRFEnviron:
 
     def save_data(self,data,folder,fname):
         # Ensure file suffix will be .npy
-        os.path.splitext(fname)[0]
+        fname2 = os.path.splitext(fname)[0]
         # Check for folder and create if necessary
         utils.trycreate(folder)
         # Save in binary
-        fpath = os.path.join(folder,fname)
+        fpath = os.path.join(folder,fname2)
         N.save(fpath,data)
         
         print("Save file {0}.npy to {1}.".format(fname,folder))
+
+    def load_data(self,folder,fname):
+        # Ensure file suffix will be .npy
+        fname2 = os.path.splitext(fname)[0]
+        fpath = os.path.join(folder,fname2)
+        data = N.load(fpath)       
+
+        print("Loaded file {0}.npy from {1}.".format(fname,folder))
+        return data
 
     def compute_diff_energy(
             self,ptype,energy,files,times,upper=None,lower=None,
@@ -249,9 +258,9 @@ class WRFEnviron:
         if d_return and not d_save:
             return DATA
         elif d_save and not d_return:
-            self.save(DATA,d_save,d_fname)
+            self.save_data(DATA,d_save,d_fname)
         elif d_return and d_save:
-            self.save(DATA,d_save,d_fname)
+            self.save_data(DATA,d_save,d_fname)
             return DATA
 
     def DE_xyz(self,nc0,nc1,t_idx,energy,*args):
@@ -398,3 +407,7 @@ class WRFEnviron:
         
         return DKE
         
+    def plot_diff_energy(self,ptype,times,datafolder,p2p):
+        DATA = N.load_data(datafolder)
+        # dstack for each permutation and average for each grid point?
+        # Plot  
