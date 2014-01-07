@@ -1,3 +1,4 @@
+import numpy as N
 import os
 
 """ A collection of useful utilities.
