@@ -16,8 +16,10 @@ M.use('Agg')
 import matplotlib.pyplot as plt
 import collections
 import fnmatch
+import calendar
 import pdb
 import itertools
+import numpy as N
 
 from wrfout import WRFOut
 from axes import Axes
@@ -47,7 +49,7 @@ class WRFEnviron:
     def wrfout_files_in(self,folder,dom='notset',init_time='notset'):
         w = 'wrfout' # Assume the prefix
         if init_time=='notset':
-            suffix = '*'
+            suffix = '*0'
             # We assume the user has wrfout files in different folders for different times
         else:
             try:
@@ -236,23 +238,28 @@ class WRFEnviron:
         
         # Get all permutations of files
         for perm in itertools.combinations(files,2):
+            print("Next permutation...")
             DATA[perm] = {}
             f1, f2 = perm
             W1 = WRFOut(f1)
             W2 = WRFOut(f2)
-        
+            #pdb.set_trace() 
             # Make sure times are the same in both files
-            if not W1.wrf_times == W2.wrf_times:
+            if not N.all(N.array(W1.wrf_times) == N.array(W2.wrf_times)):
                 print("Times are not identical between input files.")
                 raise Exception
+            else:
+                print("Passed check for identical timestamps between"
+                      "NetCDF files")
         
             # Find indices of each time
             t_idx = []
             for t in ts:
                 t_idx.append(W1.get_time_idx(t))
         
+            print("Calculating values now...")
             DATA[perm]['times'] = ts
-            DATA[perm]['values'] = PLOTS[ptype](nc0,nc1,t_idx,
+            DATA[perm]['values'] = PLOTS[ptype](W1.nc,W2.nc,t_idx,
                                                 energy,lower,upper)
         
         if d_return and not d_save:
@@ -370,31 +377,31 @@ class WRFEnviron:
         
         # Generator for lat/lon points
         def latlon(nlats,nlons):
-            for i in nlats:
-                for j in nlons:
+            for i in range(nlats):
+                for j in range(nlons):
                     yield i,j
                 
-        gridpts = latlon((xlen,ylen))
+        gridpts = latlon(xlen,ylen)
         
         DKE = []
         for n,t in enumerate(t_idx): 
-            DKE2D = N.zeros(xlen,ylen)
+            DKE2D = N.zeros((xlen,ylen))
+            print("Calculating 2D grid for time index {0}...".format(t))
             for gridpt in gridpts:
                 i,j = gridpt
-                
+                # print("Calculating for gridpoints {0} & {1}.".format(i,j))
                 # Find closest level to 'lower', 'upper'
                 P_col = P0[t,:,i,j] + PB0[t,:,i,j]
                 if lower:
-                    low_idx = util.closest(P_col,lower)
+                    low_idx = utils.closest(P_col,lower*100.0)
                 else:
                     low_idx = None
                 if upper:
-                    upp_idx = util.closest(P_col,upper)
+                    upp_idx = utils.closest(P_col,upper*100.0)
                 else:
                     upp_idx = None
                 
                 zidx = slice(low_idx,upp_idx+1) 
-                
                 if energy=='kinetic':
                     DKE2D[i,j] = N.sum(0.5*((U0[t,zidx,i,j]-U1[t,zidx,i,j])**2 +
                                         (V0[t,zidx,i-1,j]-V1[t,zidx,i-1,j])**2))
@@ -411,3 +418,12 @@ class WRFEnviron:
         DATA = N.load_data(datafolder)
         # dstack for each permutation and average for each grid point?
         # Plot  
+
+    def generate_times(self,idate,fdate,interval):
+        """
+        Interval in seconds
+        """
+        i = calendar.timegm(idate)
+        f = calendar.timegm(fdate)
+        times = range(i,f,interval)
+        return times

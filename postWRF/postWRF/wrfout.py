@@ -35,13 +35,12 @@ class WRFOut:
         self.x_dim = len(self.nc.dimensions['west_east'])
         self.y_dim = len(self.nc.dimensions['south_north'])
         
-    def get_time_idx(self,t,tuple_format=1):
+    def get_time_idx(self,t,tuple_format=0):
         
         """
         Input:
         
-        t           :   time, tuple format by default
-                        (otherwise t is in datenum)
+        t           :   time, not tuple format by default
         
         Output:
         
