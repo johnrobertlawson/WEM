@@ -249,7 +249,7 @@ class WRFEnviron:
                 print("Times are not identical between input files.")
                 raise Exception
             else:
-                print("Passed check for identical timestamps between"
+                print("Passed check for identical timestamps between "
                       "NetCDF files")
         
             # Find indices of each time
@@ -369,7 +369,7 @@ class WRFEnviron:
             T1 = nc1.variables['T']
             R = 287.0 # Universal gas constant (J / deg K * kg)
             Cp = 1004.0 # Specific heat of dry air at constant pressure (J / deg K * kg)
-            kappa = (R/Cp)
+            kappa = R/Cp
             
         xlen = U0.shape[2] # 1 less than in V
         ylen = V0.shape[3] # 1 less than in U
@@ -381,12 +381,12 @@ class WRFEnviron:
                 for j in range(nlons):
                     yield i,j
                 
-        gridpts = latlon(xlen,ylen)
         
         DKE = []
         for n,t in enumerate(t_idx): 
             DKE2D = N.zeros((xlen,ylen))
             print("Calculating 2D grid for time index {0}...".format(t))
+            gridpts = latlon(xlen,ylen)
             for gridpt in gridpts:
                 i,j = gridpt
                 # print("Calculating for gridpoints {0} & {1}.".format(i,j))
