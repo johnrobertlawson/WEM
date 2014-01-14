@@ -84,3 +84,17 @@ def closest(arr2D,val):
     idx = N.argmin(N.abs(arr2D - val))
     return idx
     
+def dstack_loop(data, obj):
+    """
+    Tries to stack numpy array (data) into object (obj).
+    If obj doesn't exist, then initialise it
+    If obj does exist, stack data.
+    """
+    try:
+        print obj
+    except NameError:
+        stack = data
+    else:
+        stack = N.dstack((obj,data))
+        
+    return stack
