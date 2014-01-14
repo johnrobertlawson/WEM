@@ -20,6 +20,9 @@ import calendar
 import pdb
 import itertools
 import numpy as N
+import time
+import json
+import cPickle as pickle
 
 from wrfout import WRFOut
 from axes import Axes
@@ -167,24 +170,45 @@ class WRFEnviron:
         xs = CrossSection()
         xs.plot(var,latA,lonA,latB,lonB)
 
-    def save_data(self,data,folder,fname):
-        # Ensure file suffix will be .npy
-        fname2 = os.path.splitext(fname)[0]
-        # Check for folder and create if necessary
+    def save_data(self,data,folder,fname,format='pickle'):
+        # Strip file extension given
+        fname_base = os.path.splitext(fname)[0]
+        # Check for folder, create if necessary
         utils.trycreate(folder)
-        # Save in binary
-        fpath = os.path.join(folder,fname2)
-        N.save(fpath,data)
-        
-        print("Save file {0}.npy to {1}.".format(fname,folder))
+        # Create absolute path
+        fpath = os.path.join(folder,fname_base)
 
-    def load_data(self,folder,fname):
-        # Ensure file suffix will be .npy
+        if format=='pickle':
+            with open(fpath+'.pickle','wb') as f:
+                pickle.dump(data,f)   
+        elif format=='numpy':
+            N.save(fpath,data)
+        elif format=='json':
+            j = json.dumps(data)
+            with open(fpath+'.json','w') as f:
+                print >> f,j
+        else:
+            print("Give suitable saving format.")
+            raise Exception
+        
+        print("Saved file {0} to {1}.".format(fname,folder))
+   
+    def load_data(self,folder,fname,format='pickle'):
         fname2 = os.path.splitext(fname)[0]
         fpath = os.path.join(folder,fname2)
-        data = N.load(fpath)       
+        if format=='pickle':
+            with open(fpath,'rb') as f:
+                data = pickle.load(f)
+        elif format=='numpy':
+            data = N.load(fpath)       
+        elif format=='json':
+            print("JSON stuff not coded yet.")
+            raise Exception   
+        else:
+            print("Give suitable loading format.")
+            raise Exception
 
-        print("Loaded file {0}.npy from {1}.".format(fname,folder))
+        print("Loaded file {0} from {1}.".format(fname,folder))
         return data
 
     def compute_diff_energy(
@@ -237,37 +261,51 @@ class WRFEnviron:
         DATA = {}
         
         # Get all permutations of files
-        for perm in itertools.combinations(files,2):
-            print("Next permutation...")
-            DATA[perm] = {}
-            f1, f2 = perm
-            W1 = WRFOut(f1)
-            W2 = WRFOut(f2)
-            #pdb.set_trace() 
-            # Make sure times are the same in both files
-            if not N.all(N.array(W1.wrf_times) == N.array(W2.wrf_times)):
-                print("Times are not identical between input files.")
-                raise Exception
+        nperm = itertools.combinations(files,2).__sizeof__()
+        for n, perm in enumerate(itertools.combinations(files,2)):
+            if n<50:
+                print("Skipping #{0} for debugging.".format(n))
             else:
-                print("Passed check for identical timestamps between "
-                      "NetCDF files")
-        
-            # Find indices of each time
-            t_idx = []
-            for t in ts:
-                t_idx.append(W1.get_time_idx(t))
-        
-            print("Calculating values now...")
-            DATA[perm]['times'] = ts
-            DATA[perm]['values'] = PLOTS[ptype](W1.nc,W2.nc,t_idx,
-                                                energy,lower,upper)
-        
+                print("No. {0} from {1} permutations".format(n,nperm))
+                perm_start = time.time()
+                DATA[str(n)] = {}
+                f1, f2 = perm
+                W1 = WRFOut(f1)
+                W2 = WRFOut(f2)
+                #pdb.set_trace() 
+                # Make sure times are the same in both files
+                if not N.all(N.array(W1.wrf_times) == N.array(W2.wrf_times)):
+                    print("Times are not identical between input files.")
+                    raise Exception
+                else:
+                    print("Passed check for identical timestamps between "
+                          "NetCDF files")
+            
+                # Find indices of each time
+                t_idx = []
+                for t in ts:
+                    t_idx.append(W1.get_time_idx(t))
+            
+                print("Calculating values now...")
+                DATA[str(n)]['times'] = ts
+                DATA[str(n)]['values'] = PLOTS[ptype](W1.nc,W2.nc,t_idx,
+                                                    energy,lower,upper)
+                DATA[str(n)]['file1'] = f1
+                DATA[str(n)]['file2'] = f2
+
+                print "Calculation #{0} took {1:2.2f} seconds.".format(n,time.time()-perm_start)
+
         if d_return and not d_save:
             return DATA
         elif d_save and not d_return:
-            self.save_data(DATA,d_save,d_fname)
+            #self.save_data(DATA,d_save,d_fname)
+            self.pickle_data(DATA,d_save,d_fname)
+            #self.json_data(DATA,d_save,d_fname)
+            return
         elif d_return and d_save:
-            self.save_data(DATA,d_save,d_fname)
+            #self.save_data(DATA,d_save,d_fname)
+            self.pickle_data(DATA,d_save,d_fname)
+            #self.json_data(DATA,d_save,d_fname)
             return DATA
 
     def DE_xyz(self,nc0,nc1,t_idx,energy,*args):
@@ -353,20 +391,20 @@ class WRFEnviron:
         # loading it to a variable yet
         
         # WIND
-        U0 = nc0.variables['U']
-        V0 = nc0.variables['V']
-        U1 = nc1.variables['U']
-        V1 = nc1.variables['V']
+        U0 = nc0.variables['U'][:]
+        V0 = nc0.variables['V'][:]
+        U1 = nc1.variables['U'][:]
+        V1 = nc1.variables['V'][:]
 
         # PERT and BASE PRESSURE
-        P0 = nc0.variables['P']
-        PB0 = nc0.variables['PB']
-        P1 = nc1.variables['P']
-        PB1 = nc1.variables['PB']
+        P0 = nc0.variables['P'][:]
+        PB0 = nc0.variables['PB'][:]
+        P1 = nc1.variables['P'][:]
+        PB1 = nc1.variables['PB'][:]
 
         if energy=='total':
-            T0 = nc0.variables['T']
-            T1 = nc1.variables['T']
+            T0 = nc0.variables['T'][:]
+            T1 = nc1.variables['T'][:]
             R = 287.0 # Universal gas constant (J / deg K * kg)
             Cp = 1004.0 # Specific heat of dry air at constant pressure (J / deg K * kg)
             kappa = R/Cp
@@ -391,7 +429,7 @@ class WRFEnviron:
                 i,j = gridpt
                 # print("Calculating for gridpoints {0} & {1}.".format(i,j))
                 # Find closest level to 'lower', 'upper'
-                P_col = P0[t,:,i,j] + PB0[t,:,i,j]
+                P_col = P0[t,:,j,i] + PB0[t,:,j,i]
                 if lower:
                     low_idx = utils.closest(P_col,lower*100.0)
                 else:
@@ -402,22 +440,37 @@ class WRFEnviron:
                     upp_idx = None
                 
                 zidx = slice(low_idx,upp_idx+1) 
+                # This needs to be a 2D array?
+                
                 if energy=='kinetic':
-                    DKE2D[i,j] = N.sum(0.5*((U0[t,zidx,i,j]-U1[t,zidx,i,j])**2 +
-                                        (V0[t,zidx,i-1,j]-V1[t,zidx,i-1,j])**2))
-                elif energy=='total':
-                    DKE2D[i,j] = N.sum(0.5*((U0[t,zidx,i,j]-U1[t,zidx,i,j])**2 +
-                                        (V0[t,zidx,i-1,j]-V1[t,zidx,i-1,j])**2 +
-                                        kappa*(T0[t,zidx,i,j]-T1[t,zidx,i,j])**2))
+                    DKE2D[i,j] = N.sum(0.5*((U0[t,zidx,j,i]-U1[t,zidx,j,i])**2 +
+                                        (V0[t,zidx,j,i]-V1[t,zidx,j,i])**2))
+                    #DKE2D = N.sum(0.5*((U0[t,zidx,1:,:]-U1[t,zidx,1:,:])**2 +
+                    #                   (V0[t,zidx,:,:]-V1[t,zidx,:,:])**2))
+                elif energy=='total': # FIX THIS
+                    DKE2D[i,j] = N.sum(0.5*((U0[t,zidx,j,i]-U1[t,zidx,j,i])**2 +
+                                        (V0[t,zidx,j,i]-V1[t,zidx,j,i])**2 +
+                                        kappa*(T0[t,zidx,j,i]-T1[t,zidx,j,i])**2))
                                 
             DKE.append(DKE2D)
         
         return DKE
         
-    def plot_diff_energy(self,ptype,times,datafolder,p2p):
-        DATA = N.load_data(datafolder)
-        # dstack for each permutation and average for each grid point?
-        # Plot  
+    def plot_diff_energy(self,ptype,time,folder,fname,p2p):
+        """
+        folder  :   directory holding computed data
+        fname   :   naming scheme of required files
+        """
+
+        DATA = N.load_data(folder,fname,format='pickle')
+        times = self.get_sequence(time)
+        for t in times:
+            for k,v in DATA:
+            # utils.dstack_loop???
+
+        stack_average = # N.average(stack,axis=?)
+
+        #birdseye plot with basemap of DKE/DTE
 
     def generate_times(self,idate,fdate,interval):
         """
