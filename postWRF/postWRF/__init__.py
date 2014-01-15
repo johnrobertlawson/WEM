@@ -456,11 +456,14 @@ class WRFEnviron:
         
         return DKE
         
-    def plot_diff_energy(self,ptype,time,folder,fname,p2p):
+    def plot_diff_energy(self,ptype,energy,time,folder,fname,p2p):
         """
         folder  :   directory holding computed data
         fname   :   naming scheme of required files
         """
+
+        va = '_'.join(ptype,energy)
+        en = folder+fname
 
         DATA = N.load_data(folder,fname,format='pickle')
         times = self.get_sequence(time)
@@ -471,6 +474,9 @@ class WRFEnviron:
         stack_average = # N.average(stack,axis=?)
 
         #birdseye plot with basemap of DKE/DTE
+        F = BirdsEye(self.C,W,p2p)    # 2D figure class
+        F.plot2D(va,t,en,lv,da,na)  # Plot/save figure
+
 
     def generate_times(self,idate,fdate,interval):
         """
