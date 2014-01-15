@@ -13,24 +13,28 @@ class BirdsEye(Figure):
         self.D = Defaults()
         self.p2p = p2p
    
-    def plot_data(self,data,mplcommand,fname,pt):
+    def plot_data(self,data,mplcommand,fname,pt,V=0):
         # INITIALISE
         self.fig = plt.figure()
         self.fig = self.figsize(8,8,self.fig)     # Create a default figure size if not set by user
         self.bmap,x,y = self.basemap_setup()
         
         if mplcommand == 'contour':
-            self.bmap.contour(x,y,data)
+            if not V:
+                self.bmap.contour(x,y,data)
+            else:
+                self.bmap.contour(x,y,data,V)
+            
    
         # LABELS, TITLES etc
         """
         Change these to hasattr!
         """
         #if self.C.plot_titles:
-        #    title = utils.string_from_time('title',pt,tupleformat=0)
-        #    plt.title(title)
+        title = utils.string_from_time('title',pt,tupleformat=0)
+        plt.title(title)
         #if self.C.plot_colorbar:
-        #    plt.colorbar(orientation='horizontal')
+        plt.colorbar(orientation='horizontal')
 
         # SAVE FIGURE
         datestr = utils.string_from_time('output',pt,tupleformat=0)

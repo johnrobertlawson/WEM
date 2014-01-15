@@ -33,14 +33,16 @@ for rundate in ['29']:
 
     itime = (2011,11,int(rundate),0,0,0)
     ftime = (2011,12,2,12,0,0)
-    times = p.generate_times(itime,ftime,3*3600)
+    times = p.generate_times(itime,ftime,6*3600)
     path_to_plots = os.path.join(outdir,foldername)
     #pdb.set_trace()
     # Produce .npy data files with DKE data
     print("Compute_diff_energy...")
     p.compute_diff_energy('sum_z','kinetic',path_to_wrfouts,times,upper=500,
-                          d_save=runfolder, d_return=0,d_fname='DKE_500_'+foldername)
-
-    #p.plot_diff_energy('sum_z','kinetic',times,runfolder,'DKE_500_'+foldername,path_to_plots)
+                              d_save=runfolder, d_return=0,d_fname='DKE_500_'+foldername)
+    # Contour fixed at these values
+    V = range(0,5500)
+    V.insert(1,100) # Extra low value for detail
+    p.plot_diff_energy('sum_z','kinetic',times,runfolder,'DKE_500_'+foldername,path_to_plots,V)
 
 print "Script took", time.time()-scriptstart, "seconds."
