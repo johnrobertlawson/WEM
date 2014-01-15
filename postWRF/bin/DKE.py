@@ -39,9 +39,8 @@ for rundate in ['29']:
     #pdb.set_trace()
     # Produce .npy data files with DKE data
     print("Compute_diff_energy...")
-    p.compute_diff_energy('sum_z','kinetic',path_to_wrfouts,times,upper=500,
-                          d_save=runfolder, d_return=0,d_fname='DKE_'+foldername)
-    # Plot these .npy files
-    p.plot_diff_energy('sum_z',times,runfolder,fname='DKE_'+foldername,path_to_plots)
+    #p.compute_diff_energy('sum_z','kinetic',path_to_wrfouts,times,upper=500,
+    #                      d_save=runfolder, d_return=0,d_fname='DKE_'+foldername)
+    p.plot_diff_energy('sum_z','kinetic',times,runfolder,fname='DKE_'+foldername,path_to_plots)
 
 print "Script took", time.time()-scriptstart, "seconds."
