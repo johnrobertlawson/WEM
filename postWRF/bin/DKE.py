@@ -38,11 +38,12 @@ for rundate in ['29']:
     #pdb.set_trace()
     # Produce .npy data files with DKE data
     print("Compute_diff_energy...")
+    """
     p.compute_diff_energy('sum_z','kinetic',path_to_wrfouts,times,upper=500,
                               d_save=runfolder, d_return=0,d_fname='DKE_500_'+foldername)
+    """
     # Contour fixed at these values
-    V = range(0,5500)
-    V.insert(1,100) # Extra low value for detail
+    V = range(0,2200,200)
     p.plot_diff_energy('sum_z','kinetic',times,runfolder,'DKE_500_'+foldername,path_to_plots,V)
 
 print "Script took", time.time()-scriptstart, "seconds."
