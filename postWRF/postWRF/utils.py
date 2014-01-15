@@ -1,5 +1,6 @@
 import numpy as N
 import os
+import time
 
 """ A collection of useful utilities.
 """
@@ -14,7 +15,9 @@ def padded_times(timeseq):
     padded = ['{0:04d}'.format(t) for t in timeseq]
     return padded
 
-def string_from_time(usage,t,dom=0,strlen=0,conven=0):
+def string_from_time(usage,t,dom=0,strlen=0,conven=0,tupleformat=1):
+        if not tupleformat:
+            t = time.gmtime(t)
         if usage == 'title':
             # Generates string for titles
             str = '{3:02d}:{4:02d}Z on {2:02d}/{1:02d}/{0:04d}'.format(*t)
