@@ -197,10 +197,10 @@ class WRFEnviron:
         fname2 = os.path.splitext(fname)[0]
         fpath = os.path.join(folder,fname2)
         if format=='pickle':
-            with open(fpath,'rb') as f:
+            with open(fpath+'.pickle','rb') as f:
                 data = pickle.load(f)
         elif format=='numpy':
-            data = N.load(fpath)       
+            data = N.load(fpath+'.npy')       
         elif format=='json':
             print("JSON stuff not coded yet.")
             raise Exception   
@@ -263,7 +263,7 @@ class WRFEnviron:
         # Get all permutations of files
         nperm = itertools.combinations(files,2).__sizeof__()
         for n, perm in enumerate(itertools.combinations(files,2)):
-            if n<50:
+            if n>99999:
                 print("Skipping #{0} for debugging.".format(n))
             else:
                 print("No. {0} from {1} permutations".format(n,nperm))
@@ -288,8 +288,10 @@ class WRFEnviron:
             
                 print("Calculating values now...")
                 DATA[str(n)]['times'] = ts
-                DATA[str(n)]['values'] = PLOTS[ptype](W1.nc,W2.nc,t_idx,
-                                                    energy,lower,upper)
+                DATA[str(n)]['values'] = []
+                for t in t_idx:
+                    DATA[str(n)]['values'].append(PLOTS[ptype](W1.nc,W2.nc,t,
+                                                    energy,lower,upper))
                 DATA[str(n)]['file1'] = f1
                 DATA[str(n)]['file2'] = f2
 
@@ -299,12 +301,12 @@ class WRFEnviron:
             return DATA
         elif d_save and not d_return:
             #self.save_data(DATA,d_save,d_fname)
-            self.pickle_data(DATA,d_save,d_fname)
+            self.save_data(DATA,d_save,d_fname)
             #self.json_data(DATA,d_save,d_fname)
             return
         elif d_return and d_save:
             #self.save_data(DATA,d_save,d_fname)
-            self.pickle_data(DATA,d_save,d_fname)
+            self.save_data(DATA,d_save,d_fname)
             #self.json_data(DATA,d_save,d_fname)
             return DATA
 
@@ -360,7 +362,7 @@ class WRFEnviron:
             DKE.append(DKE_hr)
         return DKE 
 
-    def DE_z(self,nc0,nc1,t_idx,energy,lower,upper):
+    def DE_z(self,nc0,nc1,t,energy,lower,upper):
         """
         Computation for difference kinetic energy (DKE).
         Sums DKE over all levels between lower and upper,
@@ -377,7 +379,7 @@ class WRFEnviron:
         
         nc0     :   netCDF file
         nc1     :   netCDF file
-        t_idx   :   times indices to difference
+        t       :   times index to difference
         energy  :   kinetic or total
         lower   :   lowest level, hPa
         upper   :   highest level, hPa
@@ -419,40 +421,37 @@ class WRFEnviron:
                 for j in range(nlons):
                     yield i,j
                 
-        
         DKE = []
-        for n,t in enumerate(t_idx): 
-            DKE2D = N.zeros((xlen,ylen))
-            print("Calculating 2D grid for time index {0}...".format(t))
-            gridpts = latlon(xlen,ylen)
-            for gridpt in gridpts:
-                i,j = gridpt
-                # print("Calculating for gridpoints {0} & {1}.".format(i,j))
-                # Find closest level to 'lower', 'upper'
-                P_col = P0[t,:,j,i] + PB0[t,:,j,i]
-                if lower:
-                    low_idx = utils.closest(P_col,lower*100.0)
-                else:
-                    low_idx = None
-                if upper:
-                    upp_idx = utils.closest(P_col,upper*100.0)
-                else:
-                    upp_idx = None
-                
-                zidx = slice(low_idx,upp_idx+1) 
-                # This needs to be a 2D array?
-                
-                if energy=='kinetic':
-                    DKE2D[i,j] = N.sum(0.5*((U0[t,zidx,j,i]-U1[t,zidx,j,i])**2 +
-                                        (V0[t,zidx,j,i]-V1[t,zidx,j,i])**2))
-                    #DKE2D = N.sum(0.5*((U0[t,zidx,1:,:]-U1[t,zidx,1:,:])**2 +
-                    #                   (V0[t,zidx,:,:]-V1[t,zidx,:,:])**2))
-                elif energy=='total': # FIX THIS
-                    DKE2D[i,j] = N.sum(0.5*((U0[t,zidx,j,i]-U1[t,zidx,j,i])**2 +
-                                        (V0[t,zidx,j,i]-V1[t,zidx,j,i])**2 +
-                                        kappa*(T0[t,zidx,j,i]-T1[t,zidx,j,i])**2))
-                                
-            DKE.append(DKE2D)
+        DKE2D = N.zeros((xlen,ylen))
+        print_time = ''.join((nc0.variables['Times'][t]))
+        print("Calculating 2D grid for time {0}...".format(print_time))
+        gridpts = latlon(xlen,ylen)
+        for gridpt in gridpts:
+            i,j = gridpt
+            # print("Calculating for gridpoints {0} & {1}.".format(i,j))
+            # Find closest level to 'lower', 'upper'
+            P_col = P0[t,:,j,i] + PB0[t,:,j,i]
+            if lower:
+                low_idx = utils.closest(P_col,lower*100.0)
+            else:
+                low_idx = None
+            if upper:
+                upp_idx = utils.closest(P_col,upper*100.0)
+            else:
+                upp_idx = None
+            
+            zidx = slice(low_idx,upp_idx+1) 
+            # This needs to be a 2D array?
+            
+            if energy=='kinetic':
+                DKE2D[i,j] = N.sum(0.5*((U0[t,zidx,j,i]-U1[t,zidx,j,i])**2 +
+                                    (V0[t,zidx,j,i]-V1[t,zidx,j,i])**2))
+            elif energy=='total':
+                DKE2D[i,j] = N.sum(0.5*((U0[t,zidx,j,i]-U1[t,zidx,j,i])**2 +
+                                    (V0[t,zidx,j,i]-V1[t,zidx,j,i])**2 +
+                                    kappa*(T0[t,zidx,j,i]-T1[t,zidx,j,i])**2))
+                            
+        DKE.append(DKE2D)
         
         return DKE
         
@@ -461,22 +460,28 @@ class WRFEnviron:
         folder  :   directory holding computed data
         fname   :   naming scheme of required files
         """
-
-        va = '_'.join(ptype,energy)
-        en = folder+fname
-
-        DATA = N.load_data(folder,fname,format='pickle')
+        sw = 0
+        
+        DATA = self.load_data(folder,fname,format='pickle')
         times = self.get_sequence(time)
         for t in times:
-            for k,v in DATA:
+            for perm in DATA:
+                if sw==0: 
+                    W1 = WRFOut(DATA[perm]['file1'])
+                    sw = 1
+                    stack = DATA[perm]['values'][0]
+                else:    
+                    stack = N.dstack((DATA[perm]['values'][0],stack))
             # utils.dstack_loop???
 
-        stack_average = # N.average(stack,axis=?)
 
-        #birdseye plot with basemap of DKE/DTE
-        F = BirdsEye(self.C,W,p2p)    # 2D figure class
-        F.plot2D(va,t,en,lv,da,na)  # Plot/save figure
+            stack_average = N.average(stack,axis=2)
 
+
+            #birdseye plot with basemap of DKE/DTE
+            F = BirdsEye(self.C,W1,p2p)    # 2D figure class
+            #F.plot2D(va,t,en,lv,da,na)  # Plot/save figure
+            F.plot_data(stack_average,'contour',fname,t)
 
     def generate_times(self,idate,fdate,interval):
         """
