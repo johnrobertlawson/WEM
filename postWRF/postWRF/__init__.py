@@ -263,7 +263,7 @@ class WRFEnviron:
         # Get all permutations of files
         nperm = itertools.combinations(files,2).__sizeof__()
         for n, perm in enumerate(itertools.combinations(files,2)):
-            if n>99999:
+            if n>9999:
                 print("Skipping #{0} for debugging.".format(n))
             else:
                 print("No. {0} from {1} permutations".format(n,nperm))
@@ -417,8 +417,8 @@ class WRFEnviron:
         
         # Generator for lat/lon points
         def latlon(nlats,nlons):
-            for i in range(nlats):
-                for j in range(nlons):
+            for i in range(nlats): # y-axis
+                for j in range(nlons): # x-axis
                     yield i,j
                 
         DKE = []
@@ -444,10 +444,10 @@ class WRFEnviron:
             # This needs to be a 2D array?
             
             if energy=='kinetic':
-                DKE2D[i,j] = N.sum(0.5*((U0[t,zidx,j,i]-U1[t,zidx,j,i])**2 +
+                DKE2D[j,i] = N.sum(0.5*((U0[t,zidx,j,i]-U1[t,zidx,j,i])**2 +
                                     (V0[t,zidx,j,i]-V1[t,zidx,j,i])**2))
             elif energy=='total':
-                DKE2D[i,j] = N.sum(0.5*((U0[t,zidx,j,i]-U1[t,zidx,j,i])**2 +
+                DKE2D[j,i] = N.sum(0.5*((U0[t,zidx,j,i]-U1[t,zidx,j,i])**2 +
                                     (V0[t,zidx,j,i]-V1[t,zidx,j,i])**2 +
                                     kappa*(T0[t,zidx,j,i]-T1[t,zidx,j,i])**2))
                             
@@ -455,33 +455,41 @@ class WRFEnviron:
         
         return DKE
         
-    def plot_diff_energy(self,ptype,energy,time,folder,fname,p2p):
+    def plot_diff_energy(self,ptype,energy,time,folder,fname,p2p,V):
         """
         folder  :   directory holding computed data
         fname   :   naming scheme of required files
+        V       :   constant values to contour at
         """
         sw = 0
-        
+
         DATA = self.load_data(folder,fname,format='pickle')
         times = self.get_sequence(time)
-        for t in times:
-            for perm in DATA:
+        
+        for n,t in enumerate(times):
+            for pn,perm in enumerate(DATA):
                 if sw==0: 
+                    # Get times and info about nc files
                     W1 = WRFOut(DATA[perm]['file1'])
+                    permtimes = DATA[perm]['times']
                     sw = 1
-                    stack = DATA[perm]['values'][0]
-                else:    
-                    stack = N.dstack((DATA[perm]['values'][0],stack))
-            # utils.dstack_loop???
 
-
+                # Find array for required time
+                x = N.where(N.array(permtimes)==t)[0][0]
+                data = DATA[perm]['values'][x][0] 
+                if not pn:
+                    stack = data
+                else:   
+                    stack = N.dstack((data,stack))
             stack_average = N.average(stack,axis=2)
-
 
             #birdseye plot with basemap of DKE/DTE
             F = BirdsEye(self.C,W1,p2p)    # 2D figure class
             #F.plot2D(va,t,en,lv,da,na)  # Plot/save figure
-            F.plot_data(stack_average,'contour',fname,t)
+            fname_t = ''.join((fname,'_p{0:02d}'.format(n)))
+            F.plot_data(stack_average,'contour',fname_t,t,V)
+            print("Plotting time {0} from {1}.".format(n,len(times)))
+            del data, stack
 
     def generate_times(self,idate,fdate,interval):
         """
