@@ -17,7 +17,7 @@ class Figure:
     def __init__(self,config,wrfout):
         pass
     
-    def create_fname(self,naming):
+    def create_fname(self,*naming):
         """Default naming should be:
         Variable + time + level
         """
