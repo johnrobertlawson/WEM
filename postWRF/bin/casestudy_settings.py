@@ -4,7 +4,7 @@ class Settings:
         self.output_root = '/home/jrlawson/public_html'
         self.wrfout_root = '/tera9/jrlawson/' 
         # Optional settings:
-        self.DPI = 250.0
+        self.DPI = 120.0
         self.plot_titles = True
         self.basemap = True
         self.terrain = False

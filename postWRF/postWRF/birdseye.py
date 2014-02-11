@@ -1,17 +1,20 @@
 import pdb
+import matplotlib as M
+M.use('Agg')
 import matplotlib.pyplot as plt
 from mpl_toolkits.basemap import Basemap
 
 from defaults import Defaults
 from figure import Figure
 import utils
+import scales
 
 class BirdsEye(Figure):
-    def __init__(self,config,wrfout,p2p):
+    def __init__(self,config,wrfout):
         self.C = config
         self.W = wrfout
         self.D = Defaults()
-        self.p2p = p2p
+        self.p2p = self.C.output_root
    
     def plot_data(self,data,mplcommand,fname,pt,V=0):
         # INITIALISE
@@ -42,8 +45,9 @@ class BirdsEye(Figure):
         self.save(self.fig,self.p2p,self.fname)
         self.fig.clf()
     
-    def plot2D(self,va,pt,en,lv,da,na):
+    def plot2D(self,va,pt,lv,da=0,na=0):
         # INITIALISE
+        #en = self.W.path
         self.fig = plt.figure()
         self.fig = self.figsize(8,8,self.fig)     # Create a default figure size if not set by user
         self.bmap,x,y = self.basemap_setup()
@@ -55,7 +59,7 @@ class BirdsEye(Figure):
         # LEVEL
         if lv == 2000:
             lv_idx = 0
-            lv = 'sfc' # For naming purposes
+            lv_na = 'sfc' # For naming purposes
         else:
             print("Non-surface levels not supported yet.")
             raise Exception
@@ -66,13 +70,14 @@ class BirdsEye(Figure):
         # FETCH DATA
         PS = {'t': time_idx, 'lv': lv_idx, 'la': lat_sl, 'lo': lon_sl} 
         data = self.W.get(va,PS)
+        
         la_n = data.shape[-2]
         lo_n = data.shape[-1]
 
         # COLORBAR, CONTOURING
-        try:
-            clvs,cm = scales.get_cm(va,lv)
-        except:
+        cm, clvs = scales.get_cm(va,lv)
+        #pdb.set_trace()
+        if not cm:
             self.bmap.contourf(x,y,data.reshape((la_n,lo_n)))
         else:
             self.bmap.contourf(x,y,data.reshape((la_n,lo_n)),clvs,cmap=cm)
@@ -81,21 +86,21 @@ class BirdsEye(Figure):
         if self.C.plot_titles:
             title = utils.string_from_time('title',pt)
             plt.title(title)
-        if self.C.plot_colorbar:
+        if self.C.colorbar:
             plt.colorbar(orientation='horizontal')
 
         # SAVE FIGURE
         datestr = utils.string_from_time('output',pt)
         if not na:
             # Use default naming scheme
-            na = (va,lv,datestr)
+            na = (va,lv_na,datestr)
         else:
             # Come up with scheme...
             print("Coming soon: ability to create custom filenames")
             raise Exception
-        self.fname = self.create_fname(na) # No da variable here
+        self.fname = self.create_fname(*na) # No da variable here
         self.save(self.fig,self.p2p,self.fname)
-        self.fig.clf()
+        plt.close()
 
     def basemap_setup(self):
         # Fetch settings

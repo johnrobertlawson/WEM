@@ -11,13 +11,14 @@ import os
 import numpy as N
 import calendar
 import pdb
-
+import constants as cc
 #sys.path.append('/home/jrlawson/gitprojects/meteogeneral/')
 #from meteogeneral.WRF import wrf_tools
 
 class WRFOut:
 
     def __init__(self,fpath):
+        self.path = fpath
         #self.C = config
         self.nc = Dataset(fpath,'r')
 
@@ -34,6 +35,9 @@ class WRFOut:
         self.truelat2 = float(self.nc.TRUELAT2)
         self.x_dim = len(self.nc.dimensions['west_east'])
         self.y_dim = len(self.nc.dimensions['south_north'])
+        
+        # Loads variable list 
+        self.fields = self.nc.variables.keys()
         
     def get_time_idx(self,t,tuple_format=0):
         
@@ -69,9 +73,22 @@ class WRFOut:
                         abs(self.wrf_times_epoch-t_epoch).min()
                         )[0][0]
         return self.time_idx
+
+
+    def check_compute(self,var):
+        """This method returns the required variables
+        that need to be loaded from the netCDF file.
+        """
         
-    def get(self,var,PS):
+        if var in self.fields:
+            return True
+        else:
+            return False
+            
+    def get(self,var,slices,**kwargs):
         """ Fetch a numpy array containing variable data.
+        
+        If field isn't present in the WRFOut file, compute it.
         
         Slice according to arguments.
         
@@ -80,29 +97,27 @@ class WRFOut:
         Returns unstaggered, sliced data.
         
         var     :   netCDF variable name
-        PS      :   Plot Settings, keys as follows:
+        slices  :   dict, keys as follows:
 
         t       :   time index
         lv      :   level index
         la      :   latitude slice indices
         lo      :   longitude slice indices
         
+        keyword arguments might include:
+        
+        Shear between 0 and 3 km:
+        {'top':3, 'bottom',0}
+
+        
         """
         # Check if computing required
         # When data is loaded from nc, it is destaggered
-        if var=='pressure':
-            if lv_idx == 0:
-                data = self.load('PSFC',PS)
-        elif var=='sim_ref':
-            data = self.compute_comp_ref(PS)
-        elif var=='shear':
-            data = self.compute_shear(0,3,PS)
-        elif var=='wind':
-            u = self.load('U',PS)
-            v = self.load('V',PS)
-            data = N.sqrt(u**2 + v**2)
+        isDefault = self.check_compute(var)
+        if isDefault:
+            data = self.load(var,slices)
         else:
-            data = self.load(var,PS)
+            data = self.compute(var,slices,**kwargs)
         
         return data
 
@@ -176,15 +191,55 @@ class WRFOut:
             data_unstag = 0.5*(data[sl0] + data[sl1])
             return data_unstag
 
-    def compute_shear(self,lower,upper):
+    def compute(self,var,slices,**kwargs):
+        """ Look up method needed to return array of data
+        for required variable.
+        
+        Keyword arguments include settings for computation
+        e.g. top and bottom of shear computation
+        """
+        
+        tbl = {}
+        tbl['shear'] = self.compute_shear
+        tbl['thetae'] = self.compute_thetae
+        tbl['cref'] = self.compute_comp_ref
+        tbl['wind10'] = self.compute_wind10
+        tbl['wind'] = self.compute_wind
+
+        data = tbl[var](slices,**kwargs)
+        return data
+
+    def compute_wind10(self,slices):
+        u = self.get('U10',slices)
+        v = self.get('V10',slices)
+        data = N.sqrt(u**2 + v**2)
+        return data
+        
+    def compute_wind(self,slices):
+        u = self.get('U',slices)
+        v = self.get('V',slices)
+        data = N.sqrt(u**2 + v**2)        
+        return data
+
+    def compute_shear(self,slices,**kwargs):
+        """
+        kwargs['top']
+        kwargs['bottom']
+        """
         pass
-        return shear
+        #return shear
 
-
+    def compute_thetae(self,slices):
+        P = self.get('pressure',slices) # Computed
+        Drybulb = self.get('temp',slices)
+        Q = self.get('Q',slices)
+        
+        thetae = (Drybulb + (Q * cc.Lv/cc.cp)) * (cc.P0/P) ** cc.kappa
+        return thetae
 
     def compute_comp_ref(self,PS):
         """Amend this so variables obtain at start fetch only correct date, lats, lons
-        All levels need to be fetched as it's composite reflectivity
+        All levels need to be fetched as this is composite reflectivity
         """
         T2 = self.get('T2',PS)
         QR = self.nc.variables['QRAIN'][PS['t'],:,PS['la'],PS['lo']]
