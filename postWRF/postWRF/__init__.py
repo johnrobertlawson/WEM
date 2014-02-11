@@ -30,6 +30,7 @@ from figure import Figure
 from birdseye import BirdsEye
 #import scales
 from defaults import Defaults
+from lookuptable import LookUpTable
 import utils
 
 class WRFEnviron:
@@ -39,9 +40,12 @@ class WRFEnviron:
         # Set defaults if they don't appear in user's settings
         self.D = Defaults()
         
+        # Get look-up table of variables
+        self.LT = LookUpTable()
+        
         self.font_prop = getattr(self.C,'font_prop',self.D.font_prop)
         self.usetex = getattr(self.C,'usetex',self.D.usetex)
-        self.dpi = getattr(self.C,'dpi',self.D.dpi)
+        self.dpi = getattr(self.C,'DPI',self.D.dpi)
         self.plot_titles = getattr(self.C,'plot_titles',self.D.plot_titles) 
 
         # Set some general settings
@@ -87,8 +91,42 @@ class WRFEnviron:
         str = utils.string_from_time(usage=usage,t=t,dom=dom,strlen=strlen,conven=conven)
         return str
 
+    def plot_2D(self,vardict,times,path_to_wrfout=0):
+        # Loop over different wrfout files?
+        if not path_to_wrfout:
+            # Use path in config file
+            wrfout = self.wrfout_files_in(self.C.wrfout_root)
+            
+        self.en = self.get_sequence(wrfout)
+        self.pt = self.get_sequence(times) # List of plot times        
+        
+        #pdb.set_trace()
+        for en in self.en:
+            #pdb.set_trace()
+            W = WRFOut(en) # Only load netCDF file once!
+            for pt in self.pt:
+                for va,lv in vardict.iteritems():
+                    print("Plotting {0} at level {1} for time {2}.".format(
+                            va,lv,pt))
+                    F = BirdsEye(self.C,W)
+                    F.plot2D(va,pt,lv)            
+            
+
+    def plot_variable2D(self,varlist,timelist):
+        self.va = self.get_sequence(varlist) # List of variables
+        self.pt = self.get_sequence(timelist) # List of plot times
+        
+        # Where is logic to 
+        
+        for x in itertools.product(self.va,self.pt):
+            va, pt = x
+            W = WRFOut(self.C.wrfout_root) 
+            F = BirdsEye(self.C,W)
+            F.plot2D(va,pt,lv=2000)
+        
+    """
     def plot_variable2D(self,va,pt,en,lv,p2p,na=0,da=0):
-        """Plot a longitude--latitude cross-section (bird's-eye-view).
+        ###Plot a longitude--latitude cross-section (bird's-eye-view).
         Use Basemap to create geographical data
         
         ========
@@ -108,7 +146,7 @@ class WRFEnviron:
         da = smaller domain area(s), needs dictionary || DEFAULT = 0
         na = naming scheme for plot files || DEFAULT = get what you're given
 
-        """
+        ###
         va = self.get_sequence(va)
         pt = self.get_sequence(pt,SoS=1)
         en = self.get_sequence(en)
@@ -134,6 +172,7 @@ class WRFEnviron:
             pt_s = utils.string_from_time('title',pt)
             print("Plotting from file {0}: \n variable = {1}" 
                   " time = {2}, level = {3}, area = {4}.".format(en,va,pt_s,lv,da))
+    """
     
     def make_iterator2(self,*args):
         for arg in args:

@@ -16,7 +16,9 @@ def padded_times(timeseq):
     return padded
 
 def string_from_time(usage,t,dom=0,strlen=0,conven=0,tupleformat=1):
-        if not tupleformat:
+        #if not tupleformat:
+        if isinstance(t,int):
+            # In this case, time is in datenum. Get it into tuple format.
             t = time.gmtime(t)
         if usage == 'title':
             # Generates string for titles

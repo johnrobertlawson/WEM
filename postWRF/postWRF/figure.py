@@ -15,13 +15,15 @@ import utils
 
 class Figure:
     def __init__(self,config,wrfout):
-        pass
+        self.C = config
+        self.W = wrfout
     
     def create_fname(self,*naming):
         """Default naming should be:
         Variable + time + level
         """
-        fname = '_'.join([str(a) for a in naming]) 
+        fname = '_'.join([str(a) for a in naming]) + 'Z' 
+        #pdb.set_trace()
         return fname  
  
     def title_time(self):
