@@ -25,7 +25,7 @@ import colourtables as ct
 def get_cm(va,lv):
     
     # Variable and vertical level determine contour scale
-    #pdb.set_trace()
+    # pdb.set_trace()
     try:
         if len(A[va][lv]) == 3:
             # This is a min-max-interval list
@@ -33,7 +33,7 @@ def get_cm(va,lv):
         else:
             # This is an actual list of values
             clvs = A[va][lv]
-    except:
+    except KeyError:
         # If no level exists, try finding a near one
         try:
             near_lv = find_nearest_level(lv)
@@ -41,16 +41,22 @@ def get_cm(va,lv):
         except:
             # Some variables don't live on a vertical level
             clvs = 0
-    # Variable determines colour table
-
+    # except:
+        # raise Exception
+        
     try:
         cm = A[va]['cmap'](clvs)
         #pdb.set_trace()
-    except:
+    except TypeError:
         #print("Using default colourtable.")
         #def_ct = plt.cm.get_cmap("jet")
         cm = 0    
         #cm = LinearSegmentedColormap('DEF_CT',def_ct)
+    # else:
+        # raise Exception
+    # print va
+    # print type(cm)
+    # pdb.set_trace()
     return cm, clvs
     
 def find_nearest_level(lv):
@@ -80,11 +86,11 @@ def find_nearest_level(lv):
 A = {}
 
 # Wind magnitude
-A['wind'] = {} 
-A['wind'][2000] = (5,45,5)
+A['wind10'] = {'cmap':0} 
+A['wind10'][2000] = (5,32.5,2.5)
 
 # Theta-e (Equivalent potential temperature)
-A['thetae'] = {'cmap':ct.thetae}
+# A['thetae'] = {'cmap':ct.thetae}
 
 # Simulated reflectivity
 A['sim_ref'] = {'cmap':ct.reflect_ncdc}

@@ -3,6 +3,7 @@ import matplotlib as M
 M.use('Agg')
 import matplotlib.pyplot as plt
 from mpl_toolkits.basemap import Basemap
+import numpy as N
 
 from defaults import Defaults
 from figure import Figure
@@ -60,8 +61,15 @@ class BirdsEye(Figure):
         if lv == 2000:
             lv_idx = 0
             lv_na = 'sfc' # For naming purposes
+        elif isinstance(lv,int):
+            lv_idx = 0 # Interpolation file will only have the only level
+            lv_na = str(lv) + 'hPa'
+            nc_path = self.W.path
+            fpath = self.W.interp_to_p(self.C,nc_path,va,lv)
+            # Execute p_interp here and reassign self.W to new file
+            self.W = WRFOut(fpath)
         else:
-            print("Non-surface levels not supported yet.")
+            print("Non-pressure levels not supported yet.")
             raise Exception
         
         # LAT/LON
@@ -76,11 +84,13 @@ class BirdsEye(Figure):
 
         # COLORBAR, CONTOURING
         cm, clvs = scales.get_cm(va,lv)
-        #pdb.set_trace()
-        if not cm:
-            self.bmap.contourf(x,y,data.reshape((la_n,lo_n)))
-        else:
+        # pdb.set_trace()
+        if cm:
             self.bmap.contourf(x,y,data.reshape((la_n,lo_n)),clvs,cmap=cm)
+        elif isinstance(clvs,N.ndarray):
+            self.bmap.contourf(x,y,data.reshape((la_n,lo_n)),clvs,cmap=plt.cm.jet)
+        else:
+            self.bmap.contourf(x,y,data.reshape((la_n,lo_n)))
         
         # LABELS, TITLES etc
         if self.C.plot_titles:

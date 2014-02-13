@@ -3,8 +3,17 @@
 Adapted from code by Luke Madaus and David-John Gagne II
 """
 from matplotlib.colors import LinearSegmentedColormap
+import matplotlib.pyplot as plt
+import pdb
+
+# def default(*args):
+    # jet_cdict = plt.cm.jet
+    # jet_tbl = LinearSegmentedColormap('jet_TBL',jet_cdict)
+    # pdb.set_trace()
+    # return jet_tbl
 
 def RdBufloat(*args):
+    valrange = args
     # Will define a colortable that keeps zero as white
     length = max(valrange)-min(valrange)
     distance = 0 - min(valrange)
