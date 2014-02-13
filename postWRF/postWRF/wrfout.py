@@ -325,10 +325,10 @@ class WRFOut:
         fpath   :   path to new netCDF file with p co-ords
         """
         # Fetch paths
-        p_interp_path = os.path.join((
-                            config.p_interp_root,'p_interp'))
-        namelist_path = os.path.join((
-                            config.p_interp_root,'namelist.pinterp'))
+        p_interp_path = os.path.join(
+                            config.p_interp_root,'p_interp')
+        namelist_path = os.path.join(
+                            config.p_interp_root,'namelist.pinterp')
         nc_root, nc_fname = os.path.split(nc_path)# Root directory of wrfout file
         output_root = nc_root # Directory to dump output file (same)
         
@@ -348,7 +348,7 @@ class WRFOut:
         edit_namelist(path_to_interp,'met_em_output','.FALSE.',col=18)
         edit_namelist(path_to_interp,'fields',var,col=18)
         
-        command2 = os.path.join(('./',p_interp_path))
+        command2 = os.path.join('./',p_interp_path)
         os.system(command2) # This should execute the script
         
         return fpath

@@ -31,7 +31,7 @@ from birdseye import BirdsEye
 #import scales
 from defaults import Defaults
 from lookuptable import LookUpTable
-import utils
+import WEM.utils as utils
 
 class WRFEnviron:
     def __init__(self,config):

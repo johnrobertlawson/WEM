@@ -7,10 +7,10 @@ import pdb
 import calendar
 import time
 
-sys.path.append('../') 
+sys.path.append('/home/jrlawson/gitprojects/WEM/') 
 
 from DKE_settings import Settings
-from postWRF import WRFEnviron
+from WEM.postWRF import WRFEnviron
 
 # Time script
 scriptstart = time.time()

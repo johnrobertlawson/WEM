@@ -11,7 +11,7 @@ import pdb
 import os
 
 # Custom imports
-import utils
+import WEM.utils as utils
 
 class Figure:
     def __init__(self,config,wrfout):
