@@ -17,9 +17,10 @@ import constants as cc
 
 class WRFOut:
 
-    def __init__(self,fpath):
+    def __init__(self,fpath,config=0):
         self.path = fpath
-        #self.C = config
+        if config:
+            self.C = config
         self.nc = Dataset(fpath,'r')
 
         self.wrf_times = self.nc.variables['Times'][:]
@@ -300,6 +301,7 @@ class WRFOut:
     def get_XY(self,lat,lon):
         """Return grid indices for lat/lon pair.
         """
+        pass
       
     def get_lat_idx(self,lat):
         lat_idx = N.where(abs(self.lats-lat) == abs(self.lats-lat).min())[0][0]
@@ -309,5 +311,64 @@ class WRFOut:
         lon_idx = N.where(abs(self.lons-lon) == abs(self.lons-lon).min())[0][0]
         return lon_idx
         
+    def interp_to_p(self,config,nc_path,var,lv):
+        """ Uses p_interp fortran code to put data onto a pressure
+        level specified.
+        
+        Input:
+        config  :   contains directory of p_interp files
+        nc_path :   path to original netCDF file data
+        var     :   variable(s) to compute
+        lv      :   pressure level(s) to compute
+        
+        Returns:
+        fpath   :   path to new netCDF file with p co-ords
+        """
+        # Fetch paths
+        p_interp_path = os.path.join((
+                            config.p_interp_root,'p_interp'))
+        namelist_path = os.path.join((
+                            config.p_interp_root,'namelist.pinterp'))
+        nc_root, nc_fname = os.path.split(nc_path)# Root directory of wrfout file
+        output_root = nc_root # Directory to dump output file (same)
+        
+        """
+        Can we add a suffix to the new netCDF file?
+        """
+        # Copy old p_interp for backup
+        command1 = ' '.join(('cp',p_interp_path,p_interp_path+'.bkup'))
+        os.system(command1)
+
+        # Edit p_interp's namelist settings                    
+        edit_namelist(path_to_interp,'path_to_input',nc_root,col=18)
+        edit_namelist(path_to_interp,'input_name',nc_fname,col=18)
+        edit_namelist(path_to_interp,'path_to_output',output_root,col=18)
+        edit_namelist(path_to_interp,'process','list',col=18)
+        edit_namelist(path_to_interp,'fields',var,col=18)
+        edit_namelist(path_to_interp,'met_em_output','.FALSE.',col=18)
+        edit_namelist(path_to_interp,'fields',var,col=18)
+        
+        command2 = os.path.join(('./',p_interp_path))
+        os.system(command2) # This should execute the script
+        
+        return fpath
+        
+        
+    def edit_namelist(self,fpath,old,new,incolumn=1,col=23):
+        """col=23 is default for wps namelists.
+        """
+        flines = open(fpath,'r').readlines()
+        for idx, line in enumerate(flines):
+            if old in line:
+                # Prefix for soil intermediate data filename
+                if incolumn==1:
+                    flines[idx] = flines[idx][:col] + new + " \n"
+                else:
+                    flines[idx] = ' ' + old + ' = ' + new + "\n"
+                nameout = open(fpath,'w')
+                nameout.writelines(flines)
+                nameout.close()
+                break
+
 
             
