@@ -21,6 +21,7 @@ import numpy as N
 import matplotlib.pyplot as plt
 
 import colourtables as ct
+import WEM.utils as utils
 
 def get_cm(va,lv):
     

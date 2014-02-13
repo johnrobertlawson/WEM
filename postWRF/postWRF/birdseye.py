@@ -7,7 +7,7 @@ import numpy as N
 
 from defaults import Defaults
 from figure import Figure
-import utils
+import WEM.utils as utils
 import scales
 
 class BirdsEye(Figure):
