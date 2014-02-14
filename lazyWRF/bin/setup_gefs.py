@@ -1,10 +1,17 @@
+"""
+Might want to put L.go into __init__ or 
+even just put arguments inside the constructor 
+"""
+
 import sys
 sys.path.append('/home/jrlawson/gitprojects/WEM/')
 
 from WEM.lazyWRF import Lazy
-from organise import Organize
+from lazysettings import LazySettings
 
-config = Organise()
+# This is where you mnight run getgefs, getgfs etc
+
+config = LazySettings()
 L = Lazy(organise)
 
 case = '20110419'

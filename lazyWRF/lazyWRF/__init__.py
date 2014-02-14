@@ -28,8 +28,8 @@ class Lazy:
         self.ensnames = ensnames
         
         self.GO = {'GEFSR2':go_GEFS,'NAMANL':go_NAMANL,
-                    'NAMFCST':go_NAMFCST, 'GFSANL':go_GFSANL,
-                    'GFSFCST':go_GFSFCST'}
+                   'NAMFCST':go_NAMFCST, 'GFSANL':go_GFSANL,
+                   'GFSFCST':go_GFSFCST'}
         
                     
         """
@@ -150,10 +150,19 @@ class Lazy:
         command = 'ln -sf {0} {1}'.format(path_to_met_em,self.C.path_to_WRF)
         os.system(command)
              
-    def link_to_IC_data(self,IC):
+    def link_to_IC_data(self,IC,*args):
+        """
+        Inputs:
+        *args   :   e.g. ensemble member
+        """
         if IC == 'GEFSR2':
+            """
+            Assumes files are within a folder named casestr (YYYYMMDD)
+            """
             csh = './link_grib.csh'
-            command = ' '.join(csh,self.C.path_to_GEFSR2)
+            gribfiles = '_'.join((self.casestr,nextens,'f*')
+            gribpath = os.path.join(self.C.path_to_GEFSR2,gribfiles)
+            command = ' '.join(csh,gribpath)
         
         os.system(command)
 
