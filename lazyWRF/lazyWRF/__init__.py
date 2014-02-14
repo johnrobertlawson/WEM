@@ -1,4 +1,8 @@
 import os 
+import glob
+import pdb
+import time
+
 import WEM.utils as utils
 
 class Lazy:
@@ -24,13 +28,14 @@ class Lazy:
         self.casestr = casestr
         self.IC = IC
         self.experiment = experiment.keys()
-        self.control = ensemble.values()
+        self.control = experiment.values()
         self.ensnames = ensnames
         
-        self.GO = {'GEFSR2':go_GEFS,'NAMANL':go_NAMANL,
-                   'NAMFCST':go_NAMFCST, 'GFSANL':go_GFSANL,
-                   'GFSFCST':go_GFSFCST'}
-        
+        # self.GO = {'GEFSR2':go_GEFSR2,'NAMANL':go_NAMANL,
+                #   'NAMFCST':go_NAMFCST, 'GFSANL':go_GFSANL,
+                #   'GFSFCST':go_GFSFCST}
+                
+        self.GO = {'GEFSR2':self.go_GEFSR2}
                     
         """
         self.enstype is a list of ensemble models or types.
@@ -41,7 +46,7 @@ class Lazy:
         ensemble type.
         """
         
-        GO[IC](self.ensnames)
+        self.GO[IC](self.ensnames)
         
     def go_GEFSR2(self,ensns):    
         
@@ -52,34 +57,58 @@ class Lazy:
         Inputs:
         ensns   :   names of ensemble member
         """
-        for n,e in ensns:
+        # Creating backup!
+        self.copy_namelist('wps')
+        
+        # Warning: deleting old data files first.
+        # Back these up if important
+
+        files = ('met_em*','GEFSR2*','geo_em.d*','SOIL*','GRIB*')
+        for f in files:
+            if len(glob.glob(f)):
+                command = 'rm -f {0}'.format(f)
+                os.system(command)
+
+        # Starting loop
+        for n,e in enumerate(ensns):
             # e is the next ensemble member to run
+            
             if n==0:
-                run_exe('geogrid.exe')
+                # First time, generate soil data from GFS analyses
+                # and set up geogrid.
+
+                self.run_exe('geogrid.exe')
     
-                # Soil data
-                copy_namelist('wps')
-                edit_namelist('wps',"prefix"," prefix = 'SOIL'")
-                link_to_soil_data()
-                link_to_soil_Vtable()
-                run_exe('ungrib.exe')
+                # Create soil data intermediate files
                 
-                # Atmos data
-                edit_namelist("prefix"," prefix = 'GEFSR2'")
-                link_to_IC_data('GEFSR2')
-                link_to_IC_Vtable('GEFSR2')
-                run_exe('ungrib.exe')
-                
-                # Combine both intermediate files
-                edit_namelist("fg_name"," fg_name = 'SOIL','GEFSR2'")
-                run_exe('metgrid.exe')
+                self.edit_namelist('wps',"prefix"," prefix = 'SOIL'")
+                self.link_to_soil_data()
+                self.link_to_soil_Vtable()
+                self.run_exe('ungrib.exe')
+            else:
+                # Soil data already exists
+                # Remove old met_em files and links
+                os.system('rm GRIB* GEFSR2* met_em*')
+    
+            # Create atmos intermediate files
+            self.edit_namelist('wps',"prefix"," prefix = 'GEFSR2'")
+            self.link_to_IC_data('GEFSR2',e)
+            self.link_to_IC_Vtable('GEFSR2')
+            self.run_exe('ungrib.exe')
+            
+            # Combine both intermediate files
+            self.edit_namelist('wps',"fg_name"," fg_name = 'SOIL','GEFSR2'")
+            self.run_exe('metgrid.exe')
 
-                submit_job()
-
-                to_folder = os.path.join(self.casestr,'GEFSR2',e,self.experiment)
-                copy_files(to_folder)      
-                os.system('rm -f rsl.error* rsl.out*')
-                
+            pdb.set_trace()
+            # This is where the magic happens etc etc
+            self.submit_job()[0]
+            
+            # Move files to storage before looping back
+            to_folder = os.path.join(self.casestr,'GEFSR2',e,self.experiment)
+            self.copy_files(to_folder)      
+            os.system('rm -f rsl.error* rsl.out*')
+            
                 
     def copy_files(self,tofolder):
         """ 
@@ -160,9 +189,10 @@ class Lazy:
             Assumes files are within a folder named casestr (YYYYMMDD)
             """
             csh = './link_grib.csh'
-            gribfiles = '_'.join((self.casestr,nextens,'f*')
+            nextens = args[0]
+            gribfiles = '_'.join((self.casestr,nextens,'f*'))
             gribpath = os.path.join(self.C.path_to_GEFSR2,gribfiles)
-            command = ' '.join(csh,gribpath)
+            command = ' '.join((csh,gribpath))
         
         os.system(command)
 
@@ -176,7 +206,7 @@ class Lazy:
 
     def link_to_soil_data(self):
         csh = './link_grib.csh'
-        command = ' '.join(csh,self.C.path_to_soil)
+        command = ' '.join((csh,self.C.path_to_soil))
         os.system(command)
         
     def link_to_soil_Vtable(self):
@@ -198,9 +228,9 @@ class Lazy:
         No outputs, just changes the file.
         """
         if suffix == 'wps':
-            f = os.path.join(self.self.C.path_to_WPS,'namelist.wps')
-        elif suffix == 'input:
-            f = os.path.join(self.self.C.path_to_WRF,'namelist.input')
+            f = os.path.join(self.C.path_to_WPS,'namelist.wps')
+        elif suffix == 'input':
+            f = os.path.join(self.C.path_to_WRF,'namelist.input')
         flines = open(f,'r').readlines()
         for idx, line in enumerate(flines):
             if sett in line:
@@ -227,35 +257,37 @@ class Lazy:
         
         # Wait until complete, then check tail file
         name,suffix = exe.split('.')
-        log = name + '.log'
-        l = open(name+'.log','r').readlines()
+        log = os.path.join(self.C.path_to_WPS,name + '.log')
+        l = open(log,'r').readlines()
         lastline = l[-1]
         if 'Successful completion' in lastline:
             pass
             #return True
         else:
             print ('Running {0} has failed. Check {1}.'.format(
-                        exe,log)
+                        exe,log))
             raise SomethingIsBrokenException
 
-        def generate_date(self,date,outstyle='wps'):
+    def generate_date(self,date,outstyle='wps'):
             """ Creates date string for namelist files.
             
             Input:
             """
             pass
         
-        def copy_namelist(self,suffix):
+    def copy_namelist(self,suffix):
             """Appends current time to namelist to create backup.
             """
             t = time.strftime("%Y%m%d_%H%M")
             if suffix == 'wps':
-                f = os.path.join(path_to_WPS,'namelist.wps') # Original 
+                f = os.path.join(self.C.path_to_WPS,'namelist.wps') # Original 
             elif suffix == 'input':
-                f = os.path.join(path_to_WRF,'namelist.input') # Original    
+                f = os.path.join(self.C.path_to_WRF,'namelist.input') # Original    
                 
             f2 = '_'.join((f,t)) # Backup file
-            command = ' '.join(('cp',f,f2))
+            # pdb.set_trace()
+            command = 'cp {0} {1}'.format(f,f2)
+            os.system(command)
             print("Backed up namelist.{0}.".format(suffix))
             
                 
