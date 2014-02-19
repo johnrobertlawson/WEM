@@ -19,6 +19,12 @@ all the settings for loading data, saving output, etc. Almost all settings can b
 left as default (by not specifying a setting), other than essentials like 
 the path to your WRF data, the path to output figures, etc.
 
+To run ```lazyWRF```, the top-level script must be in your WPS folder to allow WPS
+executables to see the namelist.wps. So you might need to soft-link from your WPS
+directory to where you keep your top-level lazyWRF/WEM controlling scripts (e.g.,
+```ln -sf /path/to/WEM/scripts/``` in your WPS folder). At least,
+I can't find a way around this.
+
 Contributors & Attributions
 ===========================
 
