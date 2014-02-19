@@ -2,6 +2,7 @@ import os
 import glob
 import pdb
 import time
+import subprocess 
 
 import WEM.utils as utils
 
@@ -66,7 +67,8 @@ class Lazy:
         files = ('met_em*','GEFSR2*','geo_em.d*','SOIL*','GRIB*')
         for f in files:
             if len(glob.glob(f)):
-                command = 'rm -f {0}'.format(f)
+                #command = 'rm -f {0}'.format(f)
+                command = 'rm -f %s' %f # < 2.6 edit
                 os.system(command)
 
         # Starting loop
@@ -100,7 +102,6 @@ class Lazy:
             self.edit_namelist('wps',"fg_name"," fg_name = 'SOIL','GEFSR2'")
             self.run_exe('metgrid.exe')
 
-            pdb.set_trace()
             # This is where the magic happens etc etc
             self.submit_job()[0]
             
@@ -137,26 +138,25 @@ class Lazy:
         
         for f,transfer in files.iteritems:
             fs = os.path.join(self.C.path_to_WRF,f)
-            command = '{0} {1} {2}'.format(transfer,fs,topath)
+            command = '%s %s %s' %(transfer,fs,topath)
             os.system(command)
             del command
 
 
     def submit_job(self):
         # Soft link data netCDFs files from WPS to WRF
-        link_to_met_em()
+        self.link_to_met_em()
         
         print("Submitting real.exe.")
-        real_cmd = 'qsub -d {0} real_run.sh'.format(self.C.path_to_WRF)
+        real_cmd = 'qsub -d %s real_run.sh' %(self.C.path_to_WRF)
         p_real = subprocess.Popen(real_cmd,cwd=self.C.path_to_WRF,shell=True,stdout=subprocess.PIPE)
         p_real.wait()
         jobid = p_real.stdout.read()[:5] # Assuming first five digits = job ID.
         
         # Run WRF but wait until real.exe has finished without errors
         print 'Now submitting wrf.exe.'
-        wrf_cmd = 'qsub -d {0} wrf_run.sh -W depend=afterok:{1}'.format(
-                        self.C.path_to_WRF,jobid)
-        p_wrf = subprocess.Popen(wrf_cmd,cwd=pathtoWRF,shell=True)
+        wrf_cmd = 'qsub -d %s wrf_run.sh -W depend=afterok:%s' %(self.C.path_to_WRF,jobid)
+        p_wrf = subprocess.Popen(wrf_cmd,cwd=self.C.path_to_WRF,shell=True)
         p_wrf.wait()
 
         time.sleep(self.C.roughguesshr*60*60) # Wait specified hours
@@ -165,18 +165,19 @@ class Lazy:
         finished = 0
         while not finished:
             path_to_rsl = os.path.join(self.C.path_to_WRF,'rsl.error.0000')
-            tail_cmd = 'tail {0}'.format(path_to_rsl)
+            tail_cmd = 'tail %s' %(path_to_rsl)
             tailrsl = subprocess.Popen(tail_cmd,shell=True,stdout=subprocess.PIPE)
             tailoutput = tailrsl.stdout.read()
             if "SUCCESS COMPLETE WRF" in tailoutput:
                 finished = 1
                 print "WRF has finished; moving to next case."
             else:
+                # Need to check if job has died! If so, kill script, warn user
                 time.sleep(5*60) # Try again in 5 min
         
     def link_to_met_em(self):
         path_to_met_em = os.path.join(self.C.path_to_WPS,'met_em*')
-        command = 'ln -sf {0} {1}'.format(path_to_met_em,self.C.path_to_WRF)
+        command = 'ln -sf %s %s' %(path_to_met_em,self.C.path_to_WRF)
         os.system(command)
              
     def link_to_IC_data(self,IC,*args):
@@ -191,16 +192,17 @@ class Lazy:
             csh = './link_grib.csh'
             nextens = args[0]
             gribfiles = '_'.join((self.casestr,nextens,'f*'))
-            gribpath = os.path.join(self.C.path_to_GEFSR2,gribfiles)
+            gribpath = os.path.join(self.C.path_to_GEFSR2,self.casestr,gribfiles)
             command = ' '.join((csh,gribpath))
-        
+       
+        #pdb.set_trace() 
         os.system(command)
 
     def link_to_IC_Vtable(self,IC):
         if IC == 'GEFSR2':
             path = os.path.join(self.C.path_to_WPS,'ungrib/Variable_Tables',
                             self.C.GEFSR2_Vtable)
-            command = 'ln -sf {0} Vtable'.format(path)
+            command = 'ln -sf %s Vtable' %(path)
         
         os.system(command)
 
@@ -212,7 +214,7 @@ class Lazy:
     def link_to_soil_Vtable(self):
         path = os.path.join(self.C.path_to_WPS,'ungrib/Variable_Tables',
                             self.C.soil_Vtable)
-        command = 'ln -sf {0} Vtable'.format(path)
+        command = 'ln -sf %s Vtable' %(path)
         os.system(command)
         
     def edit_namelist(self,suffix,sett,newval,maxdom=1):
@@ -240,7 +242,7 @@ class Lazy:
                 nameout.writelines(flines)
                 nameout.close()
                 break
-            
+
     def run_exe(self,exe):
         """Run WPS executables, then check to see if it failed.
         If not, return True to proceed.
@@ -253,6 +255,7 @@ class Lazy:
         #    f,suffix = exe.split('.')            
         
         command = os.path.join('./',self.C.path_to_WPS,exe)
+        print command
         os.system(command)
         
         # Wait until complete, then check tail file
@@ -264,9 +267,8 @@ class Lazy:
             pass
             #return True
         else:
-            print ('Running {0} has failed. Check {1}.'.format(
-                        exe,log))
-            raise SomethingIsBrokenException
+            print ('Running %s has failed. Check %s.'%(exe,log))
+            raise Exception
 
     def generate_date(self,date,outstyle='wps'):
             """ Creates date string for namelist files.
@@ -286,9 +288,9 @@ class Lazy:
                 
             f2 = '_'.join((f,t)) # Backup file
             # pdb.set_trace()
-            command = 'cp {0} {1}'.format(f,f2)
+            command = 'cp %s %s' %(f,f2)
             os.system(command)
-            print("Backed up namelist.{0}.".format(suffix))
+            print("Backed up namelist.%s." %(suffix))
             
                 
                 
