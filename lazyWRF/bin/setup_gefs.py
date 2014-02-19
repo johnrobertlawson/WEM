@@ -4,7 +4,7 @@ even just put arguments inside the constructor
 """
 import pdb
 import sys
-sys.path.append('/home/jrlawson/gitprojects/')
+sys.path.append('/chinook/jrlawson/')
 
 from WEM.lazyWRF.lazyWRF import Lazy
 from lazysettings import LazySettings
@@ -20,6 +20,6 @@ L = Lazy(config)
 IC = 'GEFSR2' 
 experiment = {'ICBC':'CTRL'}
 #ensnames = ['c00'] + ['p'+"{0:02d}".format(n) for n in range(1,11)]
-ensnames = ['c00'] + ['p'+"{0:02d}".format(n) for n in range(4,11)]
+ensnames = ['p'+"%02d" %n for n in range(3,11)]
 
 L.go(case,IC,experiment,ensnames)
