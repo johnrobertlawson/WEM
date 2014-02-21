@@ -99,7 +99,7 @@ class Lazy:
             self.run_exe('ungrib.exe')
             
             # Combine both intermediate files
-            self.edit_namelist('wps',"fg_name"," fg_name = 'SOIL','GEFSR2'")
+            self.edit_namelist('wps',"fg_name"," fg_name = 'GEFSR2','SOIL' ")
             self.run_exe('metgrid.exe')
 
             # This is where the magic happens etc etc
