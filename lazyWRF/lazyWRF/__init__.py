@@ -103,7 +103,8 @@ class Lazy:
             self.run_exe('metgrid.exe')
 
             # This is where the magic happens etc etc
-            self.submit_job()[0]
+            #self.submit_job()[0] <--- why was this [0] here?
+            self.submit_job()
             
             # Move files to storage before looping back
             to_folder = os.path.join(self.casestr,'GEFSR2',e,self.experiment)
