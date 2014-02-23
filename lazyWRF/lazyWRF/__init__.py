@@ -28,8 +28,8 @@ class Lazy:
         """
         self.casestr = casestr
         self.IC = IC
-        self.experiment = experiment.keys()
-        self.control = experiment.values()
+        self.experiment = experiment.keys()[0]
+        self.control = experiment.values()[0]
         self.ensnames = ensnames
         
         # self.GO = {'GEFSR2':go_GEFSR2,'NAMANL':go_NAMANL,
