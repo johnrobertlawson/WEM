@@ -315,19 +315,14 @@ class WRFOut:
         
         DCAPE = cc.g 
         
-    def compute_CAPE(self,slices,z1,z2,th1,th2,thp1,thp2):
+    def compute_CAPE(self,slices):
         """
         CAPE method based on GEMPAK's pdsuml.f function
         
         Inputs:
         
         slices  :   dictionary of level/time/lat/lon
-        z1      :   bottom of layer (m)
-        z2      :   top of layer (m)
-        th1     :   theta (environ) at z1
-        th2     :   theta (environ) at z2
-        thp1    :   theta (parcel) at z1
-        thp2    :   theta (parcel) at z2
+
         
         
         Outputs:
@@ -335,42 +330,67 @@ class WRFOut:
         CIN     :   convective inhibition
         """
 
-        capeT = 0.0
-        cinT = 0.0
+        totalCAPE = 0
+        totalCIN = 0
         
-        dt2 = thp2 - th2
-        dt1 = thp1 - th1
-        
-        dz = z2 - z1
-        
-        if (dt1 > 0) and (dt2 > 0):
-            capeT = ((dt2 + dt1)*dz)/(th2+th1)
-        elif dt1 > 0:
-            ratio = dt1/(dt1-dt2)
-            zeq = z1 + (dz*ratio)
-            teq = th1 + ((th2-th1)*ratio)
-            capeT = (dt1*(zeq-z1))/(th1+teq)
-            cinT = (dt2*(z2-zeq))/(th2+teq)
-        elif dt2 > 0:
-            ratio = dt2/(dt2-dt1)
-            zfc = z2-(dz*ratio)
-            tfc = th2-((th2-th1)*ratio)
-            capeT = (dt2*(z2-zfc)/(tfc+th2))
-            cinT = (dt1*(zfc-z1)/(tfc+th1))
-        else:
-            cinT = ((dt2+dt1)*dz)/(th2+th1)
-
-        if capeT > 0:
-            CAPE = capeT * cc.g
-        else:
-            CAPE = 0
-        
-        if cinT < 0:    
-            CIN = cinT * cc.g
-        else:
-            CIN = 0
-        
-        return CAPE,CIN
+        for lvidx in range(slices['lv']):
+            # This should loop over the levels?
+            """
+            z1      :   bottom of layer (index)
+            z2      :   top of layer (index)
+            th1     :   theta (environ) at z1
+            th2     :   theta (environ) at z2
+            thp1    :   theta (parcel) at z1
+            thp2    :   theta (parcel) at z2
+            """
+    
+            z1 = lvidx
+            z2 = lvidx + 1
+    
+            th1 = self.get('theta')
+            th2 = self.get('theta')
+            thp1 = pass
+            thp2 = pass
+    
+            capeT = 0.0
+            cinT = 0.0
+            
+            dt2 = thp2 - th2
+            dt1 = thp1 - th1
+            
+            dz = z2 - z1
+            
+            if (dt1 > 0) and (dt2 > 0):
+                capeT = ((dt2 + dt1)*dz)/(th2+th1)
+            elif dt1 > 0:
+                ratio = dt1/(dt1-dt2)
+                zeq = z1 + (dz*ratio)
+                teq = th1 + ((th2-th1)*ratio)
+                capeT = (dt1*(zeq-z1))/(th1+teq)
+                cinT = (dt2*(z2-zeq))/(th2+teq)
+            elif dt2 > 0:
+                ratio = dt2/(dt2-dt1)
+                zfc = z2-(dz*ratio)
+                tfc = th2-((th2-th1)*ratio)
+                capeT = (dt2*(z2-zfc)/(tfc+th2))
+                cinT = (dt1*(zfc-z1)/(tfc+th1))
+            else:
+                cinT = ((dt2+dt1)*dz)/(th2+th1)
+    
+            if capeT > 0:
+                CAPE = capeT * cc.g
+            else:
+                CAPE = 0
+            
+            if cinT < 0:    
+                CIN = cinT * cc.g
+            else:
+                CIN = 0
+            
+                totalCAPE += CAPE
+                totalCIN += CIN
+            
+        return totalCAPE,totalCIN
             
     def compute_ave(self,va,z1,z2):
         """
