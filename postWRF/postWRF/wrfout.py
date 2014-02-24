@@ -298,6 +298,115 @@ class WRFOut:
         pass
         return data
 
+    def compute_DCP(self):
+        """
+        Derecho Composite Parameter (Evans and Doswell, 2001, WAF)
+        And info from SPC Mesoanalyses
+        """
+        DCAPE = self.get('DCAPE')
+        MUCAPE = self.get('MUCAPE')
+        shear_0_6 = self.get('shear',0,6)
+        meanwind_0_6 = self.get('meanwind',0,6)
+        DCP = (DCAPE/980.0)*(MUCAPE/2000.0)*(shear_0_6/20.0)*(meanwind_0_6/16.0)
+        return DCP
+        
+    def compute_DCAPE(self):
+        
+        DCAPE = cc.g 
+        
+    def compute_CAPE(self,z1,z2,th1,th2,thp1,thp2):
+        """
+        CAPE method based on GEMPAK's pdsuml.f function
+        
+        Inputs:
+        
+        z1      :   bottom of layer (m)
+        z2      :   top of layer (m)
+        th1     :   theta (environ) at z1
+        th2     :   theta (environ) at z2
+        thp1    :   theta (parcel) at z1
+        thp2    :   theta (parcel) at z2
+        
+        
+        Outputs:
+        CAPE    :   convective available potential energy
+        CIN     :   convective inhibition
+        """
+
+        capeT = 0.0
+        cinT = 0.0
+        
+        dt2 = thp2 - th2
+        dt1 = thp1 - th1
+        
+        dz = z2 - z1
+        
+        if (dt1 > 0) and (dt2 > 0):
+            capeT = ((dt2 + dt1)*dz)/(th2+th1)
+        elif dt1 > 0:
+            ratio = dt1/(dt1-dt2)
+            zeq = z1 + (dz*ratio)
+            teq = th1 + ((th2-th1)*ratio)
+            capeT = (dt1*(zeq-z1))/(th1+teq)
+            cinT = (dt2*(z2-zeq))/(th2+teq)
+        elif dt2 > 0:
+            ratio = dt2/(dt2-dt1)
+            zfc = z2-(dz*ratio)
+            tfc = th2-((th2-th1)*ratio)
+            capeT = (dt2*(z2-zfc)/(tfc+th2))
+            cinT = (dt1*(zfc-z1)/(tfc+th1))
+        else:
+            cinT = ((dt2+dt1)*dz)/(th2+th1)
+
+        if capeT > 0:
+            CAPE = capeT * cc.g
+        else:
+            CAPE = 0
+        
+        if cinT < 0:    
+            CIN = cinT * cc.g
+        else:
+            CIN = 0
+        
+        return CAPE,CIN
+            
+    def compute_ave(self,va,z1,z2):
+        """
+        Compute average values for variable in layer
+        
+        Inputs:
+        va      :   variable
+        z1      :   height at bottom
+        z2      :   height at top
+        
+        Output:
+        data    :   the averaged variable
+        """
+        
+        # Get coordinate system
+        vc = self.check_vcs(z1,z2)
+        
+        
+        
+    def check_vcs(self,z1,z2,exception=1):
+        """
+        Check the vertical coordinate systems
+        
+        If identical, return the system
+        If not, raise an exception.
+        """
+        
+        vc = utils.level_type(z1)
+        vc = utils.level_type(z2)
+        
+        if vc1 != vc2:
+            print("Vertical coordinate systems not identical.")
+            return False
+            if exception:
+                raise Exception
+        else:
+            return vc1
+        
     def get_XY(self,lat,lon):
         """Return grid indices for lat/lon pair.
         """

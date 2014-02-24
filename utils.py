@@ -74,6 +74,9 @@ def level_type(lv):
         return 'PV-surface'
     elif lv.endswith('km'):
         return 'geometric'
+    else:
+        print('Unknown vertical coordinate.')
+        raise Exception
         
 def closest(arr2D,val):
     """
