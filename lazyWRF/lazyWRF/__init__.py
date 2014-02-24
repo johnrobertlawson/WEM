@@ -137,7 +137,7 @@ class Lazy:
             files['*.TS'] = 'mv'
             files['tslist'] = 'cp'
         
-        for f,transfer in files.iteritems:
+        for f,transfer in files.iteritems():
             fs = os.path.join(self.C.path_to_WRF,f)
             command = '%s %s %s' %(transfer,fs,topath)
             os.system(command)
