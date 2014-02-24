@@ -206,6 +206,7 @@ class WRFOut:
         tbl['cref'] = self.compute_comp_ref
         tbl['wind10'] = self.compute_wind10
         tbl['wind'] = self.compute_wind
+        tbl['CAPE'] = self.compute_CAPE
 
         data = tbl[var](slices,**kwargs)
         return data
@@ -314,12 +315,13 @@ class WRFOut:
         
         DCAPE = cc.g 
         
-    def compute_CAPE(self,z1,z2,th1,th2,thp1,thp2):
+    def compute_CAPE(self,slices,z1,z2,th1,th2,thp1,thp2):
         """
         CAPE method based on GEMPAK's pdsuml.f function
         
         Inputs:
         
+        slices  :   dictionary of level/time/lat/lon
         z1      :   bottom of layer (m)
         z2      :   top of layer (m)
         th1     :   theta (environ) at z1
