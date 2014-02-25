@@ -22,7 +22,6 @@ variables = {'cref':{},'wind10':{},'CAPE':{}}
 variables['cref'] = {'lv':2000,'pt':times}
 
 for en in ensnames:
-    addpath = os.path.join(p.output_root,case,IC,en,experiment.keys()[0])
-    p.output_root += addpath
-    p.wrfout_root += addpath
+    p.C.output_root = os.path.join(p.output_root,case,IC,en,experiment.keys()[0])
+    p.C.wrfout_root = os.path.join(p.wrfout_root,case,IC,en,experiment.keys()[0])
     p.plot_2D(variables,times)

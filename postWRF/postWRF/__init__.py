@@ -128,23 +128,28 @@ class WRFEnviron:
 
         self.W = WRFOut(en) # Only load netCDF file once!
         for va in dic:
-            for pt in dic['pt']:
-                # Check for pressure levels
-                if lv == 2000:
-                    pass # Standard WRF levels
-                elif isinstance(lv,int):
-                    nc_path = self.W.path
-                    fpath = self.W.interp_to_p(self.C,nc_path,va,lv)
-                    # Execute p_interp here and reassign self.W to new file
-                    self.W = WRFOut(fpath)
-                else:
-                    print("Non-pressure levels not supported yet.")
-                    raise Exception
-               
-                print("Plotting {0} at lv {1} for time {2}.".format(va,lv,pt))
-                F = BirdsEye(self.C,self.W)
-                F.plot2D(va,pt,lv)            
-        
+            lv = va['lv'] # Some variables don't have levels (e.g., cref)
+            pt = va['pt'] # Mandatory
+            
+            vc = utils.level_type(lv) # vertical coordinate
+            
+            # Check for pressure levels
+            if vc == 'surface':
+                pass # Standard WRF levels
+            elif vc == 'isobaric':
+                nc_path = self.W.path
+                p_interp_fpath = self.W.interp_to_p(self.C,nc_path,va,lv)
+                # Edit p_interp namelist
+                #Execute p_interp here and reassign self.W to new file
+                self.W = WRFOut(p_interp_fpath)
+            else:
+                print("Non-pressure levels not supported yet.")
+                raise Exception
+            
+            print("Plotting {0} at lv {1} for time {2}.".format(va,lv,pt))
+            F = BirdsEye(self.C,self.W)
+            F.plot2D(va,pt,lv)            
+
 
     def plot_variable2D(self,varlist,timelist):
         self.va = self.get_sequence(varlist) # List of variables
