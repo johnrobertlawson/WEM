@@ -33,3 +33,13 @@ for en in ensnames:
     p.plot_2D(variables)
 
 # Postage stamp plots
+list_of_wrfouts = [] 
+for en in ensnames:
+    p.C = Settings()
+    list_of_wrfouts.append(os.path.join(config.output_root,case,IC,en,experiment.keys()[0]))
+    outdirectory = os.path.join(config.output_root,case,IC)
+    itime = (2011,4,19,21,0,0)
+    ftime = (2011,4,20,9,30,0)
+    times = p.generate_times(itime,ftime,3*60*60)
+    # CODE THIS UP v v v v v v v v v
+    #p.postage_stamps(variables,times,list_of_wrfouts,outdirectory)
