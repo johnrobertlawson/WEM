@@ -349,8 +349,8 @@ class WRFOut:
     
             th1 = self.get('theta')
             th2 = self.get('theta')
-            thp1 = pass
-            thp2 = pass
+            thp1 = 0
+            thp2 = 0
     
             capeT = 0.0
             cinT = 0.0
