@@ -88,40 +88,63 @@ class WRFEnviron:
         str = utils.string_from_time(usage=usage,t=t,dom=dom,strlen=strlen,conven=conven)
         return str
 
-    def plot_2D(self,vardict,times,path_to_wrfout=0):
+    def plot_2D(self,dic):
         """
+        Currently main plotting script: Feb 25 2014
+        
+        Path to wrfout file is in config file.
+        Path to plot output is also in config
+        
+        This script is top-most and decides if the variables is
+        built into WRF default output or needs computing. It unstaggers
+        and slices data from the wrfout file appropriately.
+        
+        
+        Inputs:
+        dic     :   nested dictionary with:
+        
+            KEY
+            ===
+            va      :   variable to plot
+            
+            nested KEY/VALUE PAIRS
+            ======================
+            (MANDATORY FOR SOME VARIABLES)
+            lv      :   level to plot
+            pt      :   plot times
+            (OPTIONAL)            
+            tla     :   top limit of latitude
+            bla     :   bottom limit of latitude
+            llo     :   left limit of longitude
+            rlo     :   right limit of longitude
+            ---> if these are missing, default to 'all points'
+        
+        
         """
         
-        # Loop over different wrfout files?
-        if not path_to_wrfout:
-            # Use path in config file
-            wrfout = self.wrfout_files_in(self.C.wrfout_root)
-            
-        self.en = self.get_sequence(wrfout)
-        self.pt = self.get_sequence(times) # List of plot times        
+        #self.en = self.get_sequence(wrfout)
+        #self.pt = self.get_sequence(times) # List of plot times        
         
-        #pdb.set_trace()
-        for en in self.en:
-            #pdb.set_trace()
-            self.W = WRFOut(en) # Only load netCDF file once!
-            for pt in self.pt:
-                for va,lv in vardict.iteritems():
-                    # Check for pressure levels
-                    if lv == 2000:
-                        pass # Standard WRF levels
-                    elif isinstance(lv,int):
-                        nc_path = self.W.path
-                        fpath = self.W.interp_to_p(self.C,nc_path,va,lv)
-                        # Execute p_interp here and reassign self.W to new file
-                        self.W = WRFOut(fpath)
-                    else:
-                        print("Non-pressure levels not supported yet.")
-                        raise Exception
-                   
-                    print("Plotting {0} at lv {1} for time {2}.".format(va,lv,pt))
-                    F = BirdsEye(self.C,self.W)
-                    F.plot2D(va,pt,lv)            
-            
+
+        self.W = WRFOut(en) # Only load netCDF file once!
+        for va in dic:
+            for pt in dic['pt']:
+                # Check for pressure levels
+                if lv == 2000:
+                    pass # Standard WRF levels
+                elif isinstance(lv,int):
+                    nc_path = self.W.path
+                    fpath = self.W.interp_to_p(self.C,nc_path,va,lv)
+                    # Execute p_interp here and reassign self.W to new file
+                    self.W = WRFOut(fpath)
+                else:
+                    print("Non-pressure levels not supported yet.")
+                    raise Exception
+               
+                print("Plotting {0} at lv {1} for time {2}.".format(va,lv,pt))
+                F = BirdsEye(self.C,self.W)
+                F.plot2D(va,pt,lv)            
+        
 
     def plot_variable2D(self,varlist,timelist):
         self.va = self.get_sequence(varlist) # List of variables
