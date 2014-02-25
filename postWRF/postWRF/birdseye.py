@@ -47,6 +47,17 @@ class BirdsEye(Figure):
         self.fig.clf()
     
     def plot2D(self,va,pt,lv,da=0,na=0):
+        """
+        Inputs:
+        
+        da      : dictionary of:
+            tla     :   top limit of latitude
+            bla     :   bottom limit of latitude
+            llo     :   left limit of longitude
+            rlo     :   right limit of longitude
+
+        
+        """
         # INITIALISE
         #en = self.W.path
         self.fig = plt.figure()
@@ -56,21 +67,6 @@ class BirdsEye(Figure):
         # Get indices for time, level, lats, lons
         # TIME
         time_idx = self.W.get_time_idx(pt)
-        
-        # LEVEL
-        if lv == 2000:
-            lv_idx = 0
-            lv_na = 'sfc' # For naming purposes
-        elif isinstance(lv,int):
-            lv_idx = 0 # Interpolation file will only have the only level
-            lv_na = str(lv) + 'hPa'
-            nc_path = self.W.path
-            fpath = self.W.interp_to_p(self.C,nc_path,va,lv)
-            # Execute p_interp here and reassign self.W to new file
-            self.W = WRFOut(fpath)
-        else:
-            print("Non-pressure levels not supported yet.")
-            raise Exception
         
         # LAT/LON
         lat_sl, lon_sl = self.get_limited_domain(da)
