@@ -31,3 +31,5 @@ for en in ensnames:
     p.C.output_root = os.path.join(config.output_root,case,IC,en,experiment.keys()[0])
     p.C.wrfout_root = os.path.join(config.wrfout_root,case,IC,en,experiment.keys()[0])
     p.plot_2D(variables)
+
+# Postage stamp plots

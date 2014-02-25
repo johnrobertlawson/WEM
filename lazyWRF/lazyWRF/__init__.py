@@ -143,6 +143,9 @@ class Lazy:
             os.system(command)
             del command
 
+        # Finally the namelist.wps.
+        path_to_namelistwps = os.path.join(self.C.path_to_WPS,'namelist.wps')
+        'cp %s %s' %(path_to_namelistwps,topath)
 
     def submit_job(self):
         # Soft link data netCDFs files from WPS to WRF
