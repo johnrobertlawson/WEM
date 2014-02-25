@@ -15,7 +15,11 @@ def padded_times(timeseq):
     padded = ['{0:04d}'.format(t) for t in timeseq]
     return padded
 
-def string_from_time(usage,t,dom=0,strlen=0,conven=0,tupleformat=1):
+def string_from_time(usage,t,dom=0,strlen=0,conven=0):
+        """
+        conven  :   convection of MM/DD versus DD/MM
+        """
+
         #if not tupleformat:
         if isinstance(t,int):
             # In this case, time is in datenum. Get it into tuple format.
@@ -60,16 +64,29 @@ def lookup_time(str):
     D = {'year':0, 'month':1, 'day':2, 'hour':3, 'minute':4, 'second':5}
     return D[str]
 
+def get_level_naming(lv):
+    if lv < 1500:
+        return str(lv)+'hPa'
+    elif lv == 2000:
+        return 'sfc'
+    elif lv.endswith('K'):
+        return lv
+    elif lv.endswith('PVU'):
+        return lv
+    elif lv.endswith('km'):
+        return lv
+
+
 def level_type(lv):
     """ Check to see what type of level is requested by user.
         
     """
-    if lv.endswith('K'):
-        return 'isentropic'
-    elif lv < 1500:
+    if lv < 1500:
         return 'isobaric'
     elif lv == 2000:
         return 'surface'
+    elif lv.endswith('K'):
+        return 'isentropic'
     elif lv.endswith('PVU'):
         return 'PV-surface'
     elif lv.endswith('km'):

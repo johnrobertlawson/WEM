@@ -7,7 +7,7 @@ import numpy as N
 
 from defaults import Defaults
 from figure import Figure
-import WEM.utils as utils
+import WEM.utils.utils as utils
 import scales
 
 class BirdsEye(Figure):
@@ -16,6 +16,7 @@ class BirdsEye(Figure):
         self.W = wrfout
         self.D = Defaults()
         self.p2p = self.C.output_root
+        print self.p2p
    
     def plot_data(self,data,mplcommand,fname,pt,V=0):
         # INITIALISE
@@ -70,7 +71,17 @@ class BirdsEye(Figure):
         
         # LAT/LON
         lat_sl, lon_sl = self.get_limited_domain(da)
-        
+
+        # LEVEL
+        vc = utils.level_type(lv)
+        if vc == 'surface':
+            lv_idx = 0       
+        else:
+            print("Need to sort other levels")
+            raise Exception
+
+        lv_na = utils.get_level_naming(lv)
+
         # FETCH DATA
         PS = {'t': time_idx, 'lv': lv_idx, 'la': lat_sl, 'lo': lon_sl} 
         data = self.W.get(va,PS)

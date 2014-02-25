@@ -31,7 +31,7 @@ from birdseye import BirdsEye
 #import scales
 from defaults import Defaults
 from lookuptable import LookUpTable
-import WEM.utils as utils
+import WEM.utils.utils as utils
 
 class WRFEnviron:
     def __init__(self,config):
@@ -125,11 +125,11 @@ class WRFEnviron:
         #self.en = self.get_sequence(wrfout)
         #self.pt = self.get_sequence(times) # List of plot times        
         
-
-        self.W = WRFOut(en) # Only load netCDF file once!
+        wrfpath = self.wrfout_files_in(self.C.wrfout_root)[0]
+        self.W = WRFOut(wrfpath) # Only load netCDF file once!
         for va in dic:
-            lv = va['lv'] # Some variables don't have levels (e.g., cref)
-            pt = va['pt'] # Mandatory
+            lv = dic[va]['lv'] # Some variables don't have levels (e.g., cref)
+            pt = dic[va]['pt'] # Mandatory
             
             vc = utils.level_type(lv) # vertical coordinate
             
@@ -145,10 +145,12 @@ class WRFEnviron:
             else:
                 print("Non-pressure levels not supported yet.")
                 raise Exception
-            
-            print("Plotting {0} at lv {1} for time {2}.".format(va,lv,pt))
+           
             F = BirdsEye(self.C,self.W)
-            F.plot2D(va,pt,lv)            
+            for t in pt:
+                disp_t = utils.string_from_time('title',t)
+                print("Plotting {0} at lv {1} for time {2}.".format(va,lv,disp_t))
+                F.plot2D(va,t,lv)            
 
 
     def plot_variable2D(self,varlist,timelist):
