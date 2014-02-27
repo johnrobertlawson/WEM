@@ -29,7 +29,14 @@ Contributors & Attributions
 ===========================
 
 Some files or methods contain attributions to other programmers whose
-code has been refactored to fit this project. In summary, thanks to:
+code has been refactored to fit this project (or is/will become a 
+prerequisite). In summary, thanks to:
+
+SHARPpy
+-------
+
+* Patrick Marsh
+* John Hart
 
 HootPy/PulsatrixWx project
 --------------------------
