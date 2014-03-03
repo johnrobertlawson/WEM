@@ -75,6 +75,8 @@ def get_level_naming(lv):
         return lv
     elif lv.endswith('km'):
         return lv
+    elif lv == 'all':
+        return 'all model levels'
 
 
 def level_type(lv):
@@ -91,6 +93,8 @@ def level_type(lv):
         return 'PV-surface'
     elif lv.endswith('km'):
         return 'geometric'
+    elif lv == 'all':
+        return 'eta'
     else:
         print('Unknown vertical coordinate.')
         raise Exception

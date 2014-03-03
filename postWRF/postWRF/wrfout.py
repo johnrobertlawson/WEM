@@ -141,7 +141,13 @@ class WRFOut:
         if any('Time' in p for p in PS['dim_names']):
             sl.append(slice(PS['t'],PS['t']+1))
         if any('bottom' in p for p in PS['dim_names']):
-            sl.append(slice(PS['lv'],PS['lv']+1))
+            if not 'lv' in PS: # No level specified
+                sl.append(slice(None,None))
+            elif isinstance(PS['lv'],int):
+                sl.append(slice(PS['lv'],PS['lv']+1))
+            elif PS['lv']=='all': 
+                sl.append(slice(None,None))
+            
         if any('north' and 'west' in p for p in PS['dim_names']):
             sl.append(PS['la']) 
             sl.append(PS['lo']) 
@@ -207,6 +213,10 @@ class WRFOut:
         tbl['wind10'] = self.compute_wind10
         tbl['wind'] = self.compute_wind
         tbl['CAPE'] = self.compute_CAPE
+        tbl['Td'] = self.compute_Td
+        tbl['pressure'] = self.compute_pressure
+        tbl['temps'] = self.compute_temps
+        tbl['theta'] = self.compute_theta
 
         data = tbl[var](slices,**kwargs)
         return data
@@ -217,6 +227,27 @@ class WRFOut:
         data = N.sqrt(u**2 + v**2)
         return data
         
+    def compute_pressure(self,slices):
+        PP = self.get('P',slices)
+        PB = self.get('PB',slices)
+        pressure = PP + PB
+        return pressure
+        
+    def compute_temps(self,slices,units='K'):
+        theta = self.get('theta',slices)
+        P = self.get('pressure',slices)
+        temps = theta*((P/1000.0)**(287.04/1004.0))
+        if units=='K':
+            return temps
+        elif units=='C':
+            return temps-273.15
+        
+    def compute_theta(self,slices):
+        theta = self.get('T',slices)
+        Tbase = 300.0
+        theta = Tbase + theta
+        return theta
+    
     def compute_wind(self,slices):
         u = self.get('U',slices)
         v = self.get('V',slices)
@@ -313,8 +344,31 @@ class WRFOut:
         
     def compute_DCAPE(self):
         
-        DCAPE = cc.g 
+        pass
+    
+    def compute_thetae(self,slices):
+        P = self.get('pressure',slices)
+        T = self.get('temps',slices,units='K')
+        Td = self.get('Td',slices)
+        p2, t2 = thermo.drylift(P,T,Td)
+        x = thermo.wetlift(p2,t2,100.0)
+        thetae = thermo.theta(100.0, x, 1000.0)
+        return thetae
         
+        
+    def compute_Td(self,slices):
+        """
+        Using HootPy equation
+        """
+        Q = self.get('Q',slices)
+        P = self.get('pressure',slices)
+        w = N.divide(Q, N.subtract(1,Q))
+        e = N.divide(N.multiply(w,P), N.add(0.622,w))
+        a = N.multiply(243.5,N.log(N.divide(e,6.112)))
+        b = N.subtract(17.67,N.log(N.divide(e,6.112)))
+        Td = N.divide(a,b)
+        return Td
+    
     def compute_CAPE(self,slices):
         """
         CAPE method based on GEMPAK's pdsuml.f function
@@ -329,11 +383,17 @@ class WRFOut:
         CAPE    :   convective available potential energy
         CIN     :   convective inhibition
         """
-
+        # Make sure all levels are obtained
+        #slices['lv'] = slice(None,None)
+        slices.pop('lv',None)
+        
         totalCAPE = 0
         totalCIN = 0
         
-        for lvidx in range(slices['lv']):
+        theta = self.get('theta',slices)
+
+        for lvidx in range(theta.shape[1]-1):
+
             # This should loop over the levels?
             """
             z1      :   bottom of layer (index)
@@ -347,8 +407,9 @@ class WRFOut:
             z1 = lvidx
             z2 = lvidx + 1
     
-            th1 = self.get('theta')
-            th2 = self.get('theta')
+            th1 = theta[0,lvidx,...]
+            th2 = theta[0,lvidx+1,...]
+
             thp1 = 0
             thp2 = 0
     
@@ -359,7 +420,21 @@ class WRFOut:
             dt1 = thp1 - th1
             
             dz = z2 - z1
-            
+        
+            # 
+            # dt1_pos = N.ma.masked_greater(dt1,0)
+            # dt1_neg = N.ma.masked_less(dt1,0)
+     
+            # dt2_pos = N.ma.masked_greater(dt2,0)
+            # dt2_neg = N.ma.masked_less(dt2,0)
+        
+            dt1_pos = N.select([dt1>0],[dt1])
+            dt1_neg = N.select([dt1<0],[dt1])
+            dt2_pos = N.select([dt2>0],[dt1])
+            dt2_neg = N.select([dt2<0],[dt1])
+
+            pdb.set_trace()
+
             if (dt1 > 0) and (dt2 > 0):
                 capeT = ((dt2 + dt1)*dz)/(th2+th1)
             elif dt1 > 0:
