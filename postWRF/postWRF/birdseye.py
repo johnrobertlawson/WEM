@@ -75,7 +75,9 @@ class BirdsEye(Figure):
         # LEVEL
         vc = utils.level_type(lv)
         if vc == 'surface':
-            lv_idx = 0       
+            lv_idx = 0
+        elif lv == 'all':
+            lv_idx = 'all'
         else:
             print("Need to sort other levels")
             raise Exception

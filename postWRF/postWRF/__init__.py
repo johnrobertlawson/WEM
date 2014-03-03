@@ -128,11 +128,15 @@ class WRFEnviron:
         wrfpath = self.wrfout_files_in(self.C.wrfout_root)[0]
         self.W = WRFOut(wrfpath) # Only load netCDF file once!
         for va in dic:
-            lv = dic[va]['lv'] # Some variables don't have levels (e.g., cref)
             pt = dic[va]['pt'] # Mandatory
-            
+
+            if 'lv' in dic: # If levels are requested
+                lv = dic[va]['lv'] # Some variables don't have levels (e.g., cref)
+            else:
+                lv = 'all'
+
             vc = utils.level_type(lv) # vertical coordinate
-            
+                
             # Check for pressure levels
             if vc == 'surface':
                 pass # Standard WRF levels
@@ -142,9 +146,12 @@ class WRFEnviron:
                 # Edit p_interp namelist
                 #Execute p_interp here and reassign self.W to new file
                 self.W = WRFOut(p_interp_fpath)
+            elif vc == 'eta':
+                pass
             else:
                 print("Non-pressure levels not supported yet.")
                 raise Exception
+           
            
             F = BirdsEye(self.C,self.W)
             for t in pt:
@@ -152,7 +159,7 @@ class WRFEnviron:
                 print("Plotting {0} at lv {1} for time {2}.".format(va,lv,disp_t))
                 F.plot2D(va,t,lv)            
 
-
+    """ 
     def plot_variable2D(self,varlist,timelist):
         self.va = self.get_sequence(varlist) # List of variables
         self.pt = self.get_sequence(timelist) # List of plot times
@@ -165,7 +172,7 @@ class WRFEnviron:
             F = BirdsEye(self.C,W)
             F.plot2D(va,pt,lv=2000)
         
-    """
+    
     def plot_variable2D(self,va,pt,en,lv,p2p,na=0,da=0):
         ###Plot a longitude--latitude cross-section (bird's-eye-view).
         Use Basemap to create geographical data

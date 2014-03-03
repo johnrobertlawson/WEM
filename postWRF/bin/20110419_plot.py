@@ -12,7 +12,7 @@ p = WRFEnviron(config)
 case = '20130815'
 IC = 'GEFSR2' 
 #ensnames = ['c00'] + ['p'+"%02d" %n for n in range(1,11)]
-ensnames = ['p'+"%02d" %n for n in range(0,0)]
+ensnames = ['p'+"%02d" %n for n in range(8,9)]
 experiment = {'ICBC':'CTRL'}
 
 #itime = (2011,4,19,18,0,0)
@@ -21,11 +21,12 @@ itime = (2013,8,15,18,0,0)
 ftime = (2013,8,16,12,0,0)
 times = p.generate_times(itime,ftime,60*60)
 
-variables = {'cref':{}, 'wind10':{}}
+# variables = {'cref':{}, 'wind10':{}}
 #variables = {'cref':{},'wind10':{},'CAPE':{}}
-variables['cref'] = {'lv':2000,'pt':times}
-variables['wind10'] = {'lv':2000,'pt':times}
+# variables['cref'] = {'lv':2000,'pt':times}
+# variables['wind10'] = {'lv':2000,'pt':times}
 #variables['CAPE'] = {'pt':times}
+variables = {'thetae':{'lv':2000,'pt':times}, 'CAPE':{'pt':times}}
 
 for en in ensnames:
     # Reload settings
