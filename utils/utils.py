@@ -64,7 +64,7 @@ def lookup_time(str):
     D = {'year':0, 'month':1, 'day':2, 'hour':3, 'minute':4, 'second':5}
     return D[str]
 
-def get_level_naming(lv):
+def get_level_naming(lv,va,vardict):
     if lv < 1500:
         return str(lv)+'hPa'
     elif lv == 2000:
@@ -76,7 +76,11 @@ def get_level_naming(lv):
     elif lv.endswith('km'):
         return lv
     elif lv == 'all':
-        return 'all model levels'
+        if va == 'shear':
+            name = '{0}to{1}'.format(vardict['bottom'],vardict['top'])
+            return name
+        else:
+            return 'all_lev'
 
 
 def level_type(lv):
