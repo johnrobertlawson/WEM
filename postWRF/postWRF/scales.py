@@ -25,6 +25,8 @@ import WEM.utils as utils
 
 def get_cm(va,lv):
     
+    if lv=='all':
+        lv = 0
     # Variable and vertical level determine contour scale
     # pdb.set_trace()
     try:
@@ -113,6 +115,9 @@ A['pwat'][2000] = (0.2,2.6,0.1)
 # Snowfall
 A['snow'] = {'cmap':ct.snow2}
 A['snow'][2000] = [0.25,0.5,0.75,1,1.5,2,2.5,3,4,5,6,8,10,12,14,16,18]
+
+A['shear'] = {'cmap':0}
+A['shear'][0] = (0,33,3)
 
 
 
