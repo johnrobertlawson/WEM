@@ -1,6 +1,7 @@
 import numpy as N
 import os
 import time
+import calendar
 
 """ A collection of useful utilities.
 """
@@ -38,12 +39,14 @@ def string_from_time(usage,t,dom=0,strlen=0,conven=0):
         elif usage == 'output':
             if not conven:
                 # No convention set, assume DD/MM (I'm biased)
-                conven = 'DM'
+                conven = 'full'
             # Generates string for output file creation
             if conven == 'DM':
                 str = '{2:02d}{1:02d}_{3:02d}{4:02d}'.format(*t)
             elif conven == 'MD':
                 str = '{1:02d}{2:02d}_{3:02d}{4:02d}'.format(*t)
+            elif conven == 'full':
+                str = '{0:04d}{1:02d}{2:02d}{3:02d}{4:02d}'.format(*t)
             else:
                 print("Set convention for date format: DM or MD.")
         elif usage == 'dir':
@@ -131,3 +134,13 @@ def dstack_loop(data, obj):
         stack = N.dstack((obj,data))
         
     return stack
+
+def generate_times(idate,fdate,interval):
+    """
+    Interval in seconds
+    """
+    i = calendar.timegm(idate)
+    f = calendar.timegm(fdate)
+    times = range(i,f,interval)
+    return times
+

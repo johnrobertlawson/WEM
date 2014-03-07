@@ -23,6 +23,7 @@ import numpy as N
 import time
 import json
 import cPickle as pickle
+import copy
 
 from wrfout import WRFOut
 from axes import Axes
@@ -124,14 +125,14 @@ class WRFEnviron:
 
         #self.en = self.get_sequence(wrfout)
         #self.pt = self.get_sequence(times) # List of plot times
-
+        Dic = copy.deepcopy(dic)
         wrfpath = self.wrfout_files_in(self.C.wrfout_root)[0]
         self.W = WRFOut(wrfpath) # Only load netCDF file once!
-        for va in dic:
-            if not 'lv' in dic[va]: # For things like CAPE, shear.
-                dic[va]['lv'] = 'all'
+        for va in Dic:
+            if not 'lv' in Dic[va]: # For things like CAPE, shear.
+                Dic[va]['lv'] = 'all'
 
-            vc = utils.level_type(dic[va]['lv']) # vertical coordinate
+            vc = utils.level_type(Dic[va]['lv']) # vertical coordinate
 
             # Check for pressure levels
             if vc == 'isobaric':
@@ -146,16 +147,16 @@ class WRFEnviron:
                 pass
 
             F = BirdsEye(self.C,self.W)
-            lv = dic[va]['lv']
-            for t in dic[va]['pt']:
-                # print('Passing point. dic: \n', dic)
+            lv = Dic[va]['lv']
+            for t in Dic[va]['pt']:
+                # print('Passing point. Dic: \n', Dic)
                 # pdb.set_trace()
                 disp_t = utils.string_from_time('title',t)
                 print("Plotting {0} at lv {1} for time {2}.".format(
                                     va,lv,disp_t))
-                dic[va]['pt'] = t
-                dic[va]['vc'] = vc
-                F.plot2D(va, dic[va])
+                Dic[va]['pt'] = t
+                Dic[va]['vc'] = vc
+                F.plot2D(va, Dic[va])
 
     """
     def plot_variable2D(self,varlist,timelist):
@@ -576,11 +577,3 @@ class WRFEnviron:
             print("Plotting time {0} from {1}.".format(n,len(times)))
             del data, stack
 
-    def generate_times(self,idate,fdate,interval):
-        """
-        Interval in seconds
-        """
-        i = calendar.timegm(idate)
-        f = calendar.timegm(fdate)
-        times = range(i,f,interval)
-        return times
