@@ -228,7 +228,7 @@ class WRFOut:
         Z = geopotential/9.81
         return Z
 
-    def compute_wind10(self,slices):
+    def compute_wind10(self,slices,**kwargs):
         u = self.get('U10',slices)
         v = self.get('V10',slices)
         data = N.sqrt(u**2 + v**2)
@@ -307,7 +307,7 @@ class WRFOut:
         thetae = (Drybulb + (Q * cc.Lv/cc.cp)) * (cc.P0/P) ** cc.kappa
         return thetae
 
-    def compute_comp_ref(self,PS):
+    def compute_comp_ref(self,PS,**kwargs):
         """Amend this so variables obtain at start fetch only correct date, lats, lons
         All levels need to be fetched as this is composite reflectivity
         """
@@ -350,7 +350,7 @@ class WRFOut:
                 Qsn = N.row_stack((Qsn, N_curcol_s))
 
         # Calculate slope factor lambda
-        lambr = (N.divide((3.14159 * no_rain * rhor), N.multiply(density, Qra))) ** 0.25
+        lambr = (N.divide((3.14159 * no_rain * rhor), N.multiply(density, Qra)+N.nextafter(0,1))) ** 0.25
         lambs = N.exp(-0.0536 * (T2 - 273.15))
 
         # Calculate equivalent reflectivity factor

@@ -22,7 +22,7 @@ class Figure:
         """Default naming should be:
         Variable + time + level
         """
-        fname = '_'.join([str(a) for a in naming]) + 'Z' 
+        fname = '_'.join([str(a) for a in naming]) 
         #pdb.set_trace()
         return fname  
  
