@@ -129,10 +129,18 @@ class WRFEnviron:
         wrfpath = self.wrfout_files_in(self.C.wrfout_root)[0]
         self.W = WRFOut(wrfpath) # Only load netCDF file once!
         for va in Dic:
+
             if not 'lv' in Dic[va]: # For things like CAPE, shear.
                 Dic[va]['lv'] = 'all'
 
-            vc = utils.level_type(Dic[va]['lv']) # vertical coordinate
+            lv = Dic[va]['lv'] 
+            vc = utils.level_type(lv) # vertical coordinate
+
+            if not 'pt' in Dic[va]: # For averages and all times
+                if not 'itime' in Dic[va]: # For all times
+                    Dic[va]['pt'] = ['all',]
+                else: # For specific range
+                    Dic[va]['pt'] = ['range',]
 
             # Check for pressure levels
             if vc == 'isobaric':
@@ -147,15 +155,12 @@ class WRFEnviron:
                 pass
 
             F = BirdsEye(self.C,self.W)
-            lv = Dic[va]['lv']
+
             for t in Dic[va]['pt']:
-                # print('Passing point. Dic: \n', Dic)
-                # pdb.set_trace()
-                disp_t = utils.string_from_time('title',t)
-                print("Plotting {0} at lv {1} for time {2}.".format(
-                                    va,lv,disp_t))
-                Dic[va]['pt'] = t
-                Dic[va]['vc'] = vc
+                disp_t = utils.string_from_time('title',t,**Dic[va])
+                print("Plotting {0} at lv {1} for time {2}.".format(va,lv,disp_t))
+                Dic[va]['pt'] = t # Need this?
+                Dic[va]['vc'] = vc # Need this?
                 F.plot2D(va, Dic[va])
 
     """
@@ -577,3 +582,4 @@ class WRFEnviron:
             print("Plotting time {0} from {1}.".format(n,len(times)))
             del data, stack
 
+ 

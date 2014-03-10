@@ -16,52 +16,73 @@ def padded_times(timeseq):
     padded = ['{0:04d}'.format(t) for t in timeseq]
     return padded
 
-def string_from_time(usage,t,dom=0,strlen=0,conven=0):
-        """
-        conven  :   convection of MM/DD versus DD/MM
-        """
+def string_from_time(usage,t,dom=0,strlen=0,conven=0,**kwargs):
+    """
+    conven  :   convection of MM/DD versus DD/MM
+    """
 
-        #if not tupleformat:
-        if isinstance(t,int):
-            # In this case, time is in datenum. Get it into tuple format.
-            t = time.gmtime(t)
-        if usage == 'title':
-            # Generates string for titles
-            str = '{3:02d}:{4:02d}Z on {2:02d}/{1:02d}/{0:04d}'.format(*t)
-        elif usage == 'wrfout':
-            # Generates string for wrfout file finding
-            # Needs dom
-            if not dom:
-                print("No domain specified; using domain #1.")
-                dom = 1
-            str = ('wrfout_d0' + str(dom) +
-                   '{0:04d}-{1:02d}-{2:02d}_{3:02d}:{4:02d}:{5:02d}'.format(*t))
-        elif usage == 'output':
-            if not conven:
-                # No convention set, assume DD/MM (I'm biased)
-                conven = 'full'
-            # Generates string for output file creation
-            if conven == 'DM':
-                str = '{2:02d}{1:02d}_{3:02d}{4:02d}'.format(*t)
-            elif conven == 'MD':
-                str = '{1:02d}{2:02d}_{3:02d}{4:02d}'.format(*t)
-            elif conven == 'full':
-                str = '{0:04d}{1:02d}{2:02d}{3:02d}{4:02d}'.format(*t)
+
+    if isinstance(t,str):
+        if usage == 'output':
+            usage = 'skip' # Time is already a string
+        elif usage == 'title':
+            if kwargs['itime']: # For averages or maxima over time
+                itime = kwargs['itime']
+                ftime = kwargs['ftime']
             else:
-                print("Set convention for date format: DM or MD.")
-        elif usage == 'dir':
-            # Generates string for directory names
-            # Needs strlen which sets smallest scope of time for string
-            if not strlen:
-                 print("No timescope strlen set; using hour as minimum.")
-                 strlen = 'hour'
-            n = lookup_time(strlen)
-            str = "{0:04d}".format(t[0]) + ''.join(
-                    ["{0:02d}".format(a) for a in t[1:n+1]])
+                pass
         else:
-            print("Usage for string not valid.")
             raise Exception
-        return str
+    elif isinstance(t,int):
+        # In this case, time is in datenum. Get it into tuple format.
+        t = time.gmtime(t)
+    else:
+        pass
+
+    if usage == 'title':
+        # Generates string for titles
+        if not itime: # i.e. for specific times
+            strg = '{3:02d}:{4:02d}Z on {2:02d}/{1:02d}/{0:04d}'.format(*t)
+        else: # i.e. for ranges (average over time)
+            s1 = '{3:02d}:{4:02d}Z to '.format(*itime)
+            s2 = '{3:02d}:{4:02d}Z'.format(*ftime)
+            strg = s1 + s2
+    elif usage == 'wrfout':
+        # Generates string for wrfout file finding
+        # Needs dom
+        if not dom:
+            print("No domain specified; using domain #1.")
+            dom = 1
+        strg = ('wrfout_d0' + str(dom) +
+               '{0:04d}-{1:02d}-{2:02d}_{3:02d}:{4:02d}:{5:02d}'.format(*t))
+    elif usage == 'output':
+        if not conven:
+            # No convention set, assume DD/MM (I'm biased)
+            conven = 'full'
+        # Generates string for output file creation
+        if conven == 'DM':
+            strg = '{2:02d}{1:02d}_{3:02d}{4:02d}'.format(*t)
+        elif conven == 'MD':
+            strg = '{1:02d}{2:02d}_{3:02d}{4:02d}'.format(*t)
+        elif conven == 'full':
+            strg = '{0:04d}{1:02d}{2:02d}{3:02d}{4:02d}'.format(*t)
+        else:
+            print("Set convention for date format: DM or MD.")
+    elif usage == 'dir':
+        # Generates string for directory names
+        # Needs strlen which sets smallest scope of time for string
+        if not strlen:
+             print("No timescope strlen set; using hour as minimum.")
+             strlen = 'hour'
+        n = lookup_time(strlen)
+        strg = "{0:04d}".format(t[0]) + ''.join(
+                ["{0:02d}".format(a) for a in t[1:n+1]])
+    elif usage == 'skip':
+        strg = t
+    else:
+        print("Usage for string not valid.")
+        raise Exception
+    return strg
 
 def lookup_time(str):
     D = {'year':0, 'month':1, 'day':2, 'hour':3, 'minute':4, 'second':5}

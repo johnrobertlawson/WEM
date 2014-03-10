@@ -23,30 +23,36 @@ import matplotlib.pyplot as plt
 import colourtables as ct
 import WEM.utils as utils
 
-def get_cm(va,lv):
+def get_cm(va,**kwargs):
     
+    lv = kwargs['lv']
+
     if lv=='all':
         lv = 0
     # Variable and vertical level determine contour scale
     # pdb.set_trace()
-    try:
-        if len(A[va][lv]) == 3:
-            # This is a min-max-interval list
-            clvs = N.arange(*A[va][lv])
-        else:
-            # This is an actual list of values
-            clvs = A[va][lv]
-    except KeyError:
-        # If no level exists, try finding a near one
+    
+    if kwargs['range']: # Custom range set by user
+        clvs = N.arange(*kwargs['range'])
+    else:
         try:
-            near_lv = find_nearest_level(lv)
-            clvs = A[va][near_lv]
-        except:
-            # Some variables don't live on a vertical level
-            clvs = 0
-    # except:
-        # raise Exception
-        
+            if len(A[va][lv]) == 3:
+                # This is a min-max-interval list
+                clvs = N.arange(*A[va][lv])
+            else:
+                # This is an actual list of values
+                clvs = A[va][lv]
+        except KeyError:
+            # If no level exists, try finding a near one
+            try:
+                near_lv = find_nearest_level(lv)
+                clvs = A[va][near_lv]
+            except:
+                # Some variables don't live on a vertical level
+                clvs = 0
+        # except:
+            # raise Exception
+            
     try:
         cm = A[va]['cmap'](clvs)
         #pdb.set_trace()
@@ -125,3 +131,5 @@ A['buoyancy'][2000] = (-0.65,0.075,0.025)
 A['dptp'] = {'cmap':0}
 A['dptp'][2000] = (-15,6,1)
 
+A['strongestwind'] = {'cmap':0}
+A['strongestwind'][2000] = (10,32.5,2.5)
