@@ -219,11 +219,59 @@ class WRFOut:
         tbl['temps'] = self.compute_temps
         tbl['theta'] = self.compute_theta
         tbl['Z'] = self.compute_geopotential_height
+        tbl['dptp'] = self.compute_dptp #density potential temperature pert.
+        tbl['dpt'] = self.compute_dpt #density potential temperature pert.
+        tbl['buoyancy'] = self.compute_buoyancy
 
         data = tbl[var](slices,**kwargs)
         return data
 
-    def compute_geopotential_height(self,slices):
+    def compute_buoyancy(self,slices,**kwargs):
+        """
+        Method from Adams-Selin et al., 2013, WAF
+        """
+        theta = self.get('theta',slices)
+        thetabar = N.mean(theta)
+        qv = self.get('QVAPOR',slices)
+        qvbar = N.mean(qv)
+
+        B = cc.g * ((theta-thetabar)/thetabar + 0.61*(qv - qvbar))
+        return B
+
+    def compute_mixing_ratios(self,slices,**kwargs):
+        qv = self.get('QVAPOR',slices)
+        qc = self.get('QCLOUD',slices)
+        qr = self.get('QRAIN',slices)
+        qi = self.get('QICE',slices)
+        qs = self.get('QSNOW',slices)
+        qg = self.get('QGRAUP',slices)
+
+        rh = qc + qr + qi + qs + qg
+        rv = qv
+
+        return rh, rv        
+
+    def compute_dptp(self,slices,**kwargs):
+        dpt = self.get('dpt',slices)
+        dpt_mean = N.mean(dpt)
+        dptp = dpt - dpt_mean
+        return dptp
+
+    def compute_dpt(self,slices,**kwargs):
+        """
+        Potential: if surface level is requested, choose sigma level just
+        about the surface. I don't think this affects any
+        other dictionaries around...
+        """
+        # if slices['lv'] == 0:
+            # slices['lv'] = 0
+        theta = self.get('theta',slices)
+        rh, rv = self.compute_mixing_ratios(slices)
+
+        dpt = theta * (1 + 0.61*rv - rh) 
+        return dpt
+
+    def compute_geopotential_height(self,slices,**kwargs):
         geopotential = self.get('PH',slices) + self.get('PHB',slices)
         Z = geopotential/9.81
         return Z
@@ -580,6 +628,7 @@ class WRFOut:
 
         """
         Can we add a suffix to the new netCDF file?
+        Check to see if file already exists
         """
         # Copy old p_interp for backup
         command1 = ' '.join(('cp',p_interp_path,p_interp_path+'.bkup'))
