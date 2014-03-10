@@ -77,10 +77,18 @@ class BirdsEye(Figure):
         # Unpack dictionary
         lv = vardict['lv']
         pt = vardict['pt']
+        # pdb.set_trace()
 
         # Get indices for time, level, lats, lons
         # TIME
-        time_idx = self.W.get_time_idx(pt)
+        if pt == 'all':
+            time_idx = slice(None,None)
+        elif pt == 'range':
+            start_frame = self.W.get_time_idx(vardict['itime'], tuple_format=1)
+            end_frame = self.W.get_time_idx(vardict['ftime'], tuple_format=1)
+            time_idx = slice(start_frame,end_frame)
+        else:
+            time_idx = self.W.get_time_idx(pt)
 
         # LAT/LON
         lat_sl, lon_sl = self.get_limited_domain(da)
@@ -96,6 +104,15 @@ class BirdsEye(Figure):
             raise Exception
 
         lv_na = utils.get_level_naming(lv,va,vardict)
+
+        """
+           def plot_strongest_wind(self,dic):
+                itime = dic['itime']
+                ftime = dic['ftime']
+                V = dic.get('range',(10,32.5,2.5))
+                F = BirdsEye(self.C,W
+
+        """
 
         # Now clear dictionary of old settings
         # They will be replaced with indices
@@ -114,18 +131,24 @@ class BirdsEye(Figure):
         lo_n = data.shape[-1]
 
         # COLORBAR, CONTOURING
-        cm, clvs = scales.get_cm(va,lv)
+        cm, clvs = scales.get_cm(va,**vardict)
+        # Override contour levels if specified
+        # clvs = vardict.get('range',clvs_default)
+
         # pdb.set_trace()
         if cm:
             self.bmap.contourf(x,y,data.reshape((la_n,lo_n)),clvs,cmap=cm)
         elif isinstance(clvs,N.ndarray):
             self.bmap.contourf(x,y,data.reshape((la_n,lo_n)),clvs,cmap=plt.cm.jet)
+        # elif isinstance(clvs,tuple) or isinstance(clvs,list):
+            # N.array(clvs)
+            # self.bmap.contourf(x,y,data.reshape((la_n,lo_n)),clvs,cmap=plt.cm.jet)
         else:
             self.bmap.contourf(x,y,data.reshape((la_n,lo_n)))
 
         # LABELS, TITLES etc
         if self.C.plot_titles:
-            title = utils.string_from_time('title',pt)
+            title = utils.string_from_time('title',pt,**vardict)
             plt.title(title)
         if self.C.colorbar:
             plt.colorbar(orientation='horizontal')

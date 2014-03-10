@@ -12,6 +12,8 @@ import numpy as N
 import calendar
 import pdb
 import constants as cc
+import scipy.ndimage
+
 #sys.path.append('/home/jrlawson/gitprojects/meteogeneral/')
 #from meteogeneral.WRF import wrf_tools
 
@@ -40,6 +42,13 @@ class WRFOut:
 
         # Loads variable list
         self.fields = self.nc.variables.keys()
+
+    """
+    # TESTING A SMOOTHING METHOD
+    def test_smooth(self,data):
+        from scipy import ndimage
+        from skimage.feature
+    """
 
     def get_time_idx(self,t,tuple_format=0):
 
@@ -139,8 +148,12 @@ class WRFOut:
     def create_slice(self,PS):
         # See which dimensions are present in netCDF file variable
         sl = []
+        # pdb.set_trace()
         if any('Time' in p for p in PS['dim_names']):
-            sl.append(slice(PS['t'],PS['t']+1))
+            if isinstance(PS['t'],slice):
+                sl.append(PS['t'])
+            else:
+                sl.append(slice(PS['t'],PS['t']+1))
         if any('bottom' in p for p in PS['dim_names']):
             if not 'lv' in PS: # No level specified
                 sl.append(slice(None,None))
@@ -222,6 +235,7 @@ class WRFOut:
         tbl['dptp'] = self.compute_dptp #density potential temperature pert.
         tbl['dpt'] = self.compute_dpt #density potential temperature pert.
         tbl['buoyancy'] = self.compute_buoyancy
+        tbl['strongestwind'] = self.compute_strongest_wind
 
         data = tbl[var](slices,**kwargs)
         return data
@@ -314,6 +328,8 @@ class WRFOut:
         top and bottom in km.
         kwargs['top']
         kwargs['bottom']
+
+        Could make this faster with numpy.digitize()?
         """
         topm = kwargs['top']*1000
         botm = kwargs['bottom']*1000
@@ -454,7 +470,7 @@ class WRFOut:
         Td = N.divide(a,b)
         return Td
 
-    def compute_CAPE(self,slices):
+    def compute_CAPE(self,slices,**kwargs):
         """
         INCOMPLETE!
 
@@ -571,7 +587,12 @@ class WRFOut:
         # Get coordinate system
         vc = self.check_vcs(z1,z2)
 
-
+    def compute_strongest_wind(self,slices,**kwargs):
+        wind = self.get('wind10',slices)
+        wind_max = N.amax(wind,axis=0)
+        # wind_max_smooth = self.test_smooth(wind_max)
+        # return wind_max_smooth
+        return wind_max
 
     def check_vcs(self,z1,z2,exception=1):
         """
