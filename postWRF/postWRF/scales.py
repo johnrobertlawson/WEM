@@ -32,7 +32,7 @@ def get_cm(va,**kwargs):
     # Variable and vertical level determine contour scale
     # pdb.set_trace()
     
-    if kwargs['range']: # Custom range set by user
+    if hasattr(kwargs,'range'): # Custom range set by user
         clvs = N.arange(*kwargs['range'])
     else:
         try:

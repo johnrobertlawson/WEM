@@ -2,6 +2,7 @@ import numpy as N
 import os
 import time
 import calendar
+import pdb
 
 """ A collection of useful utilities.
 """
@@ -26,11 +27,12 @@ def string_from_time(usage,t,dom=0,strlen=0,conven=0,**kwargs):
         if usage == 'output':
             usage = 'skip' # Time is already a string
         elif usage == 'title':
-            if kwargs['itime']: # For averages or maxima over time
-                itime = kwargs['itime']
-                ftime = kwargs['ftime']
-            else:
-                pass
+            pass
+        #    if kwargs['itime']: # For averages or maxima over time
+        #        itime = kwargs['itime']
+        #        ftime = kwargs['ftime']
+        #    else:
+        #        pass
         else:
             raise Exception
     elif isinstance(t,int):
@@ -41,11 +43,12 @@ def string_from_time(usage,t,dom=0,strlen=0,conven=0,**kwargs):
 
     if usage == 'title':
         # Generates string for titles
-        if not itime: # i.e. for specific times
+        if not 'itime' in kwargs: # i.e. for specific times
+        #if not hasattr(kwargs,'itime'): # i.e. for specific times
             strg = '{3:02d}:{4:02d}Z on {2:02d}/{1:02d}/{0:04d}'.format(*t)
         else: # i.e. for ranges (average over time)
-            s1 = '{3:02d}:{4:02d}Z to '.format(*itime)
-            s2 = '{3:02d}:{4:02d}Z'.format(*ftime)
+            s1 = '{3:02d}:{4:02d}Z to '.format(*kwargs['itime'])
+            s2 = '{3:02d}:{4:02d}Z'.format(*kwargs['ftime'])
             strg = s1 + s2
     elif usage == 'wrfout':
         # Generates string for wrfout file finding
