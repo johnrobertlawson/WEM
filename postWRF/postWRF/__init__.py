@@ -157,6 +157,7 @@ class WRFEnviron:
             F = BirdsEye(self.C,self.W)
 
             for t in Dic[va]['pt']:
+                #pdb.set_trace()
                 disp_t = utils.string_from_time('title',t,**Dic[va])
                 print("Plotting {0} at lv {1} for time {2}.".format(va,lv,disp_t))
                 Dic[va]['pt'] = t # Need this?
