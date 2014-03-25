@@ -1,5 +1,5 @@
-# This script downloads all variables for GEFS R2 reforecasts
-# John Lawson, University of Utah
+"""This script downloads all variables for GEFS R2 reforecasts
+"""
 import os
 import calendar
 import time
