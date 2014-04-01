@@ -16,7 +16,10 @@ import WEM.utils.utils as utils
 class Figure:
     def __init__(self,config,wrfout):
         self.C = config
-        self.W = wrfout
+        if wrfout=='RUC':
+            pass
+        else:
+            self.W = wrfout
     
     def create_fname(self,*naming):
         """Default naming should be:
