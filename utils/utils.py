@@ -91,7 +91,8 @@ def lookup_time(str):
     D = {'year':0, 'month':1, 'day':2, 'hour':3, 'minute':4, 'second':5}
     return D[str]
 
-def get_level_naming(lv,va,**kwargs):
+def get_level_naming(va,**kwargs):
+    lv = kwargs['lv']
     if lv < 1500:
         return str(lv)+'hPa'
     elif lv == 2000:
