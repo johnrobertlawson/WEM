@@ -346,48 +346,50 @@ class WRFEnviron:
         # Look up the method to use depending on type of plot
         PLOTS = {'sum_z':self.DE_z, 'sum_xyz':self.DE_xyz}
 
+        print('Get sequence of time')
         # Creates sequence of times
         ts = self.get_sequence(times)
 
         # Dictionary of data
         DATA = {}
 
+        print('Get permutations')
         # Get all permutations of files
         nperm = itertools.combinations(files,2).__sizeof__()
+        print('Start loop')
         for n, perm in enumerate(itertools.combinations(files,2)):
-            if n>9999:
-                print("Skipping #{0} for debugging.".format(n))
+            print("No. {0} from {1} permutations".format(n,nperm))
+            perm_start = time.time()
+            DATA[str(n)] = {}
+            f1, f2 = perm
+            W1 = WRFOut(f1)
+            W2 = WRFOut(f2)
+            print('WRFOuts loaded.')
+            #pdb.set_trace()
+            # Make sure times are the same in both files
+            if not N.all(N.array(W1.wrf_times) == N.array(W2.wrf_times)):
+                print("Times are not identical between input files.")
+                raise Exception
             else:
-                print("No. {0} from {1} permutations".format(n,nperm))
-                perm_start = time.time()
-                DATA[str(n)] = {}
-                f1, f2 = perm
-                W1 = WRFOut(f1)
-                W2 = WRFOut(f2)
-                #pdb.set_trace()
-                # Make sure times are the same in both files
-                if not N.all(N.array(W1.wrf_times) == N.array(W2.wrf_times)):
-                    print("Times are not identical between input files.")
-                    raise Exception
-                else:
-                    print("Passed check for identical timestamps between "
-                          "NetCDF files")
+                print("Passed check for identical timestamps between "
+                      "NetCDF files")
 
-                # Find indices of each time
-                t_idx = []
-                for t in ts:
-                    t_idx.append(W1.get_time_idx(t))
+            # Find indices of each time
+            print('Finding time indices')
+            t_idx = []
+            for t in ts:
+                t_idx.append(W1.get_time_idx(t))
 
-                print("Calculating values now...")
-                DATA[str(n)]['times'] = ts
-                DATA[str(n)]['values'] = []
-                for t in t_idx:
-                    DATA[str(n)]['values'].append(PLOTS[ptype](W1.nc,W2.nc,t,
-                                                    energy,lower,upper))
-                DATA[str(n)]['file1'] = f1
-                DATA[str(n)]['file2'] = f2
+            print("Calculating values now...")
+            DATA[str(n)]['times'] = ts
+            DATA[str(n)]['values'] = []
+            for t in t_idx:
+                DATA[str(n)]['values'].append(PLOTS[ptype](W1.nc,W2.nc,t,
+                                                energy,lower,upper))
+            DATA[str(n)]['file1'] = f1
+            DATA[str(n)]['file2'] = f2
 
-                print "Calculation #{0} took {1:2.2f} seconds.".format(n,time.time()-perm_start)
+            print "Calculation #{0} took {1:2.2f} seconds.".format(n,time.time()-perm_start)
 
         if d_return and not d_save:
             return DATA
@@ -485,27 +487,39 @@ class WRFEnviron:
         # loading it to a variable yet
 
         # WIND
-        U0 = nc0.variables['U'][:]
-        V0 = nc0.variables['V'][:]
-        U1 = nc1.variables['U'][:]
-        V1 = nc1.variables['V'][:]
+        U0 = nc0.variables['U'][t,...]
+        U1 = nc1.variables['U'][t,...]
+        Ud = U0 - U1
+        #del U0, U1
+
+        V0 = nc0.variables['V'][t,...]  
+        V1 = nc1.variables['V'][t,...]
+        Vd = V0 - V1
+        #del V0, V1
 
         # PERT and BASE PRESSURE
-        P0 = nc0.variables['P'][:]
-        PB0 = nc0.variables['PB'][:]
-        P1 = nc1.variables['P'][:]
-        PB1 = nc1.variables['PB'][:]
+        if lower or upper:
+            P0 = nc0.variables['P'][t,...]
+            PB0 = nc0.variables['PB'][t,...]
+            Pr = P0 + PB0
+            #del P0, PB1
+            # Here we assume pressure columns are
+            # roughly the same between the two...
 
         if energy=='total':
-            T0 = nc0.variables['T'][:]
-            T1 = nc1.variables['T'][:]
+            T0 = nc0.variables['T'][t,...]
+            T1 = nc1.variables['T'][t,...]
+            Td = T0 - T1
+            #del T0, T1
+
             R = 287.0 # Universal gas constant (J / deg K * kg)
             Cp = 1004.0 # Specific heat of dry air at constant pressure (J / deg K * kg)
             kappa = R/Cp
+            print('Temp data has been loaded.')
 
-        xlen = U0.shape[2] # 1 less than in V
-        ylen = V0.shape[3] # 1 less than in U
-        zlen = U0.shape[1] # identical in U & V
+        xlen = Ud.shape[1] # 1 less than in V
+        ylen = Vd.shape[2] # 1 less than in U
+        zlen = Ud.shape[0] # identical in U & V
 
         # Generator for lat/lon points
         def latlon(nlats,nlons):
@@ -520,28 +534,27 @@ class WRFEnviron:
         gridpts = latlon(xlen,ylen)
         for gridpt in gridpts:
             i,j = gridpt
-            # print("Calculating for gridpoints {0} & {1}.".format(i,j))
             # Find closest level to 'lower', 'upper'
-            P_col = P0[t,:,j,i] + PB0[t,:,j,i]
+            if lower or upper:
+                P_col = Pr[:,j,i]
             if lower:
                 low_idx = utils.closest(P_col,lower*100.0)
             else:
                 low_idx = None
             if upper:
-                upp_idx = utils.closest(P_col,upper*100.0)
+                upp_idx = utils.closest(P_col,upper*100.0)+1
             else:
                 upp_idx = None
 
-            zidx = slice(low_idx,upp_idx+1)
-            # This needs to be a 2D array?
+            zidx = slice(low_idx,upp_idx)
 
             if energy=='kinetic':
-                DKE2D[j,i] = N.sum(0.5*((U0[t,zidx,j,i]-U1[t,zidx,j,i])**2 +
-                                    (V0[t,zidx,j,i]-V1[t,zidx,j,i])**2))
+                DKE2D[j,i] = N.sum(0.5*((Ud[zidx,j,i])**2 +
+                                    (Vd[zidx,j,i])**2))
             elif energy=='total':
-                DKE2D[j,i] = N.sum(0.5*((U0[t,zidx,j,i]-U1[t,zidx,j,i])**2 +
-                                    (V0[t,zidx,j,i]-V1[t,zidx,j,i])**2 +
-                                    kappa*(T0[t,zidx,j,i]-T1[t,zidx,j,i])**2))
+                DKE2D[j,i] = N.sum(0.5*((Ud[zidx,j,i])**2 +
+                                    (Vd[zidx,j,i])**2 +
+                                    kappa*(Td[zidx,j,i])**2))
 
         DKE.append(DKE2D)
 
@@ -573,7 +586,7 @@ class WRFEnviron:
                     stack = data
                 else:
                     stack = N.dstack((data,stack))
-            stack_average = N.average(stack,axis=2)
+                    stack_average = N.average(stack,axis=2)
 
             #birdseye plot with basemap of DKE/DTE
             F = BirdsEye(self.C,W1,p2p)    # 2D figure class

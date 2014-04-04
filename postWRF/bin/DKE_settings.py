@@ -1,8 +1,8 @@
 class Settings:
     def __init__(self):
         # Required settings:
-        self.output_root = '/home/jrlawson/public_html'
-        self.wrfout_root = '/tera9/jrlawson/' 
+        self.output_root = '/home/jrlawson/public_html/'
+        self.wrfout_root = '/chinook2/jrlawson/bowecho/' 
         # Optional settings:
         self.DPI = 250.0
         self.plot_titles = True
