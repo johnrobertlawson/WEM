@@ -583,4 +583,10 @@ class WRFEnviron:
             print("Plotting time {0} from {1}.".format(n,len(times)))
             del data, stack
 
+    def plot_skewT(self,wrfout,plot_time,prof_lat,prof_lon,dom=1,save_output=0):        
+            path_to_WRF = self.wrfout_files_in(C.wrfout_root)
+            W = WRFOut(path_to_WRF)
+            ST = SkewT(self.C)
+            ST.plot_skewT(W,plot_time,prof_lat,prof_lon,dom,save_output)
+
  

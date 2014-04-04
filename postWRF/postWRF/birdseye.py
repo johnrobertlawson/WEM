@@ -103,7 +103,7 @@ class BirdsEye(Figure):
             print("Need to sort other levels")
             raise Exception
 
-        lv_na = utils.get_level_naming(lv,va,vardict)
+        lv_na = utils.get_level_naming(va,**vardict)
 
         """
            def plot_strongest_wind(self,dic):
