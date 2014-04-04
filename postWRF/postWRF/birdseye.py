@@ -18,7 +18,18 @@ class BirdsEye(Figure):
         self.p2p = self.C.output_root
         print self.p2p
 
-    def plot_data(self,data,mplcommand,fname,pt,V=0):
+    def plot_data(self,data,lats,lons,mplcommand,fpath,V=0):
+        """
+        Generic method that plots any matrix of data on a map
+
+        Inputs:
+        data        :   lat/lon matrix of data
+        m           :   basemap instance
+        mplcommand  :   contour or contourf
+        fpath       :   absolute filepath including name
+        V           :   scale for contours
+
+        """
         # INITIALISE
         self.fig = plt.figure()
         self.fig = self.figsize(8,8,self.fig)     # Create a default figure size if not set by user
