@@ -18,7 +18,7 @@ class BirdsEye(Figure):
         self.p2p = self.C.output_root
         print self.p2p
 
-    def plot_data(self,data,lats,lons,mplcommand,fpath,V=0):
+    def plot_data(self,data,mplcommand,fpath,pt,V=0):
         """
         Generic method that plots any matrix of data on a map
 
@@ -40,6 +40,12 @@ class BirdsEye(Figure):
                 self.bmap.contour(x,y,data)
             else:
                 self.bmap.contour(x,y,data,V)
+        elif mplcommand == 'contourf':
+            if not V:
+                self.bmap.contourf(x,y,data,alpha=0.5)
+            else:
+                self.bmap.contourf(x,y,data,V,alpha=0.5)
+
 
 
         # LABELS, TITLES etc
@@ -54,7 +60,7 @@ class BirdsEye(Figure):
 
         # SAVE FIGURE
         datestr = utils.string_from_time('output',pt,tupleformat=0)
-        self.fname = self.create_fname(fname) # No da variable here
+        self.fname = self.create_fname(fpath) # No da variable here
         self.save(self.fig,self.p2p,self.fname)
         self.fig.clf()
 
