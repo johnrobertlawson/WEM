@@ -589,10 +589,10 @@ class WRFEnviron:
                     stack_average = N.average(stack,axis=2)
 
             #birdseye plot with basemap of DKE/DTE
-            F = BirdsEye(self.C,W1,p2p)    # 2D figure class
+            F = BirdsEye(self.C,W1)    # 2D figure class
             #F.plot2D(va,t,en,lv,da,na)  # Plot/save figure
             fname_t = ''.join((fname,'_p{0:02d}'.format(n)))
-            F.plot_data(stack_average,'contour',fname_t,t,V)
+            F.plot_data(stack_average,'contourf',fname_t,t,V)
             print("Plotting time {0} from {1}.".format(n,len(times)))
             del data, stack
 

@@ -10,7 +10,7 @@ class Lazy:
     def __init__(self,config):
         self.C = config
     
-    def go(self,casestr,IC,experiment,ensnames):
+    def go(self,casestr,IC,experiment,ensnames,**kwargs):
         """
         Inputs: (all folder names)
         casestr     :   string of case study initialisation date/time
@@ -24,6 +24,9 @@ class Lazy:
                             -initial condition model/ens member for others
         ensnames    :   list of ensemble member names
                             - e.g. c00,p01,p02
+
+        **kwargs include:
+        WPS_only    :   stop after linking met_em files to WRF folder
                             
         """
         self.casestr = casestr
@@ -47,9 +50,9 @@ class Lazy:
         ensemble type.
         """
         
-        self.GO[IC](self.ensnames)
+        self.GO[IC](self.ensnames,**kwargs)
         
-    def go_GEFSR2(self,ensns):    
+    def go_GEFSR2(self,ensns,**kwargs):    
         
         """ 
         Runs WPS, WRF for one set of initial conditions
@@ -102,6 +105,8 @@ class Lazy:
             self.edit_namelist('wps',"fg_name"," fg_name = 'GEFSR2','SOIL' ")
             self.run_exe('metgrid.exe')
 
+            if 'WPS_only' in kwargs:
+                continue
             # This is where the magic happens etc etc
             #self.submit_job()[0] <--- why was this [0] here?
             self.submit_job()
