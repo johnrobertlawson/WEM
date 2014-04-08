@@ -183,6 +183,49 @@ class BirdsEye(Figure):
         self.save(self.fig,self.p2p,self.fname)
         plt.close()
 
+    def plot_streamlines(self,lv,pt,da=0):
+        self.fig = plt.figure()
+        m,x,y = self.basemap_setup()
+
+        time_idx = self.W.get_time_idx(pt)
+
+        if lv==2000:
+            lv_idx = 0
+        else:
+            print("Only support surface right now")
+            raise Exception 
+
+        lat_sl, lon_sl = self.get_limited_domain(da)
+
+        slices = {'t': time_idx, 'lv': lv_idx, 'la': lat_sl, 'lo': lon_sl}
+
+        u = self.W.get('U',slices)[0,0,:,:]
+        v = self.W.get('V',slices)[0,0,:,:]
+
+        # pdb.set_trace()
+        
+        #div = N.sum(N.dstack((N.gradient(u)[0],N.gradient(v)[1])),axis=2)*10**4
+        #vort = (N.gradient(v)[0] - N.gradient(u)[1])*10**4
+        #pdb.set_trace()
+        lv_na = utils.get_level_naming('wind',lv=2000)
+
+        m.streamplot(x[self.W.x_dim/2,:],y[:,self.W.y_dim/2],u,v,
+                        density=2.5,linewidth=0.75,color='k')
+        #div_Cs = N.arange(-30,31,1)
+        #divp = m.contourf(x,y,vort,alpha=0.6)
+        #divp = m.contour(x,y,vort)
+
+        #plt.colorbar(divp,orientation='horizontal')
+        if self.C.plot_titles:
+            title = utils.string_from_time('title',pt)
+            plt.title(title)
+        datestr = utils.string_from_time('output',pt)
+        na = ('streamlines',lv_na,datestr)
+        self.fname = self.create_fname(*na) 
+        self.save(self.fig,self.p2p,self.fname)
+        plt.clf()
+        plt.close()
+
     def basemap_setup(self):
         # Fetch settings
         basemap_res = getattr(self.C,'basemap_res',self.D.basemap_res)

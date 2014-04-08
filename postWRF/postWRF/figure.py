@@ -40,6 +40,7 @@ class Figure:
         return fig
 
     def save(self,fig,p2p,fname):
+        # fig.tight_layout()
         utils.trycreate(p2p)
         fpath = os.path.join(p2p,fname)
         #self.fig.savefig(fpath)
