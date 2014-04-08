@@ -562,6 +562,7 @@ class WRFEnviron:
 
     def plot_diff_energy(self,ptype,energy,time,folder,fname,p2p,V):
         """
+        
         folder  :   directory holding computed data
         fname   :   naming scheme of required files
         V       :   constant values to contour at
@@ -601,5 +602,16 @@ class WRFEnviron:
             W = WRFOut(path_to_WRF)
             ST = SkewT(self.C)
             ST.plot_skewT(W,plot_time,prof_lat,prof_lon,dom,save_output)
+
+    def plot_streamlines(self,lv,times):
+        wrfpath = self.wrfout_files_in(self.C.wrfout_root)[0]
+        self.W = WRFOut(wrfpath)
+        self.F = BirdsEye(self.C,self.W)
+        for pt in times:
+            disp_t = utils.string_from_time('title',pt)
+            print("Plotting {0} at lv {1} for time {2}.".format(
+                    'streamlines',lv,disp_t))
+            self.F.plot_streamlines(lv,pt)
+
 
  
