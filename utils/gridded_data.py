@@ -12,11 +12,11 @@ def getXY(lats,lons,ptlat,ptlon):
     # Find where these are in the grid
     wherelat = N.where(abs(lats-ptlat) == minlat)
     wherelon = N.where(abs(lons-ptlon) == minlon)
-    y = N.where(lats==lats[wherelat])[0][0]
-    x = N.where(lons==lons[wherelon])[0][0]
+    lat_idx = N.where(lats==lats[wherelat])[0][0]
+    lon_idx = N.where(lons==lons[wherelon])[0][0]
     exactlat = lats[wherelat]
     exactlon = lons[wherelon]
-    return x,y, exactlat, exactlon
+    return lat_idx,lon_idx, exactlat, exactlon
 
 def gettopo():
     fname = '/uufs/chpc.utah.edu/common/home/u0737349/dsws/topodata/globe30.bin'

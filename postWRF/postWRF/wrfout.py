@@ -236,9 +236,22 @@ class WRFOut:
         tbl['dpt'] = self.compute_dpt #density potential temperature pert.
         tbl['buoyancy'] = self.compute_buoyancy
         tbl['strongestwind'] = self.compute_strongest_wind
-
+        tbl['PMSL'] = self.compute_pmsl
         data = tbl[var](slices,**kwargs)
         return data
+
+    def compute_pmsl(self,slices,**kwargs):
+        P = self.get('PSFC',slices)
+        T2 = self.get('T2',slices)
+        HGT = self.get('HGT',slices)
+        
+        temp = T2 + (6.5*HGT)/1000.0
+        pmsl = P*N.exp(9.81/(287.0*temp)*HGT) 
+   
+        #sm = kwargs.get('smooth',1) 
+        #data = pmsl[0,::sm,::sm]
+        #return data
+        return pmsl
 
     def compute_buoyancy(self,slices,**kwargs):
         """

@@ -23,6 +23,10 @@ import matplotlib.pyplot as plt
 import colourtables as ct
 import WEM.utils as utils
 
+def get_multiplier(va,**kwargs):
+    m = A[va].get('multiplier',1)
+    return m
+
 def get_cm(va,**kwargs):
     
     lv = kwargs['lv']
@@ -133,3 +137,6 @@ A['dptp'][2000] = (-15,6,1)
 
 A['strongestwind'] = {'cmap':0}
 A['strongestwind'][2000] = (10,32.5,2.5)
+
+A['PMSL'] = {'cmap':0,'multiplier':0.01}
+A['PMSL'][2000] = (97000,103100,100)

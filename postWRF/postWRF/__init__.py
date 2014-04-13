@@ -119,7 +119,7 @@ class WRFEnviron:
             llo     :   left limit of longitude
             rlo     :   right limit of longitude
             ---> if these are missing, default to 'all points'
-
+            plottype    :   contourf by default. 
 
         """
 
