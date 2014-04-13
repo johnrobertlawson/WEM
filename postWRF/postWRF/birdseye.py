@@ -83,17 +83,20 @@ class BirdsEye(Figure):
             llo     :   left limit of longitude
             rlo     :   right limit of longitude
 
+        plottype    :   contourf by default
 
         """
         # INITIALISE
         #en = self.W.path
         self.fig = plt.figure()
         self.fig = self.figsize(8,8,self.fig)     # Create a default figure size if not set by user
-        self.bmap,x,y = self.basemap_setup()
+        sm = vardict.get('smooth',1)
+        self.bmap,x,y = self.basemap_setup(smooth=sm)
 
         # Unpack dictionary
         lv = vardict['lv']
         pt = vardict['pt']
+        plottype = vardict.get('plottype','contourf')
         # pdb.set_trace()
 
         # Get indices for time, level, lats, lons
@@ -108,7 +111,10 @@ class BirdsEye(Figure):
             time_idx = self.W.get_time_idx(pt)
 
         # LAT/LON
-        lat_sl, lon_sl = self.get_limited_domain(da)
+        #if 'smooth' in vardict:
+            #s = vardict['smooth']
+  
+        lat_sl, lon_sl = self.get_limited_domain(da,smooth=sm)
 
         # LEVEL
         vc = vardict['vc']
@@ -149,27 +155,42 @@ class BirdsEye(Figure):
 
         # COLORBAR, CONTOURING
         cm, clvs = scales.get_cm(va,**vardict)
+        multiplier = scales.get_multiplier(va,**vardict)
         # Override contour levels if specified
         # clvs = vardict.get('range',clvs_default)
 
         # pdb.set_trace()
         if cm:
-            self.bmap.contourf(x,y,data.reshape((la_n,lo_n)),clvs,cmap=cm)
+            plotargs = (x,y,data.reshape((la_n,lo_n)),clvs)
+            cmap = cm
+            #self.bmap.contourf(x,y,data.reshape((la_n,lo_n)),clvs,{'cmap':cm})
         elif isinstance(clvs,N.ndarray):
-            self.bmap.contourf(x,y,data.reshape((la_n,lo_n)),clvs,cmap=plt.cm.jet)
-        # elif isinstance(clvs,tuple) or isinstance(clvs,list):
-            # N.array(clvs)
-            # self.bmap.contourf(x,y,data.reshape((la_n,lo_n)),clvs,cmap=plt.cm.jet)
+            #self.bmap.contourf(x,y,data.reshape((la_n,lo_n)),clvs,cmap=plt.cm.jet)
+            if plottype == 'contourf':
+                plotargs = (x,y,data.reshape((la_n,lo_n)),clvs)
+                cmap = plt.cm.jet
+            else:
+                plotargs = (x,y,data.reshape((la_n,lo_n)),clvs)
         else:
-            self.bmap.contourf(x,y,data.reshape((la_n,lo_n)))
+            plotargs = (x,y,data.reshape((la_n,lo_n)))
+            cmap = plt.cm.jet
+            #self.bmap.contourf(x,y,data.reshape((la_n,lo_n)))
+
+
+        if plottype == 'contourf':
+            self.bmap.contourf(*plotargs,cmap=cmap)
+        elif plottype == 'contour':
+            ctplt = self.bmap.contour(*plotargs,colors='k')
+            scaling_func = M.ticker.FuncFormatter(lambda x, pos:'{0:d}'.format(int(x*multiplier)))
+            plt.clabel(ctplt, inline=1, fmt=scaling_func, fontsize=9, colors='k')
 
         # LABELS, TITLES etc
         if self.C.plot_titles:
             title = utils.string_from_time('title',pt,**vardict)
             plt.title(title)
-        if self.C.colorbar:
+        if plottype == 'contourf' and self.C.colorbar:
             plt.colorbar(orientation='horizontal')
-
+        
         # SAVE FIGURE
         datestr = utils.string_from_time('output',pt)
         if not na:
@@ -190,7 +211,7 @@ class BirdsEye(Figure):
         time_idx = self.W.get_time_idx(pt)
 
         if lv==2000:
-            lv_idx = 0
+            lv_idx = None
         else:
             print("Only support surface right now")
             raise Exception 
@@ -199,9 +220,12 @@ class BirdsEye(Figure):
 
         slices = {'t': time_idx, 'lv': lv_idx, 'la': lat_sl, 'lo': lon_sl}
 
-        u = self.W.get('U',slices)[0,0,:,:]
-        v = self.W.get('V',slices)[0,0,:,:]
-
+        if lv == 2000:
+            u = self.W.get('U10',slices)[0,:,:]
+            v = self.W.get('V10',slices)[0,:,:]
+        else:
+            u = self.W.get('U',slices)[0,0,:,:]
+            v = self.W.get('V',slices)[0,0,:,:]
         # pdb.set_trace()
         
         #div = N.sum(N.dstack((N.gradient(u)[0],N.gradient(v)[1])),axis=2)*10**4
@@ -226,7 +250,7 @@ class BirdsEye(Figure):
         plt.clf()
         plt.close()
 
-    def basemap_setup(self):
+    def basemap_setup(self,smooth=1):
         # Fetch settings
         basemap_res = getattr(self.C,'basemap_res',self.D.basemap_res)
 
@@ -245,7 +269,8 @@ class BirdsEye(Figure):
         # Draw meridians etc with wrff.lat/lon spacing
         # Default should be a tenth of width of plot, rounded to sig fig
 
-        x,y = m(self.W.lons,self.W.lats)
+        s = slice(None,None,smooth)
+        x,y = m(self.W.lons[s,s],self.W.lats[s,s])
         return m, x, y
 
 
