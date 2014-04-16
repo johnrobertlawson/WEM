@@ -51,7 +51,17 @@ class WRFEnviron:
         M.rc('font',**self.font_prop)
         M.rcParams['savefig.dpi'] = self.dpi
 
-    def wrfout_files_in(self,folder,dom='notset',init_time='notset'):
+    def wrfout_files_in(self,folder,dom='notset',init_time='notset',**kwargs):
+        
+        avoids = []
+        if 'avoid' in kwargs:
+            # Avoid folder names with this string
+            # or list of strings
+            avoid = self.get_sequence(kwargs['avoid'])
+            for a in avoid:
+                avoids.append('/{0}/'.format(a))
+
+
         w = 'wrfout' # Assume the prefix
         if init_time=='notset':
             suffix = '*0'
@@ -77,7 +87,17 @@ class WRFEnviron:
         wrfouts = []
         for root,dirs,files in os.walk(folder):
             for fname in fnmatch.filter(files,prefix+suffix):
-                wrfouts.append(os.path.join(root, fname))
+                skip_me = 0
+                fpath = os.path.join(root,fname)
+                if avoids: 
+                    for a in avoids:
+                        if a in fpath:
+                            skip_me = 1
+                else:
+                    pass
+                if not skip_me:
+                    wrfouts.append(fpath)
+
         return wrfouts
 
     def dir_from_naming(self,*args):
@@ -343,6 +363,7 @@ class WRFEnviron:
                     "power")
             raise Exception
 
+        print("Saving pickle file to {0}".format(d_save))
         # Look up the method to use depending on type of plot
         PLOTS = {'sum_z':self.DE_z, 'sum_xyz':self.DE_xyz}
 
@@ -355,8 +376,9 @@ class WRFEnviron:
 
         print('Get permutations')
         # Get all permutations of files
-        nperm = itertools.combinations(files,2).__sizeof__()
+        nperm = len(list(itertools.combinations(files,2)))
         print('Start loop')
+        # pdb.set_trace()
         for n, perm in enumerate(itertools.combinations(files,2)):
             print("No. {0} from {1} permutations".format(n,nperm))
             perm_start = time.time()
@@ -515,7 +537,6 @@ class WRFEnviron:
             R = 287.0 # Universal gas constant (J / deg K * kg)
             Cp = 1004.0 # Specific heat of dry air at constant pressure (J / deg K * kg)
             kappa = R/Cp
-            print('Temp data has been loaded.')
 
         xlen = Ud.shape[1] # 1 less than in V
         ylen = Vd.shape[2] # 1 less than in U
@@ -560,7 +581,7 @@ class WRFEnviron:
 
         return DKE
 
-    def plot_diff_energy(self,ptype,energy,time,folder,fname,p2p,V):
+    def plot_diff_energy(self,ptype,energy,time,folder,fname,V):
         """
         
         folder  :   directory holding computed data
@@ -574,9 +595,12 @@ class WRFEnviron:
 
         for n,t in enumerate(times):
             for pn,perm in enumerate(DATA):
+                f1 = DATA[perm]['file1']
+                f2 = DATA[perm]['file2']
                 if sw==0:
                     # Get times and info about nc files
-                    W1 = WRFOut(DATA[perm]['file1'])
+                    # First time to save power
+                    W1 = WRFOut(f1)
                     permtimes = DATA[perm]['times']
                     sw = 1
 
@@ -596,6 +620,100 @@ class WRFEnviron:
             F.plot_data(stack_average,'contourf',fname_t,t,V)
             print("Plotting time {0} from {1}.".format(n,len(times)))
             del data, stack
+
+    def plot_growth_sensitivity(self,energy,folder,fname,plotlist,**kwargs):
+        """Plots line graphs of DKE/DTE error growth 
+        varying by a sensitivity - e.g. error growth involving
+        all members that use a certain parameterisation.
+
+        plotlist        :   list of folder names to loop over
+        """
+
+        def make_1D(data,output='list'):
+            """ Make sure data is a time series
+            of 1D values, and numpy array.
+
+            List of arrays -> Numpy array
+            """
+            if isinstance(data,list):
+
+                data_list = []
+                for time in data:
+                    data_list.append(N.sum(time[0]))
+
+                if output == 'array':
+                    data_out = N.array(data_list)
+                else:  
+                    data_out = data_list
+
+            return data_out
+
+            #elif isinstance(data,N.array):
+            #    shape = data.shape
+            #    if len(shape) == 1:
+            #        data_out = data
+            #    elif len(shape) == 2:
+            #        data_out = N.sum(data)
+
+        DATA = self.load_data(folder,fname,format='pickle')
+
+        # Dictionary to hold each plot's parameterisaton focus
+        # Key is folder name (i.e. param)
+        # Nested dicts will be similar for the permutations
+        #SENS = {}
+
+        for perm in DATA:
+            times = DATA[perm]['times']
+            break
+
+        times_tup = [time.gmtime(t) for t in times]
+        time_str = ["{2:02d}/{3:02d}".format(*t) for t in times_tup]
+
+        # If data is 2D, sum over x/y to get one number
+        for sens in plotlist:
+            fig = plt.figure()
+            labels = []
+            stack = 0
+            #SENS['sens'] = {}
+            for perm in DATA:
+                f1 = DATA[perm]['file1']
+                f2 = DATA[perm]['file2']
+
+                if sens in f1:
+                    f = f2
+                elif sens in f2:
+                    f = f1
+                else:
+                    f = 0
+
+                if f:
+                    subdirs = f.split('/')
+                    labels.append(subdirs[-2])
+                    data = make_1D(DATA[perm]['values'])
+
+                    plt.plot(times,data)
+                    # stack = utils.dstack_loop_v2(N.array(data),stack)
+                else:
+                    pass
+
+            # pdb.set_trace()
+            # ave = N.average(stack,axis=2)
+            # labels.append('Average')
+            # plt.plot(times,ave)
+
+            plt.legend(labels,loc=2,fontsize=9)
+            plt.ylim([0,2e8])
+            plt.gca().set_xticks(times[::2])
+            plt.gca().set_xticklabels(time_str[::2])
+            outdir = self.C.output_root
+            fname = '{0}_Growth_{1}.png'.format(energy,sens)
+            fpath = os.path.join(outdir,fname)
+            fig.savefig(fpath)
+
+            plt.close()
+            print("Saved {0}.".format(fpath))
+
+
 
     def plot_skewT(self,wrfout,plot_time,prof_lat,prof_lon,dom=1,save_output=0):        
             path_to_WRF = self.wrfout_files_in(C.wrfout_root)
