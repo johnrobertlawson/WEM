@@ -147,7 +147,22 @@ def closest(arr2D,val):
     
 def dstack_loop(data, obj):
     """
-    Tries to stack numpy array (data) into object (obj).
+    Tries to stack numpy array (data) into 'stack' object (obj).
+    If obj doesn't exist, then initialise it
+    If obj does exist, stack data.
+    """
+    if not obj:
+        stack = data
+    else:
+        stack = N.dstack((obj,data))
+        
+    return stack
+
+def dstack_loop_v2(data, obj):
+    """
+    Need to set obj = 0 at start of loop in master script
+
+    Tries to stack numpy array (data) into 'stack' object (obj).
     If obj doesn't exist, then initialise it
     If obj does exist, stack data.
     """
@@ -159,6 +174,24 @@ def dstack_loop(data, obj):
         stack = N.dstack((obj,data))
         
     return stack
+
+def vstack_loop(data, obj):
+    """
+    Need to set obj = 0 at start of loop in master script
+    
+    Tries to stack numpy array (data) into 'stack' object (obj).
+    If obj doesn't exist, then initialise it
+    If obj does exist, stack data.
+    """
+    try:
+        print obj
+    except NameError:
+        stack = data
+    else:
+        stack = N.vstack((obj,data))
+        
+    return stack
+
 
 def generate_times(idate,fdate,interval):
     """
