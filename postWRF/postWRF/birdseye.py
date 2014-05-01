@@ -13,7 +13,8 @@ import scales
 class BirdsEye(Figure):
     def __init__(self,config,wrfout):
         self.C = config
-        self.W = wrfout
+        if not isinstance(wrfout,list):
+            self.W = wrfout
         self.D = Defaults()
         self.p2p = self.C.output_root
         print self.p2p

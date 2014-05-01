@@ -32,6 +32,9 @@ class WRFOut:
         self.lats = self.nc.variables['XLAT'][0,...] # Might fail if only one time?
         self.lons = self.nc.variables['XLONG'][0,...]
 
+        self.lats1D = self.lats[:,len(self.lats)/2]
+        self.lons1D = self.lons[len(self.lons)/2,:]
+
         self.cen_lat = float(self.nc.CEN_LAT)
         self.cen_lon = float(self.nc.CEN_LON)
         self.truelat1 = float(self.nc.TRUELAT1)
@@ -162,10 +165,20 @@ class WRFOut:
             elif PS['lv']=='all':
                 sl.append(slice(None,None))
 
-        if any('north' and 'west' in p for p in PS['dim_names']):
-            sl.append(PS['la'])
-            sl.append(PS['lo'])
 
+        if any('north' in p for p in PS['dim_names']):
+            if isinstance(PS['la'],slice):
+                sl.append(PS['la'])
+            else:
+                sl.append(slice(PS['la'],PS['la']+1))
+  
+        if any('west' in p for p in PS['dim_names']):
+            if isinstance(PS['lo'],slice):
+                sl.append(PS['lo'])
+            else:
+                sl.append(slice(PS['lo'],PS['lo']+1))
+
+        # pdb.set_trace()
         return sl
 
     def check_destagger(self,var):
@@ -699,5 +712,10 @@ class WRFOut:
                 nameout.close()
                 break
 
-
+    def get_limits(self):
+        Nlim = self.lats[-1]
+        Elim = self.lons[-1]
+        Slim = self.lats[0]
+        Wlim = self.lons[0]
+        return Nlim, Elim, Slim, Wlim
 

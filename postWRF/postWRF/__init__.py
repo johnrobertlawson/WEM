@@ -14,6 +14,7 @@ import os
 import matplotlib as M
 M.use('Agg')
 import matplotlib.pyplot as plt
+from mpl_toolkits.basemap import Basemap
 import collections
 import fnmatch
 import calendar
@@ -24,11 +25,13 @@ import time
 import json
 import cPickle as pickle
 import copy
+import glob
 
 from wrfout import WRFOut
 from axes import Axes
 from figure import Figure
 from birdseye import BirdsEye
+from skewt import SkewT
 #import scales
 from defaults import Defaults
 from lookuptable import LookUpTable
@@ -51,8 +54,9 @@ class WRFEnviron:
         M.rc('font',**self.font_prop)
         M.rcParams['savefig.dpi'] = self.dpi
 
-    def wrfout_files_in(self,folder,dom='notset',init_time='notset',**kwargs):
+    def wrfout_files_in(self,folders,dom='notset',init_time='notset',descend=1,**kwargs):
         
+        folders = self.get_sequence(folders)
         avoids = []
         if 'avoid' in kwargs:
             # Avoid folder names with this string
@@ -85,19 +89,28 @@ class WRFEnviron:
             prefix = w + '_' + dom
 
         wrfouts = []
-        for root,dirs,files in os.walk(folder):
-            for fname in fnmatch.filter(files,prefix+suffix):
-                skip_me = 0
-                fpath = os.path.join(root,fname)
-                if avoids: 
-                    for a in avoids:
-                        if a in fpath:
-                            skip_me = 1
-                else:
-                    pass
-                if not skip_me:
-                    wrfouts.append(fpath)
+        if descend:
+            for folder in folders:
+                for root,dirs,files in os.walk(folder):
+                    for fname in fnmatch.filter(files,prefix+suffix):
+                        skip_me = 0
+                        fpath = os.path.join(root,fname)
+                        if avoids:
+                            for a in avoids:
+                                if a in fpath:
+                                    skip_me = 1
+                        else:
+                            pass
+                        if not skip_me:
+                            wrfouts.append(fpath)
 
+        else:
+            for folder in folders:
+                findfile = os.path.join(folder,prefix+suffix)
+                files = glob.glob(findfile)
+                # pdb.set_trace()
+                for f in files:
+                    wrfouts.append(os.path.join(folder,f))
         return wrfouts
 
     def dir_from_naming(self,*args):
@@ -139,7 +152,7 @@ class WRFEnviron:
             llo     :   left limit of longitude
             rlo     :   right limit of longitude
             ---> if these are missing, default to 'all points'
-            plottype    :   contourf by default. 
+            plottype    :   contourf by default.
 
         """
 
@@ -153,7 +166,7 @@ class WRFEnviron:
             if not 'lv' in Dic[va]: # For things like CAPE, shear.
                 Dic[va]['lv'] = 'all'
 
-            lv = Dic[va]['lv'] 
+            lv = Dic[va]['lv']
             vc = utils.level_type(lv) # vertical coordinate
 
             if not 'pt' in Dic[va]: # For averages and all times
@@ -514,7 +527,7 @@ class WRFEnviron:
         Ud = U0 - U1
         #del U0, U1
 
-        V0 = nc0.variables['V'][t,...]  
+        V0 = nc0.variables['V'][t,...]
         V1 = nc1.variables['V'][t,...]
         Vd = V0 - V1
         #del V0, V1
@@ -621,46 +634,17 @@ class WRFEnviron:
             print("Plotting time {0} from {1}.".format(n,len(times)))
             del data, stack
 
-    def plot_growth_sensitivity(self,energy,folder,fname,plotlist,**kwargs):
-        """Plots line graphs of DKE/DTE error growth 
+    def plot_error_growth(self,ofname,folder,pfname,sensitivity=0,ylimits=0,**kwargs):
+        """Plots line graphs of DKE/DTE error growth
         varying by a sensitivity - e.g. error growth involving
         all members that use a certain parameterisation.
 
+        ofname          :   output filename prefix
+        pfname          :   pickle filename
         plotlist        :   list of folder names to loop over
+        ylim            :   tuple of min/max for y axis range
         """
-
-        def make_1D(data,output='list'):
-            """ Make sure data is a time series
-            of 1D values, and numpy array.
-
-            List of arrays -> Numpy array
-            """
-            if isinstance(data,list):
-
-                data_list = []
-                for time in data:
-                    data_list.append(N.sum(time[0]))
-
-                if output == 'array':
-                    data_out = N.array(data_list)
-                else:  
-                    data_out = data_list
-
-            return data_out
-
-            #elif isinstance(data,N.array):
-            #    shape = data.shape
-            #    if len(shape) == 1:
-            #        data_out = data
-            #    elif len(shape) == 2:
-            #        data_out = N.sum(data)
-
-        DATA = self.load_data(folder,fname,format='pickle')
-
-        # Dictionary to hold each plot's parameterisaton focus
-        # Key is folder name (i.e. param)
-        # Nested dicts will be similar for the permutations
-        #SENS = {}
+        DATA = self.load_data(folder,pfname,format='pickle')
 
         for perm in DATA:
             times = DATA[perm]['times']
@@ -669,58 +653,133 @@ class WRFEnviron:
         times_tup = [time.gmtime(t) for t in times]
         time_str = ["{2:02d}/{3:02d}".format(*t) for t in times_tup]
 
-        # If data is 2D, sum over x/y to get one number
-        for sens in plotlist:
-            fig = plt.figure()
+        if sensitivity:
+            # Plot multiple line charts for each sensitivity
+            # Then a final chart with all the averages
+            # If data is 2D, sum over x/y to get one number
+            
+            # Dictionary with average
+            AVE = {}
+            
+            for sens in sensitivity:
+                ave_stack = 0
+                n_sens = len(sensitivity)-1
+                colourlist = utils.generate_colours(M,n_sens)
+                M.rcParams['axes.color_cycle'] = colourlist
+                fig = plt.figure()
+                labels = []
+                #SENS['sens'] = {}
+                for perm in DATA:
+                    f1 = DATA[perm]['file1']
+                    f2 = DATA[perm]['file2']
+    
+                    if sens in f1:
+                        f = f2
+                    elif sens in f2:
+                        f = f1
+                    else:
+                        f = 0
+    
+                    if f:
+                        subdirs = f.split('/')
+                        labels.append(subdirs[-2])
+                        data = self.make_1D(DATA[perm]['values'])
+    
+                        plt.plot(times,data)
+                        # pdb.set_trace()
+                        ave_stack = utils.vstack_loop(N.asarray(data),ave_stack)
+                    else:
+                        pass
+    
+                # pdb.set_trace()
+                n_sens += 1
+                colourlist = utils.generate_colours(M,n_sens)
+                M.rcParams['axes.color_cycle'] = colourlist
+                AVE[sens] = N.average(ave_stack,axis=0)
+                labels.append('Average')
+                plt.plot(times,AVE[sens],'k')
+    
+                plt.legend(labels,loc=2,fontsize=9)
+                if ylimits:
+                    plt.ylim(ylimits)
+                plt.gca().set_xticks(times[::2])
+                plt.gca().set_xticklabels(time_str[::2])
+                outdir = self.C.output_root
+                fname = '{0}_Growth_{1}.png'.format(ofname,sens)
+                fpath = os.path.join(outdir,fname)
+                fig.savefig(fpath)
+    
+                plt.close()
+                print("Saved {0}.".format(fpath))
+                
+            # Averages for each sensitivity
             labels = []
-            stack = 0
-            #SENS['sens'] = {}
-            for perm in DATA:
-                f1 = DATA[perm]['file1']
-                f2 = DATA[perm]['file2']
-
-                if sens in f1:
-                    f = f2
-                elif sens in f2:
-                    f = f1
-                else:
-                    f = 0
-
-                if f:
-                    subdirs = f.split('/')
-                    labels.append(subdirs[-2])
-                    data = make_1D(DATA[perm]['values'])
-
-                    plt.plot(times,data)
-                    # stack = utils.dstack_loop_v2(N.array(data),stack)
-                else:
-                    pass
-
-            # pdb.set_trace()
-            # ave = N.average(stack,axis=2)
-            # labels.append('Average')
-            # plt.plot(times,ave)
-
+            fig = plt.figure()
+            ave_of_ave_stack = 0
+            for sens in AVE.keys():
+                plt.plot(times,AVE[sens])
+                labels.append(sens)
+                ave_of_ave_stack = utils.vstack_loop(AVE[sens],ave_of_ave_stack)
+                
+            labels.append('Average')
+            ave_of_ave = N.average(ave_of_ave_stack,axis=0)
+            plt.plot(times,ave_of_ave,'k')
+            
             plt.legend(labels,loc=2,fontsize=9)
-            plt.ylim([0,2e8])
+            
+            if ylimits:
+                plt.ylim(ylimits)
             plt.gca().set_xticks(times[::2])
             plt.gca().set_xticklabels(time_str[::2])
             outdir = self.C.output_root
-            fname = '{0}_Growth_{1}.png'.format(energy,sens)
+            fname = '{0}_Growth_Averages.png'.format(ofname)
             fpath = os.path.join(outdir,fname)
             fig.savefig(fpath)
 
             plt.close()
             print("Saved {0}.".format(fpath))
+            #pdb.set_trace()
+                            
+            
 
+        else:
+            fig = plt.figure()
+            ave_stack = 0
+            for perm in DATA:
+                data = self.make_1D(DATA[perm]['values'])
+                plt.plot(times,data,'blue')
+                ave_stack = utils.vstack_loop(N.asarray(data),ave_stack)
 
+            total_ave = N.average(ave_stack,axis=0)
+            plt.plot(times,total_ave,'black')
+            
+            if ylimits:
+                plt.ylim(ylimits)
+            plt.gca().set_xticks(times[::2])
+            plt.gca().set_xticklabels(time_str[::2])
+            outdir = self.C.output_root
+            fname = '{0}_Growth_allmembers.png'.format(ofname)
+            fpath = os.path.join(outdir,fname)
+            fig.savefig(fpath)
 
-    def plot_skewT(self,wrfout,plot_time,prof_lat,prof_lon,dom=1,save_output=0):        
-            path_to_WRF = self.wrfout_files_in(C.wrfout_root)
-            W = WRFOut(path_to_WRF)
-            ST = SkewT(self.C)
-            ST.plot_skewT(W,plot_time,prof_lat,prof_lon,dom,save_output)
-
+            plt.close()
+            print("Saved {0}.".format(fpath))
+            
+                
+    def plot_skewT(self,plot_time,plot_latlon,dom=1,save_output=0,composite=0):
+        wrfouts = self.wrfout_files_in(self.C.wrfout_root)
+        for wrfout in wrfouts:
+            if not composite:
+                W = WRFOut(wrfout)
+                ST = SkewT(self.C,W)
+                ST.plot_skewT(plot_time,plot_latlon,dom,save_output)
+                nice_time = utils.string_from_time('title',plot_time)
+                print("Plotted Skew-T for time {0} at {1}".format(
+                            nice_time,plot_latlon))
+            else:
+                #ST = SkewT(self.C)
+                pass
+                
     def plot_streamlines(self,lv,times):
         wrfpath = self.wrfout_files_in(self.C.wrfout_root)[0]
         self.W = WRFOut(wrfpath)
@@ -733,3 +792,77 @@ class WRFEnviron:
 
 
  
+    def make_1D(self,data,output='list'):
+        """ Make sure data is a time series
+        of 1D values, and numpy array.
+
+        List of arrays -> Numpy array or list
+        """
+        if isinstance(data,list):
+
+            data_list = []
+            for time in data:
+                data_list.append(N.sum(time[0]))
+
+            if output == 'array':
+                data_out = N.array(data_list)
+            else:
+                data_out = data_list
+
+
+        #elif isinstance(data,N.array):
+        #    shape = data.shape
+        #    if len(shape) == 1:
+        #        data_out = data
+        #    elif len(shape) == 2:
+        #        data_out = N.sum(data)
+        return data_out
+
+    def plot_domains(self,wrfouts,labels,latlons,colour=0):
+        """
+        wrfouts     :   list of wrfout file paths
+        latlons     :   dictionary of Nlim,Elim,Slim,Wlim
+                        for plot
+        """
+
+        fig = plt.figure()
+
+        # Create basemap first of all
+        basemap_res = getattr(self.C,'basemap_res',self.D.basemap_res)
+
+        m = Basemap(
+            projection='merc',
+            llcrnrlon=latlons['Wlim'],llcrnrlat=latlons['Slim'],
+            urcrnrlon=latlons['Elim'],urcrnrlat=latlons['Nlim'],
+            lat_0=latlons['lat0'],lon_0=latlons['lon0'],
+            resolution=basemap_res,area_thresh=500
+            )
+
+        m.drawcoastlines()
+        m.drawstates()
+        m.drawcountries()
+
+        if not isinstance(colour,collections.Sequence):
+            colours = ['k',] * len(wrfouts)
+        else:
+            colours = colour
+        # Get corners of each domain
+        for gridlabel,fpath,colour in zip(labels,wrfouts,colours):
+            W = WRFOut(fpath)
+            print("Plotting domain {0} for {1}".format(gridlabel,fpath))
+            #Nlim, Elim, Slim, Wlim = W.get_limits()
+            x,y = m(W.lons,W.lats)
+            xl = len(x[0,:])
+            midpt = len(y[0,:])/2         
+            plt.annotate(gridlabel,color=colour,fontsize=10,xy=(x[0,-(0.12*xl)],y[0,midpt]),
+                         bbox=dict(fc='white'),alpha=1,va='center',ha='left')    
+            m.plot(x[0,:],y[0,:],colour,lw=2)
+            plt.plot(x[:,0],y[:,0],colour,lw=2) 
+            plt.plot(x[len(y)-1,:],y[len(y)-1,:],colour,lw=2)     
+            plt.plot(x[:,len(x)-1],y[:,len(x)-1],colour,lw=2)    
+
+        fpath = os.path.join(self.C.output_root,'domains.png')
+        fig.savefig(fpath)
+
+
+
