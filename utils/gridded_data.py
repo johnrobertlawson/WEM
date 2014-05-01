@@ -12,6 +12,7 @@ def getXY(lats,lons,ptlat,ptlon):
     # Find where these are in the grid
     wherelat = N.where(abs(lats-ptlat) == minlat)
     wherelon = N.where(abs(lons-ptlon) == minlon)
+    # pdb.set_trace()
     lat_idx = N.where(lats==lats[wherelat])[0][0]
     lon_idx = N.where(lons==lons[wherelon])[0][0]
     exactlat = lats[wherelat]

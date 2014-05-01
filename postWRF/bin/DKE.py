@@ -7,11 +7,15 @@ import pdb
 import calendar
 import time
 
-sys.path.append('/home/jrlawson/gitprojects/') 
+sys.path.append('/home/jrlawson/gitprojects/')
 
 from DKE_settings import Settings
 from WEM.postWRF.postWRF import WRFEnviron
 import WEM.utils.utils as utils
+
+compute = 0
+plot_2D = 1
+plot_1D = 0
 
 #case = '20060526'
 #case = '20090910'
@@ -19,12 +23,14 @@ import WEM.utils.utils as utils
 case = '20130815'
 
 IC = 'GEFSR2'
-experiment = 'STCH'
-ens = 'p09'
-MP = 'Morrison_Hail'
+experiment = 'ICBC'
+ens = ''
+MP = 'ICBC'
 # Time script
 scriptstart = time.time()
 stoch_names = ["s{0:02d}".format(n) for n in range(1,11)]
+ens_names = ['c00',] + ["p{0:02d}".format(n) for n in range(1,11)]
+
 MPs = ('ICBC','WSM6_Grau','WSM6_Hail','Kessler','Ferrier','WSM5',
 		'WDM5','Lin','WDM6_Grau','WDM6_Hail',
 		'Morrison_Grau','Morrison_Hail')
@@ -33,41 +39,61 @@ MPs = ('ICBC','WSM6_Grau','WSM6_Hail','Kessler','Ferrier','WSM5',
 config = Settings()
 p = WRFEnviron(config)
 
-
-#itime = (2006,5,26,0,0,0)
-#ftime = (2006,5,27,12,0,0)
-
-#itime = (2009,9,10,0,0,0)
-#ftime = (2009,9,11,15,0,0)
-
-#itime = (2011,4,19,0,0,0)
-#ftime = (2011,4,20,15,0,0)
-
-itime = (2013,8,15,0,0,0)
-ftime = (2013,8,16,12,0,0)
+if case[:4] == '2006':
+    itime = (2006,5,26,0,0,0)
+    ftime = (2006,5,27,15,0,0)
+elif case[:4] == '2009':
+    itime = (2009,9,10,0,0,0)
+    ftime = (2009,9,11,18,0,0)
+elif case[:4] == '2011':
+    itime = (2011,4,19,0,0,0)
+    ftime = (2011,4,20,15,0,0)
+else:
+    itime = (2013,8,15,0,0,0)
+    ftime = (2013,8,16,15,0,0)
 
 times = utils.generate_times(itime,ftime,3*3600)
-#members = ['s0{0}'.format(n) for n in range(1,8)]
 
-path_to_wrfouts = []
-for s in stoch_names:
-    fpath = os.path.join(config.wrfout_root,case,IC,ens,MP,s)
-    path_to_wrfouts.append(p.wrfout_files_in(fpath,dom=1)[0])
+if experiment=='STCH':
+    picklefolder = os.path.join(config.wrfout_root,case,IC,ens,MP)
+    p.C.output_root = os.path.join(config.output_root,case,IC,ens,MP)
+ 
+    path_to_wrfouts = []
+    for s in stoch_names:
+        fpath = os.path.join(config.wrfout_root,case,IC,ens,MP,s)
+        path_to_wrfouts.append(p.wrfout_files_in(fpath,dom=1)[0])
+    sensitivity=0
 
-picklefolder = os.path.join(config.wrfout_root,case,IC,ens,MP)
-p.C.output_root = os.path.join(config.output_root,case,IC,ens,MP)
+elif experiment=='ICBC':
+    picklefolder = os.path.join(config.wrfout_root,case,IC)
+    p.C.output_root = os.path.join(config.output_root,case,IC)
+    sensitivity=ens_names
+    #fpath = os.path.join(config.wrfout_root,case,IC,)
+    #path_to_wrfouts = p.wrfout_files_in(fpath,dom=1)
+
+elif experiment=='MXMP':
+    picklefolder = os.path.join(config.wrfout_root,case,IC,ens)
+    p.C.output_root = os.path.join(config.output_root,case,IC,ens)
+    sensitivity = MPs
+else:
+    print "Typo!"
+    raise Exception
+    
 pfname = 'DTE_' + experiment
 
-# pdb.set_trace()
-p.compute_diff_energy('sum_z','total',path_to_wrfouts,times,
+if compute:
+    p.compute_diff_energy('sum_z','total',path_to_wrfouts,times,
                           d_save=picklefolder, d_return=0,d_fname=pfname)
 
-# Contour fixed at these values
-V = range(250,5250,250)
-VV = [100,] + V
-p.plot_diff_energy('sum_z','total',times,picklefolder,pfname,VV)
+if plot_2D:
+    # Contour fixed at these values
+    V = range(250,5250,250)
+    VV = [100,] + V
+    p.plot_diff_energy('sum_z','total',times,picklefolder,pfname,VV)
 
-#p.plot_growth_sensitivity('DTE',picklefolder,pfname,MPs)
+if plot_1D:
+    ylimits = [0,2e8]
+    ofname = pfname
+    p.plot_error_growth(ofname,picklefolder,pfname,sensitivity=sensitivity,ylimits=ylimits)
 
-print "Script took", time.time()-scriptstart, "seconds."
-
+#print "Script took", time.time()-scriptstart, "seconds."

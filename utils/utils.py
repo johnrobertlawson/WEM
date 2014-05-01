@@ -151,13 +151,13 @@ def dstack_loop(data, obj):
     If obj doesn't exist, then initialise it
     If obj does exist, stack data.
     """
-    if not obj:
-        stack = data
-    else:
+    if isinstance(obj,N.ndarray):
         stack = N.dstack((obj,data))
+    else:
+        stack = data
         
     return stack
-
+        
 def dstack_loop_v2(data, obj):
     """
     Need to set obj = 0 at start of loop in master script
@@ -183,12 +183,11 @@ def vstack_loop(data, obj):
     If obj doesn't exist, then initialise it
     If obj does exist, stack data.
     """
-    try:
-        print obj
-    except NameError:
-        stack = data
-    else:
+
+    if isinstance(obj,N.ndarray):
         stack = N.vstack((obj,data))
+    else:
+        stack = data
         
     return stack
 
@@ -202,3 +201,13 @@ def generate_times(idate,fdate,interval):
     times = range(i,f,interval)
     return times
 
+def generate_colours(M,n):
+    """
+    M       :   Matplotlib instance
+    n       :   number of colours you want
+    
+    Returns
+    """
+    
+    colourlist = [M.cm.spectral(i) for i in N.linspace(0.08,0.97,n)]
+    return colourlist
