@@ -125,6 +125,7 @@ class WRFOut:
 
 
         """
+
         # Check if computing required
         # When data is loaded from nc, it is destaggered
         isDefault = self.check_compute(var)
@@ -185,6 +186,7 @@ class WRFOut:
         """ Looks up dimensions of netCDF file without loading data.
 
         Returns dimension number that requires destaggering
+
         """
         stag_dim = None
         for n,dname in enumerate(self.nc.variables[var].dimensions):
@@ -206,7 +208,21 @@ class WRFOut:
         Theta always has unstaggered points in all three spatial dimensions (axes=1,2,3).
 
         Data should be 4D but just the slice required to reduce unnecessary computation time.
+
+        Don't destagger in x/y for columns
+
         """
+        # Check for dimensions of 1. 
+        # If it exists, don't destagger it.
+        
+        shp = data.shape
+        for n,size in enumerate(shp):
+            if (size==1) and (n==ax):
+                ax = None
+                break
+
+        #pdb.set_trace()
+        
         if ax==None:
             return data
         else:
@@ -250,8 +266,16 @@ class WRFOut:
         tbl['buoyancy'] = self.compute_buoyancy
         tbl['strongestwind'] = self.compute_strongest_wind
         tbl['PMSL'] = self.compute_pmsl
+        tbl['RH'] = self.compute_RH
         data = tbl[var](slices,**kwargs)
         return data
+
+    def compute_RH(self,slices,**kwargs):
+        T = self.get('temps',slices,units='C')
+        Td = self.get('Td',slices)
+        RH = N.exp(0.073*(Td-T))
+        # pdb.set_trace()
+        return RH*100.0
 
     def compute_pmsl(self,slices,**kwargs):
         P = self.get('PSFC',slices)
@@ -331,7 +355,7 @@ class WRFOut:
     def compute_temps(self,slices,units='K'):
         theta = self.get('theta',slices)
         P = self.get('pressure',slices)
-        temps = theta*((P/1000.0)**(287.04/1004.0))
+        temps = theta*((P/100000.0)**(287.04/1004.0))
         if units=='K':
             return temps
         elif units=='C':
@@ -487,13 +511,14 @@ class WRFOut:
         """
         Using HootPy equation
         """
-        Q = self.get('Q',slices)
+        Q = self.get('QVAPOR',slices)
         P = self.get('pressure',slices)
         w = N.divide(Q, N.subtract(1,Q))
-        e = N.divide(N.multiply(w,P), N.add(0.622,w))
+        e = N.divide(N.multiply(w,P), N.add(0.622,w))/100.0
         a = N.multiply(243.5,N.log(N.divide(e,6.112)))
         b = N.subtract(17.67,N.log(N.divide(e,6.112)))
         Td = N.divide(a,b)
+        # pdb.set_trace()
         return Td
 
     def compute_CAPE(self,slices,**kwargs):

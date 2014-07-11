@@ -32,10 +32,13 @@ from axes import Axes
 from figure import Figure
 from birdseye import BirdsEye
 from skewt import SkewT
+from skewt import Profile
 #import scales
 from defaults import Defaults
 from lookuptable import LookUpTable
 import WEM.utils.utils as utils
+
+# TODO: Make this awesome
 
 class WRFEnviron:
     def __init__(self,config):
@@ -765,7 +768,10 @@ class WRFEnviron:
             plt.close()
             print("Saved {0}.".format(fpath))
             
-                
+    def composite_profile(self,va,skewT_time,skewT_latlon,enspaths,dom=1,mean=0,std=0,xlim=0,ylim=0):
+        P = Profile(self.C)
+        P.composite_profile(va,skewT_time,skewT_latlon,enspaths,dom,mean,std,xlim,ylim)
+
     def plot_skewT(self,plot_time,plot_latlon,dom=1,save_output=0,composite=0):
         wrfouts = self.wrfout_files_in(self.C.wrfout_root)
         for wrfout in wrfouts:
