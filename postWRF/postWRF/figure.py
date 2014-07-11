@@ -1,4 +1,5 @@
-"""Collection of x-y cross-section classes.
+"""
+All matplotlib figures are subclasses of Figure.
 
 """
 
@@ -15,11 +16,21 @@ import WEM.utils.utils as utils
 
 class Figure:
     def __init__(self,config,wrfout):
+        """
+        C   :   configuration settings
+        W   :   data 
+        """
+
         self.C = config
-        if wrfout=='RUC':
-            pass
-        else:
-            self.W = wrfout
+        self.W = wrfout
+
+        #if wrfout=='RUC':
+        #    pass
+        #else:
+        #    self.W = wrfout
+
+        # Create main figure
+        self.fig = plt.figure()
     
     def create_fname(self,*naming):
         """Default naming should be:
@@ -59,3 +70,28 @@ class Figure:
             lat_sl = slice(None,None,smooth)
             lon_sl = slice(None,None,smooth)
         return lat_sl, lon_sl
+
+    def just_one_colorbar(self,fpath):
+        """
+        docstring for just_one_colorbar"""
+        try:
+            with open(fpath): pass
+        except IOError:
+            self.create_colorbar(fpath)
+
+    def create_colorbar(self,fpath,fname,cf,label=''):
+        """
+        Create colorbar.
+
+        Inputs:
+        fpath   :   path to file
+        fname   :   filename
+        cf      :   contour filling for legend
+        label   :   colorbar label
+
+        """
+        fig = plt.figure()
+        CBax = fig.add_axes([0.15,0.05,0.7,0.02])
+        CB = plt.colorbar(cf,cax=CBax,orientation='horizontal')
+        CB.set_label(label)
+        self.save(fig,fpath,fname)

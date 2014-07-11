@@ -24,6 +24,138 @@ from WEM.utils import gridded_data
 from WEM.utils import utils
 import WEM.utils.metconstants as mc
 
+class Profile(Figure):
+    def __init__(self,config,wrfout=0):
+        self.C = config
+        self.path_to_WRF = self.C.wrfout_root
+        self.path_to_output = self.C.output_root
+        if wrfout:
+            self.W = wrfout
+
+    def composite_profile(self,va,plot_time,plot_latlon,wrfouts,dom,mean,std,xlim,ylim):
+        """
+        Loop over wrfout files.
+        Get profile of variable
+        Plot all members
+
+        Optional standard deviation
+        Optional mean
+        """
+
+        # Set up figure
+        fig = plt.figure()
+
+        # Plot settings
+        if xlim:
+            xmin, xmax, xint = xlim
+        if ylim:
+            P_bot, P_top, dp = [y*100.0 for y in ylim]
+        else:
+            P_bot = 100000.0
+            P_top = 20000.0 
+            dp = 10000.0
+
+        plevs = N.arange(P_bot,P_top,dp)
+
+        # Get wrfout prototype for information
+        W = WRFOut(wrfouts[0])
+
+        lat, lon = plot_latlon
+        datestr = utils.string_from_time('output',plot_time)
+        t_idx = W.get_time_idx(plot_time,tuple_format=1)
+        y, x, exact_lat, exact_lon = gridded_data.getXY(W.lats1D,W.lons1D,lat,lon)
+        slices = {'t': t_idx, 'la': y, 'lo': x}
+        #var_slices = {'t': t_idx, 'lv':0, 'la':y, 'lo':x}
+
+        # Initialise array
+        # Number of levels and ensembles:
+        nPlevs = W.z_dim
+        data = W.get(va,slices)
+        nvarlevs = data.shape[1]
+        nens = len(wrfouts)
+
+        # 2D: (profile,member)
+        profile_arr = N.zeros((nvarlevs,nens))
+        composite_P = N.zeros((nPlevs,nens))
+
+        # Set up legend
+        labels = []
+        colourlist = utils.generate_colours(M,nens)
+        M.rcParams['axes.color_cycle'] = colourlist
+
+        # Collect profiles
+        for n,wrfout in enumerate(wrfouts):
+            W = WRFOut(wrfout)
+
+            # Get pressure levels
+            composite_P[:,n] = W.get('pressure',slices)[0,:,0,0]
+            #elev = self.W.get('HGT',H_slices)
+
+            #pdb.set_trace()
+            # Grab variable
+            profile_arr[:,n] = W.get(va,slices)[0,:,0,0]
+
+            # Plot variable on graph
+            plt.plot(profile_arr[:,n],composite_P[:,n])
+            
+            member = wrfout.split('/')[-2]
+            labels.append(member)
+            # pdb.set_trace()
+
+        # Compute mean, std etc
+        if mean:
+            profile_mean = N.mean(profile_arr,axis=1)
+            profile_mean_P = N.mean(composite_P,axis=1)
+            plt.plot(profile_mean,profile_mean_P,color='black')
+        if std:
+            # Assume mean P across ensemble is correct level
+            # to plot standard deviation
+            profile_std = N.std(profile_arr,axis=1)
+            std_upper = profile_mean + profile_std
+            std_lower = profile_mean - profile_std
+            plt.plot(std_upper,profile_mean_P,'k--')
+            plt.plot(std_lower,profile_mean_P,'k--')
+
+        fname = '_'.join(('profile_comp',va,datestr,'{0:03d}'.format(x),'{0:03d}'.format(y))) + '.png'
+        utils.trycreate(self.path_to_output)
+        fpath = os.path.join(self.path_to_output,fname)
+
+
+        # Set semi-log graph
+        plt.gca().set_yscale('log')
+
+        # Plot limits, ticks
+        yticks = N.arange(P_bot,P_top,-100*100)
+        plt.yticks(yticks)
+        ytix = ["%4u" %(p/100.0) for p in yticks]
+        plt.yticks(yticks,ytix)
+
+        #plt.axis([-20,50,105000.0,20000.0])
+        #plt.xlabel(r'Temperature ($^{\circ}$C) at 1000 hPa')
+        #plt.xticks(xticks,['' if tick%10!=0 else str(tick) for tick in xticks])
+        plt.ylabel('Pressure (hPa)')
+        #yticks = N.arange(self.P_bot,P_t-1,-10**4)
+        #plt.yticks(yticks,yticks/100)
+
+        if xlim:
+            plt.xlim([xmin,xmax])
+            xticks = N.arange(xmin,xmax+xint,xint)
+            plt.xticks(xticks)
+
+        # Flip y axis
+        plt.ylim([P_bot,P_top])
+        #plt.autoscale(enable=1,axis='x')
+        #ax = plt.gca()
+        #ax.relim()
+        #ax.autoscale_view()
+        #plt.draw()
+        plt.legend(labels,loc=2,fontsize=6)
+        
+        plt.savefig(fpath)
+        plt.close()
+
+
+
 class SkewT(Figure):
     def __init__(self,config,wrfout=0):
         self.C = config
