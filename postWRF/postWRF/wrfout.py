@@ -14,10 +14,9 @@ import pdb
 import constants as cc
 import scipy.ndimage
 
-#sys.path.append('/home/jrlawson/gitprojects/meteogeneral/')
-#from meteogeneral.WRF import wrf_tools
+from WEM.utils import wrf_tools
 
-class WRFOut:
+class WRFOut(object):
 
     def __init__(self,fpath,config=0):
         self.path = fpath
@@ -28,7 +27,8 @@ class WRFOut:
         self.wrf_times = self.nc.variables['Times'][:]
         self.dx = self.nc.DX
         self.dy = self.nc.DY
-        #self.lvs =
+        
+        #self.lvs = 
         self.lats = self.nc.variables['XLAT'][0,...] # Might fail if only one time?
         self.lons = self.nc.variables['XLONG'][0,...]
 
@@ -53,7 +53,26 @@ class WRFOut:
         from skimage.feature
     """
 
-    def get_time_idx(self,t,tuple_format=0):
+    def wrftime_to_datenum(self,times):
+        """
+        Convert wrf's weird Times variable to datenum time.
+        """
+        nt = times.shape[0]
+        wrf_times_epoch = N.zeros([nt,1])
+
+        for t in range(nt):
+            yr = int(''.join(t[i,0:4]))
+            mth = int(''.join(t[i,5:7]))
+            day = int(''.join(t[i,8:10]))
+            hr = int(''.join(t[i,11:13]))
+            mins = int(''.join(t[i,14:16]))
+            sec = int(''.join(t[i,17:19]))
+            self.wrf_times_epoch[i] = calendar.timegm([yr,mth,day,hr,mins,sec])
+
+        return self.wrf_times_epoch
+
+
+    def get_time_idx(self,wrftimes,t,tuple_format=0):
 
         """
         Input:
@@ -64,29 +83,22 @@ class WRFOut:
 
         time_idx    :   index of time in WRF file
         """
+        # Ensure datenum format
         if tuple_format:
             t_epoch = calendar.timegm(t)
         else:
             t_epoch = t
-        nt = self.wrf_times.shape[0]
-        self.wrf_times_epoch = N.zeros([nt,1])
-        t = self.wrf_times   # For brevity
 
-        for i in range(nt):
-            yr = int(''.join(t[i,0:4]))
-            mth = int(''.join(t[i,5:7]))
-            day = int(''.join(t[i,8:10]))
-            hr = int(''.join(t[i,11:13]))
-            mins = int(''.join(t[i,14:16]))
-            sec = int(''.join(t[i,17:19]))
-            self.wrf_times_epoch[i] = calendar.timegm([yr,mth,day,hr,mins,sec])
+        # Convert wrftimes to datenum times
+        wrf_times_epoch = self.wrftime_to_datenum(self.wrf_times)
 
         # Now find closest WRF time
-        self.time_idx = N.where(
-                        abs(self.wrf_times_epoch-t_epoch) ==
-                        abs(self.wrf_times_epoch-t_epoch).min()
-                        )[0][0]
-        return self.time_idx
+        #self.time_idx = N.where(
+        #               abs(self.wrf_times_epoch-t_epoch) ==
+        #                abs(self.wrf_times_epoch-t_epoch).min()
+        #                )[0][0]
+        time_idx = utils.closest(wrf_times_epoch,t_epoch)
+        return time_idx
 
 
     def check_compute(self,var):
@@ -111,7 +123,7 @@ class WRFOut:
         Returns unstaggered, sliced data.
 
         var     :   netCDF variable name
-        slices  :   dict, keys as follows:
+        slices  :   if dict, keys as follows:
 
         t       :   time index
         lv      :   level index

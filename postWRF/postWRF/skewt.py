@@ -22,7 +22,7 @@ from WEM.utils import unix_tools
 from WEM.utils import generalmet
 from WEM.utils import gridded_data
 from WEM.utils import utils
-import WEM.utils.metconstants as mc
+import metconstants as mc
 
 class Profile(Figure):
     def __init__(self,config,wrfout=0):

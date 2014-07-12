@@ -3,10 +3,10 @@ import pdb
 import sys
 sys.path.append('/home/jrlawson/gitprojects/')
 
-from WEM.postWRF.postWRF import WRFEnviron
+from WEM.postWRF import WRFEnviron
 from settings import Settings
-import WEM.utils.utils as utils
-from WEM.postWRF.postWRF.rucplot import RUCPlot
+import WEM.utils as utils
+#from WEM.postWRF.postWRF.rucplot import RUCPlot
 
 config = Settings()
 p = WRFEnviron(config)
