@@ -1,12 +1,18 @@
-# Scripts to help with directory, file, etc issues
+"""
+Utility scripts to help with directory, file, etc issues
+"""
 
 import os
 
-# Create folder if it doesn't exist, along with its subdirectories
-def createfolder(dir):
-    try:
-        os.stat(dir)
-    except:
-        os.makedirs(dir)
-        print 'Creating directory',dir
-    
+def dir_from_naming(self,root,*args):
+	"""
+	Generate file path from arguments
+
+	Inputs:
+	root	:	file path base
+	args 	:	list of arguments to join as separate folders
+	"""
+    l = [str(a) for a in args]
+    path = os.path.join(root,*l)
+    return path
+

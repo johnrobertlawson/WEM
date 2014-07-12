@@ -1,3 +1,7 @@
+"""
+Utility scripts related to WRF files.
+"""
+
 # Some functions to import WRF data etc
 from netCDF4 import Dataset
 import pdb
@@ -47,7 +51,10 @@ def wrf_nc_load(dom,var,ncfolder,datestr,thin,Nlim=0,Elim=0,Slim=0,Wlim=0):
     # lons calculated earlier
     
     if Nlim:
-        m = Basemap(projection='lcc',lon_0=cen_lon,lat_0=cen_lat,llcrnrlat=Slim,urcrnrlat=Nlim,llcrnrlon=Wlim,urcrnrlon=Elim,rsphere=6371200.,resolution='h',area_thresh=100)   
+        m = Basemap(projection='lcc',lon_0=cen_lon,lat_0=cen_lat,
+                    llcrnrlat=Slim,urcrnrlat=Nlim,llcrnrlon=Wlim,
+                    urcrnrlon=Elim,rsphere=6371200.,resolution='h',
+                    area_thresh=100)   
     else:
         m = Basemap(resolution='i',projection='lcc',
             width=width_meters,height=height_meters, 
@@ -164,3 +171,72 @@ def latlon_1D(nc):
     lons = nc.variables['XLONG'][0,Ny/2,:]
     return lats, lons
     
+def wrfout_files_in(self,folders,dom='notset',init_time='notset',descend=1,**kwargs):
+    """
+    Hunt through given folder(s) to find all occurrences of wrfout
+    files.
+
+    Optional:
+    avoid   :   string. if folder name includes this
+                term, ignore the folder.
+    
+    Returns:
+    wrfouts :   list of absolute paths to wrfout files
+    """
+
+    folders = self.get_sequence(folders)
+    avoids = []
+    if 'avoid' in kwargs:
+        # Avoid folder names with this string
+        # or list of strings
+        avoid = self.get_sequence(kwargs['avoid'])
+        for a in avoid:
+            avoids.append('/{0}/'.format(a))
+
+
+    w = 'wrfout' # Assume the prefix
+    if init_time=='notset':
+        suffix = '*0'
+        # We assume the user has wrfout files in different folders for different times
+    else:
+        try:
+            it = self.string_from_time('wrfout',init_time)
+        except:
+            print("Not a valid wrfout initialisation time; try again.")
+            raise Error
+        suffix = '*' + it
+
+    if dom=='notset':
+        # Presume all domains are desired.
+        prefix = w + '_d'
+    elif (dom == 0) | (dom > 8):
+        print("Domain is out of range. Choose number between 1 and 8 inclusive.")
+        raise IndexError
+    else:
+        dom = 'd{0:02d}'.format(dom)
+        prefix = w + '_' + dom
+
+    wrfouts = []
+    if descend:
+        for folder in folders:
+            for root,dirs,files in os.walk(folder):
+                for fname in fnmatch.filter(files,prefix+suffix):
+                    skip_me = 0
+                    fpath = os.path.join(root,fname)
+                    if avoids:
+                        for a in avoids:
+                            if a in fpath:
+                                skip_me = 1
+                    else:
+                        pass
+                    if not skip_me:
+                        wrfouts.append(fpath)
+
+    else:
+        for folder in folders:
+            findfile = os.path.join(folder,prefix+suffix)
+            files = glob.glob(findfile)
+            # pdb.set_trace()
+            for f in files:
+                wrfouts.append(os.path.join(folder,f))
+    return wrfouts
