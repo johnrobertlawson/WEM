@@ -23,7 +23,8 @@ class Figure:
 
         self.C = config
         self.W = wrfout
-
+        self.D = Defaults()
+        self.output_fpath = self.C.output_root
         #if wrfout=='RUC':
         #    pass
         #else:
