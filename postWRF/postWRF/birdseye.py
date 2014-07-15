@@ -12,12 +12,7 @@ import scales
 
 class BirdsEye(Figure):
     def __init__(self,config,wrfout):
-        self.C = config
-        if not isinstance(wrfout,list):
-            self.W = wrfout
-        self.D = Defaults()
-        self.p2p = self.C.output_root
-        print self.p2p
+        super().__init__(config,wrfout)
 
     def plot_data(self,data,mplcommand,fpath,pt,V=0):
         """
@@ -65,37 +60,33 @@ class BirdsEye(Figure):
         self.save(self.fig,self.p2p,self.fname)
         self.fig.clf()
 
-    def plot2D(self,va,vardict,da=0,na=0):
+    def plot2D(self,va,**kwargs):
         """
         Inputs:
 
         va      :   variable
 
-        vardict     :   dictionary of
-            pt  :   plot time
-            lv  :   level
-            vc  :   vertical coordinate system
+        keyword arguments:
 
-        Other arguments:
+        pt  :   plot time
+        lv  :   level
 
-        da      : dictionary of:
-            tla     :   top limit of latitude
-            bla     :   bottom limit of latitude
-            llo     :   left limit of longitude
-            rlo     :   right limit of longitude
+        tla     :   top limit of latitude
+        bla     :   bottom limit of latitude
+        llo     :   left limit of longitude
+        rlo     :   right limit of longitude
 
         plottype    :   contourf by default
 
         """
         # INITIALISE
         #en = self.W.path
-        self.fig = plt.figure()
-        self.fig = self.figsize(8,8,self.fig)     # Create a default figure size if not set by user
-        sm = vardict.get('smooth',1)
+        self.fig.set_size_inches() 
+        sm = kwargs.get('smooth',1)
         self.bmap,x,y = self.basemap_setup(smooth=sm)
 
         # Unpack dictionary
-        lv = vardict['lv']
+        lv = kwargs['lv']
         pt = vardict['pt']
         plottype = vardict.get('plottype','contourf')
         # pdb.set_trace()

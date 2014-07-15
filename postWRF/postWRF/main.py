@@ -62,7 +62,7 @@ class WRFEnviron(object):
         #M.rc('font',**self.font_prop)
         #M.rcParams['savefig.dpi'] = self.dpi
 
-    def plot_2D(self,request):
+    def plot_2D(self,request,wrfout,output,f_prefix=0,f_suffix=0):
         """
         Path to wrfout file is in config file.
         Path to plot output is also in config
@@ -92,25 +92,31 @@ class WRFEnviron(object):
             ---> if these are missing, default to 'all points'
             plottype    :   contourf by default.
 
+        wrfout      :   path to wrfout file
+        output      :   path to output .png.
+
+        OPTIONAL
+        f_prefix    :   custom filename prefix
+        f_suffix    :   custom filename suffix
         """
-        # Copy dictionary for editing
-        rq = copy.deepcopy(request)
+        # Create dictionary for editing
+        #rq = copy.deepcopy(request)
 
         # Load netCDF file once for efficiency
-        wrfpath = utils.wrfout_files_in(self.C.wrfout_root)[0]
+        #wrfpath = utils.wrfout_files_in(self.C.wrfout_root)[0]
         self.W = WRFOut(wrfpath) 
 
         # Loop over all variables
-        for va in rq:
+        for va in request:
 
             # LEVELS
             # Levels may not exist for CAPE, shear etc.
-            # Use all levels in this case. 
-            if not 'lv' in rq[va]:
-                rq[va]['lv'] = 'all'
-
-            lv = rq[va]['lv']
-            vc = utils.level_type(lv) # vertical coordinate
+            # Use the '1' code in this case. 
+            #if not 'lv' in rq[va]:
+            #    rq[va]['lv'] = 'all'
+            #lvs = getattr(request[va],'lv',1)
+            lvs = self.get_list(request[va],'lv',(1,))
+            #vc = utils.level_type(lv) # vertical coordinate
 
             # TIMES
             if not 'pt' in rq[va]: # For averages and all times
@@ -120,26 +126,27 @@ class WRFEnviron(object):
                     rq[va]['pt'] = ['range',]
 
             # Check for pressure levels
-            if vc == 'isobaric':
-                nc_path = self.W.path
-                p_interp_fpath = self.W.interp_to_p(self.C,nc_path,va,lv)
-                # Edit p_interp namelist
-                #Execute p_interp here and reassign self.W to new file
-                self.W = WRFOut(p_interp_fpath)
-            else: #
-                # print("Non-pressure levels not supported yet.")
-                # raise Exception
-                pass
+            #if vc == 'isobaric':
+            #    nc_path = self.W.path
+            #    p_interp_fpath = self.W.interp_to_p(self.C,nc_path,va,lv)
+            #    # Edit p_interp namelist
+            #    #Execute p_interp here and reassign self.W to new file
+            #    self.W = WRFOut(p_interp_fpath)
+            #else: #
+            #    # print("Non-pressure levels not supported yet.")
+            #    # raise Exception
+            #    pass
 
-            F = BirdsEye(self.C,self.W)
-
-            for t in rq[va]['pt']:
-                #pdb.set_trace()
-                disp_t = utils.string_from_time('title',t,**rq[va])
-                print("Plotting {0} at lv {1} for time {2}.".format(va,lv,disp_t))
-                rq[va]['pt'] = t # Need this?
-                rq[va]['vc'] = vc # Need this?
-                F.plot2D(va, rq[va])
+            for t in ts:
+                for lv in lvs:
+                    # For each time, variable, and level:
+                    # Create figure
+                    F = BirdsEye(self.C,self.W)
+                    #disp_t = utils.string_from_time('title',t,**rq[va])
+                    #print("Plotting {0} at lv {1} for time {2}.".format(va,lv,disp_t))
+                    #rq[va]['pt'] = t # Need this?
+                    #rq[va]['vc'] = vc # Need this?
+                    F.plot2D(va, t, lv,)
 
     def get_sequence(self,x,SoS=0):
         """ Returns a sequence (tuple or list) for iteration.
@@ -697,5 +704,17 @@ class WRFEnviron(object):
         return data_out
 
 
+    def get_list(self,dic,key,default):
+        """Fetch value from dictionary.
+        
+        If it doesn't exist, use default.
+        If the value is an integer, make a list of one.
+        """
 
+        val = getattr(dic,key,default)
+        if isinstance(val,'int'):
+            lst = (val,)
+        else:
+            lst = val
+        return lst
 
