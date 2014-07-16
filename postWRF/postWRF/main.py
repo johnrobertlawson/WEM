@@ -19,7 +19,6 @@ import os
 #M.use('Agg')
 #import matplotlib.pyplot as plt
 #from mpl_toolkits.basemap import Basemap
-import collections
 import fnmatch
 import calendar
 import pdb
@@ -30,6 +29,7 @@ import json
 import cPickle as pickle
 import copy
 import glob
+import itertools
 
 from wrfout import WRFOut
 from axes import Axes
@@ -41,6 +41,7 @@ from skewt import Profile
 from defaults import Defaults
 from lookuptable import LookUpTable
 import WEM.utils as utils
+from xsection import CrossSection
 
 # TODO: Make this awesome
 
@@ -56,13 +57,13 @@ class WRFEnviron(object):
 
         #self.font_prop = getattr(self.C,'font_prop',self.D.font_prop)
         #self.usetex = getattr(self.C,'usetex',self.D.usetex)
-        #self.dpi = getattr(self.C,'DPI',self.D.dpi)
         #self.plot_titles = getattr(self.C,'plot_titles',self.D.plot_titles)
         #M.rc('text',usetex=self.usetex)
         #M.rc('font',**self.font_prop)
         #M.rcParams['savefig.dpi'] = self.dpi
 
-    def plot_2D(self,request,wrfout,output,f_prefix=0,f_suffix=0):
+    def plot2D(self,vrbl,times,levels,wrf_sd=0,wrf_nc=0,out_sd=0,f_prefix=0,f_suffix=0,
+                bounding=0,dom=0):
         """
         Path to wrfout file is in config file.
         Path to plot output is also in config
@@ -73,96 +74,118 @@ class WRFEnviron(object):
 
 
         Inputs:
-        request     :   nested dictionary with:
-
-            KEY
-            ===
-            va      :   variable to plot
-
-            nested KEY/VALUE PAIRS
-            ======================
-            (MANDATORY FOR SOME VARIABLES)
-            lv      :   level to plot
-            pt      :   plot times
-            (OPTIONAL)
-            tla     :   top limit of latitude
-            bla     :   bottom limit of latitude
-            llo     :   left limit of longitude
-            rlo     :   right limit of longitude
-            ---> if these are missing, default to 'all points'
-            plottype    :   contourf by default.
-
-        wrfout      :   path to wrfout file
-        output      :   path to output .png.
-
-        OPTIONAL
+        vrbl        :   string of variable name
+        times       :   one or more date/times.
+                        Can be tuple format (YYYY,MM,DD,HH,MM,SS - calendar.timegm)
+                        Can be integer of datenum. (time.gmtime)
+                        Can be a tuple or list of either.
+        levels      :   one or more levels.
+                        Lowest model level is integer 2000.
+                        Pressure level is integer in hPa, e.g. 850
+                        Isentropic surface is a string + K, e.g. '320K'
+                        Geometric height is a string + m, e.g. '4000m'
+        wrf_sd      :   string - subdirectory of wrfout file
+        wrf_nc      :   filename of wrf file requested.
+                            If no wrfout file is explicitly specified, the
+                            netCDF file in that folder is chosen if unambiguous.
+        out_sd      :   subdirectory of output .png.
         f_prefix    :   custom filename prefix
         f_suffix    :   custom filename suffix
+        bounding    :   list of four floats (Nlim, Elim, Slim, Wlim):
+            Nlim    :   northern limit
+            Elim    :   eastern limit
+            Slim    :   southern limit
+            Wlim    :   western limit
+        smooth      :   smoothing. 0 is off. non-zero integer is the degree
+                        of smoothing, to be specified.
+        dom         :   domain for plotting. If zero, the only netCDF file present
+                        will be plotted. If list of integers, the script will loop over domains.
+                        
+                        
         """
-        # Create dictionary for editing
-        #rq = copy.deepcopy(request)
+        self.W = get_wrfout(wrf_sd,wrf_nc,dom=dom,unambiguous=1)
 
-        # Load netCDF file once for efficiency
-        #wrfpath = utils.wrfout_files_in(self.C.wrfout_root)[0]
-        self.W = WRFOut(wrfpath) 
+        if out_sd:
+            outpath = os.path.join(self.C.output_root,out_sd)
+        else:
+            outpath = self.C.output_root
+            
+        # Make sure times are in datenum format and sequence.
+        t_list = utils.ensure_sequence_datenum(times)
+        
+        d_list = utils.get_sequence(dom)
+        lv_list = utils.get_sequence(levels)
+        # pdb.set_trace()
+        for t, l, d in itertools.product(t_list,lv_list,d_list):
+            F = BirdsEye(self.C,self.W)
+            F.plot2D(vrbl,t,l,d,outpath,bounding=bounding)
+            
+        # LEVELS
+        # Levels may not exist for CAPE, shear etc.
+        # Use the '1' code in this case.
+        #if not 'lv' in rq[va]:
+        #    rq[va]['lv'] = 'all'
+        #lvs = getattr(request[va],'lv',1)
+        #lvs = self.get_list(request[va],'lv',(1,))
+        #vc = utils.level_type(lv) # vertical coordinate
 
-        # Loop over all variables
-        for va in request:
+        # TIMES
+        # if not 'pt' in rq[va]: # For averages and all times
+            # if not 'itime' in rq[va]: # For all times
+                # rq[va]['pt'] = ['all',]
+            # else: # For specific range
+                # rq[va]['pt'] = ['range',]
 
-            # LEVELS
-            # Levels may not exist for CAPE, shear etc.
-            # Use the '1' code in this case. 
-            #if not 'lv' in rq[va]:
-            #    rq[va]['lv'] = 'all'
-            #lvs = getattr(request[va],'lv',1)
-            lvs = self.get_list(request[va],'lv',(1,))
-            #vc = utils.level_type(lv) # vertical coordinate
+        # Check for pressure levels
+        #if vc == 'isobaric':
+        #    nc_path = self.W.path
+        #    p_interp_fpath = self.W.interp_to_p(self.C,nc_path,va,lv)
+        #    # Edit p_interp namelist
+        #    #Execute p_interp here and reassign self.W to new file
+        #    self.W = WRFOut(p_interp_fpath)
+        #else: #
+        #    # print("Non-pressure levels not supported yet.")
+        #    # raise Exception
+        #    pass
 
-            # TIMES
-            if not 'pt' in rq[va]: # For averages and all times
-                if not 'itime' in rq[va]: # For all times
-                    rq[va]['pt'] = ['all',]
-                else: # For specific range
-                    rq[va]['pt'] = ['range',]
+        # for t in ts:
+            # for lv in lvs:
+                # For each time, variable, and level:
+                # Create figure
+                # F = BirdsEye(self.C,self.W)
+                #disp_t = utils.string_from_time('title',t,**rq[va])
+                #print("Plotting {0} at lv {1} for time {2}.".format(va,lv,disp_t))
+                #rq[va]['pt'] = t # Need this?
+                #rq[va]['vc'] = vc # Need this?
+                # F.plot2D(va, t, lv, )
 
-            # Check for pressure levels
-            #if vc == 'isobaric':
-            #    nc_path = self.W.path
-            #    p_interp_fpath = self.W.interp_to_p(self.C,nc_path,va,lv)
-            #    # Edit p_interp namelist
-            #    #Execute p_interp here and reassign self.W to new file
-            #    self.W = WRFOut(p_interp_fpath)
-            #else: #
-            #    # print("Non-pressure levels not supported yet.")
-            #    # raise Exception
-            #    pass
-
-            for t in ts:
-                for lv in lvs:
-                    # For each time, variable, and level:
-                    # Create figure
-                    F = BirdsEye(self.C,self.W)
-                    #disp_t = utils.string_from_time('title',t,**rq[va])
-                    #print("Plotting {0} at lv {1} for time {2}.".format(va,lv,disp_t))
-                    #rq[va]['pt'] = t # Need this?
-                    #rq[va]['vc'] = vc # Need this?
-                    F.plot2D(va, t, lv,)
-
-    def get_sequence(self,x,SoS=0):
-        """ Returns a sequence (tuple or list) for iteration.
-        Avoids an error for strings/integers.
-        SoS = 1 enables the check for a sequence of sequences (list of dates)
+    def get_wrfout(self,wrf_sd=0,wrf_nc=0,dom=0)
+        """Returns the WRFOut instance, given arguments:
+        
+        Optional inputs:
+        wrf_sd      :   subdirectory for wrf file
+        wrf_nc      :   filename for wrf file
+        dom         :   domain for wrf file
         """
-        if SoS:
-            y = x[0]
+        
+        if wrf_sd and wrf_nc:
+            wrfpath = os.path.join(self.C.wrfout_root,wrf_sd,wrf_nc)
+        elif wrf_sd:
+            wrfdir = os.path.join(self.C.wrfout_root,wrf_sd)
+            wrfpath = utils.wrfout_files_in(wrfdir,dom=dom,unambiguous=1)
         else:
-            y = x
+            wrfdir = os.path.join(self.C.wrfout_root)
+            wrfpath = utils.wrfout_files_in(wrfdir,dom=dom,unambiguous=1)
+            
+        return WRFOut(wrfpath)
 
-        if isinstance(y, collections.Sequence) and not isinstance(y, basestring):
-            return x
-        else:
-            return [x]
-
+    def generate_times(self,itime,ftime,x):
+        """
+        Wrapper for utility method.
+        """
+        y = utils.generate_times(itime,ftime,x)
+        return y
+            
     def plot_cross_section(self,var,latA,lonA,latB,lonB):
         xs = CrossSection()
         xs.plot(var,latA,lonA,latB,lonB)
@@ -718,3 +741,35 @@ class WRFEnviron(object):
             lst = val
         return lst
 
+    def plot_xs(self,vrbl,times,latA=0,lonA=0,latB=0,lonB=0,
+                wrf_sd=0,wrf_nc=0,out_sd=0,f_prefix=0,f_suffix=0,dom=0,):
+        """Plot cross-section.
+        
+        If no lat/lon transect is indicated, a popup appears for the user
+        to pick points. The popup can have an overlaid field such as reflectivity
+        to help with the process.
+        
+        Inputs:
+        vrbl        :   variable to be plotted
+        times       :   times to be plotted
+        latA        :   start latitude of transect
+        lonA        :   start longitude of transect
+        latB        :   end lat...
+        lonB        :   end lon...
+        wrf_sd      :   string - subdirectory of wrfout file
+        wrf_nc      :   filename of wrf file requested.
+                            If no wrfout file is explicitly specified, the
+                            netCDF file in that folder is chosen if unambiguous.
+        out_sd      :   subdirectory of output .png.
+        f_prefix    :   custom filename prefix
+        f_suffix    :   custom filename suffix
+
+        
+        """
+        self.W = get_wrfout(wrf_sd,wrf_nc,dom=dom,unambiguous=1)
+        
+        XS = CrossSection(self.C,self.W,latA,lonA,latB,lonB)
+        
+        t_list = utils.ensure_sequence_datenum(times)
+        for t in t_list:
+            XS.plot_xs(vrbl,t)

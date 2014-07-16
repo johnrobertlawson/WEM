@@ -13,36 +13,42 @@ import os
 
 # Custom imports
 import WEM.utils as utils
+from defaults import Defaults
 
-class Figure:
+class Figure(object):
     def __init__(self,config,wrfout):
         """
         C   :   configuration settings
-        W   :   data 
+        W   :   data
         """
 
         self.C = config
         self.W = wrfout
         self.D = Defaults()
         self.output_fpath = self.C.output_root
+
         #if wrfout=='RUC':
         #    pass
         #else:
         #    self.W = wrfout
 
+        # Get settings for figure
+        dpi = getattr(self.C,'DPI',self.D.dpi)
+        
         # Create main figure
         self.fig = plt.figure()
+        self.fig.set_dpi(dpi)
     
     def create_fname(self,*naming):
         """Default naming should be:
         Variable + time + level
         """
-        fname = '_'.join([str(a) for a in naming]) 
+        fname = '_'.join([str(a) for a in naming])
         #pdb.set_trace()
-        return fname  
+        return fname
  
     def title_time(self):
-        self.T = utils.padded_times(self.timeseq) 
+        self.T = utils.padded_times(self.timeseq)
         pdb.set_trace()
 
     def figsize(self,defwidth,defheight,fig):
@@ -56,10 +62,11 @@ class Figure:
         utils.trycreate(p2p)
         fpath = os.path.join(p2p,fname)
         #self.fig.savefig(fpath)
-        plt.gcf().savefig(fpath,bbox_inches='tight')
+        fig.savefig(fpath,bbox_inches='tight')
+        print("Saving figure {0}".format(fpath))
 
     def get_limited_domain(self,da,smooth=1):
-        if da:  # Limited domain area 
+        if da:  # Limited domain area
             N_idx = self.W.get_lat_idx(da['N'])
             E_idx = self.W.get_lon_idx(da['E'])
             S_idx = self.W.get_lat_idx(da['S'])
