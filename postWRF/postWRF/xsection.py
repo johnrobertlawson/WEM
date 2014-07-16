@@ -15,10 +15,12 @@ data (reflectivity, etc).
 import numpy as N
 from figure import Figure
 
+import WEM.utils as utils
+
 class CrossSection(Figure):
 
     def __init__(self,config,wrfout,latA=0,lonA=0,latB=0,lonB=0):
-        super(BirdsEye,self).__init__(config,wrfout)
+        super(CrossSection,self).__init__(config,wrfout)
 
         if latA and lonA and latB and lonB:
             print("Using user-defined lat/lon transects.")
@@ -47,18 +49,19 @@ class CrossSection(Figure):
     def get_xy(self,lat,lon):
         """
         Return x and y coordinates for given lat/lon.
-        """
 
+        exactlat, exactlon      :   exact coordinates of closest x/y
+        """
+        x,y,exactlat,exactlon = utils.getXY(self.W.lats1D,self.W.lons1D,lat,lon)
         return x,y
 
-    def get_height(self,t,x,y,z,pts):
+    def get_height(self,x,y,z,pts):
         """
         Return terrain heights along cross-section
         
         TODO: What's the diff between the outputs?
 
         Inputs:
-        t       :   time index, as int
         x       :   x indices, as int
         y       :   y imdices, as int
         z       :   z indices, as int
@@ -67,12 +70,14 @@ class CrossSection(Figure):
         Outputs:
         terrain_z   :   terrain height
         heighthalf  :   who knows?
+
+        Assuming t=0
         """
         # TODO: change API of W.get()
-        geopot = self.W.get('geopot',[t,z,y,x])
-        dryairmass = self.W.get('dryairmass',[t,y,x])
-        znw = self.W.get('ZNW',[t,z])
-        znu = self.W.get('ZNU',[t,z])
+        geopot = self.W.get('geopot',[0,z,y,x])
+        dryairmass = self.W.get('dryairmass',[0,y,x])
+        znw = self.W.get('ZNW',[0,z])
+        znu = self.W.get('ZNU',[0,z])
 
         heighthalf = N.zeros((len(z),pts))
 
@@ -86,7 +91,7 @@ class CrossSection(Figure):
         # TODO: import metconstants as mc
         return heighthalf, terrain_z
 
-    def plot_xs(self,v):
+    def plot_xs(self,v,t):
         """
         Inputs:
         v   :   variable to plot, from this list:
@@ -94,9 +99,10 @@ class CrossSection(Figure):
 
 
         """
+        tidx = self.W.get_time_idx(t)
 
-        xA, yA = get_xy(self.latA,self.lonA)
-        xB, yB = get_xy(self.latB,self.lonB)
+        xA, yA = self.get_xy(self.latA,self.lonA)
+        xB, yB = self.get_xy(self.latB,self.lonB)
         hyp_pts = int(N.hypot(xB-xA,yB-yA))
         xx = N.linspace(xA,xB,hyp_pts)
         yy = N.linspace(yA,yB,hyp_pts)
@@ -105,7 +111,7 @@ class CrossSection(Figure):
         angle = N.arctan((yy[-1]-yy[0])/(xx[-1]-xx[0])) # In radians
 
         # Get terrain heights
-        terrain_z, heighthalf = get_height(xx,yy,Nz,hyp_pts)
+        terrain_z, heighthalf = self.get_height(xx,yy,self.W.z_dim,hyp_pts)
         
         # Set up plot
         # Length of x-section in km
@@ -115,7 +121,7 @@ class CrossSection(Figure):
         # Generate ticks along cross-section
         xticks = N.arange(0,xs_len,xs_len/hyp_pts)
         xlabels = [r"%3.0f" %t for t in xticks]
-        grid = N.swapaxes(N.repeat(N.array(xticks).reshape(hyp_pts,1),self.W.nz,axis=1),0,1)
+        grid = N.swapaxes(N.repeat(N.array(xticks).reshape(hyp_pts,1),self.W.z_dim,axis=1),0,1)
 
         # Plotting
         if nc.dx != nc.dy:
@@ -131,20 +137,21 @@ class CrossSection(Figure):
         # If not, raise Exception.
 
         # TODO: vailable_vars in WRFOut to check this
-        if v is in self.W.available_vars:
-            data = self.W.get(v,[tidx,:,yint,xint])
-
+        ps = {'t':tidx, 'la':yint, 'la':xint}
+        
+        if v in self.W.available_vrbls:
+            data = self.W.get(v,ps)
         elif v is 'parawind':
-            u = self.W.get('U',[tidx,:,yint,xint]
-            v = self.W.get('V',[tidx,:,yint,xint]
+            u = self.W.get('U',ps)
+            v = self.W.get('V',ps)
             data = N.cos(angle)*u - N.sin(angle)*v
             clvs = u_wind_levels
             extends = 'both'
             CBlabel = r'Wind Speed (ms$^{-1}$)'
 
         elif v is 'perpwind':
-            u = self.W.get('U',[tidx,:,yint,xint]
-            v = self.W.get('V',[tidx,:,yint,xint]
+            u = self.W.get('U',ps)
+            v = self.W.get('V',ps)
             # Note the negative here. I think it's alright? TODO
             data = -N.cos(angle)*v + N.sin(angle)*u
             clvs = u_wind_levels
@@ -161,9 +168,9 @@ class CrossSection(Figure):
         # What is this? TODO
         labeldelta = 15
 
-        plt.yticks(N.arange(zmin,zmax+dz,dz)
-        plt.xlabel("Distance along cross-section (km)")
-        plt.ylabel("Height above sea level (m)")
+        fig.set_yticks(N.arange(zmin,zmax+dz,dz))
+        fig.set_xlabel("Distance along cross-section (km)")
+        fig.set_ylabel("Height above sea level (m)")
 
         fpath = self.get_fpath()
         fname = self.get_fname()
