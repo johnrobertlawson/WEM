@@ -44,15 +44,16 @@ class WRFOut(object):
         self.y_dim = len(self.nc.dimensions['south_north'])
         self.z_dim = len(self.nc.dimensions['bottom_top'])
 
-        # Loads variable list
+        # Loads variable lists
         self.fields = self.nc.variables.keys()
-
-    """
+        self.computed_fields = self.return_tbl().keys()
+        #import pdb; pdb.set_trace()
+        self.available_vrbls = self.fields + self.computed_fields
+    
     # TESTING A SMOOTHING METHOD
-    def test_smooth(self,data):
-        from scipy import ndimage
-        from skimage.feature
-    """
+    #def test_smooth(self,data):
+    #    from scipy import ndimage
+    #    from skimage.feature
 
     def wrftime_to_datenum(self,times):
         """
@@ -263,14 +264,7 @@ class WRFOut(object):
             data_unstag = 0.5*(data[sl0] + data[sl1])
             return data_unstag
 
-    def compute(self,var,slices,**kwargs):
-        """ Look up method needed to return array of data
-        for required variable.
-
-        Keyword arguments include settings for computation
-        e.g. top and bottom of shear computation
-        """
-
+    def return_tbl(self):
         tbl = {}
         tbl['shear'] = self.compute_shear
         tbl['thetae'] = self.compute_thetae
@@ -289,8 +283,25 @@ class WRFOut(object):
         tbl['strongestwind'] = self.compute_strongest_wind
         tbl['PMSL'] = self.compute_pmsl
         tbl['RH'] = self.compute_RH
-        data = tbl[var](slices,**kwargs)
-        return data
+
+        return tbl      
+        
+    def compute(self,var,slices,lookup=0,**kwargs):
+        """ Look up method needed to return array of data
+        for required variable.
+
+        Keyword arguments include settings for computation
+        e.g. top and bottom of shear computation
+
+        lookup      :   enables a check to see if something can be
+                        computed. Returns true or false.
+        """
+        tbl = self.return_tbl()
+        if not lookup:
+            response = tbl[var](slices,**kwargs)
+        else:
+            response = lookup in tbl
+        return response
 
     def compute_RH(self,slices,**kwargs):
         T = self.get('temps',slices,units='C')

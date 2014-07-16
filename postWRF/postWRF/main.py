@@ -103,7 +103,7 @@ class WRFEnviron(object):
                         
                         
         """
-        self.W = get_wrfout(wrf_sd,wrf_nc,dom=dom,unambiguous=1)
+        self.W = self.get_wrfout(wrf_sd,wrf_nc,dom=dom)
 
         if out_sd:
             outpath = os.path.join(self.C.output_root,out_sd)
@@ -159,7 +159,7 @@ class WRFEnviron(object):
                 #rq[va]['vc'] = vc # Need this?
                 # F.plot2D(va, t, lv, )
 
-    def get_wrfout(self,wrf_sd=0,wrf_nc=0,dom=0)
+    def get_wrfout(self,wrf_sd=0,wrf_nc=0,dom=0):
         """Returns the WRFOut instance, given arguments:
         
         Optional inputs:
@@ -743,7 +743,8 @@ class WRFEnviron(object):
 
     def plot_xs(self,vrbl,times,latA=0,lonA=0,latB=0,lonB=0,
                 wrf_sd=0,wrf_nc=0,out_sd=0,f_prefix=0,f_suffix=0,dom=0,):
-        """Plot cross-section.
+        """
+        Plot cross-section.
         
         If no lat/lon transect is indicated, a popup appears for the user
         to pick points. The popup can have an overlaid field such as reflectivity
@@ -766,8 +767,8 @@ class WRFEnviron(object):
 
         
         """
-        self.W = get_wrfout(wrf_sd,wrf_nc,dom=dom,unambiguous=1)
-        
+        self.W = self.get_wrfout(wrf_sd,wrf_nc,dom=dom)
+     
         XS = CrossSection(self.C,self.W,latA,lonA,latB,lonB)
         
         t_list = utils.ensure_sequence_datenum(times)
