@@ -1,6 +1,6 @@
 """Create cross-sections through WRF data.
 
-This can be time-height or distance-height. 
+This can be time-height or distance-height.
 The height can be pressure, model, geometric, or geopotential
 
 The output can be saved to a pickle file.
@@ -17,7 +17,9 @@ from figure import Figure
 
 class CrossSection(Figure):
 
-    def __init__(self,latA=0,lonA=0,latB=0,lonB=0):
+    def __init__(self,config,wrfout,latA=0,lonA=0,latB=0,lonB=0):
+        super(BirdsEye,self).__init__(config,wrfout)
+
         if latA and lonA and latB and lonB:
             print("Using user-defined lat/lon transects.")
         else:
@@ -28,8 +30,7 @@ class CrossSection(Figure):
         self.lonA = lonA
         self.latB = latB
         self.lonB = lonB
-
-        self.plot_xs()
+        
 
     def popup_transect(self):
         """
@@ -85,7 +86,7 @@ class CrossSection(Figure):
         # TODO: import metconstants as mc
         return heighthalf, terrain_z
 
-    def plot_xs(self):
+    def plot_xs(self,v):
         """
         Inputs:
         v   :   variable to plot, from this list:
@@ -104,7 +105,7 @@ class CrossSection(Figure):
         angle = N.arctan((yy[-1]-yy[0])/(xx[-1]-xx[0])) # In radians
 
         # Get terrain heights
-        terrain_z, heighthalf = get_height(xx,yy,Nz,hyp_pts)       
+        terrain_z, heighthalf = get_height(xx,yy,Nz,hyp_pts)
         
         # Set up plot
         # Length of x-section in km
@@ -113,7 +114,7 @@ class CrossSection(Figure):
         
         # Generate ticks along cross-section
         xticks = N.arange(0,xs_len,xs_len/hyp_pts)
-        xlabels = [r"%3.0f" %t for t in xticks]   
+        xlabels = [r"%3.0f" %t for t in xticks]
         grid = N.swapaxes(N.repeat(N.array(xticks).reshape(hyp_pts,1),self.W.nz,axis=1),0,1)
 
         # Plotting

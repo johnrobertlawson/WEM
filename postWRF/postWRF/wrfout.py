@@ -13,8 +13,9 @@ import calendar
 import pdb
 import constants as cc
 import scipy.ndimage
+import collections
 
-from WEM.utils import wrf_tools
+import WEM.utils as utils
 
 class WRFOut(object):
 
@@ -28,7 +29,7 @@ class WRFOut(object):
         self.dx = self.nc.DX
         self.dy = self.nc.DY
         
-        #self.lvs = 
+        #self.lvs =
         self.lats = self.nc.variables['XLAT'][0,...] # Might fail if only one time?
         self.lons = self.nc.variables['XLONG'][0,...]
 
@@ -56,23 +57,28 @@ class WRFOut(object):
     def wrftime_to_datenum(self,times):
         """
         Convert wrf's weird Times variable to datenum time.
+        
+        Input:
+        t   :   wrf's time
         """
-        nt = times.shape[0]
-        wrf_times_epoch = N.zeros([nt,1])
+        wrf_times_epoch = N.zeros([times.shape[0]])
 
-        for t in range(nt):
-            yr = int(''.join(t[i,0:4]))
-            mth = int(''.join(t[i,5:7]))
-            day = int(''.join(t[i,8:10]))
-            hr = int(''.join(t[i,11:13]))
-            mins = int(''.join(t[i,14:16]))
-            sec = int(''.join(t[i,17:19]))
-            self.wrf_times_epoch[i] = calendar.timegm([yr,mth,day,hr,mins,sec])
+        for n,t in enumerate(times):
+            tstr = ''.join(t)
 
-        return self.wrf_times_epoch
+            yr = int(tstr[0:4])
+            mth = int(tstr[5:7])
+            day = int(tstr[8:10])
+            hr = int(tstr[11:13])
+            mins = int(tstr[14:16])
+            sec = int(tstr[17:19])
+            
+            wrf_times_epoch[n] = calendar.timegm([yr,mth,day,hr,mins,sec])
+            
+        return wrf_times_epoch
 
 
-    def get_time_idx(self,wrftimes,t,tuple_format=0):
+    def get_time_idx(self,t):
 
         """
         Input:
@@ -84,11 +90,14 @@ class WRFOut(object):
         time_idx    :   index of time in WRF file
         """
         # Ensure datenum format
-        if tuple_format:
+        if isinstance(t,int):
+            t_epoch = t
+        elif isinstance(t,collections.Sequence) and len(t) == 6:
             t_epoch = calendar.timegm(t)
         else:
-            t_epoch = t
-
+            print("Time {0} is not correct format.".format(t))
+            raise Exception
+            
         # Convert wrftimes to datenum times
         wrf_times_epoch = self.wrftime_to_datenum(self.wrf_times)
 
@@ -97,6 +106,7 @@ class WRFOut(object):
         #               abs(self.wrf_times_epoch-t_epoch) ==
         #                abs(self.wrf_times_epoch-t_epoch).min()
         #                )[0][0]
+        # pdb.set_trace()
         time_idx = utils.closest(wrf_times_epoch,t_epoch)
         return time_idx
 
@@ -224,7 +234,7 @@ class WRFOut(object):
         Don't destagger in x/y for columns
 
         """
-        # Check for dimensions of 1. 
+        # Check for dimensions of 1.
         # If it exists, don't destagger it.
         
         shp = data.shape
@@ -295,9 +305,9 @@ class WRFOut(object):
         HGT = self.get('HGT',slices)
         
         temp = T2 + (6.5*HGT)/1000.0
-        pmsl = P*N.exp(9.81/(287.0*temp)*HGT) 
+        pmsl = P*N.exp(9.81/(287.0*temp)*HGT)
    
-        #sm = kwargs.get('smooth',1) 
+        #sm = kwargs.get('smooth',1)
         #data = pmsl[0,::sm,::sm]
         #return data
         return pmsl
@@ -325,7 +335,7 @@ class WRFOut(object):
         rh = qc + qr + qi + qs + qg
         rv = qv
 
-        return rh, rv        
+        return rh, rv
 
     def compute_dptp(self,slices,**kwargs):
         dpt = self.get('dpt',slices)
@@ -344,7 +354,7 @@ class WRFOut(object):
         theta = self.get('theta',slices)
         rh, rv = self.compute_mixing_ratios(slices)
 
-        dpt = theta * (1 + 0.61*rv - rh) 
+        dpt = theta * (1 + 0.61*rv - rh)
         return dpt
 
     def compute_geopotential_height(self,slices,**kwargs):
@@ -411,8 +421,8 @@ class WRFOut(object):
                                 topm,Z[0,:,i,j],range(self.z_dim)))
                 botidx[i,j] = round(N.interp(
                                 botm,Z[0,:,i,j],range(self.z_dim)))
-                ushear[i,j] = u[0,topidx[i,j],i,j] - u[0,botidx[i,j],i,j] 
-                vshear[i,j] = v[0,topidx[i,j],i,j] - v[0,botidx[i,j],i,j] 
+                ushear[i,j] = u[0,topidx[i,j],i,j] - u[0,botidx[i,j],i,j]
+                vshear[i,j] = v[0,topidx[i,j],i,j] - v[0,botidx[i,j],i,j]
 
         # Find indices of bottom and top levels
         # topidx = N.where(abs(Z-topm) == abs(Z-topm).min(axis=1))

@@ -14,6 +14,7 @@ Contents:
    intro
    lazywrf
    postwrf
+   postwrf_index
 
 
 Indices and tables

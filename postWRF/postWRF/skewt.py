@@ -18,10 +18,7 @@ import os
 
 from figure import Figure
 from wrfout import WRFOut
-from WEM.utils import unix_tools
-from WEM.utils import generalmet
-from WEM.utils import gridded_data
-from WEM.utils import utils
+import WEM.utils as utils
 import metconstants as mc
 
 class Profile(Figure):
@@ -52,7 +49,7 @@ class Profile(Figure):
             P_bot, P_top, dp = [y*100.0 for y in ylim]
         else:
             P_bot = 100000.0
-            P_top = 20000.0 
+            P_top = 20000.0
             dp = 10000.0
 
         plevs = N.arange(P_bot,P_top,dp)
@@ -174,7 +171,7 @@ class SkewT(Figure):
         self.barb_increments = {'half': 2.5,'full':5.0,'flag':25.0}
         self.skewness = 37.5
         self.P_bot = 100000.
-        self.P_top = 10000. 
+        self.P_top = 10000.
         self.dp = 100.
         self.plevs = N.arange(self.P_bot,self.P_top-1,-self.dp)
 
@@ -278,11 +275,11 @@ class SkewT(Figure):
         zmax = len(uwind)
         # n is x-ax position on skewT for barbs.
         baraxis = [n for _j in range(0,zmax,delta)]
-        plt.barbs(baraxis,P[0:zmax:delta],uwind[0:zmax:delta],vwind[0:zmax:delta], 
+        plt.barbs(baraxis,P[0:zmax:delta],uwind[0:zmax:delta],vwind[0:zmax:delta],
         barb_increments=self.barb_increments, linewidth = .75, barbcolor = color, flagcolor = color)
 
     def temperature(self,nc,time,y,x,P,linestyle='solid',color='black'):
-        theta = nc.variables['T'][time,:,y,x] + mc.Tb 
+        theta = nc.variables['T'][time,:,y,x] + mc.Tb
         T = theta*(P/self.P_bot)**mc.kappa - mc.Tz # Temperatur i halvflatene (C)
         plt.semilogy(T + self.skewnessTerm(P), P, basey=math.e, color = color, \
                      linestyle=linestyle, linewidth = 1.5)
@@ -306,7 +303,7 @@ class SkewT(Figure):
             vwind = 0.5*(nc.variables['V'][time,:,y,x]+nc.variables['V'][time,:,y+1,x])
             return uwind[thin_locs],vwind[thin_locs]
         elif whichdata == 'temp':
-            theta = nc.variables['T'][time,:,y,x] + mc.Tb 
+            theta = nc.variables['T'][time,:,y,x] + mc.Tb
             T = theta*(P/self.P_bot)**mc.kappa - mc.Tz
             return T
         elif whichdata == 'dwpt':
@@ -363,7 +360,7 @@ class SkewT(Figure):
     skewness = 37.5
     # Defines the ranges of the plot, do not confuse with self.P_bot and self.P_top
     P_b = 105000.
-    P_t = 10000. 
+    P_t = 10000.
     self.dp = 100.
     self.plevs = N.arange(P_b,P_t-1,-self.dp)
     """
@@ -372,7 +369,7 @@ class SkewT(Figure):
         """Calculates moist adiabatic lapse rate for T (Celsius) and p (Pa)
         Note: We calculate dT/dp, not dT/dz
         See formula 3.16 in Rogers&Yau for dT/dz, but this must be combined with
-        the dry adiabatic lapse rate (gamma = g/cp) and the 
+        the dry adiabatic lapse rate (gamma = g/cp) and the
         inverse of the hydrostatic equation (dz/dp = -RT/pg)"""
         a = 2./7.
         b = ((mc.R/mc.Rv)*(mc.L**2))/(mc.R*mc.cp)
