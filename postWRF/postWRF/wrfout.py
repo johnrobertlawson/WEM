@@ -44,6 +44,7 @@ class WRFOut(object):
         self.y_dim = len(self.nc.dimensions['south_north'])
         self.z_dim = len(self.nc.dimensions['bottom_top'])
 
+        self.P_top = self.nc.variables['P_TOP'][0]
         # Loads variable lists
         self.fields = self.nc.variables.keys()
         self.computed_fields = self.return_tbl().keys()
@@ -169,15 +170,27 @@ class WRFOut(object):
 
         d = self.nc.variables[var]
         sl = self.create_slice(PS)
+        
+        # If that dimension has a slice of indices, it doesn't need staggering.
+        # pdb.set_trace()
+        if PS['destag_dim'] and isinstance(sl[PS['destag_dim']],N.ndarray):
+            PS['destag_dim'] = None
+        
         data = self.destagger(d[sl],PS['destag_dim'])
         return data
 
     def create_slice(self,PS):
+        """
+        Create slices from dictionary of level, time, lat, lon.
+        Absence of a key means pick all indices.
+        
+        If PS is a list, this is to be converted to slices.
+        """
         # See which dimensions are present in netCDF file variable
         sl = []
         # pdb.set_trace()
         if any('Time' in p for p in PS['dim_names']):
-            if isinstance(PS['t'],slice):
+            if isinstance(PS['t'],slice) or isinstance(PS['t'],N.ndarray):
                 sl.append(PS['t'])
             else:
                 sl.append(slice(PS['t'],PS['t']+1))
@@ -188,21 +201,26 @@ class WRFOut(object):
                 sl.append(slice(PS['lv'],PS['lv']+1))
             elif PS['lv']=='all':
                 sl.append(slice(None,None))
-
+            else:
+                sl.append(PS['lv'])
+                
 
         if any('north' in p for p in PS['dim_names']):
-            if isinstance(PS['la'],slice):
+            if 'la' not in PS:
+                sl.append(slice(None,None))
+            if isinstance(PS['la'],slice) or isinstance(PS['la'],N.ndarray):
                 sl.append(PS['la'])
             else:
                 sl.append(slice(PS['la'],PS['la']+1))
   
         if any('west' in p for p in PS['dim_names']):
-            if isinstance(PS['lo'],slice):
+            if 'lo' not in PS:
+                sl.append(slice(None,None))
+            elif isinstance(PS['lo'],slice) or isinstance(PS['lo'],N.ndarray):
                 sl.append(PS['lo'])
             else:
                 sl.append(slice(PS['lo'],PS['lo']+1))
-
-        # pdb.set_trace()
+                
         return sl
 
     def check_destagger(self,var):
@@ -276,6 +294,7 @@ class WRFOut(object):
         tbl['pressure'] = self.compute_pressure
         tbl['temps'] = self.compute_temps
         tbl['theta'] = self.compute_theta
+        tbl['geopot'] = self.compute_geopotential
         tbl['Z'] = self.compute_geopotential_height
         tbl['dptp'] = self.compute_dptp #density potential temperature pert.
         tbl['dpt'] = self.compute_dpt #density potential temperature pert.
@@ -283,8 +302,9 @@ class WRFOut(object):
         tbl['strongestwind'] = self.compute_strongest_wind
         tbl['PMSL'] = self.compute_pmsl
         tbl['RH'] = self.compute_RH
+        tbl['dryairmass'] = self.compute_dryairmass
 
-        return tbl      
+        return tbl
         
     def compute(self,var,slices,lookup=0,**kwargs):
         """ Look up method needed to return array of data
@@ -309,6 +329,11 @@ class WRFOut(object):
         RH = N.exp(0.073*(Td-T))
         # pdb.set_trace()
         return RH*100.0
+
+    def compute_dryairmass(self,slices,**kwargs):
+        MU = self.get('MU',slices)
+        MUB = self.get('MUB',slices)
+        return MU + MUB
 
     def compute_pmsl(self,slices,**kwargs):
         P = self.get('PSFC',slices)
@@ -373,6 +398,10 @@ class WRFOut(object):
         Z = geopotential/9.81
         return Z
 
+    def compute_geopotential(self,slices,**kwargs):
+        geopotential = self.get('PH',slices) + self.get('PHB',slices)
+        return geopotential
+        
     def compute_wind10(self,slices,**kwargs):
         u = self.get('U10',slices)
         v = self.get('V10',slices)
@@ -401,6 +430,7 @@ class WRFOut(object):
         return theta
 
     def compute_wind(self,slices):
+        # pdb.set_trace()
         u = self.get('U',slices)
         v = self.get('V',slices)
         data = N.sqrt(u**2 + v**2)

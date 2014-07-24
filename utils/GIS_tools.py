@@ -568,7 +568,6 @@ def string_from_time(usage,t,dom=0,strlen=0,conven=0,**kwargs):
     conven  :   convection of MM/DD versus DD/MM
     """
 
-
     if isinstance(t,str):
         if usage == 'output':
             usage = 'skip' # Time is already a string

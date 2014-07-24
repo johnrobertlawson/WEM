@@ -105,17 +105,14 @@ class WRFEnviron(object):
         """
         self.W = self.get_wrfout(wrf_sd,wrf_nc,dom=dom)
 
-        if out_sd:
-            outpath = os.path.join(self.C.output_root,out_sd)
-        else:
-            outpath = self.C.output_root
+        outpath = self.get_outpath(out_sd)
+
             
         # Make sure times are in datenum format and sequence.
         t_list = utils.ensure_sequence_datenum(times)
         
         d_list = utils.get_sequence(dom)
         lv_list = utils.get_sequence(levels)
-        # pdb.set_trace()
         for t, l, d in itertools.product(t_list,lv_list,d_list):
             F = BirdsEye(self.C,self.W)
             F.plot2D(vrbl,t,l,d,outpath,bounding=bounding)
@@ -741,6 +738,13 @@ class WRFEnviron(object):
             lst = val
         return lst
 
+    def get_outpath(self,out_sd):
+        if out_sd:
+            outpath = os.path.join(self.C.output_root,out_sd)
+        else:
+            outpath = self.C.output_root
+        return outpath
+
     def plot_xs(self,vrbl,times,latA=0,lonA=0,latB=0,lonB=0,
                 wrf_sd=0,wrf_nc=0,out_sd=0,f_prefix=0,f_suffix=0,dom=0,):
         """
@@ -768,9 +772,11 @@ class WRFEnviron(object):
         
         """
         self.W = self.get_wrfout(wrf_sd,wrf_nc,dom=dom)
+        
+        outpath = self.get_outpath(out_sd)
      
         XS = CrossSection(self.C,self.W,latA,lonA,latB,lonB)
         
         t_list = utils.ensure_sequence_datenum(times)
         for t in t_list:
-            XS.plot_xs(vrbl,t)
+            XS.plot_xs(vrbl,t,outpath)

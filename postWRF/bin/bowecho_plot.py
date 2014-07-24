@@ -11,7 +11,7 @@ import WEM.utils as utils
 config = Settings()
 p = WRFEnviron(config)
 
-enstype = 'MXMP'
+enstype = 'STCH'
 #case = '20060526'
 #case = '20090910'
 case = '20110419'
@@ -23,13 +23,13 @@ IC = 'GEFSR2'
 #ensnames =  ['c00'] + ['p'+"%02d" %n for n in range(1,11)]
 #ensnames = ['p'+"%02d" %n for n in range(8,11)]
 ensnames = ['p04',]
-#MP = 'WDM6_Grau'
+MP = 'ICBC'
 #ensnames = ['anl']
 #experiments = ['WSM6_Grau','WSM6_Hail','Kessler','Ferrier','WSM5','WDM5','Lin','WDM6_Grau','WDM6_Hail','Morrison_Grau','Morrison_Hail']
-experiments = ['WDM5','Lin','WDM6_Grau','WDM6_Hail','Morrison_Grau','Morrison_Hail']
+#experiments = ['WDM5','Lin','WDM6_Grau','WDM6_Hail','Morrison_Grau','Morrison_Hail']
 #experiments = ['WSM5',]
 #experiment = 'VERIF'
-#experiments = ['s'+"%02d" %n for n in range(1,11)]
+experiments = ['s'+"%02d" %n for n in range(1,11)]
 
 #itime = (2006,5,26,0,0,0)
 #itime = (2009,9,10,23,0,0)
@@ -41,6 +41,8 @@ itime = (2011,4,19,18,0,0)
 ftime = (2011,4,20,10,30,0)
 #ftime = (2013,8,16,12,0,0)
 
+levels = 2000
+
 times = utils.generate_times(itime,ftime,60*60)
 #shear_times = utils.generate_times(itime,ftime,3*60*60)
 #sl_times = utils.generate_times(sl_itime,sl_ftime,1*60*60)
@@ -48,7 +50,7 @@ thresh = 10
 skewT_time = (2013,8,16,3,0,0)
 skewT_latlon = (35.2435,-97.4708)
 
-variables = {'cref':{}} ; variables['cref'] = {'lv':2000,'pt':times}
+#variables = {'cref':{}} ; variables['cref'] = {'lv':2000,'pt':times}
 #variables = {'strongestwind':{}} ; variables['strongestwind'] = {'lv':2000, 'itime':itime, 'ftime':ftime, 'range':(thresh,27.5,1.25)}
 #variables['PMSL'] = {'lv':2000,'pt':times,'plottype':'contour','smooth':5}
 #variables['wind10'] = {'lv':2000,'pt':times}
@@ -80,18 +82,18 @@ for en in ensnames:
 for en in ensnames:
     for ex in experiments:
         # Reload settings
-        p.C = Settings()
+        #p.C = Settings()
 
         # Change paths to new location
-        if ex == 'STCH':
-            p.C.output_root = os.path.join(config.output_root,case,IC,en,MP,ex)
-            p.C.wrfout_root = os.path.join(config.wrfout_root,case,IC,en,MP,ex)
+        if enstype == 'STCH':
+            out_sd = os.path.join(case,IC,en,MP,ex)
+            wrf_sd = os.path.join(case,IC,en,MP,ex)
         else:
-            p.C.output_root = os.path.join(config.output_root,case,IC,en,ex)
-            p.C.wrfout_root = os.path.join(config.wrfout_root,case,IC,en,ex)
-        print p.C.output_root
-        print p.C.wrfout_root
-        p.plot_2D(variables)
+            out_sd = os.path.join(case,IC,en,ex)
+            wrf_sd = os.path.join(case,IC,en,ex)
+        #print out_sd
+        #print wrf_sd
+        p.plot2D('cref',times,levels,wrf_sd=wrf_sd,out_sd=out_sd)
 
 """
 
