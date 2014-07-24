@@ -95,6 +95,10 @@ class Scales(object):
         A['wind10'] = {'cmap':0}
         A['wind10'][2000] = (5,32.5,2.5)
         
+        # Wind magnitude
+        A['wind'] = {'cmap':0}
+        A['wind'][2000] = (5,32.5,2.5)
+        
         # Theta-e (Equivalent potential temperature)
         # A['thetae'] = {'cmap':ct.thetae}
         

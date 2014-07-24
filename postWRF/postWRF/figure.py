@@ -38,6 +38,7 @@ class Figure(object):
         # Create main figure
         self.fig = plt.figure()
         self.fig.set_dpi(dpi)
+        self.ax = self.fig.add_subplot(111)
     
     def create_fname(self,*naming):
         """Default naming should be:
