@@ -14,22 +14,18 @@ importing matplotlib etc!
 Useful/utility scripts have been moved to WEM.utils.
 """
 
-import os
-#import matplotlib as M
-#M.use('Agg')
-#import matplotlib.pyplot as plt
-#from mpl_toolkits.basemap import Basemap
-import fnmatch
 import calendar
-import pdb
-import itertools
-import numpy as N
-import time
-import json
-import cPickle as pickle
+import collections
 import copy
+import cPickle as pickle
+import fnmatch
 import glob
 import itertools
+import json
+import numpy as N
+import os
+import pdb
+import time
 
 from wrfout import WRFOut
 from axes import Axes
@@ -695,7 +691,50 @@ class WRFEnviron(object):
                     'streamlines',lv,disp_t))
             self.F.plot_streamlines(lv,pt)
 
+    def plot_strongest_wind(self,itime,ftime,levels,wrf_sd=0,wrf_nc=0,out_sd=0,f_prefix=0,f_suffix=0,
+                bounding=0,dom=0):
+        """
+        Plot strongest wind at level lv between itime and ftime.
+        
+        Path to wrfout file is in config file.
+        Path to plot output is also in config
 
+
+        Inputs:
+        levels      :   level(s) for wind
+        wrf_sd      :   string - subdirectory of wrfout file
+        wrf_nc      :   filename of wrf file requested.
+                            If no wrfout file is explicitly specified, the
+                            netCDF file in that folder is chosen if unambiguous.
+        out_sd      :   subdirectory of output .png.
+        f_prefix    :   custom filename prefix
+        f_suffix    :   custom filename suffix
+        bounding    :   list of four floats (Nlim, Elim, Slim, Wlim):
+            Nlim    :   northern limit
+            Elim    :   eastern limit
+            Slim    :   southern limit
+            Wlim    :   western limit
+        smooth      :   smoothing. 0 is off. non-zero integer is the degree
+                        of smoothing, to be specified.
+        dom         :   domain for plotting. If zero, the only netCDF file present
+                        will be plotted. If list of integers, the script will loop over domains.
+                        
+                        
+        """
+        self.W = self.get_wrfout(wrf_sd,wrf_nc,dom=dom)
+
+        outpath = self.get_outpath(out_sd)
+            
+        # Make sure times are in datenum format and sequence.
+        it = utils.ensure_sequence_datenum(itime)
+        ft = utils.ensure_sequence_datenum(ftime)
+        
+        d_list = utils.get_sequence(dom)
+        lv_list = utils.get_sequence(levels)
+        
+        for l, d in itertools.product(lv_list,d_list):
+            F = BirdsEye(self.C,self.W)
+            F.plot2D('strongestwind',it+ft,l,d,outpath,bounding=bounding)
  
     def make_1D(self,data,output='list'):
         """ Make sure data is a time series
