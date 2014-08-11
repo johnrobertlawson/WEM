@@ -4,6 +4,7 @@ M.use('Agg')
 import matplotlib.pyplot as plt
 from mpl_toolkits.basemap import Basemap
 import numpy as N
+import collections
 
 from defaults import Defaults
 from figure import Figure
@@ -66,7 +67,9 @@ class BirdsEye(Figure):
         Inputs:
 
         vrbl        :   variable string
-        t           :   date/time in (YYYY,MM,DD,HH,MM,SS) format
+        t           :   date/time in (YYYY,MM,DD,HH,MM,SS) or datenum format
+                        If tuple of two dates, it's start time and
+                        end time, e.g. for finding max/average.
         lv          :   level
         dom         :   domain
         outpath     :   absolute path to output
@@ -89,7 +92,24 @@ class BirdsEye(Figure):
             smooth = 1
 
         # Get indices for time, level, lats, lons
-        tidx = self.W.get_time_idx(t)
+        
+        if isinstance(t,collections.Sequence) and len(t)!=6:
+            # List of two dates, start and end
+            # pdb.set_trace()
+
+            it_idx = self.W.get_time_idx(t[0])
+            ft_idx = self.W.get_time_idx(t[1])
+            assert ft_idx > it_idx
+            tidx = slice(it_idx,ft_idx,None)
+            title = "range"
+            datestr = "range"
+        else:
+            tidx = self.W.get_time_idx(t)
+            title = utils.string_from_time('title',t)
+            datestr = utils.string_from_time('output',t)
+
+        
+        # Until pressure coordinates are fixed TODO
         lvidx = 0
         latidx, lonidx = self.get_limited_domain(bounding,smooth=smooth)
         
@@ -118,12 +138,12 @@ class BirdsEye(Figure):
             cmap = S.cm
         elif isinstance(S.clvs,N.ndarray):
             if plottype == 'contourf':
-                plotargs = (x,y,data.reshape((la_n,lo_n)),S.clvs)
+                plotargs = (self.x,self.y,data.reshape((la_n,lo_n)),S.clvs)
                 cmap = plt.cm.jet
             else:
-                plotargs = (x,y,data.reshape((la_n,lo_n)),S.clvs)
+                plotargs = (self.x,self.y,data.reshape((la_n,lo_n)),S.clvs)
         else:
-            plotargs = (x,y,data.reshape((la_n,lo_n)))
+            plotargs = (self.x,self.y,data.reshape((la_n,lo_n)))
             cmap = plt.cm.jet
 
 
@@ -136,14 +156,13 @@ class BirdsEye(Figure):
 
         # LABELS, TITLES etc
         if self.C.plot_titles:
-            title = utils.string_from_time('title',t)
             plt.title(title)
         if plottype == 'contourf' and self.C.colorbar:
             plt.colorbar(orientation='horizontal')
         
         # SAVE FIGURE
+        # pdb.set_trace()
         lv_na = utils.get_level_naming(vrbl,lv)
-        datestr = utils.string_from_time('output',t)
         naming = [vrbl,lv_na,datestr]
         if dom:
             naming.append(dom)

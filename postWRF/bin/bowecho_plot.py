@@ -93,7 +93,8 @@ for en in ensnames:
             wrf_sd = os.path.join(case,IC,en,ex)
         #print out_sd
         #print wrf_sd
-        p.plot2D('cref',times,levels,wrf_sd=wrf_sd,out_sd=out_sd)
+        p.plot_strongest_wind(itime,ftime,2000,wrf_sd=wrf_sd,out_sd=out_sd)
+        #p.plot2D('cref',times,levels,wrf_sd=wrf_sd,out_sd=out_sd)
 
 """
 
