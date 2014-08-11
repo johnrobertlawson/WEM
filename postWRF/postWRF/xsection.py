@@ -15,10 +15,12 @@ data (reflectivity, etc).
 import numpy as N
 from figure import Figure
 import pdb
+import matplotlib.pyplot as plt
 
 import WEM.utils as utils
 import metconstants as mc
 from scales import Scales
+from birdseye import BirdsEye
 # from defaults import Defaults
 
 class CrossSection(Figure):
@@ -144,7 +146,7 @@ class CrossSection(Figure):
         return (1.0-w)*geopot[k] + w*geopot[k-1]
 
 
-    def plot_xs(self,vrbl,ttime,outpath):
+    def plot_xs(self,vrbl,ttime,outpath,clvs=0,ztop=0):
         """
         Inputs:
         vrbl        :   variable to plot, from this list:
@@ -202,7 +204,7 @@ class CrossSection(Figure):
             u = self.W.get('U',ps)
             v = self.W.get('V',ps)
             data = N.cos(angle)*u - N.sin(angle)*v
-            clvs = u_wind_levels
+            # clvs = u_wind_levels
             extends = 'both'
             CBlabel = r'Wind Speed (ms$^{-1}$)'
 
@@ -235,15 +237,23 @@ class CrossSection(Figure):
         # else:
             # cmap = plt.cm.jet
 
-
-        cf = self.ax.contourf(grid,terrain_z,data,alpha=0.6,levels=clvs,
-                        extend='both')#, cmap=cmap)
+        # if clvs: pass # This is where to get clvs...
+        #clvs = N.arange(-25,30,5)
+        kwargs = {}
+        kwargs['alpha'] = 0.6
+        #kwargs['extend'] = 'both'
+        if isinstance(clvs,N.ndarray):
+            kwargs['levels'] = clvs
+            
+        cf = self.ax.contourf(grid,heighthalf,data[0,...],**kwargs)#,
+        # cf = self.ax.contourf(grid[0,:],grid[:,0],data[0,...],alpha=0.6,extend='both')#levels=clvs,
+                        # extend='both')#, cmap=cmap)
                         #norm=,
 
+        # cf = self.ax.contourf(data[0,...])
         # pdb.set_trace()
         self.ax.plot(xticks,terrain_z,color='k',)
         self.ax.fill_between(xticks,terrain_z,0,facecolor='lightgrey')
-
         # What is this? TODO
         labeldelta = 15
 
@@ -253,20 +263,32 @@ class CrossSection(Figure):
         self.ax.set_ylabel("Height above sea level (m)")
         
         datestr = utils.string_from_time('output',ttime)
+
+        if ztop:
+            self.ax.set_ylim([0,ztop*1000])
         naming = [vrbl,'xs',datestr]
         fname = self.create_fname(*naming)
         self.save(self.fig,outpath,fname)
         #self.close()
-
+        
+        CBlabel = str(vrbl)
+        
         # Save a colorbar
         # Only if one doesn't exist
         self.just_one_colorbar(outpath,fname+'CB',cf,label=CBlabel)
+        
+        self.draw_transect(outpath,fname+'Tsct')
 
     def just_one_colorbar(self,fpath,fname,cf,label):
         """docstring for just_one_colorbar"""
         try:
             with open(fpath): pass
         except IOError:
-            self.create_colorbar(fpath,fname,cf,label=CBlabel)
+            self.create_colorbar(fpath,fname,cf,label=label)
 
     
+    def draw_transect(self,outpath,fname):
+        B = BirdsEye(self.C,self.W)
+        m,x,y = B.basemap_setup()
+        m.drawgreatcircle(self.lonA,self.latA,self.lonB,self.latB)
+        self.save(B.fig,outpath,fname)
