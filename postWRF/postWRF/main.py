@@ -785,7 +785,8 @@ class WRFEnviron(object):
         return outpath
 
     def plot_xs(self,vrbl,times,latA=0,lonA=0,latB=0,lonB=0,
-                wrf_sd=0,wrf_nc=0,out_sd=0,f_prefix=0,f_suffix=0,dom=0,):
+                wrf_sd=0,wrf_nc=0,out_sd=0,f_prefix=0,f_suffix=0,dom=0,
+                clvs=0,ztop=0):
         """
         Plot cross-section.
         
@@ -807,7 +808,8 @@ class WRFEnviron(object):
         out_sd      :   subdirectory of output .png.
         f_prefix    :   custom filename prefix
         f_suffix    :   custom filename suffix
-
+        clvs        :   custom contour levels
+        ztop        :   highest km to plot.
         
         """
         self.W = self.get_wrfout(wrf_sd,wrf_nc,dom=dom)
@@ -818,4 +820,4 @@ class WRFEnviron(object):
         
         t_list = utils.ensure_sequence_datenum(times)
         for t in t_list:
-            XS.plot_xs(vrbl,t,outpath)
+            XS.plot_xs(vrbl,t,outpath,clvs=clvs,ztop=ztop)

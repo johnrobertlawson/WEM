@@ -297,12 +297,13 @@ class WRFOut(object):
         tbl['geopot'] = self.compute_geopotential
         tbl['Z'] = self.compute_geopotential_height
         tbl['dptp'] = self.compute_dptp #density potential temperature pert.
-        tbl['dpt'] = self.compute_dpt #density potential temperature pert.
+        tbl['dpt'] = self.compute_dpt #density potential temperature .
         tbl['buoyancy'] = self.compute_buoyancy
         tbl['strongestwind'] = self.compute_strongest_wind
         tbl['PMSL'] = self.compute_pmsl
         tbl['RH'] = self.compute_RH
         tbl['dryairmass'] = self.compute_dryairmass
+        tbl['QTOTAL'] = self.compute_qtotal
 
         return tbl
         
@@ -372,6 +373,10 @@ class WRFOut(object):
         rv = qv
 
         return rh, rv
+        
+    def compute_qtotal(self,slices,**kwargs):
+        qtotal, _ = self.compute_mixing_ratios(slices)
+        return qtotal
 
     def compute_dptp(self,slices,**kwargs):
         dpt = self.get('dpt',slices)
