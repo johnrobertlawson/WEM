@@ -811,4 +811,15 @@ class WRFOut(object):
         Slim = self.lats[0]
         Wlim = self.lons[0]
         return Nlim, Elim, Slim, Wlim
+        
+    def cold_pool_strength(self):
+        pass
+    
+    def cold_pool_height(self):
+        pass
+    
+    
+    
+    
+    
 
