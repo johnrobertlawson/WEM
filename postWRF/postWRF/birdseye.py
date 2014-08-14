@@ -72,7 +72,8 @@ class BirdsEye(Figure):
         # print("Plot saved to {0}.".format(os.path.join(p2p,fname)))
 
     #def plot2D(self,va,**kwargs):
-    def plot2D(self,vrbl,t,lv,dom,outpath,bounding=0,smooth=1,plottype='contourf'):
+    def plot2D(self,vrbl,t,lv,dom,outpath,bounding=0,smooth=1,
+                plottype='contourf',save=1,return_data=0):
         """
         Inputs:
 
@@ -90,7 +91,7 @@ class BirdsEye(Figure):
             Wlim    :   western limit
         smooth      :   smoothing. 1 is off. integer greater than one is
                         the degree of smoothing, to be specified.
-        
+        save        :   whether to save to file
         """
         # INITIALISE
         self.fig.set_size_inches(8,8)
@@ -158,17 +159,17 @@ class BirdsEye(Figure):
 
 
         if plottype == 'contourf':
-            self.bmap.contourf(*plotargs,cmap=cmap)
+            f1 = self.bmap.contourf(*plotargs,cmap=cmap)
         elif plottype == 'contour':
-            ctplt = self.bmap.contour(*plotargs,colors='k')
+            f1 = self.bmap.contour(*plotargs,colors='k')
             scaling_func = M.ticker.FuncFormatter(lambda x, pos:'{0:d}'.format(int(x*multiplier)))
-            plt.clabel(ctplt, inline=1, fmt=scaling_func, fontsize=9, colors='k')
+            plt.clabel(f1, inline=1, fmt=scaling_func, fontsize=9, colors='k')
 
         # LABELS, TITLES etc
         if self.C.plot_titles:
             plt.title(title)
         if plottype == 'contourf' and self.C.colorbar:
-            plt.colorbar(orientation='horizontal')
+            plt.colorbar(f1,orientation='horizontal')
         
         # SAVE FIGURE
         # pdb.set_trace()
@@ -177,8 +178,12 @@ class BirdsEye(Figure):
         if dom:
             naming.append(dom)
         self.fname = self.create_fname(*naming)
-        self.save(self.fig,outpath,self.fname)
+        if save:
+            self.save(self.fig,outpath,self.fname)
         plt.close()
+        if isinstance(data,N.ndarray):
+            return data.reshape((la_n,lo_n))
+
 
     def plot_streamlines(self,lv,pt,da=0):
         self.fig = plt.figure()
