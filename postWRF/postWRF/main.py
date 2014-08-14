@@ -27,6 +27,7 @@ import os
 import pdb
 import time
 
+
 from wrfout import WRFOut
 from axes import Axes
 from figure import Figure
@@ -492,45 +493,59 @@ class WRFEnviron(object):
 
         return DKE
 
-    def plot_diff_energy(self,ptype,energy,time,folder,fname,V):
+    def plot_diff_energy(self,ptype,energy,time,folder,fname,p2p,plotname,V,
+                        no_title=0,ax=0):
         """
         
         folder  :   directory holding computed data
         fname   :   naming scheme of required files
+        p2p     :   root directory for plots
         V       :   constant values to contour at
         """
         sw = 0
 
         DATA = self.load_data(folder,fname,format='pickle')
-        times = self.get_sequence(time)
 
-        for n,t in enumerate(times):
-            for pn,perm in enumerate(DATA):
-                f1 = DATA[perm]['file1']
-                f2 = DATA[perm]['file2']
-                if sw==0:
-                    # Get times and info about nc files
-                    # First time to save power
-                    W1 = WRFOut(f1)
-                    permtimes = DATA[perm]['times']
-                    sw = 1
+        if isinstance(time,collections.Sequence):
+            time = calendar.timegm(time)
 
-                # Find array for required time
-                x = N.where(N.array(permtimes)==t)[0][0]
-                data = DATA[perm]['values'][x][0]
-                if not pn:
-                    stack = data
-                else:
-                    stack = N.dstack((data,stack))
-                    stack_average = N.average(stack,axis=2)
+        #for n,t in enumerate(times):
+        
+        for pn,perm in enumerate(DATA):
+            f1 = DATA[perm]['file1']
+            f2 = DATA[perm]['file2']
+            if sw==0:
+                # Get times and info about nc files
+                # First time to save power
+                W1 = WRFOut(f1)
+                permtimes = DATA[perm]['times']
+                sw = 1
 
-            #birdseye plot with basemap of DKE/DTE
-            F = BirdsEye(self.C,W1)    # 2D figure class
-            #F.plot2D(va,t,en,lv,da,na)  # Plot/save figure
-            fname_t = ''.join((fname,'_p{0:02d}'.format(n)))
-            F.plot_data(stack_average,'contourf',fname_t,t,V)
-            print("Plotting time {0} from {1}.".format(n,len(times)))
-            del data, stack
+            # Find array for required time
+            x = N.where(N.array(permtimes)==time)[0][0]
+            data = DATA[perm]['values'][x][0]
+            if not pn:
+                stack = data
+            else:
+                stack = N.dstack((data,stack))
+                stack_average = N.average(stack,axis=2)
+
+        if ax:
+            kwargs1 = {'ax':ax}
+            kwargs2 = {'save':0}
+        #birdseye plot with basemap of DKE/DTE
+        F = BirdsEye(self.C,W1,**kwargs1)    # 2D figure class
+        #F.plot2D(va,t,en,lv,da,na)  # Plot/save figure
+        tstr = utils.string_from_time('output',time)
+        fname_t = ''.join((plotname,'_{0}'.format(tstr)))
+        # fpath = os.path.join(p2p,fname_t)
+        fig_obj = F.plot_data(stack_average,'contourf',p2p,fname_t,time,V,
+                    no_title=no_title,**kwargs2)
+                    
+        if ax:
+            return fig_obj
+        
+        #print("Plotting time {0} from {1}.".format(n,len(times)))
 
     def plot_error_growth(self,ofname,folder,pfname,sensitivity=0,ylimits=0,**kwargs):
         """Plots line graphs of DKE/DTE error growth
