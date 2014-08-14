@@ -16,7 +16,7 @@ import WEM.utils as utils
 from defaults import Defaults
 
 class Figure(object):
-    def __init__(self,config,wrfout):
+    def __init__(self,config,wrfout,ax=0):
         """
         C   :   configuration settings
         W   :   data
@@ -36,9 +36,11 @@ class Figure(object):
         dpi = getattr(self.C,'DPI',self.D.dpi)
         
         # Create main figure
-        self.fig = plt.figure()
+        self.fig, self.ax = plt.subplots(1)
+        if ax:
+            self.ax = ax
         self.fig.set_dpi(dpi)
-        self.ax = self.fig.add_subplot(111)
+        # self.ax = self.fig.add_subplot(111)
     
     def create_fname(self,*naming):
         """Default naming should be:

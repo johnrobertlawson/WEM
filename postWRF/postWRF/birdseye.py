@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.basemap import Basemap
 import numpy as N
 import collections
+import os
 
 from defaults import Defaults
 from figure import Figure
@@ -12,10 +13,10 @@ import WEM.utils as utils
 from scales import Scales
 
 class BirdsEye(Figure):
-    def __init__(self,config,wrfout):
-        super(BirdsEye,self).__init__(config,wrfout)
+    def __init__(self,config,wrfout,ax=0):
+        super(BirdsEye,self).__init__(config,wrfout,ax=ax)
 
-    def plot_data(self,data,mplcommand,fpath,pt,V=0):
+    def plot_data(self,data,mplcommand,p2p,fname,pt,V=0,no_title=0,save=1):
         """
         Generic method that plots any matrix of data on a map
 
@@ -23,25 +24,28 @@ class BirdsEye(Figure):
         data        :   lat/lon matrix of data
         m           :   basemap instance
         mplcommand  :   contour or contourf
-        fpath       :   absolute filepath including name
+        p2p         :   path to plots
+        fname       :   filename for plot
         V           :   scale for contours
-
+        no_title    :   switch to turn off title
+        save        :   whether to save to file
         """
         # INITIALISE
-        self.fig = plt.figure()
-        self.fig = self.figsize(8,8,self.fig)     # Create a default figure size if not set by user
-        self.bmap,x,y = self.basemap_setup()
+        # self.fig = plt.figure()
+        # self.fig = self.figsize(8,8,self.fig)     # Create a default figure size if not set by user
+        self.fig.set_size_inches(5,5)
+        self.bmap,x,y = self.basemap_setup()#ax=self.ax)
 
         if mplcommand == 'contour':
             if not V:
-                self.bmap.contour(x,y,data)
+                f1 = self.bmap.contour(x,y,data)
             else:
-                self.bmap.contour(x,y,data,V)
+                f1 = self.bmap.contour(x,y,data,V)
         elif mplcommand == 'contourf':
             if not V:
-                self.bmap.contourf(x,y,data,alpha=0.5)
+                f1 = self.bmap.contourf(x,y,data,alpha=0.5)
             else:
-                self.bmap.contourf(x,y,data,V,alpha=0.5)
+                f1 = self.bmap.contourf(x,y,data,V,alpha=0.5)
 
 
 
@@ -51,15 +55,21 @@ class BirdsEye(Figure):
         """
         #if self.C.plot_titles:
         title = utils.string_from_time('title',pt,tupleformat=0)
-        plt.title(title)
+        if not no_title:
+            plt.title(title)
         #if self.C.plot_colorbar:
-        plt.colorbar(orientation='horizontal')
+        cb = self.fig.colorbar(f1, orientation='horizontal')
 
         # SAVE FIGURE
         datestr = utils.string_from_time('output',pt,tupleformat=0)
-        self.fname = self.create_fname(fpath) # No da variable here
-        self.save(self.fig,self.p2p,self.fname)
-        self.fig.clf()
+        # self.fname = self.create_fname(fpath) # No da variable here
+        if save:
+            self.save(self.fig,p2p,fname)
+        
+        plt.close(self.fig)
+        return f1
+
+        # print("Plot saved to {0}.".format(os.path.join(p2p,fname)))
 
     #def plot2D(self,va,**kwargs):
     def plot2D(self,vrbl,t,lv,dom,outpath,bounding=0,smooth=1,plottype='contourf'):
