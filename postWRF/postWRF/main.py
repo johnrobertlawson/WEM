@@ -39,6 +39,7 @@ from defaults import Defaults
 from lookuptable import LookUpTable
 import WEM.utils as utils
 from xsection import CrossSection
+from clicker import Clicker
 
 # TODO: Make this awesome
 
@@ -836,3 +837,41 @@ class WRFEnviron(object):
         t_list = utils.ensure_sequence_datenum(times)
         for t in t_list:
             XS.plot_xs(vrbl,t,outpath,clvs=clvs,ztop=ztop)
+
+    def cold_pool_strength(self,time,wrf_sd=0,wrf_nc=0,out_sd=0,len_G=30,dom=1):
+        """
+        Pick A, B points on sim ref overlay
+        This sets the angle between north and line AB
+        Also sets the length in along-line direction
+        For every gridpt along line AB:
+            Locate gust front via shear
+            Starting at front, do 3-grid-pt-average in line-normal
+            direction
+            
+        time    :   time (tuple or datenum) to plot
+        wrf_sd  :   string - subdirectory of wrfout file
+        wrf_nc  :   filename of wrf file requested.
+                            If no wrfout file is explicitly specified, the
+                            netCDF file in that folder is chosen if unambiguous.
+        out_sd      :   subdirectory of output .png.
+        len_G   :   length in km to compute behind front
+        dom     :   domain number
+        
+        """
+        # Initialise
+        self.W = self.get_wrfout(wrf_sd,wrf_nc,dom=dom)
+        outpath = self.get_outpath(out_sd)
+        
+        # Plot sim ref, send basemap axis to clicker function
+        F = BirdsEye(self.C,self.W)
+        data = F.plot2D('cref',time,2000,dom,outpath,save=0,return_data=1)
+        C = Clicker(data=data)
+        
+        # Popup window and click two locations
+        C.click_x_y()
+        Ax, Ay = C.x, C.y
+        
+        C.click_x_y()
+        Bx, By = C.x, C.y
+        
+        #
