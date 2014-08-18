@@ -208,7 +208,7 @@ class WRFOut(object):
         if any('north' in p for p in PS['dim_names']):
             if 'la' not in PS:
                 sl.append(slice(None,None))
-            if isinstance(PS['la'],slice) or isinstance(PS['la'],N.ndarray):
+            elif isinstance(PS['la'],slice) or isinstance(PS['la'],N.ndarray):
                 sl.append(PS['la'])
             else:
                 sl.append(slice(PS['la'],PS['la']+1))
@@ -812,9 +812,47 @@ class WRFOut(object):
         Wlim = self.lons[0]
         return Nlim, Elim, Slim, Wlim
         
-    def cold_pool_strength(self):
-        pass
-    
+    def cold_pool_strength(self,X,time):
+        """
+        Returns array the same shape as WRF domain.
+        
+        X   :   cross-section object
+        """
+        # Set up slices
+        time_idx = self.get_time_idx(time)
+        # lv_idx = 0
+        
+        
+        # slices = {'t': time_idx, 'lv': lv_idx, 'la': lat_sl, 'lo': lon_sl}
+        slices = {'t':time_idx}
+
+        # Get wind data
+        wind = self.get('wind10',slices)
+
+        # This is the 2D plane for calculation data
+        coldpooldata = N.zeros(wind.shape[1:])
+        
+        
+        hyp_pts, xx, yy = X.get_xs_slice()
+
+        # pdb.set_trace()
+
+        # xint = xx.astype(int)
+        # yint = yy.astype(int)
+        angle = N.arctan((yy[-1]-yy[0])/(xx[-1]-xx[0])) # In radians
+        
+        for x,y in zip(xx,yy):
+            # For every point along line AB:
+            # Create line-normal cross-section
+            
+            norm_xx, norm_yy = X.create_linenormal_xs(x,y)
+            
+            gf_x, gf_y = find_gust_front()
+            
+            pdb.set_trace()
+            
+        return coldpooldata
+            
     def cold_pool_height(self):
         pass
     

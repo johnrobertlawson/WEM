@@ -106,3 +106,26 @@ class Figure(object):
         CB = plt.colorbar(cf,cax=CBax,orientation='horizontal')
         CB.set_label(label)
         self.save(fig,fpath,fname)
+
+    def basemap_setup(self,smooth=1):
+        # Fetch settings
+        basemap_res = getattr(self.C,'basemap_res',self.D.basemap_res)
+
+        width_m = self.W.dx*(self.W.x_dim-1)
+        height_m = self.W.dy*(self.W.y_dim-1)
+        
+        m = Basemap(
+            projection='lcc',width=width_m,height=height_m,
+            lon_0=self.W.cen_lon,lat_0=self.W.cen_lat,lat_1=self.W.truelat1,
+            lat_2=self.W.truelat2,resolution=basemap_res,area_thresh=500,
+            ax=self.ax)
+        m.drawcoastlines()
+        m.drawstates()
+        m.drawcountries()
+
+        # Draw meridians etc with wrff.lat/lon spacing
+        # Default should be a tenth of width of plot, rounded to sig fig
+
+        s = slice(None,None,smooth)
+        x,y = m(self.W.lons[s,s],self.W.lats[s,s])
+        return m, x, y

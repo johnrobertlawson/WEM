@@ -52,14 +52,12 @@ class Scales(object):
                 
         try:
             self.cm = self.A[vrbl]['cmap'](clvs)
-            #pdb.set_trace()
         except TypeError:
             #print("Using default colourtable.")
             #def_ct = plt.cm.get_cmap("jet")
             self.cm = 0
             #cm = LinearSegmentedColormap('DEF_CT',def_ct)
 
-        
     def get_multiplier(self,vrbl,lv):
         m = self.A[vrbl].get('multiplier',1)
         return m

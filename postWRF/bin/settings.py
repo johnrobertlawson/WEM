@@ -9,5 +9,6 @@ class Settings:
         self.plot_titles = 1
         self.terrain = 0
         self.colorbar = 1
+        self.matplotlibuse = 'gtkagg'
         #self.pickledir = '/home/jrlawson/data/sounding/WRFoutput/'
 
