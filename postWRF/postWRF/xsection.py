@@ -40,6 +40,28 @@ class CrossSection(Figure):
             print("Please click start and end points.")
             self.popup_transect()
     
+    def create_linenormal_xs(self,x,y,length_pts=3):
+        """
+        Return a cross-section that runs normal to the
+        existing cross-section contained in self.
+        
+        x,y         :   coordinates of intersection
+        length_pts  :   length of normal line in grid points
+        """
+    
+        hyp_pts, xx, yy = self.get_xs_slice()
+
+        xint = xx.astype(int)
+        yint = yy.astype(int)
+        angle = N.arctan((yy[-1]-yy[0])/(xx[-1]-xx[0])) # In radians
+        
+        normal_angle = angle + N.radians(90)
+        pdb.set_trace()
+        
+        
+        #return norm_xx, norm_yy
+        return 1,2
+        
     def popup_transect(self):
         """
         Pops up window for user to select start and
@@ -145,6 +167,16 @@ class CrossSection(Figure):
     
         return (1.0-w)*geopot[k] + w*geopot[k-1]
 
+    def get_xs_slice(self):
+        xA, yA = self.get_xy_from_latlon(self.latA,self.lonA)
+        xB, yB = self.get_xy_from_latlon(self.latB,self.lonB)
+        hyp_pts = int(N.hypot(xB-xA,yB-yA))
+        xx = N.linspace(xA,xB,hyp_pts)
+        yy = N.linspace(yA,yB,hyp_pts)
+        
+        # pdb.set_trace()
+        return hyp_pts,xx,yy
+
 
     def plot_xs(self,vrbl,ttime,outpath,clvs=0,ztop=0):
         """
@@ -157,11 +189,9 @@ class CrossSection(Figure):
         """
         # pdb.set_trace()
         tidx = self.W.get_time_idx(ttime)
-        xA, yA = self.get_xy_from_latlon(self.latA,self.lonA)
-        xB, yB = self.get_xy_from_latlon(self.latB,self.lonB)
-        hyp_pts = int(N.hypot(xB-xA,yB-yA))
-        xx = N.linspace(xA,xB,hyp_pts)
-        yy = N.linspace(yA,yB,hyp_pts)
+        
+        hyp_pts, xx, yy = self.get_xs_slice()
+
         xint = xx.astype(int)
         yint = yy.astype(int)
         angle = N.arctan((yy[-1]-yy[0])/(xx[-1]-xx[0])) # In radians

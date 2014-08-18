@@ -26,7 +26,8 @@ import numpy as N
 import os
 import pdb
 import time
-
+import matplotlib as M
+M.use('gtkagg')
 
 from wrfout import WRFOut
 from axes import Axes
@@ -52,6 +53,10 @@ class WRFEnviron(object):
         self.D = Defaults()
 
         # This stuff should be elsewhere.
+
+        # matplotlibuse = getattr(self.C,'matplotlibuse','agg')
+        # M.use(matplotlibuse)
+        # print "Using {0} backend.".format(matplotlibuse)
 
         #self.font_prop = getattr(self.C,'font_prop',self.D.font_prop)
         #self.usetex = getattr(self.C,'usetex',self.D.usetex)
@@ -864,14 +869,15 @@ class WRFEnviron(object):
         
         # Plot sim ref, send basemap axis to clicker function
         F = BirdsEye(self.C,self.W)
-        data = F.plot2D('cref',time,2000,dom,outpath,save=0,return_data=1)
-        C = Clicker(data=data)
+        self.data = F.plot2D('cref',time,2000,dom,outpath,save=0,return_data=1)
+        # pdb.set_trace()
+        C = Clicker(self.C,self.W,data=self.data)
         
-        # Popup window and click two locations
-        C.click_x_y()
-        Ax, Ay = C.x, C.y
+        C.draw_line()
+
+        lon0, lat0 = C.bmap(C.x0,C.y0,inverse=True)
+        lon1, lat1 = C.bmap(C.x1,C.y1,inverse=True)
         
-        C.click_x_y()
-        Bx, By = C.x, C.y
+        X = CrossSection(self.C,self.W,lat0,lon0,lat1,lon1)
         
-        #
+        self.W.cold_pool_strength(X,time)

@@ -16,6 +16,46 @@ class BirdsEye(Figure):
     def __init__(self,config,wrfout,ax=0):
         super(BirdsEye,self).__init__(config,wrfout,ax=ax)
 
+    def get_contouring(self,vrbl,lv,V=0):
+        """
+        Returns colourmap and contouring levels
+        V   :   manually override contour levels
+        """
+        
+        # List of args and dictionary of kwargs
+        plotargs = []
+        plotkwargs = {}
+        
+        # Scales object
+        S = Scales(vrbl,lv)
+        
+        if self.mplcommand == 'contour':
+            multiplier = S.get_multiplier(vrbl,lv)
+
+        if isinstance(V,collections.Sequence):
+            clvs = V
+        else:
+            try:
+                clvs = S.clvs
+            except:
+                pass
+
+        if S.cm:
+            plotargs = plotargs + [self.x,self.y,self.data.reshape((self.la_n,self.lo_n)),clvs]
+            plotkwargs['cmap'] = S.cm
+        elif isinstance(S.clvs,N.ndarray):
+            if self.mplcommand == 'contourf':
+                plotargs = plotargs + [self.x,self.y,self.data.reshape((self.la_n,self.lo_n)),clvs]
+                plotkwargs['cmap'] = plt.cm.jet
+            else:
+                plotargs = plotargs + [self.x,self.y,self.data.reshape((self.la_n,self.lo_n)),clvs]
+        else:
+            plotargs = plotargs + [self.x,self.y,self.data.reshape((self.la_n,self.lo_n))]
+            plotkwargs['cmap'] = plt.cm.jet
+            
+        # pdb.set_trace()
+        return plotargs, plotkwargs
+            
     def plot_data(self,data,mplcommand,p2p,fname,pt,V=0,no_title=0,save=1):
         """
         Generic method that plots any matrix of data on a map
@@ -35,19 +75,26 @@ class BirdsEye(Figure):
         # self.fig = self.figsize(8,8,self.fig)     # Create a default figure size if not set by user
         self.fig.set_size_inches(5,5)
         self.bmap,x,y = self.basemap_setup()#ax=self.ax)
+        self.mplcommand = mplcommand
+        self.data = data
 
-        if mplcommand == 'contour':
-            if not V:
-                f1 = self.bmap.contour(x,y,data)
-            else:
-                f1 = self.bmap.contour(x,y,data,V)
-        elif mplcommand == 'contourf':
-            if not V:
-                f1 = self.bmap.contourf(x,y,data,alpha=0.5)
-            else:
-                f1 = self.bmap.contourf(x,y,data,V,alpha=0.5)
+        self.la_n = self.data.shape[-2]
+        self.lo_n = self.data.shape[-1]
+        
+        # if plottype == 'contourf':
+            # f1 = self.bmap.contourf(*plotargs,**plotkwargs)
+        # elif plottype == 'contour':
+            # plotkwargs['colors'] = 'k'
+            # f1 = self.bmap.contour(*plotargs,**plotkwargs)
+            # scaling_func = M.ticker.FuncFormatter(lambda x, pos:'{0:d}'.format(int(x*multiplier)))
+            # plt.clabel(f1, inline=1, fmt=scaling_func, fontsize=9, colors='k')
 
-
+        plotargs, plotkwargs = self.get_contouring(vrbl,lv,V=V)
+        
+        if self.mplcommand == 'contour':
+            f1 = self.bmap.contour(*plotargs,**plotkwargs)
+        elif self.mplcommand == 'contourf':
+            f1 = self.bmap.contourf(*plotargs,**plotkwargs)
 
         # LABELS, TITLES etc
         """
@@ -96,6 +143,7 @@ class BirdsEye(Figure):
         # INITIALISE
         self.fig.set_size_inches(8,8)
         self.bmap,self.x,self.y = self.basemap_setup(smooth=smooth)
+        self.mplcommand = plottype
         
         # Make sure smooth=0 is corrected to 1
         # They are both essentially 'off'.
@@ -134,41 +182,45 @@ class BirdsEye(Figure):
 
         # FETCH DATA
         ncidx = {'t': tidx, 'lv': lvidx, 'la': latidx, 'lo': lonidx}
-        data = self.W.get(vrbl,ncidx)#,**vardict)
+        self.data = self.W.get(vrbl,ncidx)#,**vardict)
 
-        la_n = data.shape[-2]
-        lo_n = data.shape[-1]
+        self.la_n = self.data.shape[-2]
+        self.lo_n = self.data.shape[-1]
 
         # COLORBAR, CONTOURING
-        S = Scales(vrbl,lv)
+        plotargs, plotkwargs = self.get_contouring(vrbl,lv)
 
-        multiplier = S.get_multiplier(vrbl,lv)
+        # S = Scales(vrbl,lv)
 
-        if S.cm:
-            plotargs = (self.x,self.y,data.reshape((la_n,lo_n)),S.clvs)
-            cmap = S.cm
-        elif isinstance(S.clvs,N.ndarray):
-            if plottype == 'contourf':
-                plotargs = (self.x,self.y,data.reshape((la_n,lo_n)),S.clvs)
-                cmap = plt.cm.jet
-            else:
-                plotargs = (self.x,self.y,data.reshape((la_n,lo_n)),S.clvs)
-        else:
-            plotargs = (self.x,self.y,data.reshape((la_n,lo_n)))
-            cmap = plt.cm.jet
+        # multiplier = S.get_multiplier(vrbl,lv)
 
+        # if S.cm:
+            # plotargs = (self.x,self.y,data.reshape((la_n,lo_n)),S.clvs)
+            # cmap = S.cm
+        # elif isinstance(S.clvs,N.ndarray):
+            # if plottype == 'contourf':
+                # plotargs = (self.x,self.y,data.reshape((la_n,lo_n)),S.clvs)
+                # cmap = plt.cm.jet
+            # else:
+                # plotargs = (self.x,self.y,data.reshape((la_n,lo_n)),S.clvs)
+        # else:
+            # plotargs = (self.x,self.y,data.reshape((la_n,lo_n)))
+            # cmap = plt.cm.jet
+        # pdb.set_trace()
 
-        if plottype == 'contourf':
-            f1 = self.bmap.contourf(*plotargs,cmap=cmap)
-        elif plottype == 'contour':
-            f1 = self.bmap.contour(*plotargs,colors='k')
+        if self.mplcommand == 'contourf':
+            # f1 = self.bmap.contourf(*plotargs,cmap=cmap)
+            f1 = self.bmap.contourf(*plotargs,**plotkwargs)
+        elif self.mplcommand == 'contour':
+            plotkwargs['colors'] = 'k'
+            f1 = self.bmap.contour(*plotargs,**kwargs)
             scaling_func = M.ticker.FuncFormatter(lambda x, pos:'{0:d}'.format(int(x*multiplier)))
             plt.clabel(f1, inline=1, fmt=scaling_func, fontsize=9, colors='k')
 
         # LABELS, TITLES etc
         if self.C.plot_titles:
             plt.title(title)
-        if plottype == 'contourf' and self.C.colorbar:
+        if self.mplcommand == 'contourf' and self.C.colorbar:
             plt.colorbar(f1,orientation='horizontal')
         
         # SAVE FIGURE
@@ -181,8 +233,8 @@ class BirdsEye(Figure):
         if save:
             self.save(self.fig,outpath,self.fname)
         plt.close()
-        if isinstance(data,N.ndarray):
-            return data.reshape((la_n,lo_n))
+        if isinstance(self.data,N.ndarray):
+            return self.data.reshape((self.la_n,self.lo_n))
 
 
     def plot_streamlines(self,lv,pt,da=0):
@@ -231,27 +283,5 @@ class BirdsEye(Figure):
         plt.clf()
         plt.close()
 
-    def basemap_setup(self,smooth=1):
-        # Fetch settings
-        basemap_res = getattr(self.C,'basemap_res',self.D.basemap_res)
-
-        width_m = self.W.dx*(self.W.x_dim-1)
-        height_m = self.W.dy*(self.W.y_dim-1)
-        
-        m = Basemap(
-            projection='lcc',width=width_m,height=height_m,
-            lon_0=self.W.cen_lon,lat_0=self.W.cen_lat,lat_1=self.W.truelat1,
-            lat_2=self.W.truelat2,resolution=basemap_res,area_thresh=500,
-            ax=self.ax)
-        m.drawcoastlines()
-        m.drawstates()
-        m.drawcountries()
-
-        # Draw meridians etc with wrff.lat/lon spacing
-        # Default should be a tenth of width of plot, rounded to sig fig
-
-        s = slice(None,None,smooth)
-        x,y = m(self.W.lons[s,s],self.W.lats[s,s])
-        return m, x, y
 
 
