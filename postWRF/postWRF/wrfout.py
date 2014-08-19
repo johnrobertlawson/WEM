@@ -812,12 +812,15 @@ class WRFOut(object):
         Wlim = self.lons[0]
         return Nlim, Elim, Slim, Wlim
         
-    def cold_pool_strength(self,X,time):
+    def cold_pool_strength(self,X,time,km=100):
         """
         Returns array the same shape as WRF domain.
         
-        X   :   cross-section object
+        X   :   cross-section object with given path
+                This path goes front-to-back through a bow
+        km  :   width in the line-normal direction
         """
+        
         # Set up slices
         time_idx = self.get_time_idx(time)
         # lv_idx = 0

@@ -84,7 +84,7 @@ class Clicker(Figure):
         if isinstance(V,N.ndarray):
             kwargs['levels'] = V
             
-        kwargs['cmap'] =cmap
+        kwargs['cmap'] = cmap
         kwargs['extent'] = (0,xlen,0,ylen)
         kwargs['picker'] = 5
 
@@ -94,4 +94,35 @@ class Clicker(Figure):
         
         return
     
-    
+    def set_box_width(self,X):
+        """
+        Ask user to specify a width that is normal to the
+        cross-section X. The plot will show with the box displayed.
+        If the user is not happy, they can try again.
+        """
+        plt.show(self.fig)
+        user_is_happy = 0
+        while not user_is_happy:
+            self.km = int(raw_input("Specify line-normal width (km): "))
+            if not isinstance(self.km,int):
+                print("Value is not integer.")
+                raise Exception
+                
+            self.rect = M.patches.Rectangle((self.x0,self.y0),X.hyp_pts,X.angle)
+            self.ax.add_patch(self.rect)
+            self.ax.figure.canvas.draw()
+
+            plt.show(self.fig)
+            
+            while True:
+                doesitwork = raw_input("Does this work? (y/n/x): ")
+                if doesitwork == 'y':
+                    user_is_happy = 1
+                    break
+                elif doesitwork == 'n':
+                    break
+                elif doesitwork == 'x':
+                    raise Exception
+                else:
+                    print("Try again.")
+                    
