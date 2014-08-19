@@ -40,28 +40,18 @@ class CrossSection(Figure):
             print("Please click start and end points.")
             self.popup_transect()
     
-    def create_linenormal_xs(self,x,y,length_pts=3):
-        """
-        Return a cross-section that runs normal to the
-        existing cross-section contained in self.
-        
-        x,y         :   coordinates of intersection
-        length_pts  :   length of normal line in grid points
-        """
-    
-        hyp_pts, xx, yy = self.get_xs_slice()
+        self.get_xs_slice()
 
-        xint = xx.astype(int)
-        yint = yy.astype(int)
-        angle = N.arctan((yy[-1]-yy[0])/(xx[-1]-xx[0])) # In radians
-        
-        normal_angle = angle + N.radians(90)
+    def get_xs_slice(self):
+        self.xA, self.yA = self.get_xy_from_latlon(self.latA,self.lonA)
+        self.xB, self.yB = self.get_xy_from_latlon(self.latB,self.lonB)
+        self.hyp_pts = int(N.hypot(self.xB-self.xA,self.yB-self.yA))
+        self.xx = N.linspace(self.xA,self.xB,self.hyp_pts)
+        self.yy = N.linspace(self.yA,self.yB,self.hyp_pts)
+        self.angle = N.radians(90.0) + N.arctan((self.yy[0]-self.yy[-1])/(self.xx[-1]-self.xx[0]))
         pdb.set_trace()
-        
-        
-        #return norm_xx, norm_yy
-        return 1,2
-        
+        return
+    
     def popup_transect(self):
         """
         Pops up window for user to select start and
@@ -167,17 +157,10 @@ class CrossSection(Figure):
     
         return (1.0-w)*geopot[k] + w*geopot[k-1]
 
-    def get_xs_slice(self):
-        xA, yA = self.get_xy_from_latlon(self.latA,self.lonA)
-        xB, yB = self.get_xy_from_latlon(self.latB,self.lonB)
-        hyp_pts = int(N.hypot(xB-xA,yB-yA))
-        xx = N.linspace(xA,xB,hyp_pts)
-        yy = N.linspace(yA,yB,hyp_pts)
-        
-        # pdb.set_trace()
-        return hyp_pts,xx,yy
 
 
+
+    
     def plot_xs(self,vrbl,ttime,outpath,clvs=0,ztop=0):
         """
         Inputs:
@@ -187,28 +170,27 @@ class CrossSection(Figure):
         outpath     :   absolute path to directory to save output
 
         """
-        # pdb.set_trace()
         tidx = self.W.get_time_idx(ttime)
-        
-        hyp_pts, xx, yy = self.get_xs_slice()
 
-        xint = xx.astype(int)
-        yint = yy.astype(int)
-        angle = N.arctan((yy[-1]-yy[0])/(xx[-1]-xx[0])) # In radians
-        # pdb.set_trace()
+        xint = self.xx.astype(int)
+        yint = self.yy.astype(int)
 
         # Get terrain heights
-        terrain_z, heighthalf = self.get_height(tidx,xint,yint,self.W.z_dim,hyp_pts)
+        terrain_z, heighthalf = self.get_height(self.tidx,xint,yint,self.W.z_dim,self.hyp_pts)
         
         # Set up plot
         # Length of x-section in km
-        xs_len = (1/1000.0) * N.sqrt((-1.0*hyp_pts*self.W.dy*N.cos(angle))**2 +
-                                    (hyp_pts*self.W.dy*N.sin(angle))**2)
+        xs_len = (1/1000.0) * N.sqrt((-1.0*self.hyp_pts*self.W.dy*N.cos(self.angle))**2 +
+                                    (self.hyp_pts*self.W.dy*N.sin(self.angle))**2)
         
         # Generate ticks along cross-section
-        xticks = N.arange(0,xs_len,xs_len/hyp_pts)
+        xticks = N.arange(0,xs_len,xs_len/self.hyp_pts)
         xlabels = [r"%3.0f" %t for t in xticks]
-        grid = N.swapaxes(N.repeat(N.array(xticks).reshape(hyp_pts,1),self.W.z_dim,axis=1),0,1)
+        grid = N.swapaxes(N.repeat(N.array(xticks).reshape(self.hyp_pts,1),self.W.z_dim,axis=1),0,1)
+
+        #########
+        #### ADD SELF BELOW HERE
+        #########
 
         # Plotting
         if self.W.dx != self.W.dy:
@@ -322,3 +304,25 @@ class CrossSection(Figure):
         m,x,y = B.basemap_setup()
         m.drawgreatcircle(self.lonA,self.latA,self.lonB,self.latB)
         self.save(B.fig,outpath,fname)
+        
+    def create_linenormal_xs(self,x,y,length_pts=3):
+        """
+        Return a cross-section that runs normal to the
+        existing cross-section contained in self.
+        
+        x,y         :   coordinates of intersection
+        length_pts  :   length of normal line in grid points
+        """
+    
+        self.hyp_pts, self.xx, self.yy = self.get_xs_slice()
+
+        xint = self.xx.astype(int)
+        yint = self.yy.astype(int)
+        self.angle = N.arctan((self.yy[-1]-self.yy[0])/(self.xx[-1]-self.xx[0])) # In radians
+        
+        normal_angle = self.angle + N.radians(90)
+        # pdb.set_trace()
+        
+        
+        #return norm_xx, norm_yy
+        return 1,2
