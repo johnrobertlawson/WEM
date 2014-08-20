@@ -16,6 +16,7 @@ import scipy.ndimage
 import collections
 
 import WEM.utils as utils
+import metconstants as mc
 
 class WRFOut(object):
 
@@ -825,42 +826,91 @@ class WRFOut(object):
         time_idx = self.get_time_idx(time)
         # lv_idx = 0
         
-        
         # slices = {'t': time_idx, 'lv': lv_idx, 'la': lat_sl, 'lo': lon_sl}
         slices = {'t':time_idx}
 
         # Get wind data
-        wind = self.get('wind10',slices)
+        wind10 = self.get('wind10',slices)[0,...]
 
         # This is the 2D plane for calculation data
-        coldpooldata = N.zeros(wind.shape[1:])
+        coldpooldata = N.zeros(wind10.shape)
+        
+        # Compute required C2 fields to save time
+        dpt = self.get('dpt',slices)[0,...]
+        heights = self.get('Z',slices)[0,...]
+        
+        # All cross-sections (parallel)
+        xxx = [X.xx,]
+        yyy = [X.yy,]
         
         
-        hyp_pts, xx, yy = X.get_xs_slice()
-
-        # pdb.set_trace()
-
-        # xint = xx.astype(int)
-        # yint = yy.astype(int)
-        angle = N.arctan((yy[-1]-yy[0])/(xx[-1]-xx[0])) # In radians
-        
-        for x,y in zip(xx,yy):
-            # For every point along line AB:
-            # Create line-normal cross-section
+        for xx, yy in zip(xxx, yyy):
+            xx = xx.astype(int)
+            yy = yy.astype(int)
+            wind_slice = wind10[yy,xx]
+            slice_loc = self.find_gust_front(wind_slice,X.angle)
             
-            norm_xx, norm_yy = X.create_linenormal_xs(x,y)
-            
-            gf_x, gf_y = find_gust_front()
-            
-            pdb.set_trace()
-            
+            gfx = xx[slice_loc]
+            gfy = yy[slice_loc]
+            xx_cut = xx[:N.where(xx==gfx)[0][0]]
+            yy_cut = yy[:N.where(yy==gfy)[0][0]]
+            for x,y in zip(xx_cut,yy_cut):
+                # pdb.set_trace()
+                coldpooldata[y,x] = self.compute_C2(x,y,dpt[:,y,x],heights[:,y,x])
+                
         return coldpooldata
             
-    def cold_pool_height(self):
-        pass
+    def compute_C2(self,x,y,dpt,heights):
+        """
+        C^2 as found in James et al. 2006 MWR
+        
+        x       :   x location in domain
+        y       :   y location in domain
+        dpt     :   density potential temperature slice
+        heights :   geopotential height slice
+        """
+        
+        dz,dptp = self.cold_pool_depth(dpt,heights)
+        C2 = -2*mc.g*(dptp/dpt[0])*dz
+        
+        return C2
+        
+    def cold_pool_depth(self,dpt,heights):
+        dz = 0
+        for d,z in zip(dpt,heights):
+            dptp = d - dpt[0]
+            # pdb.set_trace()
+            if dptp > -1.0:
+                break
+            dz = z
+        
+        return dz, dptp
     
+    def find_gust_front(self,wind_slice,angle):
+        """
+        Find location of maximum shear in the horizontal wind along a
+        1D slice.
     
-    
-    
+        wind_slice      :   1D numpy array
+        angle           :   angle of slice cross-section
+        
+        """
+        shp = wind_slice.shape
+        shear = N.zeros(shp)
+        for n in range(shp[0]):
+            if n == 0 or n == shp[0]-1:
+                shear[n] = 0
+            else:
+                len1 = abs(self.dx / N.sin(angle))
+                len2 = abs(self.dx / N.cos(angle))
+                hyp = min((len1,len2))
+                shear[n] = (wind_slice[n+1]-wind_slice[n-1]/(2*hyp))
+                # N.W.DX
+                
+        maxshearloc = N.where(shear == shear.max())
+        # pdb.set_trace()
+        return maxshearloc
+        # maxshearloc[0][0] returns the integer
+
     
 

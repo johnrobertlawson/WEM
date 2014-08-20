@@ -870,7 +870,7 @@ class WRFEnviron(object):
         # Plot sim ref, send basemap axis to clicker function
         F = BirdsEye(self.C,self.W)
         self.data = F.plot2D('cref',time,2000,dom,outpath,save=0,return_data=1)
-        # pdb.set_trace()
+        
         C = Clicker(self.C,self.W,data=self.data)
         
         # Line from front to back of system
@@ -887,7 +887,10 @@ class WRFEnviron(object):
         # pdb.set_trace()
         
         # Compute the grid (DX x DY)
-        cps = self.W.cold_pool_strength(X,time,width=C.km)
+        cps = self.W.cold_pool_strength(X,time,km=50)
         
         # Plot this array
         CPfig = BirdsEye(self.C,self.W)
+        tstr = utils.string_from_time('output',time)
+        fname = 'ColdPoolStrength_' + tstr
+        CPfig.plot_data(cps,'contourf',outpath,fname,time)

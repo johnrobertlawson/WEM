@@ -136,4 +136,6 @@ class Scales(object):
         A['PMSL'] = {'cmap':0,'multiplier':0.01}
         A['PMSL'][2000] = (97000,103100,100)
         
+        #A['cps'] = {'cmap':0}
+        
         return A
