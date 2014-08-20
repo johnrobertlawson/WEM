@@ -48,8 +48,9 @@ class CrossSection(Figure):
         self.hyp_pts = int(N.hypot(self.xB-self.xA,self.yB-self.yA))
         self.xx = N.linspace(self.xA,self.xB,self.hyp_pts)
         self.yy = N.linspace(self.yA,self.yB,self.hyp_pts)
-        self.angle = N.radians(90.0) + N.arctan((self.yy[0]-self.yy[-1])/(self.xx[-1]-self.xx[0]))
-        pdb.set_trace()
+        # self.angle = N.radians(90.0) + N.arctan((self.yy[0]-self.yy[-1])/(self.xx[-1]-self.xx[0]))
+        self.angle = N.math.atan2((self.yy[0]-self.yy[-1]),(self.xx[0]-self.xx[-1])) + N.pi
+        # pdb.set_trace()
         return
     
     def popup_transect(self):

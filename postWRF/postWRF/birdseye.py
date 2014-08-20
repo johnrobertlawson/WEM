@@ -16,7 +16,7 @@ class BirdsEye(Figure):
     def __init__(self,config,wrfout,ax=0):
         super(BirdsEye,self).__init__(config,wrfout,ax=ax)
 
-    def get_contouring(self,vrbl,lv,V=0):
+    def get_contouring(self,vrbl='user',lv='user',V=0,cmap=0):
         """
         Returns colourmap and contouring levels
         V   :   manually override contour levels
@@ -27,28 +27,32 @@ class BirdsEye(Figure):
         plotkwargs = {}
         
         # Scales object
-        S = Scales(vrbl,lv)
-        
-        if self.mplcommand == 'contour':
-            multiplier = S.get_multiplier(vrbl,lv)
-
-        if isinstance(V,collections.Sequence):
-            clvs = V
-        else:
-            try:
-                clvs = S.clvs
-            except:
-                pass
-
-        if S.cm:
-            plotargs = plotargs + [self.x,self.y,self.data.reshape((self.la_n,self.lo_n)),clvs]
-            plotkwargs['cmap'] = S.cm
-        elif isinstance(S.clvs,N.ndarray):
-            if self.mplcommand == 'contourf':
-                plotargs = plotargs + [self.x,self.y,self.data.reshape((self.la_n,self.lo_n)),clvs]
-                plotkwargs['cmap'] = plt.cm.jet
+        if not vrbl == 'user':
+            S = Scales(vrbl,lv)
+            
+            if self.mplcommand == 'contour':
+                multiplier = S.get_multiplier(vrbl,lv)
+    
+            if isinstance(V,collections.Sequence):
+                clvs = V
             else:
+                try:
+                    clvs = S.clvs
+                except:
+                    pass
+    
+            if S.cm:
                 plotargs = plotargs + [self.x,self.y,self.data.reshape((self.la_n,self.lo_n)),clvs]
+                plotkwargs['cmap'] = S.cm
+            elif isinstance(S.clvs,N.ndarray):
+                if self.mplcommand == 'contourf':
+                    plotargs = plotargs + [self.x,self.y,self.data.reshape((self.la_n,self.lo_n)),clvs]
+                    plotkwargs['cmap'] = plt.cm.jet
+                else:
+                    plotargs = plotargs + [self.x,self.y,self.data.reshape((self.la_n,self.lo_n)),clvs]
+            else:
+                plotargs = plotargs + [self.x,self.y,self.data.reshape((self.la_n,self.lo_n))]
+                plotkwargs['cmap'] = plt.cm.jet
         else:
             plotargs = plotargs + [self.x,self.y,self.data.reshape((self.la_n,self.lo_n))]
             plotkwargs['cmap'] = plt.cm.jet
@@ -56,12 +60,13 @@ class BirdsEye(Figure):
         # pdb.set_trace()
         return plotargs, plotkwargs
             
-    def plot_data(self,data,mplcommand,p2p,fname,pt,V=0,no_title=0,save=1):
+    def plot_data(self,data,mplcommand,p2p,fname,pt,cmap='jet',V=0,no_title=1,save=1):
         """
         Generic method that plots any matrix of data on a map
 
         Inputs:
         data        :   lat/lon matrix of data
+        vrbl        :   variable type for contouring convention
         m           :   basemap instance
         mplcommand  :   contour or contourf
         p2p         :   path to plots
@@ -74,7 +79,7 @@ class BirdsEye(Figure):
         # self.fig = plt.figure()
         # self.fig = self.figsize(8,8,self.fig)     # Create a default figure size if not set by user
         self.fig.set_size_inches(5,5)
-        self.bmap,x,y = self.basemap_setup()#ax=self.ax)
+        self.bmap,self.x,self.y = self.basemap_setup()#ax=self.ax)
         self.mplcommand = mplcommand
         self.data = data
 
@@ -89,20 +94,23 @@ class BirdsEye(Figure):
             # scaling_func = M.ticker.FuncFormatter(lambda x, pos:'{0:d}'.format(int(x*multiplier)))
             # plt.clabel(f1, inline=1, fmt=scaling_func, fontsize=9, colors='k')
 
-        plotargs, plotkwargs = self.get_contouring(vrbl,lv,V=V)
+        plotargs, plotkwargs = self.get_contouring(V=V,cmap=cmap)
         
         if self.mplcommand == 'contour':
             f1 = self.bmap.contour(*plotargs,**plotkwargs)
         elif self.mplcommand == 'contourf':
             f1 = self.bmap.contourf(*plotargs,**plotkwargs)
+        else:
+            print("Specify plot type.")
+            raise Exception
 
         # LABELS, TITLES etc
         """
         Change these to hasattr!
         """
         #if self.C.plot_titles:
-        title = utils.string_from_time('title',pt,tupleformat=0)
         if not no_title:
+            title = utils.string_from_time('title',pt,tupleformat=0)
             plt.title(title)
         #if self.C.plot_colorbar:
         cb = self.fig.colorbar(f1, orientation='horizontal')
