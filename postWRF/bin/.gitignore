@@ -1,4 +1,5 @@
 *.py
+!DKEold.py
 !DKE_settings.py
 !DKE.py
 !20110419_plot.py
