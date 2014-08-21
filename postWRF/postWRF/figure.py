@@ -16,7 +16,7 @@ import WEM.utils as utils
 from defaults import Defaults
 
 class Figure(object):
-    def __init__(self,config,wrfout,ax=0):
+    def __init__(self,config,wrfout,ax=0,fig=0,plotn=(1,1)):
         """
         C   :   configuration settings
         W   :   data
@@ -36,9 +36,11 @@ class Figure(object):
         dpi = getattr(self.C,'DPI',self.D.dpi)
         
         # Create main figure
-        self.fig, self.ax = plt.subplots(1)
-        if ax:
+        if ax and fig:
             self.ax = ax
+            self.fig = fig
+        else:
+            self.fig, self.ax = plt.subplots(nrows=plotn[0],ncols=plotn[1])
         self.fig.set_dpi(dpi)
         # self.ax = self.fig.add_subplot(111)
     
@@ -60,12 +62,12 @@ class Figure(object):
         fig.set_size_inches(width,height)
         return fig
 
-    def save(self,fig,p2p,fname):
+    def save(self,p2p,fname):
         # fig.tight_layout()
         utils.trycreate(p2p)
         fpath = os.path.join(p2p,fname)
         #self.fig.savefig(fpath)
-        fig.savefig(fpath,bbox_inches='tight')
+        self.fig.savefig(fpath,bbox_inches='tight')
         print("Saving figure {0}".format(fpath))
 
     def get_limited_domain(self,da,smooth=1):

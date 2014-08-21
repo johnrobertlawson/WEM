@@ -14,7 +14,7 @@ from figure import Figure
 class Clicker(Figure):
     # def __init__(self,config,wrfout,ax=0):
     def __init__(self,config,wrfout,data=0,fig=0,ax=0):
-        super(Clicker,self).__init__(config,wrfout,ax=ax)
+        super(Clicker,self).__init__(config,wrfout,fig=fig,ax=ax)
 
         if isinstance(data,N.ndarray):
             self.bmap,self.x,self.y = self.basemap_setup()
@@ -22,7 +22,8 @@ class Clicker(Figure):
             self.overlay_data(data,V=S.clvs,cmap=S.cm)
         
     def click_x_y(self):
-        self.fig.canvas.mpl_connect('pick_event',self.onpick)
+        # self.fig.canvas.mpl_connect('pick_event',self.onpick)
+        self.ax.figure.canvas.mpl_connect('button_press_event', self.on_press)
         plt.show(self.fig)
         
     def draw_box(self):
@@ -46,6 +47,7 @@ class Clicker(Figure):
         self.ax.figure.canvas.mpl_connect('button_press_event', self.on_press)
         self.ax.figure.canvas.mpl_connect('button_release_event', self.on_release_line)
         plt.show(self.fig)
+        return self.ax
         
     def on_press(self, event):
         print 'press'
@@ -89,7 +91,7 @@ class Clicker(Figure):
         kwargs['picker'] = 5
 
         cf = self.bmap.contourf(self.x,self.y,data,**kwargs)
-        self.fig.colorbar(cf)
+        # self.fig.colorbar(cf,ax=self.ax,shrink=0.5,orientation='horizontal')
         # pdb.set_trace()
         
         return

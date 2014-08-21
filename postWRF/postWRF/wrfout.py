@@ -813,13 +813,14 @@ class WRFOut(object):
         Wlim = self.lons[0]
         return Nlim, Elim, Slim, Wlim
         
-    def cold_pool_strength(self,X,time,km=100):
+    def cold_pool_strength(self,X,time,swath_width=100,env=0):
         """
         Returns array the same shape as WRF domain.
         
         X   :   cross-section object with given path
                 This path goes front-to-back through a bow
         km  :   width in the line-normal direction
+        env :   (x,y) for location to sample environmental dpt
         """
         
         # Set up slices
@@ -831,72 +832,112 @@ class WRFOut(object):
 
         # Get wind data
         wind10 = self.get('wind10',slices)[0,...]
+        T2 = self.get('T2',slices)[0,...]
 
         # This is the 2D plane for calculation data
         coldpooldata = N.zeros(wind10.shape)
         
         # Compute required C2 fields to save time
         dpt = self.get('dpt',slices)[0,...]
-        heights = self.get('Z',slices)[0,...]
+        Z = self.get('Z',slices)[0,...]
+        HGT = self.get('HGT',slices)[0,...]
+        heights = Z-HGT
+        # pdb.set_trace()
+        
+        if isinstance(env,collections.Sequence):
+            xx_env = N.arange(env[0]-2,env[0]+3)
+            yy_env = N.arange(env[1]-2,env[1]+3)
+            dpt_env = N.mean(dpt[:,yy_env,xx_env],axis=1)
         
         # All cross-sections (parallel)
-        xxx = [X.xx,]
-        yyy = [X.yy,]
         
-        
-        for xx, yy in zip(xxx, yyy):
+        # xxx = [X.xx,]
+        # yyy = [X.yy,]
+        X.translate_xs(-swath_width/2)
+        for n in range(swath_width):
+            print("Cross section #{0}".format(n))
+        # for xx, yy in zip(xxx, yyy):
+            X.translate_xs(1)
+            xx = X.xx
+            yy = X.yy
             xx = xx.astype(int)
             yy = yy.astype(int)
             wind_slice = wind10[yy,xx]
-            slice_loc = self.find_gust_front(wind_slice,X.angle)
+            T2_slice = T2[yy,xx]
+            slice_loc = self.find_gust_front(wind_slice,T2_slice,X.angle)
             
             gfx = xx[slice_loc]
             gfy = yy[slice_loc]
-            xx_cut = xx[:N.where(xx==gfx)[0][0]]
-            yy_cut = yy[:N.where(yy==gfy)[0][0]]
-            for x,y in zip(xx_cut,yy_cut):
-                # pdb.set_trace()
-                coldpooldata[y,x] = self.compute_C2(x,y,dpt[:,y,x],heights[:,y,x])
-                
+            gf_pts = N.intersect1d(N.where(xx==gfx)[0],N.where(yy==gfy)[0])
+            gf_pt = gf_pts[int(len(gf_pts)/2.0)]
+            xx_cp = xx[:gf_pt]
+            yy_cp = yy[:gf_pt]
+            # pdb.set_trace()
+            
+            # Compute enviromental dpt at each height
+            # Average all levels from the location of gust front
+            # forwards to the end of the cross-section.
+            if not env:
+                xx_env = xx[gf_pt+1:]
+                yy_env = yy[gf_pt+1:]
+                dpt_env = N.mean(dpt[:,yy_env,xx_env],axis=1)
+            # pdb.set_trace()
+            
+            for x,y in zip(xx_cp,yy_cp):
+            #for x,y in zip(xx,yy):
+                coldpooldata[y,x] = N.sqrt(self.compute_C2(x,y,dpt[:,y,x],heights[:,y,x],dpt_env))
+        
+        # pdb.set_trace()
         return coldpooldata
             
-    def compute_C2(self,x,y,dpt,heights):
+    def compute_C2(self,x,y,dpt,heights,dpt_env):
         """
         C^2 as found in James et al. 2006 MWR
         
         x       :   x location in domain
         y       :   y location in domain
         dpt     :   density potential temperature slice
-        heights :   geopotential height slice
+        heights :   height AGL slice
+        dpt_env :   environmental dpt, column
         """
         
-        dz,dptp = self.cold_pool_depth(dpt,heights)
-        C2 = -2*mc.g*(dptp/dpt[0])*dz
-        
+        dz, zidx = self.cold_pool_depth(dpt,heights,dpt_env)
+        C2 = -2*mc.g*((dpt[zidx]-dpt_env[zidx])/dpt_env[zidx])*dz
+        # print("dpt = {0} ... dpt_env = {1} ... C2 = {2}".format(dpt[0],dpt_env[0],C2))
         return C2
         
-    def cold_pool_depth(self,dpt,heights):
+    def cold_pool_depth(self,dpt,heights,dpt_env):
         dz = 0
-        for d,z in zip(dpt,heights):
-            dptp = d - dpt[0]
-            # pdb.set_trace()
+        for d,z, de in zip(dpt[1:],heights[1:],dpt_env[1:]):
+            dptp = d - de
             if dptp > -1.0:
                 break
             dz = z
         
-        return dz, dptp
+        if isinstance(dz,float):
+            zidx = N.where(heights==dz)[0]
+        else:
+            zidx = 0
+            
+        return dz, zidx
     
-    def find_gust_front(self,wind_slice,angle):
+    def find_gust_front(self,wind_slice,T2_slice,angle,method=2):
         """
         Find location of maximum shear in the horizontal wind along a
         1D slice.
     
         wind_slice      :   1D numpy array
+        T2_slice        :   temp 2m slice
         angle           :   angle of slice cross-section
-        
+        method          :   way to locate gust front
         """
+        
         shp = wind_slice.shape
+        
+        # Compute gradient quantities
         shear = N.zeros(shp)
+        T2grad = N.zeros(shp)
+        
         for n in range(shp[0]):
             if n == 0 or n == shp[0]-1:
                 shear[n] = 0
@@ -904,12 +945,37 @@ class WRFOut(object):
                 len1 = abs(self.dx / N.sin(angle))
                 len2 = abs(self.dx / N.cos(angle))
                 hyp = min((len1,len2))
-                shear[n] = (wind_slice[n+1]-wind_slice[n-1]/(2*hyp))
+                # In kilometres:
+                shear[n] = ((wind_slice[n+1]-wind_slice[n-1])/(2*hyp))*1000.0
+                T2grad[n] = ((T2_slice[n+1]-T2_slice[n-1])/(2*hyp))*1000.0
                 # N.W.DX
-                
-        maxshearloc = N.where(shear == shear.max())
+              
         # pdb.set_trace()
-        return maxshearloc
+        
+        # Go from B to A
+        # Find first location where T2 drops and shear is ?
+        
+        if method==1:
+            ### METHOD 1: USING THRESHOLDS
+            # By default
+            gfidx = shp/2
+            for n, s, t in zip(range(shp)[::-1],shear[::-1],T2grad[::-1]):
+                if (abs(s)>2.0) and (t<2.0):
+                    gfidx = n
+                    break
+            
+        elif method==2:
+            
+            ### METHOD 2: FINDING MAX GRADIENTS AND AVERAGING
+            shear = abs(shear)
+            T2grad = abs(T2grad)
+            
+            xsh_idx = N.where(shear == shear.max())[0][0]
+            xtg_idx = N.where(T2grad == T2grad.max())[0][0]
+            print("Max shear loc: {0} ... max tempgrad loc: {1}".format(xsh_idx,xtg_idx))
+            gfidx = int((xsh_idx + xtg_idx)/2.0)
+            
+        return gfidx
         # maxshearloc[0][0] returns the integer
 
     

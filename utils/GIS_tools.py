@@ -486,6 +486,9 @@ def wrfout_files_in(folders,dom=0,init_time='notset',descend=1,avoid=0,
         return wrfouts
 
 def getXY(lats,lons,ptlat,ptlon):
+    """
+    Output is lat, lon so y,x
+    """
     # Find closest lat/lon in array
     minlat = abs(lats-ptlat).min()
     minlon = abs(lons-ptlon).min()

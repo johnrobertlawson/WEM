@@ -42,6 +42,14 @@ class CrossSection(Figure):
     
         self.get_xs_slice()
 
+    def translate_xs(self,shiftpoints):
+        self.xA += shiftpoints
+        self.xB += shiftpoints
+        self.yA += shiftpoints
+        self.yB += shiftpoints
+        self.xx = N.linspace(self.xA,self.xB,self.hyp_pts)
+        self.yy = N.linspace(self.yA,self.yB,self.hyp_pts)
+
     def get_xs_slice(self):
         self.xA, self.yA = self.get_xy_from_latlon(self.latA,self.lonA)
         self.xB, self.yB = self.get_xy_from_latlon(self.latB,self.lonB)
@@ -96,7 +104,7 @@ class CrossSection(Figure):
 
         exactlat, exactlon      :   exact coordinates of closest x/y
         """
-        x,y,exactlat,exactlon = utils.getXY(self.W.lats1D,self.W.lons1D,lat,lon)
+        y,x,exactlat,exactlon = utils.getXY(self.W.lats1D,self.W.lons1D,lat,lon)
         return x,y
 
     def get_height(self,t,x,y,z,pts):
