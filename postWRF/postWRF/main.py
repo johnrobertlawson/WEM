@@ -28,6 +28,7 @@ import pdb
 import time
 import matplotlib as M
 M.use('gtkagg')
+import matplotlib.pyplot as plt
 
 from wrfout import WRFOut
 from axes import Axes
@@ -843,7 +844,7 @@ class WRFEnviron(object):
         for t in t_list:
             XS.plot_xs(vrbl,t,outpath,clvs=clvs,ztop=ztop)
 
-    def cold_pool_strength(self,time,wrf_sd=0,wrf_nc=0,out_sd=0,len_G=30,dom=1):
+    def cold_pool_strength(self,time,wrf_sd=0,wrf_nc=0,out_sd=0,swath_width=100,dom=1,twoplot=0):
         """
         Pick A, B points on sim ref overlay
         This sets the angle between north and line AB
@@ -859,19 +860,35 @@ class WRFEnviron(object):
                             If no wrfout file is explicitly specified, the
                             netCDF file in that folder is chosen if unambiguous.
         out_sd      :   subdirectory of output .png.
-        len_G   :   length in km to compute behind front
+        swath_width :   length in gridpoints in cross-section-normal direction
         dom     :   domain number
+        return2 :   return two figures. cold pool strength and cref/cross-section.
         
         """
         # Initialise
         self.W = self.get_wrfout(wrf_sd,wrf_nc,dom=dom)
         outpath = self.get_outpath(out_sd)
         
+        # keyword arguments for plots
+        line_kwargs = {}
+        cps_kwargs = {}
+        # Create two-panel figure
+        if twoplot:
+            P2 = Figure(self.C,self.W,plotn=(1,2))
+            line_kwargs['ax'] = P2.ax.flat[0]
+            line_kwargs['fig'] = P2.fig
+            P2.ax.flat[0].set_size_inches(3,3)
+                
+            cps_kwargs['ax'] = P2.ax.flat[1]
+            cps_kwargs['fig'] = P2.fig
+            P2.ax.flat[1].set_size_inches(6,6)
+            
         # Plot sim ref, send basemap axis to clicker function
         F = BirdsEye(self.C,self.W)
         self.data = F.plot2D('cref',time,2000,dom,outpath,save=0,return_data=1)
         
-        C = Clicker(self.C,self.W,data=self.data)
+        C = Clicker(self.C,self.W,data=self.data,**line_kwargs)
+        # C.fig.tight_layout()
         
         # Line from front to back of system
         C.draw_line()
@@ -879,18 +896,35 @@ class WRFEnviron(object):
         lon0, lat0 = C.bmap(C.x0,C.y0,inverse=True)
         lon1, lat1 = C.bmap(C.x1,C.y1,inverse=True)
         
+        # Pick location for environmental dpt
+        # C.click_x_y()
+        # Here, it is the end of the cross-section
+        lon_env, lat_env = C.bmap(C.x1, C.y1, inverse=True)
+        y_env,x_env,exactlat,exactlon = utils.getXY(self.W.lats1D,self.W.lons1D,lat_env,lon_env)
         # Create the cross-section object
         X = CrossSection(self.C,self.W,lat0,lon0,lat1,lon1)
 
         # Ask user the line-normal box width (self.km)
         #C.set_box_width(X)
-        # pdb.set_trace()
         
         # Compute the grid (DX x DY)
-        cps = self.W.cold_pool_strength(X,time,km=50)
+        cps = self.W.cold_pool_strength(X,time,swath_width=swath_width,env=(x_env,y_env))
         
         # Plot this array
-        CPfig = BirdsEye(self.C,self.W)
+        CPfig = BirdsEye(self.C,self.W,**cps_kwargs)
         tstr = utils.string_from_time('output',time)
         fname = 'ColdPoolStrength_' + tstr
-        CPfig.plot_data(cps,'contourf',outpath,fname,time)
+        
+        # pdb.set_trace()
+        # imfig,imax = plt.subplots(1)
+        # imax.imshow(cps)
+        # plt.show(imfig)
+        # CPfig.plot_data(cps,'contourf',outpath,fname,time,V=N.arange(5,105,5))
+        mplcommand = 'contour'
+        if mplcommand[:7] == 'contour':
+            cps_kwargs['V'] = N.arange(5,105,5)
+        CPfig.plot_data(cps,mplcommand,outpath,fname,time)
+        # CPfig.fig.tight_layout()
+        
+        if twoplot:
+            P2.save(outpath,fname+"_twopanel")

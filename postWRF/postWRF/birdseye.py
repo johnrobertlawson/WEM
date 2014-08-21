@@ -13,8 +13,8 @@ import WEM.utils as utils
 from scales import Scales
 
 class BirdsEye(Figure):
-    def __init__(self,config,wrfout,ax=0):
-        super(BirdsEye,self).__init__(config,wrfout,ax=ax)
+    def __init__(self,config,wrfout,ax=0,fig=0):
+        super(BirdsEye,self).__init__(config,wrfout,ax=ax,fig=fig)
 
     def get_contouring(self,vrbl='user',lv='user',V=0,cmap=0):
         """
@@ -26,6 +26,8 @@ class BirdsEye(Figure):
         plotargs = []
         plotkwargs = {}
         
+        
+
         # Scales object
         if not vrbl == 'user':
             S = Scales(vrbl,lv)
@@ -33,29 +35,30 @@ class BirdsEye(Figure):
             if self.mplcommand == 'contour':
                 multiplier = S.get_multiplier(vrbl,lv)
     
-            if isinstance(V,collections.Sequence):
-                clvs = V
-            else:
-                try:
-                    clvs = S.clvs
-                except:
-                    pass
-    
             if S.cm:
-                plotargs = plotargs + [self.x,self.y,self.data.reshape((self.la_n,self.lo_n)),clvs]
+                plotargs = plotargs + [self.x,self.y,self.data.reshape((self.la_n,self.lo_n)),]
                 plotkwargs['cmap'] = S.cm
+        
             elif isinstance(S.clvs,N.ndarray):
                 if self.mplcommand == 'contourf':
-                    plotargs = plotargs + [self.x,self.y,self.data.reshape((self.la_n,self.lo_n)),clvs]
+                    plotargs = plotargs + [self.x,self.y,self.data.reshape((self.la_n,self.lo_n)),]
                     plotkwargs['cmap'] = plt.cm.jet
                 else:
-                    plotargs = plotargs + [self.x,self.y,self.data.reshape((self.la_n,self.lo_n)),clvs]
+                    plotargs = plotargs + [self.x,self.y,self.data.reshape((self.la_n,self.lo_n)),]
             else:
                 plotargs = plotargs + [self.x,self.y,self.data.reshape((self.la_n,self.lo_n))]
                 plotkwargs['cmap'] = plt.cm.jet
         else:
             plotargs = plotargs + [self.x,self.y,self.data.reshape((self.la_n,self.lo_n))]
             plotkwargs['cmap'] = plt.cm.jet
+            
+        if isinstance(V,N.ndarray):
+            plotkwargs['levels'] = V
+        else:
+            if vrbl == 'user':
+                pass
+            else:
+                plotkwargs['levels'] = S.clvs
             
         # pdb.set_trace()
         return plotargs, plotkwargs
@@ -78,7 +81,7 @@ class BirdsEye(Figure):
         # INITIALISE
         # self.fig = plt.figure()
         # self.fig = self.figsize(8,8,self.fig)     # Create a default figure size if not set by user
-        self.fig.set_size_inches(5,5)
+        # self.fig.set_size_inches(5,5)
         self.bmap,self.x,self.y = self.basemap_setup()#ax=self.ax)
         self.mplcommand = mplcommand
         self.data = data
@@ -100,6 +103,12 @@ class BirdsEye(Figure):
             f1 = self.bmap.contour(*plotargs,**plotkwargs)
         elif self.mplcommand == 'contourf':
             f1 = self.bmap.contourf(*plotargs,**plotkwargs)
+        elif self.mplcommand == 'pcolor':
+            f1 = self.bmap.pcolor(*plotargs,**plotkwargs)
+        elif self.mplcommand == 'pcolormesh':
+            f1 = self.bmap.pcolormesh(*plotargs,**plotkwargs)
+        elif self.mplcommand == 'scatter':
+            f1 = self.bmap.scatter(*plotargs,**plotkwargs)
         else:
             print("Specify plot type.")
             raise Exception
@@ -113,13 +122,13 @@ class BirdsEye(Figure):
             title = utils.string_from_time('title',pt,tupleformat=0)
             plt.title(title)
         #if self.C.plot_colorbar:
-        cb = self.fig.colorbar(f1, orientation='horizontal')
+        # self.fig.colorbar(f1,ax=self.ax,shrink=0.5,orientation='horizontal')
 
         # SAVE FIGURE
         datestr = utils.string_from_time('output',pt,tupleformat=0)
         # self.fname = self.create_fname(fpath) # No da variable here
         if save:
-            self.save(self.fig,p2p,fname)
+            self.save(p2p,fname)
         
         plt.close(self.fig)
         return f1
@@ -239,7 +248,7 @@ class BirdsEye(Figure):
             naming.append(dom)
         self.fname = self.create_fname(*naming)
         if save:
-            self.save(self.fig,outpath,self.fname)
+            self.save(elf.fname)
         plt.close()
         if isinstance(self.data,N.ndarray):
             return self.data.reshape((self.la_n,self.lo_n))
@@ -287,7 +296,7 @@ class BirdsEye(Figure):
         datestr = utils.string_from_time('output',pt)
         na = ('streamlines',lv_na,datestr)
         self.fname = self.create_fname(*na)
-        self.save(self.fig,self.p2p,self.fname)
+        self.save(self.p2p,self.fname)
         plt.clf()
         plt.close()
 
