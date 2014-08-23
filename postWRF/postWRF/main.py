@@ -844,7 +844,7 @@ class WRFEnviron(object):
         for t in t_list:
             XS.plot_xs(vrbl,t,outpath,clvs=clvs,ztop=ztop)
 
-    def cold_pool_strength(self,time,wrf_sd=0,wrf_nc=0,out_sd=0,swath_width=100,dom=1,twoplot=0):
+    def cold_pool_strength(self,time,wrf_sd=0,wrf_nc=0,out_sd=0,swath_width=100,dom=1,twoplot=0,fig=0,axes=0):
         """
         Pick A, B points on sim ref overlay
         This sets the angle between north and line AB
@@ -863,6 +863,8 @@ class WRFEnviron(object):
         swath_width :   length in gridpoints in cross-section-normal direction
         dom     :   domain number
         return2 :   return two figures. cold pool strength and cref/cross-section.
+        axes    :   if two-length tuple, this is the first and second axes for
+                    cross-section/cref and cold pool strength, respectively
         
         """
         # Initialise
@@ -882,6 +884,15 @@ class WRFEnviron(object):
             cps_kwargs['ax'] = P2.ax.flat[1]
             cps_kwargs['fig'] = P2.fig
             P2.ax.flat[1].set_size_inches(6,6)
+        
+        elif isinstance(axes,tuple) and len(axes)==2:
+            line_kwargs['ax'] = axes[0]
+            line_kwargs['fig'] = fig
+            
+            cps_kwargs['ax'] = axes[1]
+            cps_kwargs['fig'] = fig
+            
+            return_ax = 1
             
         # Plot sim ref, send basemap axis to clicker function
         F = BirdsEye(self.C,self.W)
@@ -921,10 +932,15 @@ class WRFEnviron(object):
         # plt.show(imfig)
         # CPfig.plot_data(cps,'contourf',outpath,fname,time,V=N.arange(5,105,5))
         mplcommand = 'contour'
+        plotkwargs = {}
         if mplcommand[:7] == 'contour':
-            cps_kwargs['V'] = N.arange(5,105,5)
-        CPfig.plot_data(cps,mplcommand,outpath,fname,time)
+            plotkwargs['levels'] = N.arange(10,85,2.5)
+            plotkwargs['cmap'] = plt.cm.ocean_r
+        cf2 = CPfig.plot_data(cps,mplcommand,outpath,fname,time,**plotkwargs)
         # CPfig.fig.tight_layout()
         
         if twoplot:
             P2.save(outpath,fname+"_twopanel")
+            
+        if return_ax:
+            return C.cf, cf2

@@ -47,7 +47,6 @@ class Clicker(Figure):
         self.ax.figure.canvas.mpl_connect('button_press_event', self.on_press)
         self.ax.figure.canvas.mpl_connect('button_release_event', self.on_release_line)
         plt.show(self.fig)
-        return self.ax
         
     def on_press(self, event):
         print 'press'
@@ -90,7 +89,7 @@ class Clicker(Figure):
         kwargs['extent'] = (0,xlen,0,ylen)
         kwargs['picker'] = 5
 
-        cf = self.bmap.contourf(self.x,self.y,data,**kwargs)
+        self.cf = self.bmap.contourf(self.x,self.y,data,**kwargs)
         # self.fig.colorbar(cf,ax=self.ax,shrink=0.5,orientation='horizontal')
         # pdb.set_trace()
         
