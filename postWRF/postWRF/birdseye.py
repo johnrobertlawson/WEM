@@ -6,6 +6,7 @@ from mpl_toolkits.basemap import Basemap
 import numpy as N
 import collections
 import os
+from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 from defaults import Defaults
 from figure import Figure
@@ -16,54 +17,40 @@ class BirdsEye(Figure):
     def __init__(self,config,wrfout,ax=0,fig=0):
         super(BirdsEye,self).__init__(config,wrfout,ax=ax,fig=fig)
 
-    def get_contouring(self,vrbl='user',lv='user',V=0,cmap=0):
+    def get_contouring(self,vrbl='user',lv='user',**kwargs):
         """
         Returns colourmap and contouring levels
+        
+        Options keyword arguments:
         V   :   manually override contour levels
         """
         
+        data = self.data.reshape((self.la_n,self.lo_n))
+        
         # List of args and dictionary of kwargs
-        plotargs = []
-        plotkwargs = {}
-        
-        
+        plotargs = [self.x,self.y,data]
+        plotkwargs = kwargs
 
-        # Scales object
-        if not vrbl == 'user':
+        # cmap = getattr(kwargs,'cmap',plt.cm.jet)
+
+
+        if vrbl=='user':
+            pass
+            
+        else:
             S = Scales(vrbl,lv)
-            
-            if self.mplcommand == 'contour':
-                multiplier = S.get_multiplier(vrbl,lv)
-    
             if S.cm:
-                plotargs = plotargs + [self.x,self.y,self.data.reshape((self.la_n,self.lo_n)),]
                 plotkwargs['cmap'] = S.cm
-        
-            elif isinstance(S.clvs,N.ndarray):
-                if self.mplcommand == 'contourf':
-                    plotargs = plotargs + [self.x,self.y,self.data.reshape((self.la_n,self.lo_n)),]
-                    plotkwargs['cmap'] = plt.cm.jet
-                else:
-                    plotargs = plotargs + [self.x,self.y,self.data.reshape((self.la_n,self.lo_n)),]
-            else:
-                plotargs = plotargs + [self.x,self.y,self.data.reshape((self.la_n,self.lo_n))]
-                plotkwargs['cmap'] = plt.cm.jet
-        else:
-            plotargs = plotargs + [self.x,self.y,self.data.reshape((self.la_n,self.lo_n))]
-            plotkwargs['cmap'] = plt.cm.jet
-            
-        if isinstance(V,N.ndarray):
-            plotkwargs['levels'] = V
-        else:
-            if vrbl == 'user':
-                pass
-            else:
+            if isinstance(S.clvs,N.ndarray):
                 plotkwargs['levels'] = S.clvs
             
+            # if self.mplcommand == 'contour':
+                # multiplier = S.get_multiplier(vrbl,lv)
+                
         # pdb.set_trace()
         return plotargs, plotkwargs
             
-    def plot_data(self,data,mplcommand,p2p,fname,pt,cmap='jet',V=0,no_title=1,save=1):
+    def plot_data(self,data,mplcommand,p2p,fname,pt,no_title=1,save=1,**kwargs):
         """
         Generic method that plots any matrix of data on a map
 
@@ -71,7 +58,7 @@ class BirdsEye(Figure):
         data        :   lat/lon matrix of data
         vrbl        :   variable type for contouring convention
         m           :   basemap instance
-        mplcommand  :   contour or contourf
+        mplcommand  :   contour or contourf etc
         p2p         :   path to plots
         fname       :   filename for plot
         V           :   scale for contours
@@ -97,8 +84,8 @@ class BirdsEye(Figure):
             # scaling_func = M.ticker.FuncFormatter(lambda x, pos:'{0:d}'.format(int(x*multiplier)))
             # plt.clabel(f1, inline=1, fmt=scaling_func, fontsize=9, colors='k')
 
-        plotargs, plotkwargs = self.get_contouring(V=V,cmap=cmap)
-        
+        plotargs, plotkwargs = self.get_contouring(**kwargs)
+        # pdb.set_trace()
         if self.mplcommand == 'contour':
             f1 = self.bmap.contour(*plotargs,**plotkwargs)
         elif self.mplcommand == 'contourf':
@@ -122,7 +109,12 @@ class BirdsEye(Figure):
             title = utils.string_from_time('title',pt,tupleformat=0)
             plt.title(title)
         #if self.C.plot_colorbar:
-        # self.fig.colorbar(f1,ax=self.ax,shrink=0.5,orientation='horizontal')
+        #self.bmap.colorbar(f1,location='bottom',orientation='horizontal')
+        # plt.show(self.fig)
+        # div0 = make_axes_locatable(self.ax)
+        # cax0 = div0.append_axes("bottom", size="20%", pad=0.05)
+        # cb0 = self.fig.colorbar(f1, cax=cax0)
+
 
         # SAVE FIGURE
         datestr = utils.string_from_time('output',pt,tupleformat=0)

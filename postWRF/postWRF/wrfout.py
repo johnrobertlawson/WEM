@@ -921,7 +921,7 @@ class WRFOut(object):
             
         return dz, zidx
     
-    def find_gust_front(self,wind_slice,T2_slice,angle,method=2):
+    def find_gust_front(self,wind_slice,T2_slice,angle,method=3):
         """
         Find location of maximum shear in the horizontal wind along a
         1D slice.
@@ -964,7 +964,7 @@ class WRFOut(object):
                     gfidx = n
                     break
             
-        elif method==2:
+        elif method==2 or method==3:
             
             ### METHOD 2: FINDING MAX GRADIENTS AND AVERAGING
             shear = abs(shear)
@@ -973,7 +973,11 @@ class WRFOut(object):
             xsh_idx = N.where(shear == shear.max())[0][0]
             xtg_idx = N.where(T2grad == T2grad.max())[0][0]
             print("Max shear loc: {0} ... max tempgrad loc: {1}".format(xsh_idx,xtg_idx))
-            gfidx = int((xsh_idx + xtg_idx)/2.0)
+            
+            if method==2:
+                gfidx = int((xsh_idx + xtg_idx)/2.0)
+            else:
+                gfidx = max([xsh_idx,xtg_idx])
             
         return gfidx
         # maxshearloc[0][0] returns the integer
