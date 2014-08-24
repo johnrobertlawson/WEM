@@ -168,15 +168,19 @@ class WRFEnviron(object):
         wrf_nc      :   filename for wrf file
         dom         :   domain for wrf file
         """
+        # Check configuration to see if wrfout files should be
+        # sought inside subdirectories.
+        descend = getattr(self.C,'wrf_folders_descend',1)
         
         if wrf_sd and wrf_nc:
             wrfpath = os.path.join(self.C.wrfout_root,wrf_sd,wrf_nc)
         elif wrf_sd:
             wrfdir = os.path.join(self.C.wrfout_root,wrf_sd)
-            wrfpath = utils.wrfout_files_in(wrfdir,dom=dom,unambiguous=1)
+            # print wrfdir
+            wrfpath = utils.wrfout_files_in(wrfdir,dom=dom,unambiguous=1,descend=descend)
         else:
             wrfdir = os.path.join(self.C.wrfout_root)
-            wrfpath = utils.wrfout_files_in(wrfdir,dom=dom,unambiguous=1)
+            wrfpath = utils.wrfout_files_in(wrfdir,dom=dom,unambiguous=1,descend=descend)
             
         return WRFOut(wrfpath)
 
@@ -938,6 +942,8 @@ class WRFEnviron(object):
             plotkwargs['cmap'] = plt.cm.ocean_r
         cf2 = CPfig.plot_data(cps,mplcommand,outpath,fname,time,**plotkwargs)
         # CPfig.fig.tight_layout()
+        
+        plt.close(fig)
         
         if twoplot:
             P2.save(outpath,fname+"_twopanel")

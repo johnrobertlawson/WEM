@@ -42,11 +42,43 @@ class CrossSection(Figure):
     
         self.get_xs_slice()
 
-    def translate_xs(self,shiftpoints):
-        self.xA += shiftpoints
-        self.xB += shiftpoints
-        self.yA += shiftpoints
-        self.yB += shiftpoints
+    def translate_xs(self,sh):
+        """
+        Translate the cross-section up or down a certain number of
+        points.
+        For simplicity with grid spacing, the logic allows for
+        45 degree translation only.
+        
+        sh  :   number of points to shift
+        """
+        
+        if (self.angle > 0.0) and (self.angle < 22.5):
+            shxa = -sh; shxb = -sh; shya = 0;  shyb = 0
+        elif (self.angle > 22.5) and (self.angle < 67.5):
+            shxa = -sh; shxb = -sh; shya = sh;  shyb = sh
+        elif (self.angle > 67.5) and (self.angle < 112.5):
+            shxa = 0; shxb = 0; shya = sh;  shyb = sh
+        elif (self.angle > 112.5) and (self.angle < 157.5):
+            shxa = sh; shxb = sh; shya = sh;  shyb = sh
+        elif (self.angle > 157.5) and (self.angle < 202.5):
+            shxa = sh; shxb = sh; shya = 0;  shyb = 0
+        elif (self.angle > 202.5) and (self.angle < 247.5):
+            shxa = sh; shxb = sh; shya = -sh;  shyb = -sh
+        elif (self.angle > 247.5) and (self.angle < 292.5):
+            shxa = 0; shxb = 0; shya = -sh;  shyb = -sh
+        elif (self.angle > 292.5) and (self.angle < 337.5):
+            shxa = -sh; shxb = -sh; shya = -sh;  shyb = -sh
+        elif (self.angle > 337.5) and (self.angle < 360.0):
+            shxa = -sh; shxb = -sh; shya = 0;  shyb = 0
+        else:
+            print("Angle {0} is weird.".format(self.angle))
+            raise Exception
+            
+        
+        self.xA += shxa
+        self.xB += shxb
+        self.yA += shya
+        self.yB += shyb
         self.xx = N.linspace(self.xA,self.xB,self.hyp_pts)
         self.yy = N.linspace(self.yA,self.yB,self.hyp_pts)
 

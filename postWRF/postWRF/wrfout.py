@@ -366,10 +366,25 @@ class WRFOut(object):
         qv = self.get('QVAPOR',slices)
         qc = self.get('QCLOUD',slices)
         qr = self.get('QRAIN',slices)
-        qi = self.get('QICE',slices)
-        qs = self.get('QSNOW',slices)
-        qg = self.get('QGRAUP',slices)
-
+        
+        try:
+            qi = self.get('QICE',slices)
+        except KeyError:
+            print("MP scheme has no ice data.")
+            qi = 0
+            
+        try:
+            qs = self.get('QSNOW',slices)
+        except KeyError:
+            print("MP scheme has no snow data.")
+            qs = 0
+            
+        try:
+            qg = self.get('QGRAUP',slices)
+        except KeyError:
+            print("MP scheme has no graupel data.")
+            qg = 0
+            
         rh = qc + qr + qi + qs + qg
         rv = qv
 
