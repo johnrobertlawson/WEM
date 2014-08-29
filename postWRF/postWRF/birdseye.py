@@ -8,6 +8,7 @@ import collections
 import os
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 
+from wrfout import WRFOut
 from defaults import Defaults
 from figure import Figure
 import WEM.utils as utils
@@ -240,14 +241,13 @@ class BirdsEye(Figure):
             naming.append(dom)
         self.fname = self.create_fname(*naming)
         if save:
-            self.save(elf.fname)
+            self.save(outpath,self.fname)
         plt.close()
         if isinstance(self.data,N.ndarray):
             return self.data.reshape((self.la_n,self.lo_n))
 
 
-    def plot_streamlines(self,lv,pt,da=0):
-        self.fig = plt.figure()
+    def plot_streamlines(self,lv,pt,outpath,da=0):
         m,x,y = self.basemap_setup()
 
         time_idx = self.W.get_time_idx(pt)
@@ -284,13 +284,58 @@ class BirdsEye(Figure):
         #plt.colorbar(divp,orientation='horizontal')
         if self.C.plot_titles:
             title = utils.string_from_time('title',pt)
-            plt.title(title)
+            m.title(title)
         datestr = utils.string_from_time('output',pt)
         na = ('streamlines',lv_na,datestr)
-        self.fname = self.create_fname(*na)
-        self.save(self.p2p,self.fname)
-        plt.clf()
-        plt.close()
+        fname = self.create_fname(*na)
+        self.save(outpath,fname)
 
+    def spaghetti(self,t,lv,va,contour,wrfouts,outpath,da=0,dom=0):
+        """
+        wrfouts     :   list of wrfout files
 
+        Only change dom if there are multiple domains.
+        """
+        m,x,y = self.basemap_setup()
 
+        time_idx = self.W.get_time_idx(t)
+
+        colours = utils.generate_colours(M,len(wrfouts)) 
+
+        # import pdb; pdb.set_trace()
+        if lv==2000:
+            lv_idx = None
+        else:
+            print("Only support surface right now")
+            raise Exception
+
+        lat_sl, lon_sl = self.get_limited_domain(da)
+
+        slices = {'t': time_idx, 'lv': lv_idx, 'la': lat_sl, 'lo': lon_sl}
+       
+        # self.ax.set_color_cycle(colours)
+        ctlist = []
+        for n,wrfout in enumerate(wrfouts):
+            self.W = WRFOut(wrfout)
+            data = self.W.get(va,slices)[0,...]
+            # m.contour(x,y,data,levels=[contour,])
+            ct = m.contour(x,y,data,colors=[colours[n],],levels=[contour,],label=wrfout.split('/')[-2])
+            print("Plotting contour level {0} for {1} from file \n {2}".format(
+                            contour,va,wrfout))
+            # ctlist.append(ct)
+            # self.ax.legend()
+
+        # labels = [w.split('/')[-2] for w in wrfouts]
+        # print labels
+        # self.fig.legend(handles=ctlist)
+        # plt.legend(handles=ctlist,labels=labels)
+        #labels,ncol=3, loc=3,
+        #                bbox_to_anchor=[0.5,1.5])
+
+        datestr = utils.string_from_time('output',t,tupleformat=0)
+        lv_na = utils.get_level_naming(va,lv)
+        naming = ['spaghetti',va,lv_na,datestr]
+        if dom:
+            naming.append(dom)
+        fname = self.create_fname(*naming)
+        self.save(outpath,fname)
