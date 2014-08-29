@@ -160,13 +160,14 @@ class WRFEnviron(object):
                 #rq[va]['vc'] = vc # Need this?
                 # F.plot2D(va, t, lv, )
 
-    def get_wrfout(self,wrf_sd=0,wrf_nc=0,dom=0):
+    def get_wrfout(self,wrf_sd=0,wrf_nc=0,dom=0,path_only=0):
         """Returns the WRFOut instance, given arguments:
         
         Optional inputs:
         wrf_sd      :   subdirectory for wrf file
         wrf_nc      :   filename for wrf file
         dom         :   domain for wrf file
+        path_only   :   only return absolute path
         """
         # Check configuration to see if wrfout files should be
         # sought inside subdirectories.
@@ -182,7 +183,10 @@ class WRFEnviron(object):
             wrfdir = os.path.join(self.C.wrfout_root)
             wrfpath = utils.wrfout_files_in(wrfdir,dom=dom,unambiguous=1,descend=descend)
             
-        return WRFOut(wrfpath)
+        if path_only:
+            return wrfpath
+        else:
+            return WRFOut(wrfpath)
 
     def generate_times(self,itime,ftime,x):
         """
@@ -689,7 +693,7 @@ class WRFEnviron(object):
             plt.close()
             print("Saved {0}.".format(fpath))
             
-    def composite_profile(self,va,skewT_time,skewT_latlon,enspaths,dom=1,mean=0,std=0,xlim=0,ylim=0):
+    def composite_profile(self,va,skewT_time,skewT_latlon,enspaths,dom=2,mean=0,std=0,xlim=0,ylim=0):
         P = Profile(self.C)
         P.composite_profile(va,skewT_time,skewT_latlon,enspaths,dom,mean,std,xlim,ylim)
 
@@ -707,15 +711,15 @@ class WRFEnviron(object):
                 #ST = SkewT(self.C)
                 pass
                 
-    def plot_streamlines(self,lv,times):
-        wrfpath = self.wrfout_files_in(self.C.wrfout_root)[0]
-        self.W = WRFOut(wrfpath)
+    def plot_streamlines(self,lv,time,wrf_sd=0,wrf_nc=0,out_sd=0,dom=1):
+        self.W = self.get_wrfout(wrf_sd,wrf_nc,dom=dom)
+        outpath = self.get_outpath(out_sd)
+
         self.F = BirdsEye(self.C,self.W)
-        for pt in times:
-            disp_t = utils.string_from_time('title',pt)
-            print("Plotting {0} at lv {1} for time {2}.".format(
-                    'streamlines',lv,disp_t))
-            self.F.plot_streamlines(lv,pt)
+        disp_t = utils.string_from_time('title',time)
+        print("Plotting {0} at lv {1} for time {2}.".format(
+                'streamlines',lv,disp_t))
+        self.F.plot_streamlines(lv,time,outpath)
 
     def plot_strongest_wind(self,itime,ftime,levels,wrf_sd=0,wrf_nc=0,out_sd=0,f_prefix=0,f_suffix=0,
                 bounding=0,dom=0):
@@ -908,7 +912,7 @@ class WRFEnviron(object):
         # Line from front to back of system
         C.draw_line()
         # C.draw_box()
-        lon0, lat0 = C.bmap(C.x0,C.y0,inverse=True)
+        # lon0, lat0 = C.bmap(C.x0,C.y0,inverse=True)
         lon1, lat1 = C.bmap(C.x1,C.y1,inverse=True)
         
         # Pick location for environmental dpt
@@ -950,3 +954,37 @@ class WRFEnviron(object):
             
         if return_ax:
             return C.cf, cf2
+            
+    def spaghetti(self,t,lv,va,contour,wrf_sds,out_sd,dom=1):
+        """
+        Do a multi-member spaghetti plot.
+
+        t       :   time for plot
+        va      :   variable in question
+        contour :   value to contour for each member
+        wrf_sds :   list of wrf subdirs to loop over
+        out_sd  :   directory to save image
+        """
+        # import pdb; pdb.set_trace()
+        outpath = self.get_outpath(out_sd)
+        
+        # Use first wrfout to initialise grid etc
+        self.W = self.get_wrfout(wrf_sds[0],dom=dom)
+        F = BirdsEye(self.C, self.W)
+
+        ncfiles = []
+        for wrf_sd in wrf_sds:
+            ncfile = self.get_wrfout(wrf_sd,dom=dom,path_only=1)
+            ncfiles.append(ncfile)           
+           
+        F.spaghetti(t,lv,va,contour,ncfiles,outpath)
+            
+
+
+
+
+
+
+
+
+

@@ -19,7 +19,8 @@ skewT = 0
 plot2D = 0
 streamlines = 0
 rucplot = 0
-coldpoolstrength = 1
+coldpoolstrength = 0
+spaghetti = 1
 
 enstype = 'STCH'
 # enstype = 'ICBC'
@@ -64,7 +65,7 @@ elif case[:4] == '2011':
 elif case[:4] == '2013':
     itime = (2013,8,15,21,0,0)
     ftime = (2013,8,16,9,0,0)
-    times = [(2013,8,15,18,0,0),]
+    times = [(2013,8,16,3,0,0),]
 else:
     raise Exception
 
@@ -163,3 +164,17 @@ if coldpoolstrength:
                 # print out_sd, wrf_sd
                 cf0, cf1 = p.cold_pool_strength(t,wrf_sd=wrf_sd,out_sd=out_sd,swath_width=130,fig=fig,axes=(ax0,ax1))
                 plt.close(fig)
+
+if spaghetti:
+    wrf_sds = [] 
+    for en in ensnames:
+        for ex in experiments:
+            out_sd, wrf_sd = get_folders(en,ex)
+            wrf_sds.append(wrf_sd)
+    
+    lv = 2000
+    # Save to higher directory
+    out_d = os.path.dirname(out_sd) 
+    for t in times:
+        p.spaghetti(t,lv,'cref',40,wrf_sds[:4],out_d)
+                

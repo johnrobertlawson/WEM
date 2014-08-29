@@ -69,6 +69,7 @@ class Figure(object):
         #self.fig.savefig(fpath)
         self.fig.savefig(fpath,bbox_inches='tight')
         print("Saving figure {0}".format(fpath))
+        plt.close(self.fig)
 
     def get_limited_domain(self,da,smooth=1):
         if da:  # Limited domain area

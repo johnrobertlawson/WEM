@@ -760,6 +760,9 @@ def generate_colours(M,n):
     n       :   number of colours you want
     
     Returns
+
+    Usage: when cycling over n plots, the colour should
+    be colourlist[n].
     """
     
     colourlist = [M.cm.spectral(i) for i in N.linspace(0.08,0.97,n)]

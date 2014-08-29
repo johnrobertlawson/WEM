@@ -305,6 +305,7 @@ class WRFOut(object):
         tbl['RH'] = self.compute_RH
         tbl['dryairmass'] = self.compute_dryairmass
         tbl['QTOTAL'] = self.compute_qtotal
+        tbl['olr'] =self.compute_olr
 
         return tbl
         
@@ -504,6 +505,12 @@ class WRFOut(object):
 
         thetae = (Drybulb + (Q * cc.Lv/cc.cp)) * (cc.P0/P) ** cc.kappa
         return thetae
+
+    def compute_olr(self,slices):
+        OLR = self.get('OLR',slices)
+        sbc = 0.000000056704
+        ir = ((OLR/sbc)**0.25) - 273.15
+        return ir
 
     def compute_comp_ref(self,PS,**kwargs):
         """Amend this so variables obtain at start fetch only correct date, lats, lons
