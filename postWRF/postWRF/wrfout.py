@@ -835,7 +835,7 @@ class WRFOut(object):
         Wlim = self.lons[0]
         return Nlim, Elim, Slim, Wlim
         
-    def cold_pool_strength(self,X,time,swath_width=100,env=0):
+    def cold_pool_strength(self,X,time,swath_width=100,env=0,dz=0):
         """
         Returns array the same shape as WRF domain.
         
@@ -907,10 +907,28 @@ class WRFOut(object):
             
             for x,y in zip(xx_cp,yy_cp):
             #for x,y in zip(xx,yy):
-                coldpooldata[y,x] = N.sqrt(self.compute_C2(x,y,dpt[:,y,x],heights[:,y,x],dpt_env))
+                if dz:
+                    coldpooldata[y,x] = self.compute_cpdz(x,y,dpt[:,y,x],heights[:,y,x],dpt_env)
+                    # pdb.set_trace()
+                else:
+                    coldpooldata[y,x] = N.sqrt(self.compute_C2(x,y,dpt[:,y,x],heights[:,y,x],dpt_env))
         
-        # pdb.set_trace()
         return coldpooldata
+
+    def compute_cpdz(self,x,y,dpt,heights,dpt_env):
+        """
+        Cold pool depth
+        
+        x       :   x location in domain
+        y       :   y location in domain
+        dpt     :   density potential temperature slice
+        heights :   height AGL slice
+        dpt_env :   environmental dpt, column
+        """
+         
+        dz, zidx = self.cold_pool_depth(dpt,heights,dpt_env)
+        # import pdb; pdb.set_trace()
+        return dz
             
     def compute_C2(self,x,y,dpt,heights,dpt_env):
         """
@@ -930,9 +948,11 @@ class WRFOut(object):
         
     def cold_pool_depth(self,dpt,heights,dpt_env):
         dz = 0
+        # thresh = -2.0
+        thresh = -1.0
         for d,z, de in zip(dpt[1:],heights[1:],dpt_env[1:]):
             dptp = d - de
-            if dptp > -1.0:
+            if dptp > thresh:
                 break
             dz = z
         
@@ -940,7 +960,7 @@ class WRFOut(object):
             zidx = N.where(heights==dz)[0]
         else:
             zidx = 0
-            
+        # import pdb; pdb.set_trace()    
         return dz, zidx
     
     def find_gust_front(self,wind_slice,T2_slice,angle,method=3):
