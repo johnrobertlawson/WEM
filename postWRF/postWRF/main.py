@@ -852,7 +852,7 @@ class WRFEnviron(object):
         for t in t_list:
             XS.plot_xs(vrbl,t,outpath,clvs=clvs,ztop=ztop)
 
-    def cold_pool_strength(self,time,wrf_sd=0,wrf_nc=0,out_sd=0,swath_width=100,dom=1,twoplot=0,fig=0,axes=0):
+    def cold_pool_strength(self,time,wrf_sd=0,wrf_nc=0,out_sd=0,swath_width=100,dom=1,twoplot=0,fig=0,axes=0,dz=0):
         """
         Pick A, B points on sim ref overlay
         This sets the angle between north and line AB
@@ -873,6 +873,7 @@ class WRFEnviron(object):
         return2 :   return two figures. cold pool strength and cref/cross-section.
         axes    :   if two-length tuple, this is the first and second axes for
                     cross-section/cref and cold pool strength, respectively
+        dz      :   plot height of cold pool only.
         
         """
         # Initialise
@@ -912,7 +913,7 @@ class WRFEnviron(object):
         # Line from front to back of system
         C.draw_line()
         # C.draw_box()
-        # lon0, lat0 = C.bmap(C.x0,C.y0,inverse=True)
+        lon0, lat0 = C.bmap(C.x0,C.y0,inverse=True)
         lon1, lat1 = C.bmap(C.x1,C.y1,inverse=True)
         
         # Pick location for environmental dpt
@@ -927,22 +928,31 @@ class WRFEnviron(object):
         #C.set_box_width(X)
         
         # Compute the grid (DX x DY)
-        cps = self.W.cold_pool_strength(X,time,swath_width=swath_width,env=(x_env,y_env))
+        cps = self.W.cold_pool_strength(X,time,swath_width=swath_width,env=(x_env,y_env),dz=dz)
+        # import pdb; pdb.set_trace()
         
         # Plot this array
         CPfig = BirdsEye(self.C,self.W,**cps_kwargs)
         tstr = utils.string_from_time('output',time)
-        fname = 'ColdPoolStrength_' + tstr
+        if dz:
+            fprefix = 'ColdPoolDepth_'
+        else:
+            fprefix = 'ColdPoolStrength_'
+        fname = fprefix + tstr
         
-        # pdb.set_trace()
+        pdb.set_trace()
         # imfig,imax = plt.subplots(1)
         # imax.imshow(cps)
         # plt.show(imfig)
         # CPfig.plot_data(cps,'contourf',outpath,fname,time,V=N.arange(5,105,5))
         mplcommand = 'contour'
         plotkwargs = {}
+        if dz:
+            clvs = N.arange(100,5100,100)
+        else:
+            clvs = N.arange(10,85,2.5)
         if mplcommand[:7] == 'contour':
-            plotkwargs['levels'] = N.arange(10,85,2.5)
+            plotkwargs['levels'] = clvs
             plotkwargs['cmap'] = plt.cm.ocean_r
         cf2 = CPfig.plot_data(cps,mplcommand,outpath,fname,time,**plotkwargs)
         # CPfig.fig.tight_layout()

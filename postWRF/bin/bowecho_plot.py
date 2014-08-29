@@ -19,8 +19,8 @@ skewT = 0
 plot2D = 0
 streamlines = 0
 rucplot = 0
-coldpoolstrength = 0
-spaghetti = 1
+coldpoolstrength = 1
+spaghetti = 0
 
 enstype = 'STCH'
 # enstype = 'ICBC'
@@ -162,7 +162,7 @@ if coldpoolstrength:
                 
                 out_sd, wrf_sd = get_folders(en,ex)
                 # print out_sd, wrf_sd
-                cf0, cf1 = p.cold_pool_strength(t,wrf_sd=wrf_sd,out_sd=out_sd,swath_width=130,fig=fig,axes=(ax0,ax1))
+                cf0, cf1 = p.cold_pool_strength(t,wrf_sd=wrf_sd,out_sd=out_sd,swath_width=130,fig=fig,axes=(ax0,ax1),dz=1)
                 plt.close(fig)
 
 if spaghetti:
