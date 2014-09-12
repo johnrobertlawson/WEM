@@ -42,6 +42,8 @@ from lookuptable import LookUpTable
 import WEM.utils as utils
 from xsection import CrossSection
 from clicker import Clicker
+import maps
+import stats
 
 # TODO: Make this awesome
 
@@ -693,9 +695,78 @@ class WRFEnviron(object):
             plt.close()
             print("Saved {0}.".format(fpath))
             
-    def composite_profile(self,va,skewT_time,skewT_latlon,enspaths,dom=2,mean=0,std=0,xlim=0,ylim=0):
+    def composite_profile(self,va,time,latlon,enspaths,dom=2,mean=0,std=0,xlim=0,ylim=0):
         P = Profile(self.C)
-        P.composite_profile(va,skewT_time,skewT_latlon,enspaths,dom,mean,std,xlim,ylim)
+        P.composite_profile(va,time,latlon,enspaths,dom,mean,std,xlim,ylim)
+
+    def twopanel_profile(self,va,time,wrf_sds,out_sd,two_panel=1,dom=1,mean=1,std=1,
+                         xlim=0,ylim=0,latlon=0,overlay=0):
+        """
+        Create two-panel figure with profile location on map,
+        with profile of all ensemble members in comparison.
+
+        Inputs:
+        va          :   variable for profile
+        time        :   time of plot
+        wrf_sds     :   subdirs containing wrf file
+        out_d       :   out directory for plots
+
+        Optional:
+        two_panel   :   add inset for plot location
+        dom         :   WRF domain to use
+        mean        :   overlay mean on profile
+        std         :   overlay +/- std dev on profile
+        xlim        :   three-item list/tuple with limits, spacing interval
+                        for xaxis, in whatever default units
+        ylim        :   similarly for yaxis but in hPa
+        latlon      :   two-item list/tuple with lat/lon.
+                        If not specified, use pop-ups to select.
+        overlay     :   data from the same time to overlay on inset
+
+        """
+        # Initialise with first wrfout file
+        self.W = self.get_wrfout(wrf_sds[0],dom=dom)
+        outpath = self.get_outpath(out_sd)
+       
+        # Get list of all wrfout files
+        enspaths = self.list_ncfiles(wrf_sds)
+
+        self.data = 0
+        if two_panel:
+            P2 = Figure(self.C,self.W,layout='inseth')
+            if overlay:
+                F = BirdsEye(self.C, self.W)
+                self.data = F.plot2D('cref',time,2000,dom,outpath,save=0,return_data=1)
+
+        # Create basemap for clicker object
+        # F = BirdsEye(self.C,self.W)
+        # self.data = F.plot2D('cref',time,2000,dom,outpath,save=0,return_data=1)
+        
+       
+
+        # TODO: Not sure basemap inset works for lat/lon specified
+        if isinstance(latlon,collections.Sequence):
+            if not len(latlon) == 2:
+                print("Latitude and longitude needs to be two-item list/tuple.")
+                raise Exception
+            lat0,lon0 = latlon
+        else:
+            t_long = utils.string_from_time('output',time)
+            print("Pick location for {0}".format(t_long))
+            C = Clicker(self.C,self.W,fig=P2.fig,ax=P2.ax0,data=self.data)
+            # fig should be P2.fig.
+            # C.fig.tight_layout()
+
+            # Pick location for profile
+            C.click_x_y(plotpoint=1)
+            lon0, lat0 = C.bmap(C.x0,C.y0,inverse=True)
+            
+
+        # Compute profile
+        P = Profile(self.C)
+        P.composite_profile(va,time,(lat0,lon0),enspaths,outpath,dom=dom,mean=mean,
+                            std=std,xlim=xlim,ylim=ylim,fig=P2.fig,ax=P2.ax1)
+
 
     def plot_skewT(self,plot_time,plot_latlon,dom=1,save_output=0,composite=0):
         wrfouts = self.wrfout_files_in(self.C.wrfout_root)
@@ -852,6 +923,7 @@ class WRFEnviron(object):
         for t in t_list:
             XS.plot_xs(vrbl,t,outpath,clvs=clvs,ztop=ztop)
 
+
     def cold_pool_strength(self,time,wrf_sd=0,wrf_nc=0,out_sd=0,swath_width=100,dom=1,twoplot=0,fig=0,axes=0,dz=0):
         """
         Pick A, B points on sim ref overlay
@@ -988,8 +1060,57 @@ class WRFEnviron(object):
             ncfiles.append(ncfile)           
            
         F.spaghetti(t,lv,va,contour,ncfiles,outpath)
-            
 
+    def std(self,t,lv,va,wrf_sds,out_sd,dom=1):
+        """Compute standard deviation of all members
+        for given variable.
+        
+        Inputs:
+        t       :   time
+        lv      :   level
+        va      :   variable
+        wrf_sds :   list of wrf subdirs to loop over
+        out_sd  :   directory in which to save image
+        
+        """
+        
+        outpath = self.get_outpath(out_sd)
+
+        ncfiles = self.list_ncfiles(wrf_sds)
+
+        # Use first wrfout to initialise grid, get indices
+        self.W = self.get_wrfout(wrf_sds[0],dom=dom)
+
+        tidx = self.W.get_time_idx(t) 
+        
+        if lv==2000:
+            # lvidx = None
+            lvidx = 0
+        else:
+            print("Only support surface right now")
+            raise Exception
+
+        std_data = stats.std(ncfiles,va,tidx,lvidx)
+
+        F = BirdsEye(self.C, self.W)
+        t_name = utils.string_from_time('output',t)
+        fname_t = 'std_{0}_{1}'.format(va,t_name) 
+        V = 0
+        F.plot_data(std_data,'contourf',outpath,fname_t,t,V=V,no_title=1)
+        print("Plotting std dev for {0} at time {1}".format(va,t_name)) 
+
+    def list_ncfiles(self,wrf_sds,dom=1,path_only=1):
+        ncfiles = []
+        for wrf_sd in wrf_sds:
+            ncfile = self.get_wrfout(wrf_sd,dom=dom,path_only=path_only)
+            ncfiles.append(ncfile)           
+        return ncfiles
+ 
+    def plot_domains(self,wrfouts,labels,latlons,out_sd=0,colour=0):
+        outpath = self.get_outpath(out_sd)
+
+        maps.plot_domains(wrfouts,labels,latlons,outpath,colour)
+        return
 
 
 
