@@ -176,7 +176,8 @@ class WRFOut(object):
         # pdb.set_trace()
         if PS['destag_dim'] and isinstance(sl[PS['destag_dim']],N.ndarray):
             PS['destag_dim'] = None
-        
+       
+        # pdb.set_trace()
         data = self.destagger(d[sl],PS['destag_dim'])
         return data
 

@@ -10,28 +10,42 @@ import pdb
 import colourtables as ct
 from scales import Scales
 from figure import Figure
+from defaults import Defaults
 
 class Clicker(Figure):
     # def __init__(self,config,wrfout,ax=0):
     def __init__(self,config,wrfout,data=0,fig=0,ax=0):
-        super(Clicker,self).__init__(config,wrfout,fig=fig,ax=ax)
+        # import pdb; pdb.set_trace()
+        self.C = config
+        self.D = Defaults()
+        self.W = wrfout
 
+        if isinstance(fig,M.figure.Figure):
+            self.fig = fig
+            self.ax = ax
+        else:
+            super(Clicker,self).__init__(config,wrfout,fig=fig,ax=ax)
+        
+        self.bmap,self.x,self.y = self.basemap_setup()
         if isinstance(data,N.ndarray):
-            self.bmap,self.x,self.y = self.basemap_setup()
+            # Lazily assuming it's reflectivity
             S = Scales('cref',2000)
             self.overlay_data(data,V=S.clvs,cmap=S.cm)
         
-    def click_x_y(self):
+    def click_x_y(self,plotpoint=0):
+        """
+        plotpoint       :   boolean. If yes, plot point.
+        """
+        # self.plotpoint = plotpoint
         # self.fig.canvas.mpl_connect('pick_event',self.onpick)
+        # self.point = M.patches.Circle((0,0),radius=1, color='g')
+        # self.ax.add_patch(self.point)
         self.ax.figure.canvas.mpl_connect('button_press_event', self.on_press)
+        self.ax.figure.canvas.mpl_connect('button_release_event', self.on_release_point)
         plt.show(self.fig)
-        
+
     def draw_box(self):
         self.rect = M.patches.Rectangle((0,0),1,1)
-        self.x0 = None
-        self.y0 = None
-        self.x1 = None
-        self.y1 = None
         self.ax.add_patch(self.rect)
         self.ax.figure.canvas.mpl_connect('button_press_event', self.on_press)
         self.ax.figure.canvas.mpl_connect('button_release_event', self.on_release_box)
@@ -39,10 +53,6 @@ class Clicker(Figure):
 
     def draw_line(self):
         self.line = M.lines.Line2D((0,0),(1,1))
-        self.x0 = None
-        self.y0 = None
-        self.x1 = None
-        self.y1 = None
         self.ax.add_line(self.line)
         self.ax.figure.canvas.mpl_connect('button_press_event', self.on_press)
         self.ax.figure.canvas.mpl_connect('button_release_event', self.on_release_line)
@@ -52,6 +62,14 @@ class Clicker(Figure):
         print 'press'
         self.x0 = event.xdata
         self.y0 = event.ydata
+
+    def on_release_point(self,event):
+        # self.point.set_xy((self.x0,self.y0))
+        if hasattr(self,'scatt'):
+            if isinstance(self.scatt, M.collections.PathCollection):
+                self.scatt.remove()
+        self.scatt = self.ax.scatter(self.x0,self.y0,marker='x')
+        self.ax.figure.canvas.draw()
 
     def on_release_box(self, event):
         print 'release'

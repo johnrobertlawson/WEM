@@ -16,7 +16,7 @@ import WEM.utils as utils
 from defaults import Defaults
 
 class Figure(object):
-    def __init__(self,config,wrfout,ax=0,fig=0,plotn=(1,1)):
+    def __init__(self,config,wrfout,ax=0,fig=0,plotn=(1,1),layout='normal'):
         """
         C   :   configuration settings
         W   :   data
@@ -39,6 +39,16 @@ class Figure(object):
         if ax and fig:
             self.ax = ax
             self.fig = fig
+        elif layout == 'insetv':
+            self.fig = plt.figure(figsize=(8,6))
+            self.gs = M.gridspec.GridSpec(1,2,width_ratios=[1,3])
+            self.ax0 = plt.subplot(self.gs[0])
+            self.ax1 = plt.subplot(self.gs[1])
+        elif layout == 'inseth':
+            self.fig = plt.figure(figsize=(6,8))
+            self.gs = M.gridspec.GridSpec(2,1,height_ratios=[1,3])
+            self.ax0 = plt.subplot(self.gs[0])
+            self.ax1 = plt.subplot(self.gs[1])
         else:
             self.fig, self.ax = plt.subplots(nrows=plotn[0],ncols=plotn[1])
         self.fig.set_dpi(dpi)
@@ -62,10 +72,15 @@ class Figure(object):
         fig.set_size_inches(width,height)
         return fig
 
-    def save(self,p2p,fname):
+    def save(self,outpath,fname):
         # fig.tight_layout()
-        utils.trycreate(p2p)
-        fpath = os.path.join(p2p,fname)
+        if fname[-4:] == '.png':
+            pass
+        else:
+            fname = fname + '.png'
+
+        utils.trycreate(outpath)
+        fpath = os.path.join(outpath,fname)
         #self.fig.savefig(fpath)
         self.fig.savefig(fpath,bbox_inches='tight')
         print("Saving figure {0}".format(fpath))

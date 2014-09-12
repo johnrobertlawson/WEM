@@ -29,7 +29,8 @@ class Profile(Figure):
         if wrfout:
             self.W = wrfout
 
-    def composite_profile(self,va,plot_time,plot_latlon,wrfouts,dom,mean,std,xlim,ylim):
+    def composite_profile(self,va,plot_time,plot_latlon,wrfouts,outpath,
+                            dom=1,mean=1,std=1,xlim=0,ylim=0,fig=0,ax=0):
         """
         Loop over wrfout files.
         Get profile of variable
@@ -37,30 +38,40 @@ class Profile(Figure):
 
         Optional standard deviation
         Optional mean
+
+        If ax, save image to that axis
         """
 
         # Set up figure
-        fig = plt.figure()
-
+        if isinstance(fig,M.figure.Figure):
+            self.fig = fig
+            self.ax = ax
+        else:
+            self.fig, self.ax = plt.subplots()
+            
         # Plot settings
         if xlim:
             xmin, xmax, xint = xlim
         if ylim:
-            P_bot, P_top, dp = [y*100.0 for y in ylim]
+            if ylim[1] > ylim[0]:
+                # top to bottom
+                P_top, P_bot, dp = [y*100.0 for y in ylim]
+            else:
+                P_bot, P_top, dp = [y*100.0 for y in ylim]
         else:
             P_bot = 100000.0
             P_top = 20000.0
             dp = 10000.0
 
-        plevs = N.arange(P_bot,P_top,dp)
+        # plevs = N.arange(P_bot,P_top,dp)
 
         # Get wrfout prototype for information
         W = WRFOut(wrfouts[0])
 
         lat, lon = plot_latlon
         datestr = utils.string_from_time('output',plot_time)
-        t_idx = W.get_time_idx(plot_time,tuple_format=1)
-        y, x, exact_lat, exact_lon = gridded_data.getXY(W.lats1D,W.lons1D,lat,lon)
+        t_idx = W.get_time_idx(plot_time,)
+        y, x, exact_lat, exact_lon = utils.getXY(W.lats1D,W.lons1D,lat,lon)
         slices = {'t': t_idx, 'la': y, 'lo': x}
         #var_slices = {'t': t_idx, 'lv':0, 'la':y, 'lo':x}
 
@@ -78,7 +89,7 @@ class Profile(Figure):
         # Set up legend
         labels = []
         colourlist = utils.generate_colours(M,nens)
-        M.rcParams['axes.color_cycle'] = colourlist
+        # M.rcParams['axes.color_cycle'] = colourlist
 
         # Collect profiles
         for n,wrfout in enumerate(wrfouts):
@@ -93,7 +104,7 @@ class Profile(Figure):
             profile_arr[:,n] = W.get(va,slices)[0,:,0,0]
 
             # Plot variable on graph
-            plt.plot(profile_arr[:,n],composite_P[:,n])
+            self.ax.plot(profile_arr[:,n],composite_P[:,n],color=colourlist[n])
             
             member = wrfout.split('/')[-2]
             labels.append(member)
@@ -103,55 +114,55 @@ class Profile(Figure):
         if mean:
             profile_mean = N.mean(profile_arr,axis=1)
             profile_mean_P = N.mean(composite_P,axis=1)
-            plt.plot(profile_mean,profile_mean_P,color='black')
+            self.ax.plot(profile_mean,profile_mean_P,color='black')
         if std:
             # Assume mean P across ensemble is correct level
             # to plot standard deviation
             profile_std = N.std(profile_arr,axis=1)
             std_upper = profile_mean + profile_std
             std_lower = profile_mean - profile_std
-            plt.plot(std_upper,profile_mean_P,'k--')
-            plt.plot(std_lower,profile_mean_P,'k--')
+            self.ax.plot(std_upper,profile_mean_P,'k--')
+            self.ax.plot(std_lower,profile_mean_P,'k--')
 
         fname = '_'.join(('profile_comp',va,datestr,'{0:03d}'.format(x),'{0:03d}'.format(y))) + '.png'
-        utils.trycreate(self.path_to_output)
-        fpath = os.path.join(self.path_to_output,fname)
-
 
         # Set semi-log graph
-        plt.gca().set_yscale('log')
-
+        self.ax.set_yscale('log')
         # Plot limits, ticks
-        yticks = N.arange(P_bot,P_top,-100*100)
-        plt.yticks(yticks)
-        ytix = ["%4u" %(p/100.0) for p in yticks]
-        plt.yticks(yticks,ytix)
+        yticks = N.arange(P_bot,P_top+dp*100.0,-100*100.0)
+        # yticks = N.arange(P_bot,P_top+dp,-dp*100)
+        # self.ax.set_yticks(yticks)
+        ylabels = ["%4u" %(p/100.0) for p in yticks]
+        self.ax.set_yticks(yticks)
+        self.ax.set_yticklabels(ylabels)
+        # import pdb; pdb.set_trace()
+        # self.ax.yaxis.tick_right()
 
         #plt.axis([-20,50,105000.0,20000.0])
         #plt.xlabel(r'Temperature ($^{\circ}$C) at 1000 hPa')
         #plt.xticks(xticks,['' if tick%10!=0 else str(tick) for tick in xticks])
-        plt.ylabel('Pressure (hPa)')
+        self.ax.set_ylabel('Pressure (hPa)')
         #yticks = N.arange(self.P_bot,P_t-1,-10**4)
         #plt.yticks(yticks,yticks/100)
 
         if xlim:
-            plt.xlim([xmin,xmax])
+            self.ax.set_xlim([xmin,xmax])
             xticks = N.arange(xmin,xmax+xint,xint)
-            plt.xticks(xticks)
+            self.ax.set_xticks(xticks)
 
         # Flip y axis
-        plt.ylim([P_bot,P_top])
+        # Limits are already set
+        self.ax.set_ylim([P_bot,P_top])
+
+        # plt.tight_layout(self.fig)
         #plt.autoscale(enable=1,axis='x')
         #ax = plt.gca()
         #ax.relim()
         #ax.autoscale_view()
         #plt.draw()
-        plt.legend(labels,loc=2,fontsize=6)
-        
-        plt.savefig(fpath)
-        plt.close()
-
-
+        self.ax.legend(labels,loc=2,fontsize=6)
+        self.save(outpath,fname)
+        plt.close(self.fig)
 
 class SkewT(Figure):
     def __init__(self,config,wrfout=0):

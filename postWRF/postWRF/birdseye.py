@@ -109,8 +109,9 @@ class BirdsEye(Figure):
         if not no_title:
             title = utils.string_from_time('title',pt,tupleformat=0)
             plt.title(title)
-        #if self.C.plot_colorbar:
-        #self.bmap.colorbar(f1,location='bottom',orientation='horizontal')
+        plot_colorbar = 1
+        if plot_colorbar:
+            self.fig.colorbar(f1,orientation='horizontal')
         # plt.show(self.fig)
         # div0 = make_axes_locatable(self.ax)
         # cax0 = div0.append_axes("bottom", size="20%", pad=0.05)
