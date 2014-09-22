@@ -30,7 +30,8 @@ class Profile(Figure):
             self.W = wrfout
 
     def composite_profile(self,va,plot_time,plot_latlon,wrfouts,outpath,
-                            dom=1,mean=1,std=1,xlim=0,ylim=0,fig=0,ax=0):
+                            dom=1,mean=1,std=1,xlim=0,ylim=0,fig=0,ax=0,
+                            locname=0,ml=-2):
         """
         Loop over wrfout files.
         Get profile of variable
@@ -40,6 +41,9 @@ class Profile(Figure):
         Optional mean
 
         If ax, save image to that axis
+
+        ml     :   member level. negative number that corresponds to the 
+                            folder in absolute string for naming purposes.
         """
 
         # Set up figure
@@ -105,10 +109,10 @@ class Profile(Figure):
 
             # Plot variable on graph
             self.ax.plot(profile_arr[:,n],composite_P[:,n],color=colourlist[n])
-            
-            member = wrfout.split('/')[-2]
+           
+            member = wrfout.split('/')[ml]
             labels.append(member)
-            # pdb.set_trace()
+            # if locname=='KOAX': pdb.set_trace()
 
         # Compute mean, std etc
         if mean:
@@ -124,7 +128,10 @@ class Profile(Figure):
             self.ax.plot(std_upper,profile_mean_P,'k--')
             self.ax.plot(std_lower,profile_mean_P,'k--')
 
-        fname = '_'.join(('profile_comp',va,datestr,'{0:03d}'.format(x),'{0:03d}'.format(y))) + '.png'
+        if not locname:
+            fname = '_'.join(('profile_comp',va,datestr,'{0:03d}'.format(x),'{0:03d}'.format(y))) + '.png'
+        else:
+            fname = '_'.join(('profile_comp',va,datestr,locname)) + '.png'
 
         # Set semi-log graph
         self.ax.set_yscale('log')

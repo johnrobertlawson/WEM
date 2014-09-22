@@ -109,10 +109,10 @@ class WRFEnviron(object):
                         
                         
         """
+        # import pdb; pdb.set_trace()
         self.W = self.get_wrfout(wrf_sd,wrf_nc,dom=dom)
 
         outpath = self.get_outpath(out_sd)
-
             
         # Make sure times are in datenum format and sequence.
         t_list = utils.ensure_sequence_datenum(times)
@@ -700,7 +700,7 @@ class WRFEnviron(object):
         P.composite_profile(va,time,latlon,enspaths,dom,mean,std,xlim,ylim)
 
     def twopanel_profile(self,va,time,wrf_sds,out_sd,two_panel=1,dom=1,mean=1,std=1,
-                         xlim=0,ylim=0,latlon=0,overlay=0):
+                         xlim=0,ylim=0,latlon=0,locname=0,overlay=0,ml=-2):
         """
         Create two-panel figure with profile location on map,
         with profile of all ensemble members in comparison.
@@ -719,9 +719,14 @@ class WRFEnviron(object):
         xlim        :   three-item list/tuple with limits, spacing interval
                         for xaxis, in whatever default units
         ylim        :   similarly for yaxis but in hPa
+                        or dictionary with locations (METAR etc) and two-item tuple
         latlon      :   two-item list/tuple with lat/lon.
                         If not specified, use pop-ups to select.
+        locname     :   pass this to the filename of output for saving
         overlay     :   data from the same time to overlay on inset
+        ml          :   member level. negative number that corresponds to the 
+                        folder in absolute string for naming purposes.
+
 
         """
         # Initialise with first wrfout file
@@ -750,6 +755,9 @@ class WRFEnviron(object):
                 print("Latitude and longitude needs to be two-item list/tuple.")
                 raise Exception
             lat0,lon0 = latlon
+            C = Clicker(self.C,self.W,fig=P2.fig,ax=P2.ax0,data=self.data)
+            x0, y0 = C.bmap(lon0,lat0)
+            C.ax.scatter(x0,y0,marker='x')
         else:
             t_long = utils.string_from_time('output',time)
             print("Pick location for {0}".format(t_long))
@@ -765,7 +773,8 @@ class WRFEnviron(object):
         # Compute profile
         P = Profile(self.C)
         P.composite_profile(va,time,(lat0,lon0),enspaths,outpath,dom=dom,mean=mean,
-                            std=std,xlim=xlim,ylim=ylim,fig=P2.fig,ax=P2.ax1)
+                            std=std,xlim=xlim,ylim=ylim,fig=P2.fig,ax=P2.ax1,
+                            locname=locname,ml=ml)
 
 
     def plot_skewT(self,plot_time,plot_latlon,dom=1,save_output=0,composite=0):
@@ -1061,7 +1070,7 @@ class WRFEnviron(object):
            
         F.spaghetti(t,lv,va,contour,ncfiles,outpath)
 
-    def std(self,t,lv,va,wrf_sds,out_sd,dom=1):
+    def std(self,t,lv,va,wrf_sds,out_sd,dom=1,clvs=0):
         """Compute standard deviation of all members
         for given variable.
         
@@ -1070,8 +1079,10 @@ class WRFEnviron(object):
         lv      :   level
         va      :   variable
         wrf_sds :   list of wrf subdirs to loop over
+
+        Optional
         out_sd  :   directory in which to save image
-        
+        clvs    :   user-set contour levels
         """
         
         outpath = self.get_outpath(out_sd)
@@ -1095,8 +1106,13 @@ class WRFEnviron(object):
         F = BirdsEye(self.C, self.W)
         t_name = utils.string_from_time('output',t)
         fname_t = 'std_{0}_{1}'.format(va,t_name) 
-        V = 0
-        F.plot_data(std_data,'contourf',outpath,fname_t,t,V=V,no_title=1)
+        
+        # pdb.set_trace()
+        plotkwargs = {}
+        plotkwargs['no_title'] = 1
+        if isinstance(clvs,N.ndarray):
+            plotkwargs['clvs'] = clvs
+        F.plot_data(std_data,'contourf',outpath,fname_t,t,**plotkwargs)
         print("Plotting std dev for {0} at time {1}".format(va,t_name)) 
 
     def list_ncfiles(self,wrf_sds,dom=1,path_only=1):
@@ -1112,10 +1128,41 @@ class WRFEnviron(object):
         maps.plot_domains(wrfouts,labels,latlons,outpath,colour)
         return
 
+    def upperlevel_W(self,time,level,wrf_sd=0,out_sd=0,dom=1,clvs=0,
+                        no_title=1):
+        # import pdb; pdb.set_trace()
+        outpath = self.get_outpath(out_sd)
+        self.W = self.get_wrfout(wrf_sd,dom=dom)
+    
+        data = self.W.isosurface_p('W',time,level)
+        F = BirdsEye(self.C,self.W)
+        tstr = utils.string_from_time('output',time)
+        fname = 'W_{0}_{1}.png'.format(level,tstr) 
+        F.plot_data(data,'contourf',outpath,fname,time,clvs=clvs,
+                    no_title=no_title)
 
 
+    def frontogenesis(self,time,level,wrf_sd=0,out_sd=0,dom=1,
+                        clvs=0,no_title=1):
+        """
+        Compute and plot (Miller?) frontogenesis as d/dt of theta gradient.
+        
+        Use a centred-in-time derivative; hence, if
+        time index is start or end of wrfout file, skip the plot.
+        """
 
+        outpath = self.get_outpath(out_sd)
+        self.W = self.get_wrfout(wrf_sd,dom=dom)
+        tstr = utils.string_from_time('output',time)
+ 
+        Front = self.W.compute_frontogenesis(time,level)
 
-
+        if isinstance(Front,N.ndarray):
+            F = BirdsEye(self.C,self.W)
+            fname = 'frontogen_{0}.png'.format(tstr) 
+            F.plot_data(Front,'contourf',outpath,fname,time,clvs=clvs,
+                        no_title=no_title)
+        else:
+            print("Skipping this time; at start or end of run.")
 
 

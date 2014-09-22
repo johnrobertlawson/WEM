@@ -16,6 +16,7 @@ Default settings are listed at the bottom.
 These can be overwritten in user's config file... somehow
 """
 import pdb
+import matplotlib as M
 from matplotlib.colors import LinearSegmentedColormap
 import numpy as N
 import matplotlib.pyplot as plt
@@ -51,12 +52,15 @@ class Scales(object):
                 # raise Exception
                 
         try:
-            self.cm = self.A[vrbl]['cmap'](clvs)
+            # Need to unify user cms and matplotlib cms.
+            # self.cm = self.A[vrbl]['cmap']        # This is for matplotlib
+            self.cm = self.A[vrbl]['cmap'](clvs)    # This is for user
         except TypeError:
             #print("Using default colourtable.")
             #def_ct = plt.cm.get_cmap("jet")
             self.cm = 0
             #cm = LinearSegmentedColormap('DEF_CT',def_ct)
+        # pdb.set_trace()
 
     def get_multiplier(self,vrbl,lv):
         m = self.A[vrbl].get('multiplier',1)
@@ -135,6 +139,10 @@ class Scales(object):
         
         A['PMSL'] = {'cmap':0,'multiplier':0.01}
         A['PMSL'][2000] = (97000,103100,100)
+
+        # A['RH'] = {'cmap':ct.irsat}
+        A['RH'] = {'cmap':M.cm.BrBG}
+        A['RH'][2000] = (0,110,5)
         
         A['olr'] = {'cmap':ct.irsat}
         A['olr'][2000] = [-100,-90,-85,-80,-75,-70,-65,-60,-55,-50,

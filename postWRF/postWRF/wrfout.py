@@ -14,6 +14,7 @@ import pdb
 import constants as cc
 import scipy.ndimage
 import collections
+import scipy.interpolate
 
 import WEM.utils as utils
 import metconstants as mc
@@ -57,13 +58,12 @@ class WRFOut(object):
     #    from scipy import ndimage
     #    from skimage.feature
 
-    def wrftime_to_datenum(self,times):
+    def wrftime_to_datenum(self):
         """
         Convert wrf's weird Times variable to datenum time.
         
-        Input:
-        t   :   wrf's time
         """
+        times = self.wrf_times
         wrf_times_epoch = N.zeros([times.shape[0]])
 
         for n,t in enumerate(times):
@@ -78,6 +78,7 @@ class WRFOut(object):
             
             wrf_times_epoch[n] = calendar.timegm([yr,mth,day,hr,mins,sec])
             
+        self.wrf_times_epoch = wrf_times_epoch
         return wrf_times_epoch
 
 
@@ -102,7 +103,7 @@ class WRFOut(object):
             raise Exception
             
         # Convert wrftimes to datenum times
-        wrf_times_epoch = self.wrftime_to_datenum(self.wrf_times)
+        self.wrftime_to_datenum()
 
         # Now find closest WRF time
         #self.time_idx = N.where(
@@ -110,7 +111,7 @@ class WRFOut(object):
         #                abs(self.wrf_times_epoch-t_epoch).min()
         #                )[0][0]
         # pdb.set_trace()
-        time_idx = utils.closest(wrf_times_epoch,t_epoch)
+        time_idx = utils.closest(self.wrf_times_epoch,t_epoch)
         return time_idx
 
 
@@ -769,7 +770,44 @@ class WRFOut(object):
         lon_idx = N.where(abs(self.lons-lon) == abs(self.lons-lon).min())[0][0]
         return lon_idx
 
-    def interp_to_p(self,config,nc_path,var,lv):
+    def isosurface_p(self,vrbl,time,level):
+        """
+        Return an pressure level isosurface of given variable.
+        Interpolation is linear so watch out.
+
+        """
+        if isinstance(level,int):
+            hPa = level*100.0
+            nlv = 1
+        elif isinstance(level,collections.Sequence):
+            hPa = [l*100.0 for l in level]
+            nlv = len(hPa)
+        else:
+            print("Use integer or list of integers for level.")
+            raise Exception
+        
+        if time<1000:
+            tidx = time
+        else:
+            tidx = self.get_time_idx(time)
+        sl = {'t':tidx}
+        
+        # If this breaks, user is requesting non-4D data
+        datain = self.get(vrbl,sl)[0,:,:,:]
+        P = self.get('pressure',sl)[0,:,:,:]
+        # import pdb; pdb.set_trace()
+        dataout = N.zeros([nlv,P.shape[-2],P.shape[-1]])
+        # pdb.set_trace()
+        for (i,j), p in N.ndenumerate(dataout[0,:,:]):
+            dataout[:,i,j] = N.interp(hPa,P[:,i,j][::-1],datain[:,i,j][::-1])
+        # dataout = scipy.interpolate.griddata(P.flatten(),datain.flatten(),hPa)
+        if nlv == 1:
+            # Return 2D if only one level requested
+            return dataout[0,:,:]
+        else:
+            return dataout
+
+    def interp_to_p_fortran(self,config,nc_path,var,lv):
         """ Uses p_interp fortran code to put data onto a pressure
         level specified.
 
@@ -1025,5 +1063,129 @@ class WRFOut(object):
         return gfidx
         # maxshearloc[0][0] returns the integer
 
+    def compute_frontogenesis(self,time,level):
+        """
+        Note that all variables fetched with self.get have been
+        destaggered and are at the same location.
+
+        Output:
+        Front       :   Frontgenesis in Kelvin per second.
+        """
+        # import pdb; pdb.set_trace()
     
+        tidx = self.get_time_idx(time)
+        if (tidx == 0) or (tidx == self.wrf_times.shape[0]-1):
+            return None
+        elif level == 2000:
+            tidxs = (tidx-1,tidx,tidx+1)
+            T = {}
+            TH2 = {}
+            Z = {}
+            dTdx = {}
+            dTdy = {}
+            dTdz = {}
+            U = {}
+            V = {}
+            W = {}
+            for n, tidx in enumerate(tidxs):
+                # Just assume surface
+                lvidx = 0 
+                U[n] = self.get('U10',{'t':tidx})[0,:,:]
+                V[n] = self.get('V10',{'t':tidx})[0,:,:]
+                W[n] = self.get('W',{'t':tidx, 'lv':0})[0,0,:,:]
+                T[n] = self.get('T',{'t':tidx, 'lv':[0,1]})[0,:,:,:]
+                TH2[n] = self.get('TH2',{'t':tidx})[0,:,:]
+                # Z[n] = self.get('Z',{'t':tidx, 'lv' :[0,1]})[0,:,:,:]
+                # We want gap between levels so not destaggered:
+                Z[n] = (self.nc.variables['PH'][tidx,0:2,:,:] + 
+                        self.nc.variables['PHB'][tidx,0:2,:,:])/mc.g
+                # Each grid point is DX km apart:
+                dTdx[n], dTdy[n] = N.gradient(TH2[n])/self.dx
+
+                # import pdb; pdb.set_trace()
+                levelgap = Z[n][1,:,:] - Z[n][0,:,:]
+                _, __, dTdz[n] = N.gradient(T[n])/levelgap
+                # _, __, dTdz_2 = N.gradient(T[n])/levelgap
+                # N.gradient needs interpolating to one level here?
+                # dTdz[n] = (dTdz_2[1,...]-dTdz_2[0,...])/2.0     
+                
+        elif level == 850:
+            tidxs = (tidx-1,tidx,tidx+1)
+            Tupp = {}
+            Tlev = {}
+            Tlow = {}
+            dTdx = {}
+            dTdxLow = {}
+            dTdxUpp = {}
+            dTdy = {}
+            dTdyLow = {}
+            dTdyUpp = {}
+            dTdz = {}
+            U = {}
+            V = {}
+            W = {}
+            omega = {}
+            for n, t in enumerate(tidxs):
+                U[n] = self.isosurface_p('U',t,level) 
+                V[n] = self.isosurface_p('V',t,level) 
+                W[n] = self.isosurface_p('W',t,level) 
+
+                Tupp[n] = self.isosurface_p('T',t,level+25)
+                Tlev[n] = self.isosurface_p('T',t,level)
+                Tlow[n] = self.isosurface_p('T',t,level-25)
+
+                # Compute omega
+                # P = rho* R* drybulb
+                # drybulb = T/((P0/P)^(R/cp)
+                drybulb = Tlev[n]/((100000.0/(level*100.0))**(mc.R/mc.cp))
+                rho = (level*100.0)/(mc.R*drybulb)
+                omega[n] = -rho * mc.g * W[n] 
+
+
+                # Height
+                # PH = self.isosurface_p('PH',t,(level-25,level+25))
+                # PHB = self.isosurface_p('PHB',t,(level-25,level+25))
+                # Z = (PH + PHB)/mc.g
+
+                # Gradients in potential temperature
+                # Horizontal
+                # Each grid point is DX km apart:
+                dTdx[n], dTdy[n] = N.gradient(Tlev[n])/self.dx
+                dTdxUpp[n], dTdyUpp[n] = N.gradient(Tupp[n])/self.dx
+                dTdxLow[n], dTdyLow[n] = N.gradient(Tlow[n])/self.dx
+                
+                # Vertical
+                # levelgap = Z[0,:,:] - Z[1,:,:]
+                dp = 50*100.0 # pressure coordinates
+                dTdz[n] = (Tupp[n]-Tlow[n])/dp
+                   
+        # Time difference in sec
+        dt = self.wrf_times_epoch[tidx+1]-self.wrf_times_epoch[tidx-1]
+        # Gradient part
+        grad = {}
+        for n in range(len(tidxs)):
+            # grad[n] = abs(dTdx[n] + dTdy[n] + dTdz[n])**2
+            gradLev = abs(dTdx[n] + dTdy[n])**2
+            gradUpp = abs(dTdxUpp[n] + dTdyUpp[n])**2
+            gradLow = abs(dTdxLow[n] + dTdyLow[n])**2
+            # grad[n] = N.dstack((gradLow,gradLev,gradUpp))
+            grad[n] = N.dstack((gradUpp,gradLev,gradLow))
+
+        # Full derivative
+        dgraddx, dgraddy, dgraddz = N.gradient(grad[1])
+        dgraddx = dgraddx[:,:,1]/self.dx # Middle level
+        dgraddy = dgraddy[:,:,1]/self.dy # Middle level
+        dgraddz = dgraddz[:,:,1]/dp # Middle level
+
+        # Interpolate onto a single level
+        # dgraddx = (dgraddx[1,...]+dgraddx[0,...])/2.0
+        # dgraddy = (dgraddy[1,...]+dgraddy[0,...])/2.0
+        # dgraddz = (dgraddz[1,...]+dgraddz[0,...])/2.0
+
+        # Full equation
+        Front = ((grad[2][:,:,1]-grad[0][:,:,1])/dt) + U[1]*dgraddx + V[1]*dgraddy + omega[1]*dgraddz
+        # Front = ((grad[2][:,:,1]-grad[0][:,:,1])/dt) + U[1]*dgraddx + V[1]*dgraddy 
+        import pdb; pdb.set_trace()
+        # Front = (Front_2[1]+Front_2[0])/2.0
+        return Front
 
