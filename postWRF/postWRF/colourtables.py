@@ -63,7 +63,7 @@ def mixprecip1(*args):
     mix_coltbl = LinearSegmentedColormap('MIX_COLTBL',mix_cdict)
     return mix_coltbl
 
-def grays():
+def grays(*args):
     grays_cdict ={'red':    ((0.00, 1.00, 1.00),
                 (1.00, 0.05, 0.05)),
         'green':    ((0.00, 1.00, 1.00),
@@ -73,7 +73,7 @@ def grays():
     grays_coltbl = LinearSegmentedColormap('GRAYS_COLTBL',grays_cdict)
     return grays_coltbl
 
-def snow2():
+def snow2(*args):
     snowf_cdict ={'red':    ((0.00, 0.91, 0.91),
                 (0.06, 0.81, 0.81),
                 (0.12, 0.51, 0.51),
@@ -128,7 +128,7 @@ def snow2():
     snowf_coltbl = LinearSegmentedColormap('SNOWF_COLTBL',snowf_cdict)
     return snowf_coltbl
 
-def reflect():
+def reflect(*args):
     reflect_cdict ={'red':    ((0.000, 0.40, 0.40),
                 (0.067, 0.20, 0.20),
                 (0.133, 0.00, 0.00),
@@ -233,7 +233,7 @@ def reflect_ncdc(*args):
     reflect_ncdc_coltbl = LinearSegmentedColormap('REFLECT_NCDC_COLTBL',reflect_ncdc_cdict)
     return reflect_ncdc_coltbl
 
-def irsat():
+def irsat(*args):
     irsat_cdict ={'red':    ((0.000, 1.000, 0.294),
                 (0.067, 1.000, 1.000),
                 (0.133, 0.804, 0.804),
@@ -279,7 +279,7 @@ def irsat():
     irsat_coltbl = LinearSegmentedColormap('IRSAT_COLTBL',irsat_cdict)
     return irsat_coltbl
 
-def bw_irsat():
+def bw_irsat(*args):
     bw_irsat_cdict ={'red':    ((0.000, 1.000, 1.000),
                 (1.000, 0.000, 0.000)),
         'green':    ((0.000, 1.000, 1.000),
@@ -290,7 +290,7 @@ def bw_irsat():
     return bw_irsat_coltbl
 
 
-def precip1():
+def precip1(*args):
     precip_cdict ={'red':    ((0.000, 1.000, 1.000),
                 (0.004, 0.914, 0.914),
                 (0.012, 0.812, 0.812),
@@ -357,7 +357,7 @@ def precip1():
     precip_coltbl = LinearSegmentedColormap('PRECIP_COLTBL',precip_cdict)
     return precip_coltbl
 
-def dewpoint1():
+def dewpoint1(*args):
     dwp_cdict ={'red':    ((0.00, 0.60, 0.60),
                 (0.35, 0.70, 0.70),
                 (0.40, 0.80, 0.80),
@@ -395,7 +395,7 @@ def dewpoint1():
     dwp_coltbl = LinearSegmentedColormap('DWP_COLTBL',dwp_cdict)
     return dwp_coltbl         
 
-def sftemp():
+def sftemp(*args):
     sfc_cdict ={'red':    ((0.00, 0.20, 0.20),
                 (0.08, 0.40, 0.40),
                 (0.17, 0.27, 0.27),
@@ -442,7 +442,7 @@ def sftemp():
     sfc_coltbl = LinearSegmentedColormap('SFC_COLTBL',sfc_cdict)
     return sfc_coltbl
 
-def thetae():
+def thetae(*args):
     thte_cdict ={'red':    ((0.00, 0.20, 0.20),
                 (0.08, 0.40, 0.40),
                 (0.17, 0.27, 0.27),

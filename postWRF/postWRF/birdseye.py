@@ -47,7 +47,10 @@ class BirdsEye(Figure):
             
             # if self.mplcommand == 'contour':
                 # multiplier = S.get_multiplier(vrbl,lv)
-                
+        if 'clvs' in kwargs:
+            if isinstance(kwargs['clvs'],N.ndarray):
+                plotkwargs['levels'] = kwargs['clvs']
+                kwargs.pop('clvs')
         # pdb.set_trace()
         return plotargs, plotkwargs
             
