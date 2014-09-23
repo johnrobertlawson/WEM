@@ -51,6 +51,7 @@ class BirdsEye(Figure):
             if isinstance(kwargs['clvs'],N.ndarray):
                 plotkwargs['levels'] = kwargs['clvs']
                 kwargs.pop('clvs')
+        
         # pdb.set_trace()
         return plotargs, plotkwargs
             
@@ -76,6 +77,8 @@ class BirdsEye(Figure):
         self.bmap,self.x,self.y = self.basemap_setup()#ax=self.ax)
         self.mplcommand = mplcommand
         self.data = data
+
+        # pdb.set_trace()
 
         self.la_n = self.data.shape[-2]
         self.lo_n = self.data.shape[-1]
@@ -114,7 +117,8 @@ class BirdsEye(Figure):
             plt.title(title)
         plot_colorbar = 1
         if plot_colorbar:
-            self.fig.colorbar(f1,orientation='horizontal')
+            # self.fig.colorbar(f1,orientation='horizontal')
+            self.fig.colorbar(f1,orientation='vertical')
         # plt.show(self.fig)
         # div0 = make_axes_locatable(self.ax)
         # cax0 = div0.append_axes("bottom", size="20%", pad=0.05)

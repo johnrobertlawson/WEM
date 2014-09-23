@@ -584,7 +584,7 @@ def string_from_time(usage,t,dom=0,strlen=0,conven=0,**kwargs):
         #        pass
         else:
             raise Exception
-    elif isinstance(t,int):
+    elif isinstance(t,float) or isinstance(t,int):
         # In this case, time is in datenum. Get it into tuple format.
         t = time.gmtime(t)
     else:

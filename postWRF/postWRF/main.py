@@ -13,7 +13,7 @@ importing matplotlib etc!
 
 Useful/utility scripts have been moved to WEM.utils.
 """
-
+from netCDF4 import Dataset
 import calendar
 import collections
 import copy
@@ -298,7 +298,7 @@ class WRFEnviron(object):
 
         print('Get sequence of time')
         # Creates sequence of times
-        ts = self.get_sequence(times)
+        ts = utils.get_sequence(times)
 
         # Dictionary of data
         DATA = {}
@@ -563,6 +563,98 @@ class WRFEnviron(object):
             return fig_obj
         
         #print("Plotting time {0} from {1}.".format(n,len(times)))
+    
+    def delta_diff_energy(self,ptype,energy,folder,fname,p2p,plotname,
+                          V,wrfouts,vrbl,no_title=1,ax=0):
+        """
+        Plot DKE/DTE growth with time, DDKE/DDTE (contours) over ensemble mean of variable.
+
+        Will calculate DDKE/DDTE for all times, then plot variable mean for the time in between.
+
+        wrfouts         :   link to all netcdf files of ensemble members
+        vrbl            :   variable to compute ensemble mean for
+        """
+        
+        def TimeLevelLatLonWRF(nc1,nc2,v='GHT',times='all',levels='all',latslons='all'):
+            # Time (DateTime in string)
+            if times == 'all':
+                timeInds = range(nc2.variables['DateTime'].shape[0])
+            else:
+                # Time is in 6-tuple format
+                # pdb.set_trace()
+                if isinstance(times,float):
+                    input_t = ''.join(['{0:02d}'.format(n) for n in time.gmtime(times)[0:4]])
+                else:
+                    input_t = ''.join(['%02u' %t for t in times[:4]]) 
+                timeInds = list(nc2.variables['DateTime'][:]).index(int(input_t))
+            # Level (hPa)
+            if levels == 'all':
+                lvInds = range(nc2.variables['pressure'].shape[0]) # unstaggered
+            else:
+                lvInds = list(nc2.variables['pressure'][:]).index(lv)
+            # Lat/lon of interest and their grid pointd
+            lats = nc1.variables['XLAT'][:]
+            lons = nc1.variables['XLONG'][:]
+            if latslons == 'all':
+                latInds = range(lats.shape[-2])
+                lonInds = range(lons.shape[-1])
+            else:
+                xmin,ymax = gridded_data.getXY(lats,lons,Nlim,Wlim)
+                xmax,ymin = gridded_data.getXY(lats,lons,Slim,Elim)
+                latInds = range(ymin,ymax)
+                lonInds = range(xmin,xmax)
+
+            # Return sliced data
+            data = N.reshape(nc2.variables[v][timeInds,lvInds,latInds,lonInds],(len(latInds),len(lonInds)))
+            return data
+
+
+        data = self.load_data(folder,fname,format='pickle')
+        
+        for n, perm in enumerate(data):
+            if n==0:
+                permtimes = data[perm]['times']
+                deltatimes = [(t0+t1)/2.0 for t0,t1 in zip(permtimes[:-2],permtimes[1:])]
+                W1 = WRFOut(data[perm]['file1'])
+                break
+
+        for t, delt in enumerate(deltatimes):
+            print('Computing for time {0}'.format(time.gmtime(delt)))
+            for n, perm in enumerate(data):
+                diff0 = data[perm]['values'][t][0]
+                diff1 = data[perm]['values'][t+1][0]
+                if n==0:
+                    stack0 = diff0
+                    stack1 = diff1
+                else:
+                    stack0 = N.dstack((diff0,stack0))
+                    stack1 = N.dstack((diff1,stack1))
+           
+            for wnum,wrf in enumerate(wrfouts):
+                W2 = Dataset(wrf)
+                ght = TimeLevelLatLonWRF(W1.nc,W2,times=delt)
+                if wnum==0:
+                    ghtstack = ght
+                else:
+                    ghtstack = N.dstack((ght,ghtstack))
+
+            heightmean = N.average(ghtstack,axis=2)
+     
+            delta = N.average(stack1,axis=2) - N.average(stack0,axis=2)
+
+            F = BirdsEye(self.C, W1)
+            tstr = utils.string_from_time('output',int(delt))
+            fname_t = ''.join((plotname,'_{0}'.format(tstr)))
+            F.plot_data(delta,'contourf',p2p,fname_t,delt,
+                        save=0,levels=N.arange(-2000,2200,200))
+
+            # F = BirdsEye(self.C, W1)
+            # tstr = utils.string_from_time('output',int(delt))
+            # fname_t = ''.join((plotname,'_{0}'.format(tstr)))
+            F.plot_data(heightmean,'contour',p2p,fname_t,delt,
+                       colors='k',levels=N.arange(2700,3930,30))
+            # pdb.set_trace()
+
 
     def plot_error_growth(self,ofname,folder,pfname,sensitivity=0,ylimits=0,**kwargs):
         """Plots line graphs of DKE/DTE error growth

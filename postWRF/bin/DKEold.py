@@ -32,33 +32,44 @@ figs = {}
 axes = {}
 cbs = {}
 
+ensnames = ['c00'] + ['p{0:02d}'.format(n) for n in range(1,11)]
+
 #for rundate in ('25','27','29'):
 plot_all = 1
 if plot_all:
-    for rundate in ['25','27','29']:
+    # for rundate in ['25','27','29']:
+    for rundate in ['27','29']:
         # print("Computing for {0} November".format(rundate))
         foldername = '201111' + rundate + '00'
         runfolder = os.path.join(rootdir,foldername)
-        # path_to_wrfouts = utils.wrfout_files_in(runfolder,dom=1)
+        path_to_wrfouts = utils.wrfout_files_in(runfolder,dom=1)
     
         itime = (2011,11,int(rundate),0,0,0)
         ftime = (2011,12,2,12,0,0)
-        times = p.generate_times(itime,ftime,12*3600)
+        times = p.generate_times(itime,ftime,6*3600)
         
         path_to_plots = os.path.join(outdir,foldername)
-        for time in times:
+        # for time in times:
         #pdb.set_trace()
         # Produce .npy data files with DKE data
         # print("Compute_diff_energy...")
-        #p.compute_diff_energy('sum_z','kinetic',path_to_wrfouts,times,upper=500,
-        #                          d_save=runfolder, d_return=0,d_fname='DKE_500_2'+foldername)
+        wrfouts = ['/uufs/chpc.utah.edu/common/home/horel-group2/lawson2/201111{0}00/{1}/wrfout_d01_2011-11-{2}_00:00:00_PLEV'.format(rundate,e,rundate)
+                    for e in ensnames]
+        clvs = 0
+        plotfname = 'deltaDKE'
+        # p.compute_diff_energy('sum_z','kinetic',path_to_wrfouts,times,upper=500,
+                                 # d_save=runfolder, d_return=0,d_fname='DKE_500_sixhrly_'+foldername)
+        p.delta_diff_energy('sum_z','kinetic',runfolder,'DKE_500_'+foldername,path_to_plots,plotfname,
+                            clvs,wrfouts,'GHT',)
+                                
         # Contour fixed at these values
-            plotfname = 'DKE_500_'
-            V = range(200,2200,200)
-            p.plot_diff_energy('sum_z','kinetic',time,runfolder,'DKE_500_'+foldername,
-                                path_to_plots,plotfname,V,no_title=1,ax=ax)
+            # plotfname = 'DKE_500_'
+            # V = range(200,2200,200)
+            # p.plot_diff_energy('sum_z','kinetic',time,runfolder,'DKE_500_'+foldername,
+                                # path_to_plots,plotfname,V,no_title=1,ax=ax)
     
-
+if plot_all:
+    raise Exception
 #print "Script took", time.time()-scriptstart, "seconds."
 #pdb.set_trace()
 
