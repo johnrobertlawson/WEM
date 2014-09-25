@@ -74,7 +74,7 @@ elif case[:4] == '2011':
 elif case[:4] == '2013':
     itime = (2013,8,15,6,0,0)
     ftime = (2013,8,16,12,0,0)
-    # times = [(2013,8,16,0,0,0),]
+    times = [(2013,8,15,12,0,0),]
 else:
     raise Exception
 
@@ -91,7 +91,7 @@ def get_folders(en,ex):
     return out_sd, wrf_sd
 
 
-times = utils.generate_times(itime,ftime,hourly*60*60)
+# times = utils.generate_times(itime,ftime,hourly*60*60)
 
 #shear_times = utils.generate_times(itime,ftime,3*60*60)
 #sl_times = utils.generate_times(sl_itime,sl_ftime,1*60*60)
@@ -235,8 +235,9 @@ if frontogenesis:
             out_sd, wrf_sd = get_folders(en,ex)
             for time in times: 
                 p.frontogenesis(time,925,wrf_sd=wrf_sd,out_sd=out_sd,
-                                clvs=N.arange(-3.0,3.25,0.25)*10**-7
+                                clvs=N.arange(-2.5,2.75,0.25)*10**-7,
                                 # clvs = N.arange(-500,510,10)
+                                blurn=5, cmap='bwr'
                                 )
 
 if upperlevel:

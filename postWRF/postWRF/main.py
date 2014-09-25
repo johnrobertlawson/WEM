@@ -12,6 +12,9 @@ This script is API and should not be doing any hard work of
 importing matplotlib etc!
 
 Useful/utility scripts have been moved to WEM.utils.
+
+TODO: move all DKE stuff to stats and figure/birdseye.
+TODO: move more utilities to utils.
 """
 from netCDF4 import Dataset
 import calendar
@@ -1234,13 +1237,15 @@ class WRFEnviron(object):
                     no_title=no_title)
 
 
-    def frontogenesis(self,time,level,wrf_sd=0,out_sd=0,dom=1,
-                        clvs=0,no_title=1):
+    def frontogenesis(self,time,level,wrf_sd=0,out_sd=0,dom=1,blurn=0,
+                        clvs=0,no_title=1,**kwargs):
         """
         Compute and plot (Miller?) frontogenesis as d/dt of theta gradient.
         
         Use a centred-in-time derivative; hence, if
         time index is start or end of wrfout file, skip the plot.
+
+        blurn       :   gaussian smooth by this many grid points
         """
 
         outpath = self.get_outpath(out_sd)
@@ -1249,11 +1254,14 @@ class WRFEnviron(object):
  
         Front = self.W.compute_frontogenesis(time,level)
 
+        if blurn:
+            Front = stats.blur_image(Front,blurn,pad=1)
+
         if isinstance(Front,N.ndarray):
             F = BirdsEye(self.C,self.W)
             fname = 'frontogen_{0}.png'.format(tstr) 
             F.plot_data(Front,'contourf',outpath,fname,time,clvs=clvs,
-                        no_title=no_title)
+                        no_title=no_title,**kwargs)
         else:
             print("Skipping this time; at start or end of run.")
 
