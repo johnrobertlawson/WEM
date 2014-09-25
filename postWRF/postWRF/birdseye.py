@@ -55,7 +55,7 @@ class BirdsEye(Figure):
         # pdb.set_trace()
         return plotargs, plotkwargs
             
-    def plot_data(self,data,mplcommand,p2p,fname,pt,no_title=1,save=1,**kwargs):
+    def plot_data(self,data,mplcommand,p2p,fname,pt,no_title=1,save=1,smooth=1,**kwargs):
         """
         Generic method that plots any matrix of data on a map
 
@@ -74,7 +74,7 @@ class BirdsEye(Figure):
         # self.fig = plt.figure()
         # self.fig = self.figsize(8,8,self.fig)     # Create a default figure size if not set by user
         # self.fig.set_size_inches(5,5)
-        self.bmap,self.x,self.y = self.basemap_setup()#ax=self.ax)
+        self.bmap,self.x,self.y = self.basemap_setup(smooth=smooth)#ax=self.ax)
         self.mplcommand = mplcommand
         self.data = data
 

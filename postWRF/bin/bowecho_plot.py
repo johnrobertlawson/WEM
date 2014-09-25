@@ -28,17 +28,17 @@ frontogenesis = 1
 upperlevel = 0
 
 # enstype = 'STCH'
-# enstype = 'ICBC'
-enstype = 'MXMP'
+enstype = 'ICBC'
+# enstype = 'MXMP'
 
-#case = '20060526'
-case = '2006052612'
+# case = '20060526'
+# case = '2006052612'
 #case = '20090910'
 # case = '20110419'
-# case = '20130815'
+case = '20130815'
 
-# IC = 'GEFSR2'
-IC = 'NAM'
+IC = 'GEFSR2'
+# IC = 'NAM'
 # IC = 'RUC'
 
 
@@ -54,7 +54,7 @@ elif enstype == 'MXMP':
     # experiments = ['WSM6_Hail','Kessler','Ferrier',
     experiments = ['WSM6_Grau','WSM6_Hail','Kessler','Ferrier',
                     'WSM5','WDM5','Lin','WDM6_Grau','WDM6_Hail',
-                    'Morrison_Grau','Morrison_Hail']
+                    'Morrison_Grau','Morrison_Hail','ICBC']
     # experiments = ['ICBC',]
     ensnames = ['anl',]
 elif enstype == 'ICBC':
@@ -64,7 +64,7 @@ elif enstype == 'ICBC':
 if case[:4] == '2006':
     itime = (2006,5,26,12,0,0)
     ftime = (2006,5,27,13,0,0)
-    times = [(2006,5,27,3,0,0),]
+    times = [(2006,5,27,0,0,0),]
 elif case[:4] == '2009':
     itime = (2009,9,10,23,0,0)
     ftime = (2009,9,11,14,0,0)
@@ -72,14 +72,14 @@ elif case[:4] == '2011':
     itime = (2011,4,19,18,0,0)
     ftime = (2011,4,20,10,30,0)
 elif case[:4] == '2013':
-    itime = (2013,8,15,3,0,0)
+    itime = (2013,8,15,6,0,0)
     ftime = (2013,8,16,12,0,0)
-    # times = [(2013,8,16,3,0,0),]
+    # times = [(2013,8,16,0,0,0),]
 else:
     raise Exception
 
 hourly = 6
-levels = 2000
+level = 2000
 
 def get_folders(en,ex):
     if enstype == 'STCH':
@@ -91,7 +91,7 @@ def get_folders(en,ex):
     return out_sd, wrf_sd
 
 
-# times = utils.generate_times(itime,ftime,hourly*60*60)
+times = utils.generate_times(itime,ftime,hourly*60*60)
 
 #shear_times = utils.generate_times(itime,ftime,3*60*60)
 #sl_times = utils.generate_times(sl_itime,sl_ftime,1*60*60)
@@ -234,9 +234,9 @@ if frontogenesis:
         for ex in experiments:
             out_sd, wrf_sd = get_folders(en,ex)
             for time in times: 
-                p.frontogenesis(time,850,wrf_sd=wrf_sd,out_sd=out_sd,
-                                clvs=N.arange(-5.0,5.25,0.25)*10**-11
-                                # clvs = N.arange(0,1.3,0.01)*10**-3
+                p.frontogenesis(time,925,wrf_sd=wrf_sd,out_sd=out_sd,
+                                clvs=N.arange(-3.0,3.25,0.25)*10**-7
+                                # clvs = N.arange(-500,510,10)
                                 )
 
 if upperlevel:
