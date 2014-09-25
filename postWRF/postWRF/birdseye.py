@@ -1,3 +1,10 @@
+"""
+Top-down 2D plots, which are so common in meteorology
+that they get their own file here.
+
+Subclass of Figure.
+"""
+
 import pdb
 import matplotlib as M
 M.use('Agg')
@@ -51,7 +58,10 @@ class BirdsEye(Figure):
             if isinstance(kwargs['clvs'],N.ndarray):
                 plotkwargs['levels'] = kwargs['clvs']
                 kwargs.pop('clvs')
-        
+       
+        if 'cmap' in kwargs:
+            cmap = eval('M.cm.{0}'.format(kwargs['cmap']))
+            plotkwargs['cmap'] = cmap
         # pdb.set_trace()
         return plotargs, plotkwargs
             
