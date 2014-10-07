@@ -41,7 +41,7 @@ def gauss_kern(size, sizey=None):
     g = scipy.exp(-(x**2/float(size)+y**2/float(sizey)))
     return g / g.sum()
 
-def blur_image(im, n, ny=None, pad=0) :
+def gauss_smooth(im, n, ny=None, pad=1, pad_values=0) :
     """ 
     Taken from scipy cookbook online.
     Blur the image by convolving with a gaussian kernel of typical
@@ -51,8 +51,16 @@ def blur_image(im, n, ny=None, pad=0) :
     Pad     :   put zeros on edge of length n so that output
                 array equals input array size.
     """
+    # Create list from fill values
+    if pad_values == 'nan':
+        constant_values = [0,]
+    else:
+        constant_values = [pad_values,]
+    
     g = gauss_kern(n, sizey=ny)
     improc = scipy.signal.convolve(im,g, mode='valid')
     if pad:
-        improc = N.pad(improc,n,'constant')
+        improc = N.pad(improc,n,'constant',constant_values=constant_values)
+        if pad_values=='nan':
+            improc[improc==0] = N.nan
     return(improc)

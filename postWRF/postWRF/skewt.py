@@ -23,11 +23,12 @@ import metconstants as mc
 
 class Profile(Figure):
     def __init__(self,config,wrfout=0):
-        self.C = config
-        self.path_to_WRF = self.C.wrfout_root
-        self.path_to_output = self.C.output_root
-        if wrfout:
-            self.W = wrfout
+        # self.C = config
+        # self.path_to_WRF = self.C.wrfout_root
+        # self.path_to_output = self.C.output_root
+        # if wrfout:
+            # self.W = wrfout
+        super(Profile,self).__init__(config,wrfout,ax=0,fig=0)
 
     def composite_profile(self,va,plot_time,plot_latlon,wrfouts,outpath,
                             dom=1,mean=1,std=1,xlim=0,ylim=0,fig=0,ax=0,
@@ -173,16 +174,17 @@ class Profile(Figure):
 
 class SkewT(Figure):
     def __init__(self,config,wrfout=0):
-        self.C = config
-        self.path_to_WRF = self.C.wrfout_root
-        self.path_to_output = self.C.output_root
-        if wrfout:
-            self.W = wrfout
+        # self.C = config
+        # self.path_to_WRF = self.C.wrfout_root
+        # self.path_to_output = self.C.output_root
+        # if wrfout:
+            # self.W = wrfout
+        super(SkewT,self).__init__(config,wrfout,ax=0,fig=0)
 
         #self.plevs = self.W.z_dim-1
 
 
-    def plot_skewT(self,plot_time,plot_latlon,dom,save_output,save_plot=1):
+    def plot_skewT(self,plot_time,plot_latlon,dom,outpath,save_output=0,save_plot=1):
         
 
         # Defines the ranges of the plot, do not confuse with self.P_bot and self.P_top
@@ -196,15 +198,15 @@ class SkewT(Figure):
         # pdb.set_trace()
         prof_lat, prof_lon = plot_latlon
         datestr = utils.string_from_time('output',plot_time)
-        t_idx = self.W.get_time_idx(plot_time,tuple_format=1)
-        y,x, exact_lat, exact_lon = gridded_data.getXY(self.W.lats1D,self.W.lons1D,prof_lat,prof_lon)
+        t_idx = self.W.get_time_idx(plot_time)
+        y,x, exact_lat, exact_lon = utils.getXY(self.W.lats1D,self.W.lons1D,prof_lat,prof_lon)
 
 
         # Create figure
         if save_plot:
-            height, width = (10,10)
+            # height, width = (10,10)
 
-            fig = plt.figure(figsize=(width,height))
+            # fig = plt.figure(figsize=(width,height))
             self.isotherms()
             self.isobars()
             self.dry_adiabats()
@@ -218,7 +220,7 @@ class SkewT(Figure):
 
             elev = self.W.get('HGT',H_slices)
 
-            thin_locs = gridded_data.thinned_barbs(P)
+            thin_locs = utils.thinned_barbs(P)
 
             self.windbarbs(self.W.nc,t_idx,y,x,P,thin_locs,n=45,color='blue')
             self.temperature(self.W.nc,t_idx,y,x,P,linestyle='solid',color='blue')
@@ -227,22 +229,23 @@ class SkewT(Figure):
             xticks = N.arange(-20,51,5)
             yticks = N.arange(100000.0,self.P_top-1,-10**4)
             ytix = ["%4u" %(p/100.0) for p in yticks]
-            plt.xticks(xticks,['' if tick%10!=0 else str(tick) for tick in xticks])
-            plt.yticks(yticks,ytix)
+            self.ax.set_xticks(xticks,['' if tick%10!=0 else str(tick) for tick in xticks])
+            self.ax.set_yticks(yticks,ytix)
 
-            plt.axis([-20,50,105000.0,20000.0])
-            plt.xlabel(r'Temperature ($^{\circ}$C) at 1000 hPa')
-            plt.xticks(xticks,['' if tick%10!=0 else str(tick) for tick in xticks])
-            plt.ylabel('Pressure (hPa)')
-            plt.yticks(yticks,ytix)
+            self.ax.axis([-20,50,105000.0,20000.0])
+            self.ax.set_xlabel(r'Temperature ($^{\circ}$C) at 1000 hPa')
+            self.ax.set_xticks(xticks,['' if tick%10!=0 else str(tick) for tick in xticks])
+            self.ax.set_ylabel('Pressure (hPa)')
+            self.ax.set_yticks(yticks,ytix)
             #yticks = N.arange(self.P_bot,P_t-1,-10**4)
             #plt.yticks(yticks,yticks/100)
 
             fname = '_'.join(('skewT',datestr,'{0:03d}'.format(x),'{0:03d}'.format(y))) + '.png'
-            utils.trycreate(self.path_to_output)
+            # utils.trycreate(self.path_to_output)
 
-            fpath = os.path.join(self.path_to_output,fname)
-            plt.savefig(fpath)
+            # fpath = os.path.join(self.path_to_output,fname)
+            # plt.savefig(fpath)
+            self.save(outpath,fname)
             plt.close()
 
         # For saving Skew T data
@@ -261,7 +264,9 @@ class SkewT(Figure):
                 pickle.dump(data_dict,p)
             print("Saving data to {0}".format(pickle_path))
 
-        return
+            return
+        else:
+            return
 
     def skewT_composite(self,):
         """

@@ -55,7 +55,7 @@ class Scales(object):
             # Need to unify user cms and matplotlib cms.
             # self.cm = self.A[vrbl]['cmap']        # This is for matplotlib
             self.cm = self.A[vrbl]['cmap'](clvs)    # This is for user
-        except TypeError:
+        except KeyError:
             #print("Using default colourtable.")
             #def_ct = plt.cm.get_cmap("jet")
             self.cm = 0
