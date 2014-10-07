@@ -20,6 +20,7 @@ from defaults import Defaults
 from figure import Figure
 import WEM.utils as utils
 from scales import Scales
+import stats
 
 class BirdsEye(Figure):
     def __init__(self,config,wrfout,ax=0,fig=0):
@@ -32,7 +33,6 @@ class BirdsEye(Figure):
         Options keyword arguments:
         V   :   manually override contour levels
         """
-        
         data = self.data.reshape((self.la_n,self.lo_n))
         
         # List of args and dictionary of kwargs
@@ -41,16 +41,6 @@ class BirdsEye(Figure):
 
         # cmap = getattr(kwargs,'cmap',plt.cm.jet)
 
-
-        if vrbl=='user':
-            pass
-            
-        else:
-            S = Scales(vrbl,lv)
-            if S.cm:
-                plotkwargs['cmap'] = S.cm
-            if isinstance(S.clvs,N.ndarray):
-                plotkwargs['levels'] = S.clvs
             
             # if self.mplcommand == 'contour':
                 # multiplier = S.get_multiplier(vrbl,lv)
@@ -63,9 +53,20 @@ class BirdsEye(Figure):
             cmap = eval('M.cm.{0}'.format(kwargs['cmap']))
             plotkwargs['cmap'] = cmap
         # pdb.set_trace()
+
+        if vrbl=='user':
+            pass
+            
+        else:
+            S = Scales(vrbl,lv)
+            if S.cm:
+                plotkwargs['cmap'] = S.cm
+            if isinstance(S.clvs,N.ndarray):
+                plotkwargs['levels'] = S.clvs
+
         return plotargs, plotkwargs
             
-    def plot_data(self,data,mplcommand,p2p,fname,pt,no_title=1,save=1,smooth=1,**kwargs):
+    def plot_data(self,data,mplcommand,p2p,fname,pt,save=1,smooth=1,**kwargs):
         """
         Generic method that plots any matrix of data on a map
 
@@ -84,7 +85,7 @@ class BirdsEye(Figure):
         # self.fig = plt.figure()
         # self.fig = self.figsize(8,8,self.fig)     # Create a default figure size if not set by user
         # self.fig.set_size_inches(5,5)
-        self.bmap,self.x,self.y = self.basemap_setup(smooth=smooth)#ax=self.ax)
+        self.bmap,self.x,self.y = self.basemap_setup(smooth=1)#ax=self.ax)
         self.mplcommand = mplcommand
         self.data = data
 
@@ -122,9 +123,9 @@ class BirdsEye(Figure):
         Change these to hasattr!
         """
         #if self.C.plot_titles:
-        if not no_title:
-            title = utils.string_from_time('title',pt,tupleformat=0)
-            plt.title(title)
+        if 'title' in kwargs:
+            title_str = utils.string_from_time('title',pt,tupleformat=0)
+            plt.title(title_str)
         plot_colorbar = 1
         if plot_colorbar:
             # self.fig.colorbar(f1,orientation='horizontal')
@@ -170,35 +171,23 @@ class BirdsEye(Figure):
         """
         # INITIALISE
         self.fig.set_size_inches(8,8)
-        self.bmap,self.x,self.y = self.basemap_setup(smooth=smooth)
+        self.bmap,self.x,self.y = self.basemap_setup(smooth=1)
         self.mplcommand = plottype
         
         # Make sure smooth=0 is corrected to 1
         # They are both essentially 'off'.
-        if smooth==0:
-            smooth = 1
 
         # Get indices for time, level, lats, lons
-        
-        if isinstance(t,collections.Sequence) and len(t)!=6:
-            # List of two dates, start and end
-            # pdb.set_trace()
-
-            it_idx = self.W.get_time_idx(t[0])
-            ft_idx = self.W.get_time_idx(t[1])
-            assert ft_idx > it_idx
-            tidx = slice(it_idx,ft_idx,None)
-            title = "range"
-            datestr = "range"
-        else:
-            tidx = self.W.get_time_idx(t)
-            title = utils.string_from_time('title',t)
-            datestr = utils.string_from_time('output',t)
+        tidx = self.W.get_time_idx(t)
+        title = utils.string_from_time('title',t)
+        datestr = utils.string_from_time('output',t)
 
         
         # Until pressure coordinates are fixed TODO
-        lvidx = 0
-        latidx, lonidx = self.get_limited_domain(bounding,smooth=smooth)
+        latidx, lonidx = self.get_limited_domain(bounding,smooth=1)
+        
+        if lv== 2000:
+            lvidx = 0
         
         # if vc == 'surface':
         #     lv_idx = 0
@@ -209,8 +198,14 @@ class BirdsEye(Figure):
         #     raise Exception
 
         # FETCH DATA
-        ncidx = {'t': tidx, 'lv': lvidx, 'la': latidx, 'lo': lonidx}
-        self.data = self.W.get(vrbl,ncidx)#,**vardict)
+            ncidx = {'t': tidx, 'lv': lvidx, 'la': latidx, 'lo': lonidx}
+            self.data = self.W.get(vrbl,ncidx)#,**vardict)
+        else:
+            self.data = self.W.get_p(vrbl,t,lv)
+            # TODO: include bounding box for get_p
+
+        if smooth>1:
+            self.data = stats.gauss_smooth(self.data,smooth,pad_values='nan')
 
         self.la_n = self.data.shape[-2]
         self.lo_n = self.data.shape[-1]
@@ -241,9 +236,9 @@ class BirdsEye(Figure):
             f1 = self.bmap.contourf(*plotargs,**plotkwargs)
         elif self.mplcommand == 'contour':
             plotkwargs['colors'] = 'k'
-            f1 = self.bmap.contour(*plotargs,**kwargs)
-            scaling_func = M.ticker.FuncFormatter(lambda x, pos:'{0:d}'.format(int(x*multiplier)))
-            plt.clabel(f1, inline=1, fmt=scaling_func, fontsize=9, colors='k')
+            f1 = self.bmap.contour(*plotargs,**plotkwargs)
+            # scaling_func = M.ticker.FuncFormatter(lambda x, pos:'{0:d}'.format(int(x*multiplier)))
+            plt.clabel(f1, inline=1, fontsize=9, colors='k')
 
         # LABELS, TITLES etc
         if self.C.plot_titles:
@@ -302,7 +297,7 @@ class BirdsEye(Figure):
         #plt.colorbar(divp,orientation='horizontal')
         if self.C.plot_titles:
             title = utils.string_from_time('title',pt)
-            m.title(title)
+            self.ax.set_title(title)
         datestr = utils.string_from_time('output',pt)
         na = ('streamlines',lv_na,datestr)
         fname = self.create_fname(*na)

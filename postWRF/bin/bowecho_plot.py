@@ -27,15 +27,15 @@ profiles = 0
 frontogenesis = 1
 upperlevel = 0
 
-# enstype = 'STCH'
-enstype = 'ICBC'
+enstype = 'STCH'
+# enstype = 'ICBC'
 # enstype = 'MXMP'
 
-# case = '20060526'
+case = '20060526'
 # case = '2006052612'
 #case = '20090910'
 # case = '20110419'
-case = '20130815'
+# case = '20130815'
 
 IC = 'GEFSR2'
 # IC = 'NAM'
@@ -48,7 +48,7 @@ IC = 'GEFSR2'
 
 if enstype == 'STCH':
     experiments = ['s'+"%02d" %n for n in range(1,11)]
-    ensnames = ['p09',]
+    ensnames = ['c00',]
     MP = 'ICBC'
 elif enstype == 'MXMP':
     # experiments = ['WSM6_Hail','Kessler','Ferrier',
@@ -62,9 +62,9 @@ elif enstype == 'ICBC':
     experiments = ['ICBC',]
 
 if case[:4] == '2006':
-    itime = (2006,5,26,12,0,0)
-    ftime = (2006,5,27,13,0,0)
-    times = [(2006,5,27,0,0,0),]
+    itime = (2006,5,26,3,0,0)
+    ftime = (2006,5,27,12,0,0)
+    # times = [(2006,5,26,12,0,0),]
 elif case[:4] == '2009':
     itime = (2009,9,10,23,0,0)
     ftime = (2009,9,11,14,0,0)
@@ -78,7 +78,7 @@ elif case[:4] == '2013':
 else:
     raise Exception
 
-hourly = 6
+hourly = 3
 level = 2000
 
 def get_folders(en,ex):
@@ -91,12 +91,10 @@ def get_folders(en,ex):
     return out_sd, wrf_sd
 
 
-# times = utils.generate_times(itime,ftime,hourly*60*60)
+times = utils.generate_times(itime,ftime,hourly*60*60)
 
 #shear_times = utils.generate_times(itime,ftime,3*60*60)
 #sl_times = utils.generate_times(sl_itime,sl_ftime,1*60*60)
-# skewT_time = (2013,8,16,3,0,0)
-# skewT_latlon = (35.2435,-97.4708)
 # thresh = 10
 
 #variables = {'cref':{}} ; variables['cref'] = {'lv':2000,'pt':times}
@@ -111,6 +109,10 @@ def get_folders(en,ex):
 #variables = {'PMSL':{'lv':2000,'pt':times,'plottype':'contour','smooth':5}}
 
 #shear06 = {'shear':{'top':6,'bottom':0,'pt':shear_times}}
+
+skewT_time = (2006,5,27,0,0,0)
+skewT_latlon = (36.73,-102.51) # Boise City, OK
+
 if skewT:
     for en in ensnames:
         for ex in experiments:
@@ -118,32 +120,27 @@ if skewT:
             p.C = Settings()
     
             # Change paths to new location
-            p.C.output_root = os.path.join(config.output_root,case,IC,en,MP,ex)
-            p.C.wrfout_root = os.path.join(config.wrfout_root,case,IC,en,MP,ex)
-            p.C.pickledir = os.path.join(config.wrfout_root,case,IC,en,MP,ex)
+            out_sd, wrf_sd = get_folders(en,ex)
     
-            p.plot_skewT(skewT_time,skewT_latlon,save_output=1)
+            p.plot_skewT(skewT_time,skewT_latlon,out_sd=out_sd,wrf_sd=wrf_sd,save_output=0)
     
     #p.plot_skewT(skewT_time,skewT_latlon,composite=1)
 
 if plot2D:
     for en in ensnames:
         for ex in experiments:
-            out_sd, wrf_sd = get_folders(en,ex)
-            
-            # p.plot_strongest_wind(itime,ftime,2000,wrf_sd=wrf_sd,out_sd=out_sd)
-            p.plot2D('cref',times,levels,wrf_sd=wrf_sd,out_sd=out_sd)
+            for t in times:
+                out_sd, wrf_sd = get_folders(en,ex)
+                # p.plot_strongest_wind(itime,ftime,2000,wrf_sd=wrf_sd,out_sd=out_sd)
+                # p.plot2D('Z',t,500,wrf_sd=wrf_sd,out_sd=out_sd,plottype='contour',smooth=10)
+                p.plot2D('cref',t,2000,wrf_sd=wrf_sd,out_sd=out_sd)
 
 if streamlines:
     for en in ensnames:
-        # Reload settings
-        p.C = Settings()
-        # Change paths to new location
-        p.C.output_root = os.path.join(config.output_root,case,IC,en,experiment)
-        p.C.wrfout_root = os.path.join(config.wrfout_root,case,IC,en,experiment)
-        #p.plot_2D(variables)
-        print p.C.wrfout_root
-        p.plot_streamlines(2000,sl_times)
+        for ex in experiments:
+            for t in times:
+                out_sd, wrf_sd = get_folders(en,ex)
+                p.plot_streamlines(t,2000,out_sd=out_sd,wrf_sd=wrf_sd)
 
 if rucplot:
     # RUC file is one-per-time so .nc file is specified beforehand
@@ -211,8 +208,8 @@ if profiles:
             out_sd, wrf_sd = get_folders(en,ex)
             wrf_sds.append(wrf_sd)
 
-    locs = {'KTOP':(39.073,-95.626),'KOAX':(41.320,-96.366),
-           'KOUN':(35.244,-97.471)}
+    # locs = {'KTOP':(39.073,-95.626),'KOAX':(41.320,-96.366),'KOUN':(35.244,-97.471)}
+    locs = {'KAMA':(35.2202,-101.7173)}
     lv = 2000
     vrbl = 'RH'; xlim=[0,110,10]
     # vrbl = 'wind'; xlim=[0,50,5]
@@ -235,9 +232,9 @@ if frontogenesis:
             out_sd, wrf_sd = get_folders(en,ex)
             for time in times: 
                 p.frontogenesis(time,925,wrf_sd=wrf_sd,out_sd=out_sd,
-                                clvs=N.arange(-2.5,2.75,0.25)*10**-7,
+                                clvs=N.arange(-2.0,2.125,0.125)*10**-7,
                                 # clvs = N.arange(-500,510,10)
-                                blurn=5, cmap='bwr'
+                                blurn=3, cmap='bwr'
                                 )
 
 if upperlevel:
@@ -248,4 +245,4 @@ if upperlevel:
                 p.upperlevel_W(time,850,wrf_sd=wrf_sd,out_sd=out_sd,
                                 clvs = N.arange(0,1.0,0.01)
                                 )
- 
+

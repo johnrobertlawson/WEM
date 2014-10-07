@@ -71,8 +71,8 @@ class WRFEnviron(object):
         #M.rc('font',**self.font_prop)
         #M.rcParams['savefig.dpi'] = self.dpi
 
-    def plot2D(self,vrbl,times,levels,wrf_sd=0,wrf_nc=0,out_sd=0,f_prefix=0,f_suffix=0,
-                bounding=0,dom=0):
+    def plot2D(self,vrbl,time,level,wrf_sd=0,wrf_nc=0,out_sd=0,f_prefix=0,f_suffix=0,
+                bounding=0,dom=0,plottype='contourf',smooth=0):
         """
         Path to wrfout file is in config file.
         Path to plot output is also in config
@@ -118,14 +118,14 @@ class WRFEnviron(object):
         outpath = self.get_outpath(out_sd)
             
         # Make sure times are in datenum format and sequence.
-        t_list = utils.ensure_sequence_datenum(times)
+        # t_list = utils.ensure_sequence_datenum(times)
         
-        d_list = utils.get_sequence(dom)
-        lv_list = utils.get_sequence(levels)
-        for t, l, d in itertools.product(t_list,lv_list,d_list):
-            F = BirdsEye(self.C,self.W)
-            F.plot2D(vrbl,t,l,d,outpath,bounding=bounding)
-            
+        # d_list = utils.get_sequence(dom)
+        # lv_list = utils.get_sequence(levels)
+        # for t, l, d in itertools.product(t_list,lv_list,d_list):
+        F = BirdsEye(self.C,self.W)
+        F.plot2D(vrbl,time,level,dom,outpath,bounding=bounding,plottype=plottype,smooth=smooth)
+        
         # LEVELS
         # Levels may not exist for CAPE, shear etc.
         # Use the '1' code in this case.
@@ -514,11 +514,11 @@ class WRFEnviron(object):
         return DKE
 
     def plot_diff_energy(self,ptype,energy,time,folder,fname,p2p,plotname,V,
-                        no_title=0,ax=0):
+                        title=0,ax=0):
         """
         
         folder  :   directory holding computed data
-        fname   :   naming scheme of required files
+        fname   :   naming scheme of required files (prefix to time)
         p2p     :   root directory for plots
         V       :   constant values to contour at
         """
@@ -526,6 +526,7 @@ class WRFEnviron(object):
 
         DATA = self.load_data(folder,fname,format='pickle')
 
+        # import pdb; pdb.set_trace()
         if isinstance(time,collections.Sequence):
             time = calendar.timegm(time)
 
@@ -550,17 +551,23 @@ class WRFEnviron(object):
                 stack = N.dstack((data,stack))
                 stack_average = N.average(stack,axis=2)
 
+        kwargs1 = {}
+        kwargs2 = {}
         if ax:
-            kwargs1 = {'ax':ax}
-            kwargs2 = {'save':0}
+            kwargs1['ax'] = ax
+            kwargs2['save'] = 0
+        if title:
+            kwargs2['title'] = 1
         #birdseye plot with basemap of DKE/DTE
         F = BirdsEye(self.C,W1,**kwargs1)    # 2D figure class
         #F.plot2D(va,t,en,lv,da,na)  # Plot/save figure
         tstr = utils.string_from_time('output',time)
         fname_t = ''.join((plotname,'_{0}'.format(tstr)))
         # fpath = os.path.join(p2p,fname_t)
+        import pdb; pdb.set_trace()
+
         fig_obj = F.plot_data(stack_average,'contourf',p2p,fname_t,time,V,
-                    no_title=no_title,**kwargs2)
+                    **kwargs2)
                     
         if ax:
             return fig_obj
@@ -872,21 +879,22 @@ class WRFEnviron(object):
                             locname=locname,ml=ml)
 
 
-    def plot_skewT(self,plot_time,plot_latlon,dom=1,save_output=0,composite=0):
-        wrfouts = self.wrfout_files_in(self.C.wrfout_root)
-        for wrfout in wrfouts:
-            if not composite:
-                W = WRFOut(wrfout)
-                ST = SkewT(self.C,W)
-                ST.plot_skewT(plot_time,plot_latlon,dom,save_output)
-                nice_time = utils.string_from_time('title',plot_time)
-                print("Plotted Skew-T for time {0} at {1}".format(
-                            nice_time,plot_latlon))
-            else:
-                #ST = SkewT(self.C)
-                pass
+    def plot_skewT(self,plot_time,plot_latlon,out_sd=0,wrf_sd=0,dom=1,save_output=0,composite=0):
+
+        outpath = self.get_outpath(out_sd)
+        W = self.get_wrfout(wrf_sd,dom=dom)
+ 
+        if not composite:
+            ST = SkewT(self.C,W)
+            ST.plot_skewT(plot_time,plot_latlon,dom,outpath,save_output=save_output)
+            nice_time = utils.string_from_time('title',plot_time)
+            print("Plotted Skew-T for time {0} at {1}".format(
+                        nice_time,plot_latlon))
+        else:
+            #ST = SkewT(self.C)
+            pass
                 
-    def plot_streamlines(self,lv,time,wrf_sd=0,wrf_nc=0,out_sd=0,dom=1):
+    def plot_streamlines(self,time,lv,wrf_sd=0,wrf_nc=0,out_sd=0,dom=1):
         self.W = self.get_wrfout(wrf_sd,wrf_nc,dom=dom)
         outpath = self.get_outpath(out_sd)
 
@@ -1253,15 +1261,20 @@ class WRFEnviron(object):
         tstr = utils.string_from_time('output',time)
  
         Front = self.W.compute_frontogenesis(time,level)
-
-        if blurn:
-            Front = stats.blur_image(Front,blurn,pad=1)
-
         if isinstance(Front,N.ndarray):
-            F = BirdsEye(self.C,self.W)
-            fname = 'frontogen_{0}.png'.format(tstr) 
-            F.plot_data(Front,'contourf',outpath,fname,time,clvs=clvs,
-                        no_title=no_title,**kwargs)
+        
+            if blurn:
+                Front = stats.gauss_smooth(Front,blurn)
+
+            if level==2000:
+                lv_str = 'sfc'
+            else:
+                lv_str = str(level)
+
+                F = BirdsEye(self.C,self.W)
+                fname = 'frontogen_{0}_{1}.png'.format(lv_str,tstr) 
+                F.plot_data(Front,'contourf',outpath,fname,time,clvs=clvs,
+                            no_title=no_title,**kwargs)
         else:
             print("Skipping this time; at start or end of run.")
 

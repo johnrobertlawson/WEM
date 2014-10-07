@@ -522,7 +522,7 @@ class WRFOut(object):
         QR = self.nc.variables['QRAIN'][PS['t'],:,PS['la'],PS['lo']]
         PSFC = self.get('PSFC',PS)
         try:
-            QS = self.nc.variables['QRAIN'][PS['t'],:,PS['la'],PS['lo']]
+            QS = self.nc.variables['QSNOW'][PS['t'],:,PS['la'],PS['lo']]
         except:
             QS = N.zeros(N.shape(QR))
         rhor = 1000.0
@@ -770,13 +770,15 @@ class WRFOut(object):
         lon_idx = N.where(abs(self.lons-lon) == abs(self.lons-lon).min())[0][0]
         return lon_idx
 
-    def isosurface_p(self,vrbl,time,level):
+    def get_p(self,vrbl,time,level):
         """
         Return an pressure level isosurface of given variable.
         Interpolation is linear so watch out.
 
         Dimensions returns as (height,lat,lon)
         Or is it (height,lon, lat!?)
+
+        TODO: Need to include limited domain functionality
         """
         if isinstance(level,int):
             hPa = level*100.0
@@ -1119,7 +1121,7 @@ class WRFOut(object):
             tidxs = (tidx-1,tidx,tidx+1)
 
             # Get sizes of array
-            ny,nx = self.isosurface_p('U',tidx,level).shape
+            ny,nx = self.get_p('U',tidx,level).shape
 
             # Initialise them
             U = N.zeros([3,3,ny,nx])
@@ -1134,15 +1136,15 @@ class WRFOut(object):
             # grad = N.zeros_like(U)
 
             for n, t in enumerate(tidxs):
-                U[n,...] = self.isosurface_p('U',t,level)
-                V[n,...] = self.isosurface_p('V',t,level)
-                W[n,...] = self.isosurface_p('W',t,level)
+                U[n,...] = self.get_p('U',t,level)
+                V[n,...] = self.get_p('V',t,level)
+                W[n,...] = self.get_p('W',t,level)
 
                 # 3D array has dimensions (vertical, horz, horz)
-                T[n,...] = self.isosurface_p('T',t,(level-dp,level,level+dp))
-                # Tupp[n] = self.isosurface_p('T',t,level+dp)
-                # Tlev[n] = self.isosurface_p('T',t,level)
-                # Tlow[n] = self.isosurface_p('T',t,level-dp)
+                T[n,...] = self.get_p('T',t,(level-dp,level,level+dp))
+                # Tupp[n] = self.get_p('T',t,level+dp)
+                # Tlev[n] = self.get_p('T',t,level)
+                # Tlow[n] = self.get_p('T',t,level-dp)
 
                 # pdb.set_trace()
                 # Compute omega
@@ -1154,8 +1156,8 @@ class WRFOut(object):
             # return omega[0]
 
                 # Height
-                # PH = self.isosurface_p('PH',t,(level-25,level+25))
-                # PHB = self.isosurface_p('PHB',t,(level-25,level+25))
+                # PH = self.get_p('PH',t,(level-25,level+25))
+                # PHB = self.get_p('PHB',t,(level-25,level+25))
                 # Z = (PH + PHB)/mc.g
 
                 # Gradients in potential temperature
