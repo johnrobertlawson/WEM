@@ -109,23 +109,23 @@ class WRFEnviron(object):
                         of smoothing, to be specified.
         dom         :   domain for plotting. If zero, the only netCDF file present
                         will be plotted. If list of integers, the script will loop over domains.
-                        
-                        
+
+
         """
         # import pdb; pdb.set_trace()
-        self.W = self.get_wrfout(wrf_sd,wrf_nc,dom=dom)
+        self.W = self.get_netcdf(wrf_sd,wrf_nc,dom=dom)
 
         outpath = self.get_outpath(out_sd)
-            
+
         # Make sure times are in datenum format and sequence.
         # t_list = utils.ensure_sequence_datenum(times)
-        
+
         # d_list = utils.get_sequence(dom)
         # lv_list = utils.get_sequence(levels)
         # for t, l, d in itertools.product(t_list,lv_list,d_list):
         F = BirdsEye(self.C,self.W)
         F.plot2D(vrbl,time,level,dom,outpath,bounding=bounding,plottype=plottype,smooth=smooth)
-        
+
         # LEVELS
         # Levels may not exist for CAPE, shear etc.
         # Use the '1' code in this case.
@@ -165,9 +165,9 @@ class WRFEnviron(object):
                 #rq[va]['vc'] = vc # Need this?
                 # F.plot2D(va, t, lv, )
 
-    def get_wrfout(self,wrf_sd=0,wrf_nc=0,dom=0,path_only=0):
-        """Returns the WRFOut instance, given arguments:
-        
+    def get_netcdf(self,wrf_sd=0,wrf_nc=0,dom=0,path_only=0):
+        """Returns the WRFOut or RUC instance, given arguments:
+
         Optional inputs:
         wrf_sd      :   subdirectory for wrf file
         wrf_nc      :   filename for wrf file
@@ -177,7 +177,7 @@ class WRFEnviron(object):
         # Check configuration to see if wrfout files should be
         # sought inside subdirectories.
         descend = getattr(self.C,'wrf_folders_descend',1)
-        
+
         if wrf_sd and wrf_nc:
             wrfpath = os.path.join(self.C.wrfout_root,wrf_sd,wrf_nc)
         elif wrf_sd:
@@ -187,10 +187,15 @@ class WRFEnviron(object):
         else:
             wrfdir = os.path.join(self.C.wrfout_root)
             wrfpath = utils.wrfout_files_in(wrfdir,dom=dom,unambiguous=1,descend=descend)
-            
+
         if path_only:
             return wrfpath
         else:
+            # Check for WRF or RUC 
+            nc = Dataset(wrfpath)
+            if 'ruc' in nc.grib_source[:3]:
+                return RUC(wrfpath)
+            elif
             return WRFOut(wrfpath)
 
     def generate_times(self,itime,ftime,x):
@@ -199,7 +204,7 @@ class WRFEnviron(object):
         """
         y = utils.generate_times(itime,ftime,x)
         return y
-            
+
     def plot_cross_section(self,var,latA,lonA,latB,lonB):
         xs = CrossSection()
         xs.plot(var,latA,lonA,latB,lonB)
@@ -237,7 +242,7 @@ class WRFEnviron(object):
         Load array from file.
         Needed by subclasses?
         """
-        
+
         fname2 = os.path.splitext(fname)[0]
         fpath = os.path.join(folder,fname2)
         if format=='pickle':
@@ -516,7 +521,7 @@ class WRFEnviron(object):
     def plot_diff_energy(self,ptype,energy,time,folder,fname,p2p,plotname,V,
                         title=0,ax=0):
         """
-        
+
         folder  :   directory holding computed data
         fname   :   naming scheme of required files (prefix to time)
         p2p     :   root directory for plots
@@ -531,7 +536,7 @@ class WRFEnviron(object):
             time = calendar.timegm(time)
 
         #for n,t in enumerate(times):
-        
+
         for pn,perm in enumerate(DATA):
             f1 = DATA[perm]['file1']
             f2 = DATA[perm]['file2']
@@ -568,12 +573,12 @@ class WRFEnviron(object):
 
         fig_obj = F.plot_data(stack_average,'contourf',p2p,fname_t,time,V,
                     **kwargs2)
-                    
+
         if ax:
             return fig_obj
-        
+
         #print("Plotting time {0} from {1}.".format(n,len(times)))
-    
+
     def delta_diff_energy(self,ptype,energy,folder,fname,p2p,plotname,
                           V,wrfouts,vrbl,no_title=1,ax=0):
         """
@@ -584,7 +589,7 @@ class WRFEnviron(object):
         wrfouts         :   link to all netcdf files of ensemble members
         vrbl            :   variable to compute ensemble mean for
         """
-        
+
         def TimeLevelLatLonWRF(nc1,nc2,v='GHT',times='all',levels='all',latslons='all'):
             # Time (DateTime in string)
             if times == 'all':
@@ -595,7 +600,7 @@ class WRFEnviron(object):
                 if isinstance(times,float):
                     input_t = ''.join(['{0:02d}'.format(n) for n in time.gmtime(times)[0:4]])
                 else:
-                    input_t = ''.join(['%02u' %t for t in times[:4]]) 
+                    input_t = ''.join(['%02u' %t for t in times[:4]])
                 timeInds = list(nc2.variables['DateTime'][:]).index(int(input_t))
             # Level (hPa)
             if levels == 'all':
@@ -620,7 +625,7 @@ class WRFEnviron(object):
 
 
         data = self.load_data(folder,fname,format='pickle')
-        
+
         for n, perm in enumerate(data):
             if n==0:
                 permtimes = data[perm]['times']
@@ -639,7 +644,7 @@ class WRFEnviron(object):
                 else:
                     stack0 = N.dstack((diff0,stack0))
                     stack1 = N.dstack((diff1,stack1))
-           
+
             for wnum,wrf in enumerate(wrfouts):
                 W2 = Dataset(wrf)
                 ght = TimeLevelLatLonWRF(W1.nc,W2,times=delt)
@@ -649,7 +654,7 @@ class WRFEnviron(object):
                     ghtstack = N.dstack((ght,ghtstack))
 
             heightmean = N.average(ghtstack,axis=2)
-     
+
             delta = N.average(stack1,axis=2) - N.average(stack0,axis=2)
 
             F = BirdsEye(self.C, W1)
@@ -689,10 +694,10 @@ class WRFEnviron(object):
             # Plot multiple line charts for each sensitivity
             # Then a final chart with all the averages
             # If data is 2D, sum over x/y to get one number
-            
+
             # Dictionary with average
             AVE = {}
-            
+
             for sens in sensitivity:
                 ave_stack = 0
                 n_sens = len(sensitivity)-1
@@ -704,25 +709,25 @@ class WRFEnviron(object):
                 for perm in DATA:
                     f1 = DATA[perm]['file1']
                     f2 = DATA[perm]['file2']
-    
+
                     if sens in f1:
                         f = f2
                     elif sens in f2:
                         f = f1
                     else:
                         f = 0
-    
+
                     if f:
                         subdirs = f.split('/')
                         labels.append(subdirs[-2])
                         data = self.make_1D(DATA[perm]['values'])
-    
+
                         plt.plot(times,data)
                         # pdb.set_trace()
                         ave_stack = utils.vstack_loop(N.asarray(data),ave_stack)
                     else:
                         pass
-    
+
                 # pdb.set_trace()
                 n_sens += 1
                 colourlist = utils.generate_colours(M,n_sens)
@@ -730,7 +735,7 @@ class WRFEnviron(object):
                 AVE[sens] = N.average(ave_stack,axis=0)
                 labels.append('Average')
                 plt.plot(times,AVE[sens],'k')
-    
+
                 plt.legend(labels,loc=2,fontsize=9)
                 if ylimits:
                     plt.ylim(ylimits)
@@ -740,10 +745,10 @@ class WRFEnviron(object):
                 fname = '{0}_Growth_{1}.png'.format(ofname,sens)
                 fpath = os.path.join(outdir,fname)
                 fig.savefig(fpath)
-    
+
                 plt.close()
                 print("Saved {0}.".format(fpath))
-                
+
             # Averages for each sensitivity
             labels = []
             fig = plt.figure()
@@ -752,13 +757,13 @@ class WRFEnviron(object):
                 plt.plot(times,AVE[sens])
                 labels.append(sens)
                 ave_of_ave_stack = utils.vstack_loop(AVE[sens],ave_of_ave_stack)
-                
+
             labels.append('Average')
             ave_of_ave = N.average(ave_of_ave_stack,axis=0)
             plt.plot(times,ave_of_ave,'k')
-            
+
             plt.legend(labels,loc=2,fontsize=9)
-            
+
             if ylimits:
                 plt.ylim(ylimits)
             plt.gca().set_xticks(times[::2])
@@ -771,8 +776,8 @@ class WRFEnviron(object):
             plt.close()
             print("Saved {0}.".format(fpath))
             #pdb.set_trace()
-                            
-            
+
+
 
         else:
             fig = plt.figure()
@@ -784,7 +789,7 @@ class WRFEnviron(object):
 
             total_ave = N.average(ave_stack,axis=0)
             plt.plot(times,total_ave,'black')
-            
+
             if ylimits:
                 plt.ylim(ylimits)
             plt.gca().set_xticks(times[::2])
@@ -796,7 +801,7 @@ class WRFEnviron(object):
 
             plt.close()
             print("Saved {0}.".format(fpath))
-            
+
     def composite_profile(self,va,time,latlon,enspaths,dom=2,mean=0,std=0,xlim=0,ylim=0):
         P = Profile(self.C)
         P.composite_profile(va,time,latlon,enspaths,dom,mean,std,xlim,ylim)
@@ -826,15 +831,15 @@ class WRFEnviron(object):
                         If not specified, use pop-ups to select.
         locname     :   pass this to the filename of output for saving
         overlay     :   data from the same time to overlay on inset
-        ml          :   member level. negative number that corresponds to the 
+        ml          :   member level. negative number that corresponds to the
                         folder in absolute string for naming purposes.
 
 
         """
         # Initialise with first wrfout file
-        self.W = self.get_wrfout(wrf_sds[0],dom=dom)
+        self.W = self.get_netcdf(wrf_sds[0],dom=dom)
         outpath = self.get_outpath(out_sd)
-       
+
         # Get list of all wrfout files
         enspaths = self.list_ncfiles(wrf_sds)
 
@@ -848,8 +853,8 @@ class WRFEnviron(object):
         # Create basemap for clicker object
         # F = BirdsEye(self.C,self.W)
         # self.data = F.plot2D('cref',time,2000,dom,outpath,save=0,return_data=1)
-        
-       
+
+
 
         # TODO: Not sure basemap inset works for lat/lon specified
         if isinstance(latlon,collections.Sequence):
@@ -870,7 +875,7 @@ class WRFEnviron(object):
             # Pick location for profile
             C.click_x_y(plotpoint=1)
             lon0, lat0 = C.bmap(C.x0,C.y0,inverse=True)
-            
+
 
         # Compute profile
         P = Profile(self.C)
@@ -882,8 +887,8 @@ class WRFEnviron(object):
     def plot_skewT(self,plot_time,plot_latlon,out_sd=0,wrf_sd=0,dom=1,save_output=0,composite=0):
 
         outpath = self.get_outpath(out_sd)
-        W = self.get_wrfout(wrf_sd,dom=dom)
- 
+        W = self.get_netcdf(wrf_sd,dom=dom)
+
         if not composite:
             ST = SkewT(self.C,W)
             ST.plot_skewT(plot_time,plot_latlon,dom,outpath,save_output=save_output)
@@ -893,9 +898,9 @@ class WRFEnviron(object):
         else:
             #ST = SkewT(self.C)
             pass
-                
+
     def plot_streamlines(self,time,lv,wrf_sd=0,wrf_nc=0,out_sd=0,dom=1):
-        self.W = self.get_wrfout(wrf_sd,wrf_nc,dom=dom)
+        self.W = self.get_netcdf(wrf_sd,wrf_nc,dom=dom)
         outpath = self.get_outpath(out_sd)
 
         self.F = BirdsEye(self.C,self.W)
@@ -908,7 +913,7 @@ class WRFEnviron(object):
                 bounding=0,dom=0):
         """
         Plot strongest wind at level lv between itime and ftime.
-        
+
         Path to wrfout file is in config file.
         Path to plot output is also in config
 
@@ -931,24 +936,24 @@ class WRFEnviron(object):
                         of smoothing, to be specified.
         dom         :   domain for plotting. If zero, the only netCDF file present
                         will be plotted. If list of integers, the script will loop over domains.
-                        
-                        
+
+
         """
-        self.W = self.get_wrfout(wrf_sd,wrf_nc,dom=dom)
+        self.W = self.get_netcdf(wrf_sd,wrf_nc,dom=dom)
 
         outpath = self.get_outpath(out_sd)
-            
+
         # Make sure times are in datenum format and sequence.
         it = utils.ensure_sequence_datenum(itime)
         ft = utils.ensure_sequence_datenum(ftime)
-        
+
         d_list = utils.get_sequence(dom)
         lv_list = utils.get_sequence(levels)
-        
+
         for l, d in itertools.product(lv_list,d_list):
             F = BirdsEye(self.C,self.W)
             F.plot2D('strongestwind',it+ft,l,d,outpath,bounding=bounding)
- 
+
     def make_1D(self,data,output='list'):
         """ Make sure data is a time series
         of 1D values, and numpy array.
@@ -978,7 +983,7 @@ class WRFEnviron(object):
 
     def get_list(self,dic,key,default):
         """Fetch value from dictionary.
-        
+
         If it doesn't exist, use default.
         If the value is an integer, make a list of one.
         """
@@ -1002,11 +1007,11 @@ class WRFEnviron(object):
                 clvs=0,ztop=0):
         """
         Plot cross-section.
-        
+
         If no lat/lon transect is indicated, a popup appears for the user
         to pick points. The popup can have an overlaid field such as reflectivity
         to help with the process.
-        
+
         Inputs:
         vrbl        :   variable to be plotted
         times       :   times to be plotted
@@ -1023,14 +1028,14 @@ class WRFEnviron(object):
         f_suffix    :   custom filename suffix
         clvs        :   custom contour levels
         ztop        :   highest km to plot.
-        
+
         """
-        self.W = self.get_wrfout(wrf_sd,wrf_nc,dom=dom)
-        
+        self.W = self.get_netcdf(wrf_sd,wrf_nc,dom=dom)
+
         outpath = self.get_outpath(out_sd)
-     
+
         XS = CrossSection(self.C,self.W,latA,lonA,latB,lonB)
-        
+
         t_list = utils.ensure_sequence_datenum(times)
         for t in t_list:
             XS.plot_xs(vrbl,t,outpath,clvs=clvs,ztop=ztop)
@@ -1045,7 +1050,7 @@ class WRFEnviron(object):
             Locate gust front via shear
             Starting at front, do 3-grid-pt-average in line-normal
             direction
-            
+
         time    :   time (tuple or datenum) to plot
         wrf_sd  :   string - subdirectory of wrfout file
         wrf_nc  :   filename of wrf file requested.
@@ -1058,12 +1063,12 @@ class WRFEnviron(object):
         axes    :   if two-length tuple, this is the first and second axes for
                     cross-section/cref and cold pool strength, respectively
         dz      :   plot height of cold pool only.
-        
+
         """
         # Initialise
-        self.W = self.get_wrfout(wrf_sd,wrf_nc,dom=dom)
+        self.W = self.get_netcdf(wrf_sd,wrf_nc,dom=dom)
         outpath = self.get_outpath(out_sd)
-        
+
         # keyword arguments for plots
         line_kwargs = {}
         cps_kwargs = {}
@@ -1073,33 +1078,33 @@ class WRFEnviron(object):
             line_kwargs['ax'] = P2.ax.flat[0]
             line_kwargs['fig'] = P2.fig
             P2.ax.flat[0].set_size_inches(3,3)
-                
+
             cps_kwargs['ax'] = P2.ax.flat[1]
             cps_kwargs['fig'] = P2.fig
             P2.ax.flat[1].set_size_inches(6,6)
-        
+
         elif isinstance(axes,tuple) and len(axes)==2:
             line_kwargs['ax'] = axes[0]
             line_kwargs['fig'] = fig
-            
+
             cps_kwargs['ax'] = axes[1]
             cps_kwargs['fig'] = fig
-            
+
             return_ax = 1
-            
+
         # Plot sim ref, send basemap axis to clicker function
         F = BirdsEye(self.C,self.W)
         self.data = F.plot2D('cref',time,2000,dom,outpath,save=0,return_data=1)
-        
+
         C = Clicker(self.C,self.W,data=self.data,**line_kwargs)
         # C.fig.tight_layout()
-        
+
         # Line from front to back of system
         C.draw_line()
         # C.draw_box()
         lon0, lat0 = C.bmap(C.x0,C.y0,inverse=True)
         lon1, lat1 = C.bmap(C.x1,C.y1,inverse=True)
-        
+
         # Pick location for environmental dpt
         # C.click_x_y()
         # Here, it is the end of the cross-section
@@ -1110,11 +1115,11 @@ class WRFEnviron(object):
 
         # Ask user the line-normal box width (self.km)
         #C.set_box_width(X)
-        
+
         # Compute the grid (DX x DY)
         cps = self.W.cold_pool_strength(X,time,swath_width=swath_width,env=(x_env,y_env),dz=dz)
         # import pdb; pdb.set_trace()
-        
+
         # Plot this array
         CPfig = BirdsEye(self.C,self.W,**cps_kwargs)
         tstr = utils.string_from_time('output',time)
@@ -1123,7 +1128,7 @@ class WRFEnviron(object):
         else:
             fprefix = 'ColdPoolStrength_'
         fname = fprefix + tstr
-        
+
         pdb.set_trace()
         # imfig,imax = plt.subplots(1)
         # imax.imshow(cps)
@@ -1140,12 +1145,12 @@ class WRFEnviron(object):
             plotkwargs['cmap'] = plt.cm.ocean_r
         cf2 = CPfig.plot_data(cps,mplcommand,outpath,fname,time,**plotkwargs)
         # CPfig.fig.tight_layout()
-        
+
         plt.close(fig)
-        
+
         if twoplot:
             P2.save(outpath,fname+"_twopanel")
-            
+
         if return_ax:
             return C.cf, cf2
 <<<<<<< Updated upstream
@@ -1153,7 +1158,7 @@ class WRFEnviron(object):
 <<<<<<< HEAD
 =======
 >>>>>>> Stashed changes
-            
+
     def spaghetti(self,t,lv,va,contour,wrf_sds,out_sd,dom=1):
         """
         Do a multi-member spaghetti plot.
@@ -1166,22 +1171,22 @@ class WRFEnviron(object):
         """
         # import pdb; pdb.set_trace()
         outpath = self.get_outpath(out_sd)
-        
+
         # Use first wrfout to initialise grid etc
-        self.W = self.get_wrfout(wrf_sds[0],dom=dom)
+        self.W = self.get_netcdf(wrf_sds[0],dom=dom)
         F = BirdsEye(self.C, self.W)
 
         ncfiles = []
         for wrf_sd in wrf_sds:
-            ncfile = self.get_wrfout(wrf_sd,dom=dom,path_only=1)
-            ncfiles.append(ncfile)           
-           
+            ncfile = self.get_netcdf(wrf_sd,dom=dom,path_only=1)
+            ncfiles.append(ncfile)
+
         F.spaghetti(t,lv,va,contour,ncfiles,outpath)
 
     def std(self,t,lv,va,wrf_sds,out_sd,dom=1,clvs=0):
         """Compute standard deviation of all members
         for given variable.
-        
+
         Inputs:
         t       :   time
         lv      :   level
@@ -1192,16 +1197,16 @@ class WRFEnviron(object):
         out_sd  :   directory in which to save image
         clvs    :   user-set contour levels
         """
-        
+
         outpath = self.get_outpath(out_sd)
 
         ncfiles = self.list_ncfiles(wrf_sds)
 
         # Use first wrfout to initialise grid, get indices
-        self.W = self.get_wrfout(wrf_sds[0],dom=dom)
+        self.W = self.get_netcdf(wrf_sds[0],dom=dom)
 
-        tidx = self.W.get_time_idx(t) 
-        
+        tidx = self.W.get_time_idx(t)
+
         if lv==2000:
             # lvidx = None
             lvidx = 0
@@ -1213,23 +1218,23 @@ class WRFEnviron(object):
 
         F = BirdsEye(self.C, self.W)
         t_name = utils.string_from_time('output',t)
-        fname_t = 'std_{0}_{1}'.format(va,t_name) 
-        
+        fname_t = 'std_{0}_{1}'.format(va,t_name)
+
         # pdb.set_trace()
         plotkwargs = {}
         plotkwargs['no_title'] = 1
         if isinstance(clvs,N.ndarray):
             plotkwargs['clvs'] = clvs
         F.plot_data(std_data,'contourf',outpath,fname_t,t,**plotkwargs)
-        print("Plotting std dev for {0} at time {1}".format(va,t_name)) 
+        print("Plotting std dev for {0} at time {1}".format(va,t_name))
 
     def list_ncfiles(self,wrf_sds,dom=1,path_only=1):
         ncfiles = []
         for wrf_sd in wrf_sds:
-            ncfile = self.get_wrfout(wrf_sd,dom=dom,path_only=path_only)
-            ncfiles.append(ncfile)           
+            ncfile = self.get_netcdf(wrf_sd,dom=dom,path_only=path_only)
+            ncfiles.append(ncfile)
         return ncfiles
- 
+
     def plot_domains(self,wrfouts,labels,latlons,out_sd=0,colour=0):
         outpath = self.get_outpath(out_sd)
 
@@ -1240,12 +1245,12 @@ class WRFEnviron(object):
                         no_title=1):
         # import pdb; pdb.set_trace()
         outpath = self.get_outpath(out_sd)
-        self.W = self.get_wrfout(wrf_sd,dom=dom)
-    
+        self.W = self.get_netcdf(wrf_sd,dom=dom)
+
         data = self.W.isosurface_p('W',time,level)
         F = BirdsEye(self.C,self.W)
         tstr = utils.string_from_time('output',time)
-        fname = 'W_{0}_{1}.png'.format(level,tstr) 
+        fname = 'W_{0}_{1}.png'.format(level,tstr)
         F.plot_data(data,'contourf',outpath,fname,time,clvs=clvs,
                     no_title=no_title)
 
@@ -1254,7 +1259,7 @@ class WRFEnviron(object):
                         clvs=0,no_title=1,**kwargs):
         """
         Compute and plot (Miller?) frontogenesis as d/dt of theta gradient.
-        
+
         Use a centred-in-time derivative; hence, if
         time index is start or end of wrfout file, skip the plot.
 
@@ -1262,12 +1267,12 @@ class WRFEnviron(object):
         """
 
         outpath = self.get_outpath(out_sd)
-        self.W = self.get_wrfout(wrf_sd,dom=dom)
+        self.W = self.get_netcdf(wrf_sd,dom=dom)
         tstr = utils.string_from_time('output',time)
- 
+
         Front = self.W.compute_frontogenesis(time,level)
         if isinstance(Front,N.ndarray):
-        
+
             if blurn:
                 Front = stats.gauss_smooth(Front,blurn)
 
@@ -1277,10 +1282,8 @@ class WRFEnviron(object):
                 lv_str = str(level)
 
                 F = BirdsEye(self.C,self.W)
-                fname = 'frontogen_{0}_{1}.png'.format(lv_str,tstr) 
+                fname = 'frontogen_{0}_{1}.png'.format(lv_str,tstr)
                 F.plot_data(Front,'contourf',outpath,fname,time,clvs=clvs,
                             no_title=no_title,**kwargs)
         else:
             print("Skipping this time; at start or end of run.")
-
-

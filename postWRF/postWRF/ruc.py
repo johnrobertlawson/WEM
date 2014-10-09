@@ -25,7 +25,7 @@ This script should inherit WRFOut and override the 'get' command.
 """
 
 
-class RUCPlot(Figure):
+class RUC(WRFOut):
     def __init__(self,config,t,**kwargs):
         """
         config  :   configuration settings
@@ -405,7 +405,11 @@ class RUCPlot(Figure):
         else:
             return key
 
-    def compute_frontogenesis():
+    def compute_frontogenesis_NOTNEEDED():
+        """
+        Override WRFOut frontogenesis?
+        """
+
         dp = 15 # hPa to compute vertical gradients
         tidx = self.get_time_idx(time)
         if (tidx == 0) or (tidx == self.wrf_times.shape[0]-1):
