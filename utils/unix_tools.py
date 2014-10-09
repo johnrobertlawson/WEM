@@ -8,6 +8,7 @@ try:
     import paramiko
 except ImportError:
     print("Module paramiko unavailable.")
+import base64 
 
 def dir_from_naming(root,*args):
     """
@@ -21,10 +22,10 @@ def dir_from_naming(root,*args):
     path = os.path.join(root,*l)
     return path
 
-def ssh_client(domain,username,password):
-    #key = paramiko.RSAKey(data=base64.decodestring('AAA...'))
+def ssh_client(ky,domain,username,password):
+    key = paramiko.RSAKey(data=base64.decodestring(ky))
     client = paramiko.SSHClient()
-    #client.get_host_keys().add('ssh.example.com', 'ssh-rsa', key)
+    client.get_host_keys().add(domain, 'ssh-rsa', key)
     client.connect(domain, username=username, password=password)
     return client
     stdin, stdout, stderr = client.exec_command('ls')

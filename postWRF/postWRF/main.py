@@ -1148,6 +1148,11 @@ class WRFEnviron(object):
             
         if return_ax:
             return C.cf, cf2
+<<<<<<< Updated upstream
+=======
+<<<<<<< HEAD
+=======
+>>>>>>> Stashed changes
             
     def spaghetti(self,t,lv,va,contour,wrf_sds,out_sd,dom=1):
         """
