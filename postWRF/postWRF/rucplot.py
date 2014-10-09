@@ -404,3 +404,82 @@ class RUCPlot(Figure):
             return key
 
 
+
+    def compute_frontogenesis():
+        dp = 15 # hPa to compute vertical gradients
+        tidx = self.get_time_idx(time)
+        if (tidx == 0) or (tidx == self.wrf_times.shape[0]-1):
+            return None
+        elif level == 2000:
+            tidxs = (tidx-1,tidx,tidx+1)
+            T = {}
+            TH2 = {}
+            Z = {}
+            dTdx = {}
+            dTdy = {}
+            dTdz = {}
+            U = {}
+            V = {}
+            W = {}
+            for n, tidx in enumerate(tidxs):
+                # Just assume surface
+                lvidx = 0 
+                U[n] = self.get('U10',{'t':tidx})[0,:,:]
+                V[n] = self.get('V10',{'t':tidx})[0,:,:]
+                W[n] = self.get('W',{'t':tidx, 'lv':0})[0,0,:,:]
+                T[n] = self.get('T',{'t':tidx, 'lv':[0,1]})[0,:,:,:]
+                TH2[n] = self.get('TH2',{'t':tidx})[0,:,:]
+                # Z[n] = self.get('Z',{'t':tidx, 'lv' :[0,1]})[0,:,:,:]
+                # We want gap between levels so not destaggered:
+                Z[n] = (self.nc.variables['PH'][tidx,0:2,:,:] + 
+                        self.nc.variables['PHB'][tidx,0:2,:,:])/mc.g
+                # Each grid point is DX km apart:
+                dTdx[n], dTdy[n] = N.gradient(TH2[n])/self.dx
+
+                # import pdb; pdb.set_trace()
+                levelgap = Z[n][1,:,:] - Z[n][0,:,:]
+                _, __, dTdz[n] = N.gradient(T[n])/levelgap
+                # _, __, dTdz_2 = N.gradient(T[n])/levelgap
+                # N.gradient needs interpolating to one level here?
+                # dTdz[n] = (dTdz_2[1,...]-dTdz_2[0,...])/2.0     
+                
+        elif isinstance(level,int):
+            tidxs = (tidx-1,tidx,tidx+1)
+
+            # Get sizes of array
+            ny,nx = self.get_p('U',tidx,level).shape
+
+            # Initialise them
+            U = N.zeros([3,3,ny,nx])
+            V = N.zeros_like(U)
+            W = N.zeros_like(U)
+            T = N.zeros_like(U)
+            # omega = N.zeros_like(U)
+
+            for n, t in enumerate(tidxs):
+                U[n,...] = self.get_p('U',t,level)
+                V[n,...] = self.get_p('V',t,level)
+                W[n,...] = self.get_p('W',t,level)
+
+                # 3D array has dimensions (vertical, horz, horz)
+                T[n,...] = self.get_p('T',t,(level-dp,level,level+dp))
+
+                # Compute omega
+                # P = rho* R* drybulb
+                # drybulb = T/((P0/P)^(R/cp)
+
+            drybulb = 273.15 + (T/((100000.0/(level*100.0))**(mc.R/mc.cp)))
+            rho = (level*100.0)/(mc.R*drybulb)
+            omega = -rho * mc.g * W 
+                  
+            # Time difference in sec
+            dt = self.wrf_times_epoch[tidx+1]-self.wrf_times_epoch[tidx]
+            dTdt, dTdz, dTdy, dTdx = N.gradient(T,dt,dp*100.0,self.dy, self.dx)
+            # Gradient part
+            grad = (dTdx**2 + dTdy**2)**0.5
+            # Full derivative - value wrong for dgraddz here
+            dgraddt, dgraddz, dgraddy, dgraddx = N.gradient(grad,dt,dp*100.0,self.dy, self.dx) 
+            # Full equation
+            Front = dgraddt[1,1,:,:] + U[1,1,:,:]*dgraddx[1,1,:,:] + V[1,1,:,:]*dgraddy[1,1,:,:] # + omega[1,1,:,:]*dgraddz[1,1,:,:]
+        return Front
+

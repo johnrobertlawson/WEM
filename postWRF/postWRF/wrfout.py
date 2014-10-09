@@ -1129,11 +1129,6 @@ class WRFOut(object):
             W = N.zeros_like(U)
             T = N.zeros_like(U)
             # omega = N.zeros_like(U)
-            # dTdx = N.zeros_like(U)
-            # dTdy = N.zeros_like(U)
-            # dTdz = N.zeros_like(U)
-            # dTdt = N.zeros_like(U)
-            # grad = N.zeros_like(U)
 
             for n, t in enumerate(tidxs):
                 U[n,...] = self.get_p('U',t,level)
@@ -1142,71 +1137,23 @@ class WRFOut(object):
 
                 # 3D array has dimensions (vertical, horz, horz)
                 T[n,...] = self.get_p('T',t,(level-dp,level,level+dp))
-                # Tupp[n] = self.get_p('T',t,level+dp)
-                # Tlev[n] = self.get_p('T',t,level)
-                # Tlow[n] = self.get_p('T',t,level-dp)
 
-                # pdb.set_trace()
                 # Compute omega
                 # P = rho* R* drybulb
                 # drybulb = T/((P0/P)^(R/cp)
+
             drybulb = 273.15 + (T/((100000.0/(level*100.0))**(mc.R/mc.cp)))
             rho = (level*100.0)/(mc.R*drybulb)
             omega = -rho * mc.g * W 
-            # return omega[0]
-
-                # Height
-                # PH = self.get_p('PH',t,(level-25,level+25))
-                # PHB = self.get_p('PHB',t,(level-25,level+25))
-                # Z = (PH + PHB)/mc.g
-
-                # Gradients in potential temperature
-                # Horizontal
-                # Each grid point is DX km apart:
-                # dTdx[n], dTdy[n] = N.gradient(Tlev[n],ds,ds)/(self.dx/ds)
-                # dTdx[n], dTdy[n] = N.gradient(Tlev[n],self.dx,self.dy)
-                # dTdxUpp[n], dTdyUpp[n] = N.gradient(Tupp[n],self.dx,self.dy)
-                # dTdxLow[n], dTdyLow[n] = N.gradient(Tlow[n],self.dx,self.dy)
-                
-
-
-
-                # Vertical
-                # levelgap = Z[0,:,:] - Z[1,:,:]
-                # dTdz[n] = (Tupp[n]-Tlow[n])/dpPa
-                   
+                  
             # Time difference in sec
             dt = self.wrf_times_epoch[tidx+1]-self.wrf_times_epoch[tidx]
             dTdt, dTdz, dTdy, dTdx = N.gradient(T,dt,dp*100.0,self.dy, self.dx)
             # Gradient part
-            # grad = abs(dTdx + dTdy)**2
             grad = (dTdx**2 + dTdy**2)**0.5
-            # grad = {}
-            # for n in range(len(tidxs)):
-                # grad[n] = abs(dTdx[n] + dTdy[n] + dTdz[n])**2
-                # grad[n] = abs(dTdx[n] + dTdy[n])**2
-                # gradUpp = abs(dTdxUpp[n] + dTdyUpp[n])**2
-                # gradLow = abs(dTdxLow[n] + dTdyLow[n])**2
-                # grad[n] = N.dstack((gradUpp,gradLev,gradLow))
-
-            # import pdb; pdb.set_trace()
             # Full derivative - value wrong for dgraddz here
             dgraddt, dgraddz, dgraddy, dgraddx = N.gradient(grad,dt,dp*100.0,self.dy, self.dx) 
-            # dgraddx, dgraddy, dgraddz = N.gradient(grad[1],self.dx,self.dy,self.dp)
-            # dgraddx = dgraddx[:,:,1] # Middle level
-            # dgraddy = dgraddy[:,:,1] # Middle level
-            # dgraddz = dgraddz[:,:,1] # Middle level
-
-            # Interpolate onto a single level
-            # dgraddx = (dgraddx[1,...]+dgraddx[0,...])/2.0
-            # dgraddy = (dgraddy[1,...]+dgraddy[0,...])/2.0
-            # dgraddz = (dgraddz[1,...]+dgraddz[0,...])/2.0
-
             # Full equation
             Front = dgraddt[1,1,:,:] + U[1,1,:,:]*dgraddx[1,1,:,:] + V[1,1,:,:]*dgraddy[1,1,:,:] # + omega[1,1,:,:]*dgraddz[1,1,:,:]
-            # Front = ((grad[2][:,:,1]-grad[0][:,:,1])/dt) + U[1]*dgraddx + V[1]*dgraddy + omega[1]*dgraddz
-            # import pdb; pdb.set_trace()
-            # Front = ((grad[2][:,:,1]-grad[0][:,:,1])/dt) + U[1]*dgraddx + V[1]*dgraddy 
-            # Front = (Front_2[1]+Front_2[0])/2.0
         return Front
 

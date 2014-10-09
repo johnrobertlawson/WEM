@@ -17,7 +17,7 @@ config = Settings()
 p = WRFEnviron(config)
 
 skewT = 0
-plot2D = 0
+plot2D = 1
 streamlines = 0
 rucplot = 0
 coldpoolstrength = 0
@@ -27,9 +27,9 @@ profiles = 0
 frontogenesis = 1
 upperlevel = 0
 
-enstype = 'STCH'
+# enstype = 'STCH'
 # enstype = 'ICBC'
-# enstype = 'MXMP'
+enstype = 'MXMP'
 
 case = '20060526'
 # case = '2006052612'
@@ -37,10 +37,10 @@ case = '20060526'
 # case = '20110419'
 # case = '20130815'
 
-IC = 'GEFSR2'
+# IC = 'GEFSR2'
 # IC = 'NAM'
 # IC = 'RUC'
-
+IC = 'GFS'
 
 #ensnames = ['anl']
 #experiment = 'VERIF'
@@ -55,7 +55,7 @@ elif enstype == 'MXMP':
     experiments = ['WSM6_Grau','WSM6_Hail','Kessler','Ferrier',
                     'WSM5','WDM5','Lin','WDM6_Grau','WDM6_Hail',
                     'Morrison_Grau','Morrison_Hail','ICBC']
-    # experiments = ['ICBC',]
+    experiments = ['ICBC',]
     ensnames = ['anl',]
 elif enstype == 'ICBC':
     ensnames =  ['c00'] + ['p'+"%02d" %n for n in range(1,11)]
