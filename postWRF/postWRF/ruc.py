@@ -11,8 +11,7 @@ import glob
 
 import sys
 #sys.path.append('/home/jrlawson/gitprojects/')
-import WEM.utils.utils as utils
-import WEM.utils.gridded_data as gridded_data
+import WEM.utils as utils
 from figure import Figure
 from defaults import Defaults
 from wrfout import WRFOut
@@ -26,7 +25,7 @@ This script should inherit WRFOut and override the 'get' command.
 
 
 class RUC(WRFOut):
-    def __init__(self,config,t,**kwargs):
+    def __init__(self,fpath,**kwargs):
         """
         config  :   configuration settings
         t       :   time, datenum format
@@ -34,20 +33,20 @@ class RUC(WRFOut):
         optional key-word arguments:
         wrfdir  :   if picked, domain is cut down
         """
+        self.fpath = fpath
+        # self.C = config
+        # self.D = Defaults()
 
-        self.C = config
-        self.D = Defaults()
+        # self.path_to_data = self.C.path_to_RUC
+        # self.output_root = self.C.output_root
 
-        self.path_to_data = self.C.path_to_RUC
-        self.output_root = self.C.output_root
-
-        self.t = t
+        # self.t = t
         # Convert the datenum into time sequence
-        self.ts = self.get_time_seq()
+        # self.ts = self.get_time_seq()
 
-        self.version = self.get_version()
-        self.fname = self.get_fname()
-        self.fpath = os.path.join(self.path_to_data,self.fname+'.nc')
+        # self.version = self.get_version()
+        # self.fname = self.get_fname()
+        # self.fpath = os.path.join(self.path_to_data,self.fname+'.nc')
 
         self.nc = Dataset(self.fpath)
 
