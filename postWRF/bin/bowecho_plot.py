@@ -17,7 +17,7 @@ config = Settings()
 p = WRFEnviron(config)
 
 skewT = 0
-plot2D = 1
+plot2D = 0
 streamlines = 0
 rucplot = 0
 coldpoolstrength = 0
@@ -40,7 +40,8 @@ case = '20060526'
 # IC = 'GEFSR2'
 # IC = 'NAM'
 # IC = 'RUC'
-IC = 'GFS'
+# IC = 'GFS'
+IC = 'RUC'
 
 #ensnames = ['anl']
 #experiment = 'VERIF'
@@ -56,22 +57,27 @@ elif enstype == 'MXMP':
                     'WSM5','WDM5','Lin','WDM6_Grau','WDM6_Hail',
                     'Morrison_Grau','Morrison_Hail','ICBC']
     experiments = ['ICBC',]
+    experiments = ['VERIF',]
     ensnames = ['anl',]
 elif enstype == 'ICBC':
     ensnames =  ['c00'] + ['p'+"%02d" %n for n in range(1,11)]
     experiments = ['ICBC',]
 
 if case[:4] == '2006':
+    inittime = (2006,5,26,0,0,0)
     itime = (2006,5,26,3,0,0)
     ftime = (2006,5,27,12,0,0)
     # times = [(2006,5,26,12,0,0),]
 elif case[:4] == '2009':
+    inittime = (2009,9,10,23,0,0)
     itime = (2009,9,10,23,0,0)
     ftime = (2009,9,11,14,0,0)
 elif case[:4] == '2011':
+    inittime = (2011,4,19,0,0,0)
     itime = (2011,4,19,18,0,0)
     ftime = (2011,4,20,10,30,0)
 elif case[:4] == '2013':
+    inittime = (2013,8,15,0,0,0)
     itime = (2013,8,15,6,0,0)
     ftime = (2013,8,16,12,0,0)
     times = [(2013,8,15,12,0,0),]
@@ -231,7 +237,7 @@ if frontogenesis:
         for ex in experiments:
             out_sd, wrf_sd = get_folders(en,ex)
             for time in times: 
-                p.frontogenesis(time,925,wrf_sd=wrf_sd,out_sd=out_sd,
+                p.frontogenesis(time,925,nc_sd=wrf_sd,nc_init=inittime,out_sd=out_sd,
                                 clvs=N.arange(-2.0,2.125,0.125)*10**-7,
                                 # clvs = N.arange(-500,510,10)
                                 blurn=3, cmap='bwr'

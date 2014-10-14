@@ -37,6 +37,7 @@ from wrfout import WRFOut
 from axes import Axes
 from figure import Figure
 from birdseye import BirdsEye
+from ruc import RUC
 from skewt import SkewT
 from skewt import Profile
 #import scales
@@ -164,8 +165,40 @@ class WRFEnviron(object):
                 #rq[va]['pt'] = t # Need this?
                 #rq[va]['vc'] = vc # Need this?
                 # F.plot2D(va, t, lv, )
+    
+    def get_netcdf(self,nc_sd,nc_f=0,nc_t=0,dom=0,path_only=False):
+        """Returns the WRFOut or RUC instance, given arguments:
 
-    def get_netcdf(self,wrf_sd=0,wrf_nc=0,dom=0,path_only=0):
+        nc_sd       :   absolute path to subdirectory
+
+        Optional inputs:
+        nc_f        :   file name 
+        nc_t        :   initialisation time (tuple)
+        dom         :   domain required
+        path_only   :   if True, return only absolute path+fname
+        """
+        # import pdb; pdb.set_trace()
+        if nc_f:
+            fpath = os.path.join(nc_sd,nc_f)
+            model = utils.determine_model(nc_f)
+        elif nc_sd:
+            fpath, model = utils.netcdf_files_in(nc_sd,init_time=nc_t,
+                                            dom=dom,return_model=True)
+        
+        if path_only:
+            return fpath
+        else:
+            # Check for WRF or RUC 
+            # nc = Dataset(wrfpath)
+            # if 'ruc' in nc.grib_source[:3]:
+            if model=='ruc':
+                return RUC(fpath)
+            elif model=='wrfout':
+                return WRFOut(fpath)
+            else:
+                print("Unrecognised netCDF4 file type at {0}".format(fpath))
+
+    def get_wrfout(self,wrf_sd=0,wrf_nc=0,dom=0,path_only=0):
         """Returns the WRFOut or RUC instance, given arguments:
 
         Optional inputs:
@@ -177,6 +210,7 @@ class WRFEnviron(object):
         # Check configuration to see if wrfout files should be
         # sought inside subdirectories.
         descend = getattr(self.C,'wrf_folders_descend',1)
+        import pdb; pdb.set_trace()
 
         if wrf_sd and wrf_nc:
             wrfpath = os.path.join(self.C.wrfout_root,wrf_sd,wrf_nc)
@@ -192,11 +226,14 @@ class WRFEnviron(object):
             return wrfpath
         else:
             # Check for WRF or RUC 
-            nc = Dataset(wrfpath)
-            if 'ruc' in nc.grib_source[:3]:
+            # nc = Dataset(wrfpath)
+            # if 'ruc' in nc.grib_source[:3]:
+            if 'ruc' in wrfpath[:5]:
                 return RUC(wrfpath)
-            elif
-            return WRFOut(wrfpath)
+            elif 'wrfout' in wrfpath[:6]:
+                return WRFOut(wrfpath)
+            else:
+                print("Unrecognised netCDF4 file type at {0}".format(wrfpath))
 
     def generate_times(self,itime,ftime,x):
         """
@@ -1153,11 +1190,6 @@ class WRFEnviron(object):
 
         if return_ax:
             return C.cf, cf2
-<<<<<<< Updated upstream
-=======
-<<<<<<< HEAD
-=======
->>>>>>> Stashed changes
 
     def spaghetti(self,t,lv,va,contour,wrf_sds,out_sd,dom=1):
         """
@@ -1169,7 +1201,6 @@ class WRFEnviron(object):
         wrf_sds :   list of wrf subdirs to loop over
         out_sd  :   directory to save image
         """
-        # import pdb; pdb.set_trace()
         outpath = self.get_outpath(out_sd)
 
         # Use first wrfout to initialise grid etc
@@ -1255,7 +1286,7 @@ class WRFEnviron(object):
                     no_title=no_title)
 
 
-    def frontogenesis(self,time,level,wrf_sd=0,out_sd=0,dom=1,blurn=0,
+    def frontogenesis(self,time,level,nc_sd=0,nc_f=0,nc_init=0,out_sd=0,dom=1,blurn=0,
                         clvs=0,no_title=1,**kwargs):
         """
         Compute and plot (Miller?) frontogenesis as d/dt of theta gradient.
@@ -1265,9 +1296,11 @@ class WRFEnviron(object):
 
         blurn       :   gaussian smooth by this many grid points
         """
-
+        # Need to rewrite API so sd becomes absolute path.
         outpath = self.get_outpath(out_sd)
-        self.W = self.get_netcdf(wrf_sd,dom=dom)
+        nc_path = os.path.join(self.C.wrfout_root,nc_sd)
+        # import pdb; pdb.set_trace()
+        self.W = self.get_netcdf(nc_path,nc_f,nc_t=nc_init,dom=dom)
         tstr = utils.string_from_time('output',time)
 
         Front = self.W.compute_frontogenesis(time,level)

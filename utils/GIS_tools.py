@@ -401,6 +401,86 @@ def latlon_1D(nc):
     lons = nc.variables['XLONG'][0,Ny/2,:]
     return lats, lons
     
+def netcdf_files_in(folder,dom=0,init_time=0,model='auto',return_model=False):
+    """
+    Hunt through given folder to find the right netcdf file for data.
+    
+
+    Inputs:
+    folder      :   Absolute path to directory
+    dom         :   specify domain. None specified if zero.
+    init_time   :   initialisation time. Can be tuple or datenum.
+                    If zero, then folder must contain one unambiguous file.
+    model       :   Default: automatically detect the type of netcdf file
+                    (RUC data, wrfout file, etc)
+    Returns:
+    ncpath      :   Absolute path to file
+    model       :   Model (RUC, WRF) of netcdf file, 
+                    if return_model is True and model is 'auto'.
+    """
+    t = 'auto'
+    if init_time:
+        t = ensure_timetuple(init_time,fmt='single')
+
+    # Set the model type to load.
+    if model=='auto':
+        # Get files, check prefix
+        files = glob.glob(os.path.join(folder,'*'))
+        matches = 0
+        for f in files:
+            model = determine_model(f.split('/')[-1])
+            # import pdb; pdb.set_trace()
+            if model:
+                matches += 1
+            
+        if matches < 1:
+            print("No netcdf files found.")
+            raise Exception
+        elif matches > 1 and isinstance(t,str):
+            print("Ambiguous netcdf file selection. Specify model?")
+            raise Exception
+
+    if model=='wrfout':
+        pfx = 'wrfout' # Assume the prefix
+    elif model=='ruc':
+        pfx = 'ruc'
+        # TODO: logic that considers the four versions of RUC
+    else:
+        raise Exception
+
+    # Pick unambiguous 
+    if t=='auto':
+        # We assume the user has wrfout files in different folders for different times
+        f = glob.glob(os.path.join(folder,pfx+'*'))
+        if len(f) != 1:
+            print("Ambiguous netCDF4 selection.")
+            raise Exception
+        else:
+            if return_model:
+                return f, model
+            else:
+                return f
+    else:
+        if (dom > 8):
+            print("Domain is out of range. Choose number between 1 and 8 inclusive.")
+            raise IndexError
+        
+        fname = get_netcdf_naming(model,t,dom)
+        f = glob.glob(os.path.join(folder,fname))
+        import pdb; pdb.set_trace()
+        if len(f) == 1:
+            if return_model:
+                return f, model
+            else:
+                return f
+        elif len(f) == 0:
+            print("No netCDF4 file found.")
+            raise Exception
+        else:
+            print("Ambiguous netCDF4 selection.")
+            raise Exception
+            
+
 def wrfout_files_in(folders,dom=0,init_time='notset',descend=1,avoid=0,
                     unambiguous=0):
     """
@@ -607,6 +687,10 @@ def string_from_time(usage,t,dom=0,strlen=0,conven=0,**kwargs):
             dom = 1
         strg = ('wrfout_d0' + str(dom) +
                '{0:04d}-{1:02d}-{2:02d}_{3:02d}:{4:02d}:{5:02d}'.format(*t))
+    elif usage == 'ruc':
+        # This depends on the RUC version? Will break?
+        strg = ('ruc2_252_{0:04d}{1:02d}{2:02d}_' +
+                '{3:02d}{4:02d}_{5:02d}0.nc'.format(*t))
     elif usage == 'output':
         if not conven:
             # No convention set, assume DD/MM (I'm biased)
@@ -798,7 +882,7 @@ def convert_tuple_to_dntimes(times):
 
     return dntimes
     
-def ensure_sequence_datenum(times):
+def ensure_datenum(times,fmt='list'):
     """
     Make sure times are in list-of-datenums format.
     If not, convert them.
@@ -810,6 +894,9 @@ def ensure_sequence_datenum(times):
     times = (2011,12,1,18,0,0)                          #4
     times = ((2011,12,1,18,0,0),(2011,12,2,6,0,0))      #5
     
+    fmt     :   whether to return list of integers or an integer
+                'int' or 'list'
+
     Output:
     dntimes = (123456,) or (123456,234567)
     """
@@ -826,8 +913,81 @@ def ensure_sequence_datenum(times):
         else: #2,3
             dntimes = times
     
-    return dntimes
+    if (fmt == 'list') or (len(dntimes)>1):
+        return dntimes
+    elif (fmt == 'int') or (len(dntimes)==1):
+        return dntimes[0]
+    else:
+        print("Nonsense format choice.")
+        raise Exception
     
+def ensure_timetuple(times,fmt='list'): 
+    """ 
+    MAke sure time(s) are in six-item tuple format
+    (YYYY,MM,DD,HH,MM,SS)
+
+    fmt     :   whether to return a list of tuples or single tuple.
+                'list' or 'single'
+
+    Possibilities:
+    times = 123456                                      #1
+    times = (123456,)                                   #2
+    times = (123456,234567)                             #3
+    times = (2011,12,1,18,0,0)                          #4
+    times = ((2011,12,1,18,0,0),(2011,12,2,6,0,0))      #5
+    """
     
+    if isinstance(times,int):
+        tttimes = [calendar.timegm(times),] #1
+    elif isinstance(times,basestring):
+        print("Don't give me strings...")
+        raise Exception
+    elif isinstance(times,collections.Sequence): #2,3,4,5
+        if not isinstance(times[0],int): #5
+            tttimes = times
+        elif times[0]<3000: #4
+            tttimes = [times,]
+        else: #2,3
+            tttimes = [calendar.timegm(t) for t in times]
     
+    if (fmt == 'list') or (len(tttimes)>1):
+        return tttimes
+    elif (fmt == 'single') or (len(tttimes)==1):
+        return tttimes[0]
+    else:
+        print("Nonsense format choice.")
+        raise Exception
+
+def get_netcdf_naming(model,t,dom=0):
+    """
+    By default:
+    wrfout files don't have an extension
+    other files have .nc extension (convert first)
+    """
+    if model=='wrfout':
+        if not dom:
+            print("No domain specified; using domain #1.")
+            dom = 1
+        fname = ('wrfout_d{0:02d}_{1:04d}-{2:02d}-{3:02d}_{4:02d}:{5:02d}:{6:02d}'.format(dom,*t))
+    elif model == 'ruc':
+        # This depends on the RUC version? Will break?
+        fname = ('ruc2_252_{0:04d}{1:02d}{2:02d}_{3:02d}{4:02d}_{5:02d}0.nc'.format(*t))
+    else:
+        print("Model format not supported yet.")
+        raise Exception
+    return fname
+
+def determine_model(fname):
+    """
+    Return model depending on naming convention.
     
+    If no model exists, return false.
+    """
+
+    models = {'wrfout_d':'wrfout','ruc2':'ruc'}
+
+    for k,v in models.iteritems():
+        if k in fname[:10]:
+            return v
+    
+    return False
