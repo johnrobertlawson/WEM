@@ -55,7 +55,7 @@ def dewpoint(T,RH): # Lawrence 2005 BAMS?
     Td = (237.7 * alog)/(7.5-alog)
     #pdb.set_trace()
     return Td
-    
+
 def csvprocess(data,names,convert=0):
     # Get stations
     stationlist = N.unique(data['stid']) # Stations in the record
@@ -73,7 +73,7 @@ def csvprocess(data,names,convert=0):
         # Entries from MesoWest data
         for n in names:
             D[s][n] = data[n][those]
-     
+
         # Sort times
         year = [int(t[0:4]) for t in D[s]['tutc']]
         month = [int(t[4:6]) for t in D[s]['tutc']]
@@ -111,7 +111,7 @@ def csvprocess(data,names,convert=0):
             D[s]['mwi'] = D[s]['dVdt'].max() # max wind increase
             loc = N.where(D[s]['dVdt']==D[s]['mwi'])
             D[s]['mwi_t'] = D[s]['pytime'][loc][0] # time of max wind increase
-        
+
         # Find time of maximum wind gust
         if any(D[s]['wgms']) == False:
             D[s]['mg'] = -9999
@@ -129,8 +129,8 @@ def csvprocess(data,names,convert=0):
             D[s]['ms'] = D[s]['wsms'].max() # Maximum gust at the station
             loc = N.where(D[s]['wsms']==D[s]['ms'])
             D[s]['ms_t'] = D[s]['pytime'][loc][0] # time of max gust
- 
-            
+
+
         # Frequency of observation in minutes
         try:
             D[s]['dt'] = (D[s]['pytime'][1] - D[s]['pytime'][0]) / 60
@@ -241,7 +241,7 @@ def get_cross_section(Alat, Alon, Blat, Blon):
     fname = 'test1.png'
     plt.savefig(outdir+fname,bbox_inches='tight',pad_inches=0.3)
     plt.clf()
-    
+
 # datestring needs to be format yyyymmddhh
 def wrf_nc_load(dom,var,ncfolder,datestr,thin,Nlim=0,Elim=0,Slim=0,Wlim=0):
     datestr2 = datestr[0:4]+'-'+datestr[4:6]+'-'+datestr[6:8]+'_'+datestr[8:10]+':00:00'
@@ -279,7 +279,7 @@ def wrf_nc_load(dom,var,ncfolder,datestr,thin,Nlim=0,Elim=0,Slim=0,Wlim=0):
 
     # Draw the base map behind it with the lats and
     # lons calculated earlier
-    
+
     if Nlim:
         m = Basemap(projection='lcc',lon_0=cen_lon,lat_0=cen_lat,
                     llcrnrlat=Slim,urcrnrlat=Nlim,llcrnrlon=Wlim,
@@ -336,7 +336,7 @@ def hgt_from_sigma(nc):
 def find_time_index(wrftime,reqtimetuple,tupleformat=1):
     # wrftime = WRF Times in array
     # reqtime = desired time in six-tuple
-    
+
     # Convert required time to Python time if required
     if tupleformat:
         reqtime = calendar.timegm(reqtimetuple)
@@ -354,7 +354,7 @@ def find_time_index(wrftime,reqtimetuple,tupleformat=1):
         min = int(''.join(t[i,14:16]))
         sec = int(''.join(t[i,17:19]))
         pytime[i] = calendar.timegm([yr,mth,day,hr,min,sec])
-        
+
     # Now find closest WRF time
     timeInd = N.where(abs(pytime-reqtime) == abs(pytime-reqtime).min())[0][0]
     return timeInd
@@ -400,11 +400,11 @@ def latlon_1D(nc):
     lats = nc.variables['XLAT'][0,:,Nx/2]
     lons = nc.variables['XLONG'][0,Ny/2,:]
     return lats, lons
-    
+
 def netcdf_files_in(folder,dom=0,init_time=0,model='auto',return_model=False):
     """
     Hunt through given folder to find the right netcdf file for data.
-    
+
 
     Inputs:
     folder      :   Absolute path to directory
@@ -415,7 +415,7 @@ def netcdf_files_in(folder,dom=0,init_time=0,model='auto',return_model=False):
                     (RUC data, wrfout file, etc)
     Returns:
     ncpath      :   Absolute path to file
-    model       :   Model (RUC, WRF) of netcdf file, 
+    model       :   Model (RUC, WRF) of netcdf file,
                     if return_model is True and model is 'auto'.
     """
     t = 'auto'
@@ -432,7 +432,7 @@ def netcdf_files_in(folder,dom=0,init_time=0,model='auto',return_model=False):
             # import pdb; pdb.set_trace()
             if model:
                 matches += 1
-            
+
         if matches < 1:
             print("No netcdf files found.")
             raise Exception
@@ -448,7 +448,7 @@ def netcdf_files_in(folder,dom=0,init_time=0,model='auto',return_model=False):
     else:
         raise Exception
 
-    # Pick unambiguous 
+    # Pick unambiguous
     if t=='auto':
         # We assume the user has wrfout files in different folders for different times
         f = glob.glob(os.path.join(folder,pfx+'*'))
@@ -464,7 +464,7 @@ def netcdf_files_in(folder,dom=0,init_time=0,model='auto',return_model=False):
         if (dom > 8):
             print("Domain is out of range. Choose number between 1 and 8 inclusive.")
             raise IndexError
-        
+
         fname = get_netcdf_naming(model,t,dom)
         f = glob.glob(os.path.join(folder,fname))
         import pdb; pdb.set_trace()
@@ -479,7 +479,7 @@ def netcdf_files_in(folder,dom=0,init_time=0,model='auto',return_model=False):
         else:
             print("Ambiguous netCDF4 selection.")
             raise Exception
-            
+
 
 def wrfout_files_in(folders,dom=0,init_time='notset',descend=1,avoid=0,
                     unambiguous=0):
@@ -496,7 +496,7 @@ def wrfout_files_in(folders,dom=0,init_time='notset',descend=1,avoid=0,
                     the string, do not descend into this one.
     unambiguous :   only return a single absolute path, else throw
                     an Exception.
-    
+
     Returns:
     wrfouts     :   list of absolute paths to wrfout files
     """
@@ -642,7 +642,7 @@ def trycreate(loc):
         os.stat(loc)
     except:
         os.makedirs(loc)
-        
+
 def padded_times(timeseq):
     padded = ['{0:04d}'.format(t) for t in timeseq]
     return padded
@@ -726,7 +726,7 @@ def lookup_time(str):
 
 def get_level_naming(va,lv,**kwargs):
     #lv = kwargs['lv']
-    
+
     if lv < 1500:
         return str(lv)+'hPa'
     elif lv == 2000:
@@ -747,7 +747,7 @@ def get_level_naming(va,lv,**kwargs):
 
 def level_type(lv):
     """ Check to see what type of level is requested by user.
-        
+
     """
     if lv < 1500:
         return 'isobaric'
@@ -764,24 +764,24 @@ def level_type(lv):
     else:
         print('Unknown vertical coordinate.')
         raise Exception
-        
+
 def closest(arr,val):
     """
     Find index of closest value.
     Only working on 1D array right now.
-    
+
     Inputs:
     val     :   required value
     arr     :   array of values
-    
+
     Output:
-    
+
     idx     :   index of closest value
-    
+
     """
     idx = N.argmin(N.abs(arr - val))
     return idx
-    
+
 def dstack_loop(data, obj):
     """
     Tries to stack numpy array (data) into 'stack' object (obj).
@@ -792,9 +792,9 @@ def dstack_loop(data, obj):
         stack = N.dstack((obj,data))
     else:
         stack = data
-        
+
     return stack
-        
+
 def dstack_loop_v2(data, obj):
     """
     Need to set obj = 0 at start of loop in master script
@@ -809,13 +809,13 @@ def dstack_loop_v2(data, obj):
         stack = data
     else:
         stack = N.dstack((obj,data))
-        
+
     return stack
 
 def vstack_loop(data, obj):
     """
     Need to set obj = 0 at start of loop in master script
-    
+
     Tries to stack numpy array (data) into 'stack' object (obj).
     If obj doesn't exist, then initialise it
     If obj does exist, stack data.
@@ -825,7 +825,7 @@ def vstack_loop(data, obj):
         stack = N.vstack((obj,data))
     else:
         stack = data
-        
+
     return stack
 
 
@@ -842,13 +842,13 @@ def generate_colours(M,n):
     """
     M       :   Matplotlib instance
     n       :   number of colours you want
-    
+
     Returns
 
     Usage: when cycling over n plots, the colour should
     be colourlist[n].
     """
-    
+
     colourlist = [M.cm.spectral(i) for i in N.linspace(0.08,0.97,n)]
     return colourlist
 
@@ -869,31 +869,31 @@ def get_sequence(x,sos=0):
     else:
         # make a one-element list
         return [x,]
-        
+
 def convert_tuple_to_dntimes(times):
     """
     Convert tuple or tuple of tuples to datenum date format.
     """
     timelist = get_sequence(times,sos=1)
-    
+
     dntimes = []
     for t in timelist:
         dntimes.append(calendar.timegm(t))
 
     return dntimes
-    
+
 def ensure_datenum(times,fmt='list'):
     """
     Make sure times are in list-of-datenums format.
     If not, convert them.
-    
+
     Possibilities:
     times = 123456                                      #1
     times = (123456,)                                   #2
     times = (123456,234567)                             #3
     times = (2011,12,1,18,0,0)                          #4
     times = ((2011,12,1,18,0,0),(2011,12,2,6,0,0))      #5
-    
+
     fmt     :   whether to return list of integers or an integer
                 'int' or 'list'
 
@@ -912,7 +912,7 @@ def ensure_datenum(times,fmt='list'):
             dntimes = convert_tuple_to_dntimes(times)
         else: #2,3
             dntimes = times
-    
+
     if (fmt == 'list') or (len(dntimes)>1):
         return dntimes
     elif (fmt == 'int') or (len(dntimes)==1):
@@ -920,9 +920,9 @@ def ensure_datenum(times,fmt='list'):
     else:
         print("Nonsense format choice.")
         raise Exception
-    
-def ensure_timetuple(times,fmt='list'): 
-    """ 
+
+def ensure_timetuple(times,fmt='list'):
+    """
     MAke sure time(s) are in six-item tuple format
     (YYYY,MM,DD,HH,MM,SS)
 
@@ -936,7 +936,7 @@ def ensure_timetuple(times,fmt='list'):
     times = (2011,12,1,18,0,0)                          #4
     times = ((2011,12,1,18,0,0),(2011,12,2,6,0,0))      #5
     """
-    
+
     if isinstance(times,int):
         tttimes = [calendar.timegm(times),] #1
     elif isinstance(times,basestring):
@@ -949,7 +949,7 @@ def ensure_timetuple(times,fmt='list'):
             tttimes = [times,]
         else: #2,3
             tttimes = [calendar.timegm(t) for t in times]
-    
+
     if (fmt == 'list') or (len(tttimes)>1):
         return tttimes
     elif (fmt == 'single') or (len(tttimes)==1):
@@ -980,7 +980,7 @@ def get_netcdf_naming(model,t,dom=0):
 def determine_model(fname):
     """
     Return model depending on naming convention.
-    
+
     If no model exists, return false.
     """
 
@@ -989,5 +989,54 @@ def determine_model(fname):
     for k,v in models.iteritems():
         if k in fname[:10]:
             return v
-    
+
     return False
+
+def save_data(data,folder,fname,format='pickle'):
+    """
+    Save array to file.
+    """
+
+    # Strip file extension given
+    fname_base = os.path.splitext(fname)[0]
+    # Check for folder, create if necessary
+    trycreate(folder)
+    # Create absolute path
+    fpath = os.path.join(folder,fname_base)
+
+    if format=='pickle':
+        with open(fpath+'.pickle','wb') as f:
+            pickle.dump(data,f)
+    elif format=='numpy':
+        N.save(fpath,data)
+    elif format=='json':
+        j = json.dumps(data)
+        with open(fpath+'.json','w') as f:
+            print >> f,j
+    else:
+        print("Give suitable saving format.")
+        raise Exception
+
+    print("Saved file {0} to {1}.".format(fname,folder))
+
+def load_data(folder,fname,format='pickle'):
+    """
+    Load array from file.
+    """
+
+    fname2 = os.path.splitext(fname)[0]
+    fpath = os.path.join(folder,fname2)
+    if format=='pickle':
+        with open(fpath+'.pickle','rb') as f:
+            data = pickle.load(f)
+    elif format=='numpy':
+        data = N.load(fpath+'.npy')
+    elif format=='json':
+        print("JSON stuff not coded yet.")
+        raise Exception
+    else:
+        print("Give suitable loading format.")
+        raise Exception
+
+    print("Loaded file {0} from {1}.".format(fname,folder))
+    return data

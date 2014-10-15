@@ -6,127 +6,60 @@ M.use('gtkagg')
 import matplotlib.pyplot as plt
 import numpy as N
 
-sys.path.append('/path/to/WEM/')
+# sys.path.append('/path/to/WEM/')
 
 from WEM.postWRF import WRFEnviron
-from settings import Settings
-import WEM.utils as utils
 
-config = Settings()
-p = WRFEnviron(config)
+p = WRFEnviron()
 
 skewT = 0
-plot2D = 0
+plot2D = 1
 streamlines = 0
-rucplot = 0
 coldpoolstrength = 0
 spaghetti = 0
 std = 0
 profiles = 0
-frontogenesis = 1
+frontogenesis = 0
 upperlevel = 0
 
 itime = (2006,5,10,12,0,0)
 ftime = (2006,5,11,12,0,0)
 hourly = 3
-times = utils.generate_times(itime,ftime,hourly*60*60)
+times = p.generate_times(itime,ftime,hourly*60*60)
 
 skewT_time = (2006,5,27,0,0,0)
 skewT_latlon = (36.73,-102.51) # Boise City, OK
+level = 2000
 
 out_sd = '/absolute/path/to/figures/'
 wrf_sd = '/absolute/path/to/wrfoutdata/'
 
 if skewT:
-    for en in ensnames:
-        for ex in experiments:
-            # Reload settings
-            p.C = Settings()
-    
-            # Change paths to new location
-            out_sd, wrf_sd = get_folders(en,ex)
-    
-            p.plot_skewT(skewT_time,skewT_latlon,out_sd=out_sd,wrf_sd=wrf_sd,save_output=0)
-    
-    #p.plot_skewT(skewT_time,skewT_latlon,composite=1)
+    p.plot_skewT(skewT_time,skewT_latlon,outdir=outdir,ncdir=ncdir)
 
 if plot2D:
-    for en in ensnames:
-        for ex in experiments:
-            for t in times:
-                out_sd, wrf_sd = get_folders(en,ex)
-                # p.plot_strongest_wind(itime,ftime,2000,wrf_sd=wrf_sd,out_sd=out_sd)
-                # p.plot2D('Z',t,500,wrf_sd=wrf_sd,out_sd=out_sd,plottype='contour',smooth=10)
-                p.plot2D('cref',t,2000,wrf_sd=wrf_sd,out_sd=out_sd)
+    for t in times:
+        p.plot2D('cref',t,level,outdir=outdir,ncdir=ncdir)
 
 if streamlines:
-    for en in ensnames:
-        for ex in experiments:
-            for t in times:
-                out_sd, wrf_sd = get_folders(en,ex)
-                p.plot_streamlines(t,2000,out_sd=out_sd,wrf_sd=wrf_sd)
-
-if rucplot:
-    # RUC file is one-per-time so .nc file is specified beforehand
-    en = ensnames[0]
-    RC = Settings()
-    RC.output_root = os.path.join(config.output_root,case,IC,en,experiment)
-    RC.path_to_RUC = os.path.join(config.RUC_root,case,IC,en,experiment)
-    WRF_dir = os.path.join(config.wrfout_root,case,'NAM',en,'ICBC')
-    
-    variables = ['streamlines',]
-    level = 2000
-    
-    for t in sl_times:
-        RUC = RUCPlot(RC,t,wrfdir=WRF_dir)
-        #limits = RUC.colocate_WRF_map(WRF_dir)
-        RUC.plot(variables,level)
+    for t in times:
+        p.plot_streamlines(t,level,outdir=outdir,ncdir=ncdir)
 
 if coldpoolstrength:
     for t in times:
-        for en in ensnames:
-            for ex in experiments:
-                fig = plt.figure(figsize=(8,6))
-                gs = M.gridspec.GridSpec(1,2,width_ratios=[1,3])
-                ax0 = plt.subplot(gs[0])
-                ax1 = plt.subplot(gs[1])
-                
-                out_sd, wrf_sd = get_folders(en,ex)
-                # print out_sd, wrf_sd
-                cf0, cf1 = p.cold_pool_strength(t,wrf_sd=wrf_sd,out_sd=out_sd,
-                                    swath_width=130,fig=fig,axes=(ax0,ax1),dz=1)
-                plt.close(fig)
+        fig = plt.figure(figsize=(8,6))
+        gs = M.gridspec.GridSpec(1,2,width_ratios=[1,3])
+        ax0 = plt.subplot(gs[0])
+        ax1 = plt.subplot(gs[1])
 
-if spaghetti:
-    wrf_sds = [] 
-    for en in ensnames:
-        for ex in experiments:
-            out_sd, wrf_sd = get_folders(en,ex)
-            wrf_sds.append(wrf_sd)
-    
-    lv = 2000
-    # Save to higher directory
-    out_d = os.path.dirname(out_sd) 
-    for t in times:
-        p.spaghetti(t,lv,'cref',40,wrf_sds[:4],out_d)
-                
-if std:
-    wrf_sds = [] 
-    for en in ensnames:
-        for ex in experiments:
-            out_sd, wrf_sd = get_folders(en,ex)
-            wrf_sds.append(wrf_sd)
-    
-    lv = 2000
-    # Save to higher directory
-    out_d = os.path.dirname(out_sd) 
-    if enstype == 'ICBC':
-        out_d = os.path.dirname(out_d)
-    for t in times:
-        p.std(t,lv,'RH',wrf_sds,out_d,clvs=N.arange(0,26,1))
+        out_sd, wrf_sd = get_folders(en,ex)
+        # print out_sd, wrf_sd
+        cf0, cf1 = p.cold_pool_strength(t,wrf_sd=wrf_sd,out_sd=out_sd,
+                            swath_width=130,fig=fig,axes=(ax0,ax1),dz=1)
+        plt.close(fig)
 
 if profiles:
-    wrf_sds = [] 
+    wrf_sds = []
     for en in ensnames:
         for ex in experiments:
             out_sd, wrf_sd = get_folders(en,ex)
@@ -139,7 +72,7 @@ if profiles:
     # vrbl = 'wind'; xlim=[0,50,5]
     # Save to higher directory
     ml = -2
-    out_d = os.path.dirname(out_sd) 
+    out_d = os.path.dirname(out_sd)
     if enstype == 'ICBC':
         out_d = os.path.dirname(out_d)
         ml = -3
@@ -154,19 +87,9 @@ if frontogenesis:
     for en in ensnames:
         for ex in experiments:
             out_sd, wrf_sd = get_folders(en,ex)
-            for time in times: 
+            for time in times:
                 p.frontogenesis(time,925,nc_sd=wrf_sd,nc_init=inittime,out_sd=out_sd,
                                 clvs=N.arange(-2.0,2.125,0.125)*10**-7,
                                 # clvs = N.arange(-500,510,10)
                                 blurn=3, cmap='bwr'
                                 )
-
-if upperlevel:
-    for en in ensnames:
-        for ex in experiments:
-            out_sd, wrf_sd = get_folders(en,ex)
-            for time in times: 
-                p.upperlevel_W(time,850,wrf_sd=wrf_sd,out_sd=out_sd,
-                                clvs = N.arange(0,1.0,0.01)
-                                )
-

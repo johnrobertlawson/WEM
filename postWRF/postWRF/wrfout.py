@@ -21,16 +21,14 @@ import metconstants as mc
 
 class WRFOut(object):
 
-    def __init__(self,fpath,config=0):
+    def __init__(self,fpath):
         self.path = fpath
-        if config:
-            self.C = config
         self.nc = Dataset(fpath,'r')
 
         self.wrf_times = self.nc.variables['Times'][:]
         self.dx = self.nc.DX
         self.dy = self.nc.DY
-        
+
         #self.lvs =
         self.lats = self.nc.variables['XLAT'][0,...] # Might fail if only one time?
         self.lons = self.nc.variables['XLONG'][0,...]
@@ -50,18 +48,16 @@ class WRFOut(object):
         # Loads variable lists
         self.fields = self.nc.variables.keys()
         self.computed_fields = self.return_tbl().keys()
-        #import pdb; pdb.set_trace()
         self.available_vrbls = self.fields + self.computed_fields
-    
-    # TESTING A SMOOTHING METHOD
-    #def test_smooth(self,data):
-    #    from scipy import ndimage
-    #    from skimage.feature
+
+        # Get times in nicer format
+        self.wrf_times_epoch = self.wrftime_to_datenum()
+
 
     def wrftime_to_datenum(self):
         """
         Convert wrf's weird Times variable to datenum time.
-        
+
         """
         times = self.wrf_times
         wrf_times_epoch = N.zeros([times.shape[0]])
@@ -75,10 +71,9 @@ class WRFOut(object):
             hr = int(tstr[11:13])
             mins = int(tstr[14:16])
             sec = int(tstr[17:19])
-            
+
             wrf_times_epoch[n] = calendar.timegm([yr,mth,day,hr,mins,sec])
-            
-        self.wrf_times_epoch = wrf_times_epoch
+
         return wrf_times_epoch
 
 
@@ -101,16 +96,8 @@ class WRFOut(object):
         else:
             print("Time {0} is not correct format.".format(t))
             raise Exception
-            
-        # Convert wrftimes to datenum times
-        self.wrftime_to_datenum()
 
-        # Now find closest WRF time
-        #self.time_idx = N.where(
-        #               abs(self.wrf_times_epoch-t_epoch) ==
-        #                abs(self.wrf_times_epoch-t_epoch).min()
-        #                )[0][0]
-        # pdb.set_trace()
+        # Convert wrftimes to datenum times
         time_idx = utils.closest(self.wrf_times_epoch,t_epoch)
         return time_idx
 
@@ -172,12 +159,12 @@ class WRFOut(object):
 
         d = self.nc.variables[var]
         sl = self.create_slice(PS)
-        
+
         # If that dimension has a slice of indices, it doesn't need staggering.
         # pdb.set_trace()
         if PS['destag_dim'] and isinstance(sl[PS['destag_dim']],N.ndarray):
             PS['destag_dim'] = None
-       
+
         # pdb.set_trace()
         data = self.destagger(d[sl],PS['destag_dim'])
         return data
@@ -186,7 +173,7 @@ class WRFOut(object):
         """
         Create slices from dictionary of level, time, lat, lon.
         Absence of a key means pick all indices.
-        
+
         If PS is a list, this is to be converted to slices.
         """
         # See which dimensions are present in netCDF file variable
@@ -206,7 +193,7 @@ class WRFOut(object):
                 sl.append(slice(None,None))
             else:
                 sl.append(PS['lv'])
-                
+
 
         if any('north' in p for p in PS['dim_names']):
             if 'la' not in PS:
@@ -215,7 +202,7 @@ class WRFOut(object):
                 sl.append(PS['la'])
             else:
                 sl.append(slice(PS['la'],PS['la']+1))
-  
+
         if any('west' in p for p in PS['dim_names']):
             if 'lo' not in PS:
                 sl.append(slice(None,None))
@@ -223,7 +210,7 @@ class WRFOut(object):
                 sl.append(PS['lo'])
             else:
                 sl.append(slice(PS['lo'],PS['lo']+1))
-                
+
         return sl
 
     def check_destagger(self,var):
@@ -258,7 +245,7 @@ class WRFOut(object):
         """
         # Check for dimensions of 1.
         # If it exists, don't destagger it.
-        
+
         shp = data.shape
         for n,size in enumerate(shp):
             if (size==1) and (n==ax):
@@ -266,7 +253,7 @@ class WRFOut(object):
                 break
 
         #pdb.set_trace()
-        
+
         if ax==None:
             return data
         else:
@@ -310,7 +297,7 @@ class WRFOut(object):
         tbl['olr'] =self.compute_olr
 
         return tbl
-        
+
     def compute(self,var,slices,lookup=0,**kwargs):
         """ Look up method needed to return array of data
         for required variable.
@@ -344,10 +331,10 @@ class WRFOut(object):
         P = self.get('PSFC',slices)
         T2 = self.get('T2',slices)
         HGT = self.get('HGT',slices)
-        
+
         temp = T2 + (6.5*HGT)/1000.0
         pmsl = P*N.exp(9.81/(287.0*temp)*HGT)
-   
+
         #sm = kwargs.get('smooth',1)
         #data = pmsl[0,::sm,::sm]
         #return data
@@ -369,30 +356,30 @@ class WRFOut(object):
         qv = self.get('QVAPOR',slices)
         qc = self.get('QCLOUD',slices)
         qr = self.get('QRAIN',slices)
-        
+
         try:
             qi = self.get('QICE',slices)
         except KeyError:
             print("MP scheme has no ice data.")
             qi = 0
-            
+
         try:
             qs = self.get('QSNOW',slices)
         except KeyError:
             print("MP scheme has no snow data.")
             qs = 0
-            
+
         try:
             qg = self.get('QGRAUP',slices)
         except KeyError:
             print("MP scheme has no graupel data.")
             qg = 0
-            
+
         rh = qc + qr + qi + qs + qg
         rv = qv
 
         return rh, rv
-        
+
     def compute_qtotal(self,slices,**kwargs):
         qtotal, _ = self.compute_mixing_ratios(slices)
         return qtotal
@@ -425,7 +412,7 @@ class WRFOut(object):
     def compute_geopotential(self,slices,**kwargs):
         geopotential = self.get('PH',slices) + self.get('PHB',slices)
         return geopotential
-        
+
     def compute_wind10(self,slices,**kwargs):
         u = self.get('U10',slices)
         v = self.get('V10',slices)
@@ -789,13 +776,13 @@ class WRFOut(object):
         else:
             print("Use integer or list of integers for level.")
             raise Exception
-        
+
         if time<1000:
             tidx = time
         else:
             tidx = self.get_time_idx(time)
         sl = {'t':tidx}
-        
+
         # If this breaks, user is requesting non-4D data
         datain = self.get(vrbl,sl)[0,:,:,:]
         P = self.get('pressure',sl)[0,:,:,:]
@@ -877,21 +864,21 @@ class WRFOut(object):
         Slim = self.lats[0]
         Wlim = self.lons[0]
         return Nlim, Elim, Slim, Wlim
-        
+
     def cold_pool_strength(self,X,time,swath_width=100,env=0,dz=0):
         """
         Returns array the same shape as WRF domain.
-        
+
         X   :   cross-section object with given path
                 This path goes front-to-back through a bow
         km  :   width in the line-normal direction
         env :   (x,y) for location to sample environmental dpt
         """
-        
+
         # Set up slices
         time_idx = self.get_time_idx(time)
         # lv_idx = 0
-        
+
         # slices = {'t': time_idx, 'lv': lv_idx, 'la': lat_sl, 'lo': lon_sl}
         slices = {'t':time_idx}
 
@@ -901,21 +888,21 @@ class WRFOut(object):
 
         # This is the 2D plane for calculation data
         coldpooldata = N.zeros(wind10.shape)
-        
+
         # Compute required C2 fields to save time
         dpt = self.get('dpt',slices)[0,...]
         Z = self.get('Z',slices)[0,...]
         HGT = self.get('HGT',slices)[0,...]
         heights = Z-HGT
         # pdb.set_trace()
-        
+
         if isinstance(env,collections.Sequence):
             xx_env = N.arange(env[0]-2,env[0]+3)
             yy_env = N.arange(env[1]-2,env[1]+3)
             dpt_env = N.mean(dpt[:,yy_env,xx_env],axis=1)
-        
+
         # All cross-sections (parallel)
-        
+
         # xxx = [X.xx,]
         # yyy = [X.yy,]
         X.translate_xs(-swath_width/2)
@@ -930,7 +917,7 @@ class WRFOut(object):
             wind_slice = wind10[yy,xx]
             T2_slice = T2[yy,xx]
             slice_loc = self.find_gust_front(wind_slice,T2_slice,X.angle)
-            
+
             gfx = xx[slice_loc]
             gfy = yy[slice_loc]
             gf_pts = N.intersect1d(N.where(xx==gfx)[0],N.where(yy==gfy)[0])
@@ -938,7 +925,7 @@ class WRFOut(object):
             xx_cp = xx[:gf_pt]
             yy_cp = yy[:gf_pt]
             # pdb.set_trace()
-            
+
             # Compute enviromental dpt at each height
             # Average all levels from the location of gust front
             # forwards to the end of the cross-section.
@@ -947,7 +934,7 @@ class WRFOut(object):
                 yy_env = yy[gf_pt+1:]
                 dpt_env = N.mean(dpt[:,yy_env,xx_env],axis=1)
             # pdb.set_trace()
-            
+
             for x,y in zip(xx_cp,yy_cp):
             #for x,y in zip(xx,yy):
                 if dz:
@@ -955,40 +942,40 @@ class WRFOut(object):
                     # pdb.set_trace()
                 else:
                     coldpooldata[y,x] = N.sqrt(self.compute_C2(x,y,dpt[:,y,x],heights[:,y,x],dpt_env))
-        
+
         return coldpooldata
 
     def compute_cpdz(self,x,y,dpt,heights,dpt_env):
         """
         Cold pool depth
-        
+
         x       :   x location in domain
         y       :   y location in domain
         dpt     :   density potential temperature slice
         heights :   height AGL slice
         dpt_env :   environmental dpt, column
         """
-         
+
         dz, zidx = self.cold_pool_depth(dpt,heights,dpt_env)
         # import pdb; pdb.set_trace()
         return dz
-            
+
     def compute_C2(self,x,y,dpt,heights,dpt_env):
         """
         C^2 as found in James et al. 2006 MWR
-        
+
         x       :   x location in domain
         y       :   y location in domain
         dpt     :   density potential temperature slice
         heights :   height AGL slice
         dpt_env :   environmental dpt, column
         """
-        
+
         dz, zidx = self.cold_pool_depth(dpt,heights,dpt_env)
         C2 = -2*mc.g*((dpt[zidx]-dpt_env[zidx])/dpt_env[zidx])*dz
         # print("dpt = {0} ... dpt_env = {1} ... C2 = {2}".format(dpt[0],dpt_env[0],C2))
         return C2
-        
+
     def cold_pool_depth(self,dpt,heights,dpt_env):
         dz = 0
         # thresh = -2.0
@@ -998,31 +985,31 @@ class WRFOut(object):
             if dptp > thresh:
                 break
             dz = z
-        
+
         if isinstance(dz,float):
             zidx = N.where(heights==dz)[0]
         else:
             zidx = 0
-        # import pdb; pdb.set_trace()    
+        # import pdb; pdb.set_trace()
         return dz, zidx
-    
+
     def find_gust_front(self,wind_slice,T2_slice,angle,method=3):
         """
         Find location of maximum shear in the horizontal wind along a
         1D slice.
-    
+
         wind_slice      :   1D numpy array
         T2_slice        :   temp 2m slice
         angle           :   angle of slice cross-section
         method          :   way to locate gust front
         """
-        
+
         shp = wind_slice.shape
-        
+
         # Compute gradient quantities
         shear = N.zeros(shp)
         T2grad = N.zeros(shp)
-        
+
         for n in range(shp[0]):
             if n == 0 or n == shp[0]-1:
                 shear[n] = 0
@@ -1034,12 +1021,12 @@ class WRFOut(object):
                 shear[n] = ((wind_slice[n+1]-wind_slice[n-1])/(2*hyp))*1000.0
                 T2grad[n] = ((T2_slice[n+1]-T2_slice[n-1])/(2*hyp))*1000.0
                 # N.W.DX
-              
+
         # pdb.set_trace()
-        
+
         # Go from B to A
         # Find first location where T2 drops and shear is ?
-        
+
         if method==1:
             ### METHOD 1: USING THRESHOLDS
             # By default
@@ -1048,22 +1035,22 @@ class WRFOut(object):
                 if (abs(s)>2.0) and (t<2.0):
                     gfidx = n
                     break
-            
+
         elif method==2 or method==3:
-            
+
             ### METHOD 2: FINDING MAX GRADIENTS AND AVERAGING
             shear = abs(shear)
             T2grad = abs(T2grad)
-            
+
             xsh_idx = N.where(shear == shear.max())[0][0]
             xtg_idx = N.where(T2grad == T2grad.max())[0][0]
             print("Max shear loc: {0} ... max tempgrad loc: {1}".format(xsh_idx,xtg_idx))
-            
+
             if method==2:
                 gfidx = int((xsh_idx + xtg_idx)/2.0)
             else:
                 gfidx = max([xsh_idx,xtg_idx])
-            
+
         return gfidx
         # maxshearloc[0][0] returns the integer
 
@@ -1097,7 +1084,7 @@ class WRFOut(object):
             W = {}
             for n, tidx in enumerate(tidxs):
                 # Just assume surface
-                lvidx = 0 
+                lvidx = 0
                 U[n] = self.get('U10',{'t':tidx})[0,:,:]
                 V[n] = self.get('V10',{'t':tidx})[0,:,:]
                 W[n] = self.get('W',{'t':tidx, 'lv':0})[0,0,:,:]
@@ -1105,7 +1092,7 @@ class WRFOut(object):
                 TH2[n] = self.get('TH2',{'t':tidx})[0,:,:]
                 # Z[n] = self.get('Z',{'t':tidx, 'lv' :[0,1]})[0,:,:,:]
                 # We want gap between levels so not destaggered:
-                Z[n] = (self.nc.variables['PH'][tidx,0:2,:,:] + 
+                Z[n] = (self.nc.variables['PH'][tidx,0:2,:,:] +
                         self.nc.variables['PHB'][tidx,0:2,:,:])/mc.g
                 # Each grid point is DX km apart:
                 dTdx[n], dTdy[n] = N.gradient(TH2[n])/self.dx
@@ -1115,8 +1102,8 @@ class WRFOut(object):
                 _, __, dTdz[n] = N.gradient(T[n])/levelgap
                 # _, __, dTdz_2 = N.gradient(T[n])/levelgap
                 # N.gradient needs interpolating to one level here?
-                # dTdz[n] = (dTdz_2[1,...]-dTdz_2[0,...])/2.0     
-                
+                # dTdz[n] = (dTdz_2[1,...]-dTdz_2[0,...])/2.0
+
         elif isinstance(level,int):
             tidxs = (tidx-1,tidx,tidx+1)
 
@@ -1144,16 +1131,15 @@ class WRFOut(object):
 
             drybulb = 273.15 + (T/((100000.0/(level*100.0))**(mc.R/mc.cp)))
             rho = (level*100.0)/(mc.R*drybulb)
-            omega = -rho * mc.g * W 
-                  
+            omega = -rho * mc.g * W
+
             # Time difference in sec
             dt = self.wrf_times_epoch[tidx+1]-self.wrf_times_epoch[tidx]
             dTdt, dTdz, dTdy, dTdx = N.gradient(T,dt,dp*100.0,self.dy, self.dx)
             # Gradient part
             grad = (dTdx**2 + dTdy**2)**0.5
             # Full derivative - value wrong for dgraddz here
-            dgraddt, dgraddz, dgraddy, dgraddx = N.gradient(grad,dt,dp*100.0,self.dy, self.dx) 
+            dgraddt, dgraddz, dgraddy, dgraddx = N.gradient(grad,dt,dp*100.0,self.dy, self.dx)
             # Full equation
             Front = dgraddt[1,1,:,:] + U[1,1,:,:]*dgraddx[1,1,:,:] + V[1,1,:,:]*dgraddy[1,1,:,:] # + omega[1,1,:,:]*dgraddz[1,1,:,:]
         return Front
-
