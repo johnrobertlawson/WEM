@@ -55,7 +55,7 @@ class WRFEnviron(object):
         #M.rc('font',**self.font_prop)
         #M.rcParams['savefig.dpi'] = self.dpi
 
-    def plot2D(self,vrbl,datetime,level,ncdir,outdir,ncf=False,nct=False,
+    def plot2D(self,vrbl,utc,level,ncdir,outdir,ncf=False,nct=False,
                 f_prefix=0,f_suffix=False,bounding=False,dom=0,
                 plottype='contourf',smooth=0,fig=False,ax=False):
         """
@@ -69,7 +69,7 @@ class WRFEnviron(object):
         Inputs:
         vrbl        :   string of variable name as found in WRF, or one of
                         the computed fields available in WEM
-        datetime    :   one date/time.
+        utc    :   one date/time.
                         Can be tuple (YYYY,MM,DD,HH,MM,SS - calendar.timegm)
                         Can be integer of datenum. (time.gmtime)
         level       :   one level.
@@ -107,7 +107,7 @@ class WRFEnviron(object):
         self.W = self.get_netcdf(ncdir,ncf=ncf,nct=nct,dom=dom)
         outpath = self.get_outpath(out_sd)
         F = BirdsEye(self.W,fig=fig,ax=ax)
-        F.plot2D(vrbl,datetime,level,outpath,bounding=bounding,
+        F.plot2D(vrbl,utc,level,outpath,bounding=bounding,
                     plottype=plottype,smooth=smooth)
 
     def get_netcdf(self,ncdir,ncf=False,nct=False,dom=0,path_only=False):
@@ -190,12 +190,12 @@ class WRFEnviron(object):
         listoftimes = utils.generate_times(itime,ftime,interval)
         return listoftimes
 
-    def plot_diff_energy(self,vrbl,datetime,energy,datadir,outdir,dataf=False
+    def plot_diff_energy(self,vrbl,utc,energy,datadir,outdir,dataf=False
                             outprefix=False,outsuffix=False,clvs=0,
                             title=False,fig=False,ax=False):
         """
         vrbl        :   'sum_z' or 'sum_xyz'
-        datetime    :   date/time for plot
+        utc    :   date/time for plot
         energy      :   'kinetic' or 'total'
         datadir     :   directory holding computed data
         outdir      :   root directory for plots
@@ -213,8 +213,8 @@ class WRFEnviron(object):
         """
         DATA = utils.load_data(folder,fname,format='pickle')
 
-        if isinstance(time,collections.Sequence):
-            time = calendar.timegm(time)
+        if isinstance(utc,collections.Sequence):
+            utc = calendar.timegm(utc)
 
         for pn,perm in enumerate(DATA):
             f1 = DATA[perm]['file1']
@@ -225,7 +225,7 @@ class WRFEnviron(object):
             permtimes = DATA[perm]['times']
 
             # Find array for required time
-            x = N.where(N.array(permtimes)==time)[0][0]
+            x = N.where(N.array(permtimes)==utc)[0][0]
             data = DATA[perm]['values'][x][0]
             if not pn:
                 stack = data
@@ -243,16 +243,16 @@ class WRFEnviron(object):
 
         #birdseye plot with basemap of DKE/DTE
         F = BirdsEye(self.C,W1,**kwargs1)    # 2D figure class
-        tstr = utils.string_from_time('output',time)
+        tstr = utils.string_from_time('output',utc)
         fname_t = ''.join((plotname,'_{0}'.format(tstr)))
         # fpath = os.path.join(p2p,fname_t)
         import pdb; pdb.set_trace()
 
-        fig_obj = F.plot_data(stack_average,'contourf',p2p,fname_t,time,V,
+        fig_obj = F.plot_data(stack_average,'contourf',p2p,fname_t,utc,V,
                                 **kwargs2)
 
 
-    def delta_diff_energy(self,vrbl,time0,time1,energy,datadir,outdir,
+    def delta_diff_energy(self,vrbl,utc0,utc1,energy,datadir,outdir,
                             meanvrbl='Z',meanlevel=500,
                             dataf=False,outprefix=False,outsuffix=False,
                             clvs=0,title=False,fig=False,ax=False,ncdata=False):
@@ -263,8 +263,8 @@ class WRFEnviron(object):
         Will calculate DDKE/DDTE for halfway between time0 and time1.
 
         vrbl        :   'sum_z' or 'sum_xyz'
-        time0       :   first time, must exist in pickle file
-        time1       :   second time, ditto
+        utc0       :   first time, must exist in pickle file
+        utc1       :   second time, ditto
         energy      :   'kinetic' or 'total'
         datadir     :   directory holding computed data
         outdir      :   root directory for plots
@@ -463,12 +463,12 @@ class WRFEnviron(object):
             plt.close()
             print("Saved {0}.".format(fpath))
 
-    def composite_profile(self,va,time,latlon,enspaths,
+    def composite_profile(self,va,utc,latlon,enspaths,
                             dom=0,mean=0,std=0,xlim=0,ylim=0):
         P = Profile(self.C)
-        P.composite_profile(va,time,latlon,enspaths,dom,mean,std,xlim,ylim)
+        P.composite_profile(va,utc,latlon,enspaths,dom,mean,std,xlim,ylim)
 
-    def twopanel_profile(self,va,time,wrf_sds,out_sd,two_panel=1,dom=1,mean=1,std=1,
+    def twopanel_profile(self,va,utc,wrf_sds,out_sd,two_panel=1,dom=1,mean=1,std=1,
                          xlim=0,ylim=0,latlon=0,locname=0,overlay=0,ml=-2):
         """
         Create two-panel figure with profile location on map,
@@ -476,7 +476,7 @@ class WRFEnviron(object):
 
         Inputs:
         va          :   variable for profile
-        time        :   time of plot
+        utc        :   time of plot
         wrf_sds     :   subdirs containing wrf file
         out_d       :   out directory for plots
 
@@ -510,7 +510,7 @@ class WRFEnviron(object):
             P2 = Figure(self.C,self.W,layout='inseth')
             if overlay:
                 F = BirdsEye(self.C, self.W)
-                self.data = F.plot2D('cref',time,2000,dom,outpath,save=0,return_data=1)
+                self.data = F.plot2D('cref',utc,2000,dom,outpath,save=0,return_data=1)
 
         # TODO: Not sure basemap inset works for lat/lon specified
         if isinstance(latlon,collections.Sequence):
@@ -522,7 +522,7 @@ class WRFEnviron(object):
             x0, y0 = C.bmap(lon0,lat0)
             C.ax.scatter(x0,y0,marker='x')
         else:
-            t_long = utils.string_from_time('output',time)
+            t_long = utils.string_from_time('output',utc)
             print("Pick location for {0}".format(t_long))
             C = Clicker(self.C,self.W,fig=P2.fig,ax=P2.ax0,data=self.data)
             # fig should be P2.fig.
@@ -535,35 +535,35 @@ class WRFEnviron(object):
 
         # Compute profile
         P = Profile(self.C)
-        P.composite_profile(va,time,(lat0,lon0),enspaths,outpath,dom=dom,mean=mean,
+        P.composite_profile(va,utc,(lat0,lon0),enspaths,outpath,dom=dom,mean=mean,
                             std=std,xlim=xlim,ylim=ylim,fig=P2.fig,ax=P2.ax1,
                             locname=locname,ml=ml)
 
 
-    def plot_skewT(self,plot_time,plot_latlon,out_sd=0,wrf_sd=0,dom=1,save_output=0,composite=0):
+    def plot_skewT(self,utc,latlon,out_sd=0,wrf_sd=0,dom=1,save_output=0,composite=0):
 
         outpath = self.get_outpath(out_sd)
         W = self.get_netcdf(wrf_sd,dom=dom)
 
         if not composite:
             ST = SkewT(self.C,W)
-            ST.plot_skewT(plot_time,plot_latlon,dom,outpath,save_output=save_output)
-            nice_time = utils.string_from_time('title',plot_time)
+            ST.plot_skewT(utc,plot_latlon,dom,outpath,save_output=save_output)
+            nice_time = utils.string_from_time('title',utc)
             print("Plotted Skew-T for time {0} at {1}".format(
                         nice_time,plot_latlon))
         else:
             #ST = SkewT(self.C)
             pass
 
-    def plot_streamlines(self,time,lv,wrf_sd=0,wrf_nc=0,out_sd=0,dom=1):
+    def plot_streamlines(self,utc,lv,wrf_sd=0,wrf_nc=0,out_sd=0,dom=1):
         self.W = self.get_netcdf(wrf_sd,wrf_nc,dom=dom)
         outpath = self.get_outpath(out_sd)
 
         self.F = BirdsEye(self.C,self.W)
-        disp_t = utils.string_from_time('title',time)
+        disp_t = utils.string_from_time('title',utc)
         print("Plotting {0} at lv {1} for time {2}.".format(
                 'streamlines',lv,disp_t))
-        self.F.plot_streamlines(lv,time,outpath)
+        self.F.plot_streamlines(lv,utc,outpath)
 
     def plot_strongest_wind(self,itime,ftime,levels,wrf_sd=0,wrf_nc=0,out_sd=0,f_prefix=0,f_suffix=0,
                 bounding=0,dom=0):
@@ -619,8 +619,8 @@ class WRFEnviron(object):
         if isinstance(data,list):
 
             data_list = []
-            for time in data:
-                data_list.append(N.sum(time[0]))
+            for utc in data:
+                data_list.append(N.sum(utc[0]))
 
             if output == 'array':
                 data_out = N.array(data_list)
@@ -658,7 +658,7 @@ class WRFEnviron(object):
             outpath = self.C.output_root
         return outpath
 
-    def plot_xs(self,vrbl,times,latA=0,lonA=0,latB=0,lonB=0,
+    def plot_xs(self,vrbl,utc,latA=0,lonA=0,latB=0,lonB=0,
                 wrf_sd=0,wrf_nc=0,out_sd=0,f_prefix=0,f_suffix=0,dom=0,
                 clvs=0,ztop=0):
         """
@@ -670,7 +670,7 @@ class WRFEnviron(object):
 
         Inputs:
         vrbl        :   variable to be plotted
-        times       :   times to be plotted
+        utc       :   times to be plotted
         latA        :   start latitude of transect
         lonA        :   start longitude of transect
         latB        :   end lat...
@@ -692,12 +692,10 @@ class WRFEnviron(object):
 
         XS = CrossSection(self.C,self.W,latA,lonA,latB,lonB)
 
-        t_list = utils.ensure_sequence_datenum(times)
-        for t in t_list:
-            XS.plot_xs(vrbl,t,outpath,clvs=clvs,ztop=ztop)
+        XS.plot_xs(vrbl,utc,outpath,clvs=clvs,ztop=ztop)
 
 
-    def cold_pool_strength(self,time,wrf_sd=0,wrf_nc=0,out_sd=0,
+    def cold_pool_strength(self,utc,wrf_sd=0,wrf_nc=0,out_sd=0,
                             swath_width=100,dom=1,twoplot=0,fig=0,
                             axes=0,dz=0):
         """
@@ -709,7 +707,7 @@ class WRFEnviron(object):
             Starting at front, do 3-grid-pt-average in line-normal
             direction
 
-        time    :   time (tuple or datenum) to plot
+        utc    :   time (tuple or datenum) to plot
         wrf_sd  :   string - subdirectory of wrfout file
         wrf_nc  :   filename of wrf file requested.
                             If no wrfout file is explicitly specified, the
@@ -752,7 +750,7 @@ class WRFEnviron(object):
 
         # Plot sim ref, send basemap axis to clicker function
         F = BirdsEye(self.C,self.W)
-        self.data = F.plot2D('cref',time,2000,dom,outpath,save=0,return_data=1)
+        self.data = F.plot2D('cref',utc,2000,dom,outpath,save=0,return_data=1)
 
         C = Clicker(self.C,self.W,data=self.data,**line_kwargs)
         # C.fig.tight_layout()
@@ -775,12 +773,12 @@ class WRFEnviron(object):
         #C.set_box_width(X)
 
         # Compute the grid (DX x DY)
-        cps = self.W.cold_pool_strength(X,time,swath_width=swath_width,env=(x_env,y_env),dz=dz)
+        cps = self.W.cold_pool_strength(X,utc,swath_width=swath_width,env=(x_env,y_env),dz=dz)
         # import pdb; pdb.set_trace()
 
         # Plot this array
         CPfig = BirdsEye(self.C,self.W,**cps_kwargs)
-        tstr = utils.string_from_time('output',time)
+        tstr = utils.string_from_time('output',utc)
         if dz:
             fprefix = 'ColdPoolDepth_'
         else:
@@ -801,7 +799,7 @@ class WRFEnviron(object):
         if mplcommand[:7] == 'contour':
             plotkwargs['levels'] = clvs
             plotkwargs['cmap'] = plt.cm.ocean_r
-        cf2 = CPfig.plot_data(cps,mplcommand,outpath,fname,time,**plotkwargs)
+        cf2 = CPfig.plot_data(cps,mplcommand,outpath,fname,utc,**plotkwargs)
         # CPfig.fig.tight_layout()
 
         plt.close(fig)
@@ -812,11 +810,11 @@ class WRFEnviron(object):
         if return_ax:
             return C.cf, cf2
 
-    def spaghetti(self,t,lv,va,contour,wrf_sds,out_sd,dom=1):
+    def spaghetti(self,utc,lv,va,contour,wrf_sds,out_sd,dom=1):
         """
         Do a multi-member spaghetti plot.
 
-        t       :   time for plot
+        utc       :   time for plot
         va      :   variable in question
         contour :   value to contour for each member
         wrf_sds :   list of wrf subdirs to loop over
@@ -833,14 +831,14 @@ class WRFEnviron(object):
             ncfile = self.get_netcdf(wrf_sd,dom=dom,path_only=1)
             ncfiles.append(ncfile)
 
-        F.spaghetti(t,lv,va,contour,ncfiles,outpath)
+        F.spaghetti(utc,lv,va,contour,ncfiles,outpath)
 
-    def std(self,datetime,lv,va,wrf_sds,out_sd,dom=1,clvs=0):
+    def std(self,utc,lv,va,wrf_sds,out_sd,dom=1,clvs=0):
         """Compute standard deviation of all members
         for given variable.
 
         Inputs:
-        t       :   time
+        utc       :   time
         lv      :   level
         va      :   variable
         wrf_sds :   list of wrf subdirs to loop over

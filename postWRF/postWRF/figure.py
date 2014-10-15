@@ -16,13 +16,11 @@ import WEM.utils as utils
 from defaults import Defaults
 
 class Figure(object):
-    def __init__(self,config,wrfout,ax=0,fig=0,plotn=(1,1),layout='normal'):
+    def __init__(self,wrfout,ax=0,fig=0,plotn=(1,1),layout='normal'):
         """
         C   :   configuration settings
         W   :   data
         """
-
-        self.C = config
         self.W = wrfout
         self.D = Defaults()
         self.output_fpath = self.C.output_root
@@ -34,7 +32,7 @@ class Figure(object):
 
         # Get settings for figure
         dpi = getattr(self.C,'DPI',self.D.dpi)
-        
+
         # Create main figure
         if ax and fig:
             self.ax = ax
@@ -53,7 +51,7 @@ class Figure(object):
             self.fig, self.ax = plt.subplots(nrows=plotn[0],ncols=plotn[1])
         self.fig.set_dpi(dpi)
         # self.ax = self.fig.add_subplot(111)
-    
+
     def create_fname(self,*naming):
         """Default naming should be:
         Variable + time + level
@@ -61,7 +59,7 @@ class Figure(object):
         fname = '_'.join([str(a) for a in naming])
         #pdb.set_trace()
         return fname
- 
+
     def title_time(self):
         self.T = utils.padded_times(self.timeseq)
         pdb.set_trace()
@@ -131,7 +129,7 @@ class Figure(object):
 
         width_m = self.W.dx*(self.W.x_dim-1)
         height_m = self.W.dy*(self.W.y_dim-1)
-        
+
         m = Basemap(
             projection='lcc',width=width_m,height=height_m,
             lon_0=self.W.cen_lon,lat_0=self.W.cen_lat,lat_1=self.W.truelat1,

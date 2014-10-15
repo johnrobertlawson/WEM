@@ -23,32 +23,32 @@ from scales import Scales
 import stats
 
 class BirdsEye(Figure):
-    def __init__(self,config,wrfout,ax=0,fig=0):
-        super(BirdsEye,self).__init__(config,wrfout,ax=ax,fig=fig)
+    def __init__(self,wrfout,ax=0,fig=0):
+        super(BirdsEye,self).__init__(wrfout,ax=ax,fig=fig)
 
     def get_contouring(self,vrbl='user',lv='user',**kwargs):
         """
         Returns colourmap and contouring levels
-        
+
         Options keyword arguments:
         V   :   manually override contour levels
         """
         data = self.data.reshape((self.la_n,self.lo_n))
-        
+
         # List of args and dictionary of kwargs
         plotargs = [self.x,self.y,data]
         plotkwargs = kwargs
 
         # cmap = getattr(kwargs,'cmap',plt.cm.jet)
 
-            
+
             # if self.mplcommand == 'contour':
                 # multiplier = S.get_multiplier(vrbl,lv)
         if 'clvs' in kwargs:
             if isinstance(kwargs['clvs'],N.ndarray):
                 plotkwargs['levels'] = kwargs['clvs']
                 kwargs.pop('clvs')
-       
+
         if 'cmap' in kwargs:
             cmap = eval('M.cm.{0}'.format(kwargs['cmap']))
             plotkwargs['cmap'] = cmap
@@ -56,7 +56,7 @@ class BirdsEye(Figure):
 
         if vrbl=='user':
             pass
-            
+
         else:
             S = Scales(vrbl,lv)
             if S.cm:
@@ -65,45 +65,32 @@ class BirdsEye(Figure):
                 plotkwargs['levels'] = S.clvs
 
         return plotargs, plotkwargs
-            
-    def plot_data(self,data,mplcommand,p2p,fname,pt,save=1,smooth=1,**kwargs):
+
+    def plot_data(self,data,time,outdir,fname,plottype='contourf',save=1,smooth=1,**kwargs):
         """
         Generic method that plots any matrix of data on a map
 
         Inputs:
-        data        :   lat/lon matrix of data
-        vrbl        :   variable type for contouring convention
-        m           :   basemap instance
-        mplcommand  :   contour or contourf etc
-        p2p         :   path to plots
-        fname       :   filename for plot
-        V           :   scale for contours
-        no_title    :   switch to turn off title
+        data        :   2D matrix of data
+        outdir      :   path to plots
+        outf        :   filename for output (with or without .png)
+
+        Optional:
+        plottype    :   matplotlib function for plotting
+        smooth      :   Gaussian smooth by this many grid spaces
+        clvs        :   scale for contours
+        title       :   title on plot
         save        :   whether to save to file
         """
         # INITIALISE
-        # self.fig = plt.figure()
-        # self.fig = self.figsize(8,8,self.fig)     # Create a default figure size if not set by user
-        # self.fig.set_size_inches(5,5)
         self.bmap,self.x,self.y = self.basemap_setup(smooth=1)#ax=self.ax)
         self.mplcommand = mplcommand
         self.data = data
-
-        # pdb.set_trace()
-
         self.la_n = self.data.shape[-2]
         self.lo_n = self.data.shape[-1]
-        
-        # if plottype == 'contourf':
-            # f1 = self.bmap.contourf(*plotargs,**plotkwargs)
-        # elif plottype == 'contour':
-            # plotkwargs['colors'] = 'k'
-            # f1 = self.bmap.contour(*plotargs,**plotkwargs)
-            # scaling_func = M.ticker.FuncFormatter(lambda x, pos:'{0:d}'.format(int(x*multiplier)))
-            # plt.clabel(f1, inline=1, fmt=scaling_func, fontsize=9, colors='k')
 
         plotargs, plotkwargs = self.get_contouring(**kwargs)
-        # pdb.set_trace()
+
         if self.mplcommand == 'contour':
             f1 = self.bmap.contour(*plotargs,**plotkwargs)
         elif self.mplcommand == 'contourf':
@@ -115,7 +102,7 @@ class BirdsEye(Figure):
         elif self.mplcommand == 'scatter':
             f1 = self.bmap.scatter(*plotargs,**plotkwargs)
         else:
-            print("Specify plot type.")
+            print("Specify correct plot type.")
             raise Exception
 
         # LABELS, TITLES etc
@@ -141,7 +128,7 @@ class BirdsEye(Figure):
         # self.fname = self.create_fname(fpath) # No da variable here
         if save:
             self.save(p2p,fname)
-        
+
         plt.close(self.fig)
         return f1
 
@@ -173,7 +160,7 @@ class BirdsEye(Figure):
         self.fig.set_size_inches(8,8)
         self.bmap,self.x,self.y = self.basemap_setup(smooth=1)
         self.mplcommand = plottype
-        
+
         # Make sure smooth=0 is corrected to 1
         # They are both essentially 'off'.
 
@@ -182,13 +169,13 @@ class BirdsEye(Figure):
         title = utils.string_from_time('title',t)
         datestr = utils.string_from_time('output',t)
 
-        
+
         # Until pressure coordinates are fixed TODO
         latidx, lonidx = self.get_limited_domain(bounding,smooth=1)
-        
+
         if lv== 2000:
             lvidx = 0
-        
+
         # if vc == 'surface':
         #     lv_idx = 0
         # elif lv == 'all':
@@ -245,7 +232,7 @@ class BirdsEye(Figure):
             plt.title(title)
         if self.mplcommand == 'contourf' and self.C.colorbar:
             plt.colorbar(f1,orientation='horizontal')
-        
+
         # SAVE FIGURE
         # pdb.set_trace()
         lv_na = utils.get_level_naming(vrbl,lv)
@@ -282,7 +269,7 @@ class BirdsEye(Figure):
             u = self.W.get('U',slices)[0,0,:,:]
             v = self.W.get('V',slices)[0,0,:,:]
         # pdb.set_trace()
-        
+
         #div = N.sum(N.dstack((N.gradient(u)[0],N.gradient(v)[1])),axis=2)*10**4
         #vort = (N.gradient(v)[0] - N.gradient(u)[1])*10**4
         #pdb.set_trace()
@@ -313,7 +300,7 @@ class BirdsEye(Figure):
 
         time_idx = self.W.get_time_idx(t)
 
-        colours = utils.generate_colours(M,len(wrfouts)) 
+        colours = utils.generate_colours(M,len(wrfouts))
 
         # import pdb; pdb.set_trace()
         if lv==2000:
@@ -325,7 +312,7 @@ class BirdsEye(Figure):
         lat_sl, lon_sl = self.get_limited_domain(da)
 
         slices = {'t': time_idx, 'lv': lv_idx, 'la': lat_sl, 'lo': lon_sl}
-       
+
         # self.ax.set_color_cycle(colours)
         ctlist = []
         for n,wrfout in enumerate(wrfouts):
