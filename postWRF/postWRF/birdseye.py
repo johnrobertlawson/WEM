@@ -66,7 +66,8 @@ class BirdsEye(Figure):
 
         return plotargs, plotkwargs
 
-    def plot_data(self,data,time,outdir,fname,plottype='contourf',save=1,smooth=1,**kwargs):
+    def plot_data(self,data,time,outdir,fname,plottype='contourf',
+                    save=1,smooth=1):
         """
         Generic method that plots any matrix of data on a map
 
@@ -135,16 +136,16 @@ class BirdsEye(Figure):
         # print("Plot saved to {0}.".format(os.path.join(p2p,fname)))
 
     #def plot2D(self,va,**kwargs):
-    def plot2D(self,vrbl,t,lv,dom,outpath,bounding=0,smooth=1,
-                plottype='contourf',save=1,return_data=0):
+    def plot2D(self,vrbl,utc,level,outdir,dom=1,bounding=0,smooth=1,
+                plottype='contourf',save=1,return_data=0,title=False):
         """
         Inputs:
 
         vrbl        :   variable string
-        t           :   date/time in (YYYY,MM,DD,HH,MM,SS) or datenum format
+        utc         :   date/time in (YYYY,MM,DD,HH,MM,SS) or datenum format
                         If tuple of two dates, it's start time and
                         end time, e.g. for finding max/average.
-        lv          :   level
+        level       :   level
         dom         :   domain
         outpath     :   absolute path to output
         bounding    :   list of four floats (Nlim, Elim, Slim, Wlim):
@@ -157,18 +158,15 @@ class BirdsEye(Figure):
         save        :   whether to save to file
         """
         # INITIALISE
-        self.fig.set_size_inches(8,8)
-        self.bmap,self.x,self.y = self.basemap_setup(smooth=1)
-        self.mplcommand = plottype
-
-        # Make sure smooth=0 is corrected to 1
-        # They are both essentially 'off'.
+        self.m,self.x,self.y = self.basemap_setup(smooth=1)
+        self.plottype = plottype
 
         # Get indices for time, level, lats, lons
         tidx = self.W.get_time_idx(t)
-        title = utils.string_from_time('title',t)
-        datestr = utils.string_from_time('output',t)
+        if title:
+            title_str = utils.string_from_time('title',t)
 
+        date_str = utils.string_from_time('output',t)
 
         # Until pressure coordinates are fixed TODO
         latidx, lonidx = self.get_limited_domain(bounding,smooth=1)

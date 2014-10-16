@@ -105,7 +105,7 @@ class WRFEnviron(object):
 
         """
         self.W = self.get_netcdf(ncdir,ncf=ncf,nct=nct,dom=dom)
-        outpath = self.get_outpath(out_sd)
+        outpath = self.get_outpath(outdir)
         F = BirdsEye(self.W,fig=fig,ax=ax)
         F.plot2D(vrbl,utc,level,outpath,bounding=bounding,
                     plottype=plottype,smooth=smooth)
@@ -651,12 +651,6 @@ class WRFEnviron(object):
             lst = val
         return lst
 
-    def get_outpath(self,out_sd):
-        if out_sd:
-            outpath = os.path.join(self.C.output_root,out_sd)
-        else:
-            outpath = self.C.output_root
-        return outpath
 
     def plot_xs(self,vrbl,utc,latA=0,lonA=0,latB=0,lonB=0,
                 wrf_sd=0,wrf_nc=0,out_sd=0,f_prefix=0,f_suffix=0,dom=0,

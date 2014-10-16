@@ -102,17 +102,18 @@ class WRFOut(object):
         return time_idx
 
 
-    def check_compute(self,var):
+    def check_compute(self,vrbl):
         """This method returns the required variables
         that need to be loaded from the netCDF file.
         """
 
-        if var in self.fields:
+        if vrbl in self.fields:
             return True
         else:
             return False
 
-    def get(self,var,slices,**kwargs):
+    def get(self,vrbl,tidx=False,lvidx=False,latidx=False,lonidx=False,
+                other=False):
         """ Fetch a numpy array containing variable data.
 
         If field isn't present in the WRFOut file, compute it.
@@ -123,14 +124,15 @@ class WRFOut(object):
 
         Returns unstaggered, sliced data.
 
-        var     :   netCDF variable name
-        slices  :   if dict, keys as follows:
+        vrbl     :   netCDF variable name
 
-        t       :   time index
-        lv      :   level index
-        la      :   latitude slice indices
-        lo      :   longitude slice indices
+        Optional (if blank, select all indices)
+        tidx     :   time index/indices
+        lvidx    :   level index
+        latidx   :   latitude slice indices
+        lonidx   :   longitude slice indices
 
+        other   :
         keyword arguments might include:
 
         Shear between 0 and 3 km:
@@ -141,35 +143,33 @@ class WRFOut(object):
 
         # Check if computing required
         # When data is loaded from nc, it is destaggered
-        isDefault = self.check_compute(var)
+        isDefault = self.check_compute(vrbl)
         if isDefault:
-            data = self.load(var,slices)
+            data = self.load(vrbl,tidx,lvidx,lonidx,latidx)
         else:
-            data = self.compute(var,slices,**kwargs)
+            data = self.compute(vrbl,tidx,lvidx,lonidx,latidx,other)
 
         return data
 
-    def load(self,var,PS):
+    def load(self,vrbl,tidx,lvidx,lonidx,latidx):
 
         # First, check dimension that is staggered (if any)
-        PS['destag_dim'] = self.check_destagger(var)
+        destag_dim = self.check_destagger(vrbl)
 
         # Next, fetch dimension names
-        PS['dim_names'] = self.get_dims(var)
+        dim_names = self.get_dims(var)
 
-        d = self.nc.variables[var]
-        sl = self.create_slice(PS)
+        vrbldata = self.nc.variables[vrbl]
+        sl = self.create_slice(vrbl,tidx,lvidx,lonidx,latidx,dim_names)
 
         # If that dimension has a slice of indices, it doesn't need staggering.
-        # pdb.set_trace()
-        if PS['destag_dim'] and isinstance(sl[PS['destag_dim']],N.ndarray):
-            PS['destag_dim'] = None
+        if destag_dim and isinstance(sl[destag_dim],N.ndarray):
+            destag_dim = None
 
-        # pdb.set_trace()
-        data = self.destagger(d[sl],PS['destag_dim'])
+        data = self.destagger(vrbldata[sl],destag_dim)
         return data
 
-    def create_slice(self,PS):
+    def create_slice(self,vrbl,tidx,lvidx,lonidx,latidx,dim_names):
         """
         Create slices from dictionary of level, time, lat, lon.
         Absence of a key means pick all indices.
@@ -179,37 +179,35 @@ class WRFOut(object):
         # See which dimensions are present in netCDF file variable
         sl = []
         # pdb.set_trace()
-        if any('Time' in p for p in PS['dim_names']):
-            if isinstance(PS['t'],slice) or isinstance(PS['t'],N.ndarray):
-                sl.append(PS['t'])
+        if any('Time' in p for p in dim_names):
+            if isinstance(tidx,slice) or isinstance(tidx,N.ndarray):
+                sl.append(tidx)
             else:
-                sl.append(slice(PS['t'],PS['t']+1))
-        if any('bottom' in p for p in PS['dim_names']):
-            if not 'lv' in PS: # No level specified
-                sl.append(slice(None,None))
-            elif isinstance(PS['lv'],int):
-                sl.append(slice(PS['lv'],PS['lv']+1))
-            elif PS['lv']=='all':
-                sl.append(slice(None,None))
-            else:
-                sl.append(PS['lv'])
+                sl.append(slice(tidx,tidx+1))
 
-
-        if any('north' in p for p in PS['dim_names']):
-            if 'la' not in PS:
+        if any('bottom' in p for p in dim_names):
+            if not lvidx: # No level specified
                 sl.append(slice(None,None))
-            elif isinstance(PS['la'],slice) or isinstance(PS['la'],N.ndarray):
-                sl.append(PS['la'])
+            elif isinstance(lvidx,int):
+                sl.append(slice(lvidx,lvidx+1))
             else:
-                sl.append(slice(PS['la'],PS['la']+1))
+                sl.append(lvidx)
 
-        if any('west' in p for p in PS['dim_names']):
-            if 'lo' not in PS:
+        if any('north' in p for p in dim_names):
+            if not latidx:
                 sl.append(slice(None,None))
-            elif isinstance(PS['lo'],slice) or isinstance(PS['lo'],N.ndarray):
-                sl.append(PS['lo'])
+            elif isinstance(latidx,slice) or isinstance(latidx,N.ndarray):
+                sl.append(latidx)
             else:
-                sl.append(slice(PS['lo'],PS['lo']+1))
+                sl.append(slice(latidx,latidx+1))
+
+        if any('west' in p for p in dim_names):
+            if not lonidx:
+                sl.append(slice(None,None))
+            elif isinstance(lonidx,slice) or isinstance(lonidx,N.ndarray):
+                sl.append(lonidx)
+            else:
+                sl.append(slice(lonidx,lonidx+1))
 
         return sl
 
@@ -298,7 +296,7 @@ class WRFOut(object):
 
         return tbl
 
-    def compute(self,var,slices,lookup=0,**kwargs):
+    def compute(self,vrbl,tidx,lvidx,lonidx,latidx,other,lookup=0):
         """ Look up method needed to return array of data
         for required variable.
 
@@ -309,28 +307,28 @@ class WRFOut(object):
                         computed. Returns true or false.
         """
         tbl = self.return_tbl()
-        if not lookup:
-            response = tbl[var](slices,**kwargs)
-        else:
+        if lookup:
             response = lookup in tbl
+        else:
+            response = tbl[var](slices,other)
         return response
 
-    def compute_RH(self,slices,**kwargs):
-        T = self.get('temps',slices,units='C')
-        Td = self.get('Td',slices)
+    def compute_RH(self,tidx,lvidx,lonidx,latidx):
+        T = self.get('temps',tidx,lvidx,lonidx,latidx,units='C')
+        Td = self.get('Td',tidx,lvidx,lonidx,latidx)
         RH = N.exp(0.073*(Td-T))
         # pdb.set_trace()
         return RH*100.0
 
-    def compute_dryairmass(self,slices,**kwargs):
-        MU = self.get('MU',slices)
-        MUB = self.get('MUB',slices)
+    def compute_dryairmass(self,tidx,lvidx,lonidx,latidx):
+        MU = self.get('MU',tidx,lvidx,lonidx,latidx)
+        MUB = self.get('MUB',tidx,lvidx,lonidx,latidx)
         return MU + MUB
 
-    def compute_pmsl(self,slices,**kwargs):
-        P = self.get('PSFC',slices)
-        T2 = self.get('T2',slices)
-        HGT = self.get('HGT',slices)
+    def compute_pmsl(self,tidx,lvidx,lonidx,latidx):
+        P = self.get('PSFC',tidx,lvidx,lonidx,latidx)
+        T2 = self.get('T2',tidx,lvidx,lonidx,latidx)
+        HGT = self.get('HGT',tidx,lvidx,lonidx,latidx)
 
         temp = T2 + (6.5*HGT)/1000.0
         pmsl = P*N.exp(9.81/(287.0*temp)*HGT)
@@ -340,37 +338,37 @@ class WRFOut(object):
         #return data
         return pmsl
 
-    def compute_buoyancy(self,slices,**kwargs):
+    def compute_buoyancy(self,tidx,lvidx,lonidx,latidx):
         """
         Method from Adams-Selin et al., 2013, WAF
         """
-        theta = self.get('theta',slices)
+        theta = self.get('theta',tidx,lvidx,lonidx,latidx)
         thetabar = N.mean(theta)
-        qv = self.get('QVAPOR',slices)
+        qv = self.get('QVAPOR',tidx,lvidx,lonidx,latidx)
         qvbar = N.mean(qv)
 
         B = cc.g * ((theta-thetabar)/thetabar + 0.61*(qv - qvbar))
         return B
 
-    def compute_mixing_ratios(self,slices,**kwargs):
-        qv = self.get('QVAPOR',slices)
-        qc = self.get('QCLOUD',slices)
-        qr = self.get('QRAIN',slices)
+    def compute_mixing_ratios(self,tidx,lvidx,lonidx,latidx):
+        qv = self.get('QVAPOR',tidx,lvidx,lonidx,latidx)
+        qc = self.get('QCLOUD',tidx,lvidx,lonidx,latidx)
+        qr = self.get('QRAIN',tidx,lvidx,lonidx,latidx)
 
         try:
-            qi = self.get('QICE',slices)
+            qi = self.get('QICE',tidx,lvidx,lonidx,latidx)
         except KeyError:
             print("MP scheme has no ice data.")
             qi = 0
 
         try:
-            qs = self.get('QSNOW',slices)
+            qs = self.get('QSNOW',tidx,lvidx,lonidx,latidx)
         except KeyError:
             print("MP scheme has no snow data.")
             qs = 0
 
         try:
-            qg = self.get('QGRAUP',slices)
+            qg = self.get('QGRAUP',tidx,lvidx,lonidx,latidx)
         except KeyError:
             print("MP scheme has no graupel data.")
             qg = 0
@@ -380,74 +378,74 @@ class WRFOut(object):
 
         return rh, rv
 
-    def compute_qtotal(self,slices,**kwargs):
-        qtotal, _ = self.compute_mixing_ratios(slices)
+    def compute_qtotal(self,tidx,lvidx,lonidx,latidx):
+        qtotal, _ = self.compute_mixing_ratios(tidx,lvidx,lonidx,latidx)
         return qtotal
 
-    def compute_dptp(self,slices,**kwargs):
-        dpt = self.get('dpt',slices)
+    def compute_dptp(self,tidx,lvidx,lonidx,latidx):
+        dpt = self.get('dpt',tidx,lvidx,lonidx,latidx)
         dpt_mean = N.mean(dpt)
         dptp = dpt - dpt_mean
         return dptp
 
-    def compute_dpt(self,slices,**kwargs):
+    def compute_dpt(self,tidx,lvidx,lonidx,latidx):
         """
         Potential: if surface level is requested, choose sigma level just
         about the surface. I don't think this affects any
         other dictionaries around...
         """
-        # if slices['lv'] == 0:
-            # slices['lv'] = 0
-        theta = self.get('theta',slices)
-        rh, rv = self.compute_mixing_ratios(slices)
+        # if tidx,lvidx,lonidx,latidx['lv'] == 0:
+            # tidx,lvidx,lonidx,latidx['lv'] = 0
+        theta = self.get('theta',tidx,lvidx,lonidx,latidx)
+        rh, rv = self.compute_mixing_ratios(tidx,lvidx,lonidx,latidx)
 
         dpt = theta * (1 + 0.61*rv - rh)
         return dpt
 
-    def compute_geopotential_height(self,slices,**kwargs):
-        geopotential = self.get('PH',slices) + self.get('PHB',slices)
+    def compute_geopotential_height(self,tidx,lvidx,lonidx,latidx):
+        geopotential = self.get('PH',tidx,lvidx,lonidx,latidx) + self.get('PHB',tidx,lvidx,lonidx,latidx)
         Z = geopotential/9.81
         return Z
 
-    def compute_geopotential(self,slices,**kwargs):
-        geopotential = self.get('PH',slices) + self.get('PHB',slices)
+    def compute_geopotential(self,tidx,lvidx,lonidx,latidx):
+        geopotential = self.get('PH',tidx,lvidx,lonidx,latidx) + self.get('PHB',tidx,lvidx,lonidx,latidx)
         return geopotential
 
-    def compute_wind10(self,slices,**kwargs):
-        u = self.get('U10',slices)
-        v = self.get('V10',slices)
+    def compute_wind10(self,tidx,lvidx,lonidx,latidx):
+        u = self.get('U10',tidx,lvidx,lonidx,latidx)
+        v = self.get('V10',tidx,lvidx,lonidx,latidx)
         data = N.sqrt(u**2 + v**2)
         return data
 
-    def compute_pressure(self,slices):
-        PP = self.get('P',slices)
-        PB = self.get('PB',slices)
+    def compute_pressure(self,tidx,lvidx,lonidx,latidx):
+        PP = self.get('P',tidx,lvidx,lonidx,latidx)
+        PB = self.get('PB',tidx,lvidx,lonidx,latidx)
         pressure = PP + PB
         return pressure
 
-    def compute_temps(self,slices,units='K'):
-        theta = self.get('theta',slices)
-        P = self.get('pressure',slices)
+    def compute_temps(self,tidx,lvidx,lonidx,latidx,units='K'):
+        theta = self.get('theta',tidx,lvidx,lonidx,latidx)
+        P = self.get('pressure',tidx,lvidx,lonidx,latidx)
         temps = theta*((P/100000.0)**(287.04/1004.0))
         if units=='K':
             return temps
         elif units=='C':
             return temps-273.15
 
-    def compute_theta(self,slices):
-        theta = self.get('T',slices)
+    def compute_theta(self,tidx,lvidx,lonidx,latidx):
+        theta = self.get('T',tidx,lvidx,lonidx,latidx)
         Tbase = 300.0
         theta = Tbase + theta
         return theta
 
-    def compute_wind(self,slices):
+    def compute_wind(self,tidx,lvidx,lonidx,latidx):
         # pdb.set_trace()
-        u = self.get('U',slices)
-        v = self.get('V',slices)
+        u = self.get('U',tidx,lvidx,lonidx,latidx)
+        v = self.get('V',tidx,lvidx,lonidx,latidx)
         data = N.sqrt(u**2 + v**2)
         return data
 
-    def compute_shear(self,slices,**kwargs):
+    def compute_shear(self,tidx,lvidx,lonidx,latidx):
         """
         top and bottom in km.
         kwargs['top']
@@ -458,9 +456,9 @@ class WRFOut(object):
         topm = kwargs['top']*1000
         botm = kwargs['bottom']*1000
 
-        u = self.get('U',slices)
-        v = self.get('V',slices)
-        Z = self.get('Z',slices)
+        u = self.get('U',tidx,lvidx,lonidx,latidx)
+        v = self.get('V',tidx,lvidx,lonidx,latidx)
+        Z = self.get('Z',tidx,lvidx,lonidx,latidx)
 
         topidx = N.zeros((450,450))
         botidx = N.zeros((450,450))
@@ -487,29 +485,30 @@ class WRFOut(object):
         # pdb.set_trace()
         return shear
 
-    def compute_thetae(self,slices):
-        P = self.get('pressure',slices) # Computed
-        Drybulb = self.get('temp',slices)
-        Q = self.get('Q',slices)
+    def compute_thetae(self,tidx,lvidx,lonidx,latidx):
+        P = self.get('pressure',tidx,lvidx,lonidx,latidx) # Computed
+        Drybulb = self.get('temp',tidx,lvidx,lonidx,latidx)
+        Q = self.get('Q',tidx,lvidx,lonidx,latidx)
 
         thetae = (Drybulb + (Q * cc.Lv/cc.cp)) * (cc.P0/P) ** cc.kappa
         return thetae
 
-    def compute_olr(self,slices):
-        OLR = self.get('OLR',slices)
+    def compute_olr(self,tidx,lvidx,lonidx,latidx):
+        OLR = self.get('OLR',tidx,lvidx,lonidx,latidx)
         sbc = 0.000000056704
         ir = ((OLR/sbc)**0.25) - 273.15
         return ir
 
-    def compute_comp_ref(self,PS,**kwargs):
+    def compute_comp_ref(self,tidx,lvidx,lonidx,latidx,**kwargs):
         """Amend this so variables obtain at start fetch only correct date, lats, lons
         All levels need to be fetched as this is composite reflectivity
         """
-        T2 = self.get('T2',PS)
-        QR = self.nc.variables['QRAIN'][PS['t'],:,PS['la'],PS['lo']]
-        PSFC = self.get('PSFC',PS)
+        T2 = self.get('T2',tidx,lvidx,lonidx,latidx)
+        # QR = self.nc.variables['QRAIN'][PS['t'],:,PS['la'],PS['lo']]
+        QR = self.get('QRAIN',tidx,lonidx,latidx) # This should get all levels
+        PSFC = self.get('PSFC',tidx,lvidx,lonidx,latidx)
         try:
-            QS = self.nc.variables['QSNOW'][PS['t'],:,PS['la'],PS['lo']]
+            QS = self.get('QSNOW',tidx,lonidx,latidx)
         except:
             QS = N.zeros(N.shape(QR))
         rhor = 1000.0
@@ -577,22 +576,22 @@ class WRFOut(object):
 
         pass
 
-    def compute_thetae(self,slices):
-        P = self.get('pressure',slices)
-        T = self.get('temps',slices,units='K')
-        Td = self.get('Td',slices)
+    def compute_thetae(self,tidx,lvidx,lonidx,latidx):
+        P = self.get('pressure',tidx,lvidx,lonidx,latidx)
+        T = self.get('temps',tidx,lvidx,lonidx,latidx,units='K')
+        Td = self.get('Td',tidx,lvidx,lonidx,latidx)
         p2, t2 = thermo.drylift(P,T,Td)
         x = thermo.wetlift(p2,t2,100.0)
         thetae = thermo.theta(100.0, x, 1000.0)
         return thetae
 
 
-    def compute_Td(self,slices):
+    def compute_Td(self,tidx,lvidx,lonidx,latidx):
         """
         Using HootPy equation
         """
-        Q = self.get('QVAPOR',slices)
-        P = self.get('pressure',slices)
+        Q = self.get('QVAPOR',tidx,lvidx,lonidx,latidx)
+        P = self.get('pressure',tidx,lvidx,lonidx,latidx)
         w = N.divide(Q, N.subtract(1,Q))
         e = N.divide(N.multiply(w,P), N.add(0.622,w))/100.0
         a = N.multiply(243.5,N.log(N.divide(e,6.112)))
@@ -601,7 +600,7 @@ class WRFOut(object):
         # pdb.set_trace()
         return Td
 
-    def compute_CAPE(self,slices,**kwargs):
+    def compute_CAPE(self,tidx,lvidx,lonidx,latidx,**kwargs):
         """
         INCOMPLETE!
 
@@ -609,7 +608,7 @@ class WRFOut(object):
 
         Inputs:
 
-        slices  :   dictionary of level/time/lat/lon
+        tidx,lvidx,lonidx,latidx  :   dictionary of level/time/lat/lon
 
 
 
@@ -618,14 +617,13 @@ class WRFOut(object):
         CIN     :   convective inhibition
         """
         # Make sure all levels are obtained
-        #slices['lv'] = slice(None,None)
-        slices.pop('lv',None)
+        #tidx,lvidx,lonidx,latidx['lv'] = slice(None,None)
 
         totalCAPE = 0
         totalCIN = 0
 
-        theta = self.get('theta',slices)
-        Z = self.get('Z',slices)
+        theta = self.get('theta',tidx,lvidx,lonidx,latidx)
+        Z = self.get('Z',tidx,lvidx,lonidx,latidx)
 
         for lvidx in range(theta.shape[1]-1):
             if lvidx < 20:
@@ -718,8 +716,8 @@ class WRFOut(object):
         # Get coordinate system
         vc = self.check_vcs(z1,z2)
 
-    def compute_strongest_wind(self,slices,**kwargs):
-        wind = self.get('wind10',slices)
+    def compute_strongest_wind(self,tidx,lvidx,lonidx,latidx,**kwargs):
+        wind = self.get('wind10',tidx,lvidx,lonidx,latidx)
         wind_max = N.amax(wind,axis=0)
         # wind_max_smooth = self.test_smooth(wind_max)
         # return wind_max_smooth
@@ -880,19 +878,19 @@ class WRFOut(object):
         # lv_idx = 0
 
         # slices = {'t': time_idx, 'lv': lv_idx, 'la': lat_sl, 'lo': lon_sl}
-        slices = {'t':time_idx}
+        tidx,lvidx,lonidx,latidx = {'t':time_idx}
 
         # Get wind data
-        wind10 = self.get('wind10',slices)[0,...]
-        T2 = self.get('T2',slices)[0,...]
+        wind10 = self.get('wind10',tidx,lvidx,lonidx,latidx)[0,...]
+        T2 = self.get('T2',tidx,lvidx,lonidx,latidx)[0,...]
 
         # This is the 2D plane for calculation data
         coldpooldata = N.zeros(wind10.shape)
 
         # Compute required C2 fields to save time
-        dpt = self.get('dpt',slices)[0,...]
-        Z = self.get('Z',slices)[0,...]
-        HGT = self.get('HGT',slices)[0,...]
+        dpt = self.get('dpt',tidx,lvidx,lonidx,latidx)[0,...]
+        Z = self.get('Z',tidx,lvidx,lonidx,latidx)[0,...]
+        HGT = self.get('HGT',tidx,lvidx,lonidx,latidx)[0,...]
         heights = Z-HGT
         # pdb.set_trace()
 
