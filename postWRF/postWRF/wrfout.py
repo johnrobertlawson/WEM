@@ -77,29 +77,21 @@ class WRFOut(object):
         return wrf_times_epoch
 
 
-    def get_time_idx(self,t):
+    def get_time_idx(self,utc):
 
         """
         Input:
 
-        t           :   time, not tuple format by default
+        utc     :   time, tuple or datenum
+                    can be one or more
 
         Output:
 
         time_idx    :   index of time in WRF file
         """
-        # Ensure datenum format
-        if isinstance(t,int):
-            t_epoch = t
-        elif isinstance(t,collections.Sequence) and len(t) == 6:
-            t_epoch = calendar.timegm(t)
-        else:
-            print("Time {0} is not correct format.".format(t))
-            raise Exception
-
-        # Convert wrftimes to datenum times
-        time_idx = utils.closest(self.wrf_times_epoch,t_epoch)
-        return time_idx
+        dn = utils.ensure_datenum(utc)
+        tidx = utils.closest(self.wrf_times_epoch,dn)
+        return tidx
 
 
     def check_compute(self,vrbl):
@@ -112,7 +104,86 @@ class WRFOut(object):
         else:
             return False
 
-    def get(self,vrbl,tidx=False,lvidx=False,latidx=False,lonidx=False,
+    def get(self,vrbl,utc=False,level=False,lats=False,lons=False,
+                smooth=1,other=False):
+        """
+        Get data.
+
+        Will interpolate onto pressure, height coordinates if needed.
+        Will smooth if needed.
+
+        Will accept the following.
+        Time:
+        indices (<500): integer/N.ndarray of integers
+        time tuple: 6-item tuple or list/tuple of these
+        datenum: integer >500 or list of them
+
+        Level:
+        indices: integer or N.ndarray of integers
+        pressure: string ending in 'hPa'
+        height: string ending in 'm' or 'km'
+        isentropic: string ending in 'K'
+
+        Lats:
+        indices: integer or N.ndarray of integers
+        lats: float or N.ndarray of floats
+
+        Lons:
+        indices: integer or N.ndarray of integers
+        lons: float or N.ndarray of floats
+        """
+        # Time
+        if not utc:
+            tidx = False
+        elif isinstance(utc,int) and utc<500:
+            tidx = utc
+        elif isinstance(utc,(list,tuple)): # and len(utc[0])==6:
+            tidx = self.get_time_idx(utc)
+        elif isinstance(utc,N.ndarray) and isinstance(utc[0],int):
+            tidx = utc
+        else
+            print("Invalid time selection.")
+            raise Exception
+
+        # Level
+        if not level:
+        coords = utils.check_vertical_coordinate(level)
+        if not level:
+            lvidx = False
+        elif coords == 'index'
+            lvidx = level
+        elif isinstance(coords,basestring):
+            lvidx = False
+        else:
+            print("Invalid level selection.")
+            raise Exception
+
+        # Lat/lon
+        if not type(lats)==type(lons):
+            # What about case where all lats with one lon?
+            raise Exception
+        elif isinstance(lons,(list,tuple,N.ndarray)):
+            if isinstance(lons[0],int):
+                lonidx = lons
+                latidx = lats
+            elif instance(lons[0],float):
+                # Interpolate to lat/lon
+                lonidx = False
+                latidx = False
+        elif isinstance(lons,int):
+            lonidx = lons
+            latidx = lats
+        elif instance(lons,float):
+            # Interpolate to lat/lon
+            lonidx = False
+            latidx = False
+        else:
+            print("Invalid lat/lon selection.")
+            raise Exception
+
+        return self.get_with_idx(vrbl,tidx,lvidx,latidx,lonidx)
+
+    def get_with_idx(self,vrbl,tidx=False,lvidx=False,latidx=False,lonidx=False,
                 other=False):
         """ Fetch a numpy array containing variable data.
 

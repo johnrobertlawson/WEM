@@ -745,22 +745,42 @@ def get_level_naming(va,lv,**kwargs):
             return 'all_lev'
 
 
-def level_type(lv):
+def check_vertical_coordinate(level):
     """ Check to see what type of level is requested by user.
 
     """
-    if lv < 1500:
-        return 'isobaric'
-    elif lv == 2000:
-        return 'surface'
+    if isinstance(level,(basestring,int):
+        lv = level
+    elif isinstance(level,(list,tuple,N.ndarray)):
+        lv = level[0]
+    else:
+        print("What have you given me here? Level is"
+                "{0}".format(type(level)))
+        raise Exception
+
+    if isinstance(lv,int):
+        return 'index'
+    if lv.endswith('hPa'):
+        if lv[:4] == '2000':
+            return 'surface'
+        elif int(lv[:4]) < 2000:
+            return 'isobaric'
+        else:
+            print("Pressure is in hPa. Requested value too large.")
+            raise Exception
+
     elif lv.endswith('K'):
         return 'isentropic'
+
     elif lv.endswith('PVU'):
         return 'PV-surface'
+
     elif lv.endswith('km'):
         return 'geometric'
+
     elif lv == 'all':
         return 'eta'
+
     else:
         print('Unknown vertical coordinate.')
         raise Exception
