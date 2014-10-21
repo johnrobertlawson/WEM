@@ -818,6 +818,27 @@ class WRFOut(object):
         """
         pass
 
+    def get_limited_domain(self,da,skip=1):
+        """
+        Return smaller array of lats, lons depending on
+        input dictionary of N, E, S, W limits.
+
+        skip    :   for creating thinned domains
+        """
+        
+        if da:  # Limited domain area
+            N_idx = self.get_lat_idx(da['Nlim'])
+            E_idx = self.get_lon_idx(da['Elim'])
+            S_idx = self.get_lat_idx(da['Slim'])
+            W_idx = self.get_lon_idx(da['Wlim'])
+
+            lat_sl = slice(S_idx,N_idx,smooth)
+            lon_sl = slice(W_idx,E_idx,smooth)
+        else:
+            lat_sl = slice(None,None,smooth)
+            lon_sl = slice(None,None,smooth)
+        return lat_sl, lon_sl
+
     def get_lat_idx(self,lat):
         lat_idx = N.where(abs(self.lats-lat) == abs(self.lats-lat).min())[0][0]
         return lat_idx

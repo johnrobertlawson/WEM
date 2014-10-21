@@ -88,7 +88,7 @@ class WRFEnviron(object):
                         ambiguous within ncdir.
         f_prefix    :   custom filename prefix for output
         f_suffix    :   custom filename suffix for output
-        bounding    :   list of four floats (Nlim, Elim, Slim, Wlim):
+        bounding    :   dictionary of four floats (Nlime, Elim, Slim, Wlim):
             Nlim    :   northern limit
             Elim    :   eastern limit
             Slim    :   southern limit
@@ -104,10 +104,17 @@ class WRFEnviron(object):
 
 
         """
-        self.W = self.get_netcdf(ncdir,ncf=ncf,nct=nct,dom=dom)
         outpath = self.get_outpath(outdir)
+
+        # Data
+        self.W = self.get_netcdf(ncdir,ncf=ncf,nct=nct,dom=dom)
+        lats, lons = self.W.get_limited_domain(bounding)
+        data = self.W.get(vrbl,utc,level,lons,lats)
+
+        # Figure
+        fname = create_fname(vrbl,utc,level)
         F = BirdsEye(self.W,fig=fig,ax=ax)
-        F.plot2D(vrbl,utc,level,outpath,bounding=bounding,
+        F.plot2D(data,fname,outpath,bounding=bounding,
                     plottype=plottype,smooth=smooth)
 
     def get_netcdf(self,ncdir,ncf=False,nct=False,dom=0,path_only=False):

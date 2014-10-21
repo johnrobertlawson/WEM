@@ -84,19 +84,6 @@ class Figure(object):
         print("Saving figure {0}".format(fpath))
         plt.close(self.fig)
 
-    def get_limited_domain(self,da,smooth=1):
-        if da:  # Limited domain area
-            N_idx = self.W.get_lat_idx(da['N'])
-            E_idx = self.W.get_lon_idx(da['E'])
-            S_idx = self.W.get_lat_idx(da['S'])
-            W_idx = self.W.get_lon_idx(da['W'])
-
-            lat_sl = slice(S_idx,N_idx,smooth)
-            lon_sl = slice(W_idx,E_idx,smooth)
-        else:
-            lat_sl = slice(None,None,smooth)
-            lon_sl = slice(None,None,smooth)
-        return lat_sl, lon_sl
 
     def just_one_colorbar(self,fpath):
         """
