@@ -101,12 +101,15 @@ def edit_namelist(old,new,incolumn=1):
             break
     return
 
-def edit_namelist_input(old,new,pathtoWRF=pathtoWRF):
+def edit_namelist_input(old,new,incolumn=0,pathtoWRF=pathtoWRF):
     ninput = open(pathtoWRF+'namelist.input','r').readlines()
     for idx, line in enumerate(ninput):
         if old in line:
-            # Prefix for soil intermediate data filename
-            ninput[idx]= ninput[idx][:39] + new + " \n"
+	    # Prefix for soil intermediate data filename
+            if incolumn==1:
+                ninput[idx] = ninput[idx][:43] + new + " \n"
+            else:
+                ninput[idx] = ' ' + old + ' = ' + new + "\n"
             nameout = open(pathtoWRF+'namelist.input','w')
             nameout.writelines(ninput)
             nameout.close()
@@ -205,7 +208,7 @@ def intelligent_run(executable,email):
 ###############################
 
 # Open the WPS namelist; copy the old one in case of bugs
-os.system('cp namelist.wps{,.python_backup}')
+os.system('cp ' + pathtoWPS + 'namelist.wps' ' namelist.wps.python_backup')
 nwps = open('namelist.wps','r').readlines()
 
 # Sets values depending on initialisation data
@@ -235,8 +238,8 @@ if WPS:
     edit_namelist("parent_grid_ratio",', '.join([str(p) for p in parent_grid_ratio])+',')
     edit_namelist("i_parent_start", ', '.join([str(i) for i in i_start])+',')
     edit_namelist("j_parent_start", ', '.join([str(j) for j in j_start])+',')
-    edit_namelist("dx",str(dx*1000),incolumn=0)
-    edit_namelist("dy",str(dy*1000),incolumn=0)
+    edit_namelist("dx",str(1000*int(dx))+',',incolumn=0)
+    edit_namelist("dy",str(1000*int(dy))+',',incolumn=0)
     edit_namelist("e_we",', '.join([str(w) for w in e_we])+',')
     edit_namelist("e_sn",', '.join([str(s) for s in e_sn])+',')
     edit_namelist("prefix",int_prefix+',',incolumn=0)
@@ -259,12 +262,13 @@ if WPS:
 
 # Submit jobs (edit as needed)
 if WRF:
+    os.chdir(pathtoWRF)
     # Soft link data netCDFs files from WPS to WRF
     os.system('ln -sf ' + pathtoWPS + 'met_em* ' + pathtoWRF)
     
     ##### Sync namelist.input with namelist.wps
     # Copy original in case of bugs
-    os.system('cp ' + pathtoWRF + 'namelist.input{,.python_backup}')
+    os.system('cp ' + pathtoWRF +'namelist.input' ' namelist.input.python_backup')
     
     print 'met_em* linked. Now amending namelist.input.'
 
@@ -307,7 +311,7 @@ if WRF:
     edit_namelist_input("end_minute", (min2+', ')*domains)
     edit_namelist_input("end_second", (s2+', ')*domains)
     edit_namelist_input("interval_seconds", str(int(interval*3600))+',')
-    edit_namelist_input("max_dom",str(domains)+',')
+    edit_namelist_input("max_dom",str(domains))
     edit_namelist_input("e_we", ', '.join([str(w) for w in e_we])+',')
     edit_namelist_input("e_sn", ', '.join([str(s) for s in e_sn])+',')
     edit_namelist_input("num_metgrid_levels", str(atmos_levs)+',')
@@ -322,13 +326,13 @@ if WRF:
         print 'Namelist edited. Now submitting real.exe.'  
         # Run real, get ID number of job
         # Change name of submission script if needed
-        p_real = subprocess.Popen('qsub -d '+pathtoWRF+' real_run.sh',cwd=pathtoWRF,shell=True,stdout=subprocess.PIPE)
+        p_real = subprocess.Popen('./real.exe',cwd=pathtoWRF,shell=True,stdout=subprocess.PIPE)
         p_real.wait()
         jobid = p_real.stdout.read()[:5] # Assuming first five digits = job ID.
         # Run WRF but wait until Real has finished without errors
         print 'Now submitting wrf.exe.'  
         # Again, change name of submission script if needed
-        p_wrf = subprocess.Popen('qsub -d '+pathtoWRF+' wrf_run.sh -W depend=afterok:'+jobid,cwd=pathtoWRF,shell=True)
+        p_wrf = subprocess.Popen('./wrf.exe',cwd=pathtoWRF,shell=True,stdout=subprocess.PIPE)
         p_wrf.wait()
         print "real.exe and wrf.exe submitted. Exiting Python script."
 
