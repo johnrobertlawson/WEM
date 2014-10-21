@@ -26,7 +26,7 @@ class BirdsEye(Figure):
     def __init__(self,wrfout,ax=0,fig=0):
         super(BirdsEye,self).__init__(wrfout,ax=ax,fig=fig)
 
-    def get_contouring(self,vrbl='user',lv='user',**kwargs):
+    def get_contouring(self,vrbl='user',lv='user',cmap=False,clvs=False):
         """
         Returns colourmap and contouring levels
 
@@ -37,20 +37,19 @@ class BirdsEye(Figure):
 
         # List of args and dictionary of kwargs
         plotargs = [self.x,self.y,data]
-        plotkwargs = kwargs
+        plotkwargs = {}
 
         # cmap = getattr(kwargs,'cmap',plt.cm.jet)
 
 
             # if self.mplcommand == 'contour':
                 # multiplier = S.get_multiplier(vrbl,lv)
-        if 'clvs' in kwargs:
-            if isinstance(kwargs['clvs'],N.ndarray):
-                plotkwargs['levels'] = kwargs['clvs']
-                kwargs.pop('clvs')
+        if clvs is not False:
+            if isinstance(clvs,N.ndarray):
+                plotkwargs['levels'] = clvs
 
-        if 'cmap' in kwargs:
-            cmap = eval('M.cm.{0}'.format(kwargs['cmap']))
+        if cmap is not False:
+            cmap = eval('M.cm.{0}'.format(cmap))
             plotkwargs['cmap'] = cmap
         # pdb.set_trace()
 
@@ -65,9 +64,12 @@ class BirdsEye(Figure):
                 plotkwargs['levels'] = S.clvs
 
         return plotargs, plotkwargs
-
-    def plot_data(self,data,time,outdir,fname,plottype='contourf',
-                    save=1,smooth=1):
+        
+    # Old plot_data
+    def plot2D(self,data,fname,outdir,plottype='contourf',
+                    save=1,smooth=1,lats=False,lons=False,
+                    clvs=False,cmap=False):
+        
         """
         Generic method that plots any matrix of data on a map
 
@@ -84,23 +86,23 @@ class BirdsEye(Figure):
         save        :   whether to save to file
         """
         # INITIALISE
-        self.bmap,self.x,self.y = self.basemap_setup(smooth=1)#ax=self.ax)
-        self.mplcommand = mplcommand
         self.data = data
+        self.bmap,self.x,self.y = self.basemap_setup(smooth=smooth,lats=lats,
+                                                    lons=lons,)#ax=self.ax)
         self.la_n = self.data.shape[-2]
         self.lo_n = self.data.shape[-1]
 
-        plotargs, plotkwargs = self.get_contouring(**kwargs)
+        plotargs, plotkwargs = self.get_contouring(clvs=clvs,cmap=cmap)
 
-        if self.mplcommand == 'contour':
+        if plottype == 'contour':
             f1 = self.bmap.contour(*plotargs,**plotkwargs)
-        elif self.mplcommand == 'contourf':
+        elif plottype == 'contourf':
             f1 = self.bmap.contourf(*plotargs,**plotkwargs)
-        elif self.mplcommand == 'pcolor':
+        elif plottype == 'pcolor':
             f1 = self.bmap.pcolor(*plotargs,**plotkwargs)
-        elif self.mplcommand == 'pcolormesh':
+        elif plottype == 'pcolormesh':
             f1 = self.bmap.pcolormesh(*plotargs,**plotkwargs)
-        elif self.mplcommand == 'scatter':
+        elif plottype == 'scatter':
             f1 = self.bmap.scatter(*plotargs,**plotkwargs)
         else:
             print("Specify correct plot type.")
@@ -136,7 +138,7 @@ class BirdsEye(Figure):
         # print("Plot saved to {0}.".format(os.path.join(p2p,fname)))
 
     #def plot2D(self,va,**kwargs):
-    def plot2D(self,vrbl,utc,level,outdir,dom=1,bounding=0,smooth=1,
+    def plot2D_old(self,vrbl,utc,level,outdir,dom=1,bounding=0,smooth=1,
                 plottype='contourf',save=1,return_data=0,title=False):
         """
         Inputs:

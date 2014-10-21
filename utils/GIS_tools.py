@@ -428,10 +428,10 @@ def netcdf_files_in(folder,dom=0,init_time=0,model='auto',return_model=False):
         files = glob.glob(os.path.join(folder,'*'))
         matches = 0
         for f in files:
-            model = determine_model(f.split('/')[-1])
-            # import pdb; pdb.set_trace()
-            if model:
+            model_test = determine_model(f.split('/')[-1])
+            if model_test:
                 matches += 1
+                model = model_test
 
         if matches < 1:
             print("No netcdf files found.")
@@ -440,6 +440,7 @@ def netcdf_files_in(folder,dom=0,init_time=0,model='auto',return_model=False):
             print("Ambiguous netcdf file selection. Specify model?")
             raise Exception
 
+    # import pdb; pdb.set_trace()
     if model=='wrfout':
         pfx = 'wrfout' # Assume the prefix
     elif model=='ruc':
@@ -457,9 +458,9 @@ def netcdf_files_in(folder,dom=0,init_time=0,model='auto',return_model=False):
             raise Exception
         else:
             if return_model:
-                return f, model
+                return f[0], model
             else:
-                return f
+                return f[0]
     else:
         if (dom > 8):
             print("Domain is out of range. Choose number between 1 and 8 inclusive.")
@@ -749,7 +750,7 @@ def check_vertical_coordinate(level):
     """ Check to see what type of level is requested by user.
 
     """
-    if isinstance(level,(basestring,int):
+    if isinstance(level,(basestring,int)):
         lv = level
     elif isinstance(level,(list,tuple,N.ndarray)):
         lv = level[0]
@@ -761,9 +762,10 @@ def check_vertical_coordinate(level):
     if isinstance(lv,int):
         return 'index'
     if lv.endswith('hPa'):
+        # import pdb; pdb.set_trace()
         if lv[:4] == '2000':
             return 'surface'
-        elif int(lv[:4]) < 2000:
+        elif int(lv.split('h')[0]) < 2000:
             return 'isobaric'
         else:
             print("Pressure is in hPa. Requested value too large.")

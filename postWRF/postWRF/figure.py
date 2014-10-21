@@ -23,15 +23,6 @@ class Figure(object):
         """
         self.W = wrfout
         self.D = Defaults()
-        self.output_fpath = self.C.output_root
-
-        #if wrfout=='RUC':
-        #    pass
-        #else:
-        #    self.W = wrfout
-
-        # Get settings for figure
-        dpi = getattr(self.C,'DPI',self.D.dpi)
 
         # Create main figure
         if ax and fig:
@@ -49,7 +40,7 @@ class Figure(object):
             self.ax1 = plt.subplot(self.gs[1])
         else:
             self.fig, self.ax = plt.subplots(nrows=plotn[0],ncols=plotn[1])
-        self.fig.set_dpi(dpi)
+        self.fig.set_dpi(self.D.dpi)
         # self.ax = self.fig.add_subplot(111)
 
     def create_fname(self,*naming):
@@ -110,9 +101,14 @@ class Figure(object):
         CB.set_label(label)
         self.save(fig,fpath,fname)
 
-    def basemap_setup(self,smooth=1):
+    def basemap_setup(self,smooth=1,lats=False,lons=False):
+        """
+        Needs rewriting to include limited domains based on lats/lons.
+        Currently, assuming whole domain is plotted.
+        """
+
         # Fetch settings
-        basemap_res = getattr(self.C,'basemap_res',self.D.basemap_res)
+        basemap_res = self.D.basemap_res
 
         width_m = self.W.dx*(self.W.x_dim-1)
         height_m = self.W.dy*(self.W.y_dim-1)

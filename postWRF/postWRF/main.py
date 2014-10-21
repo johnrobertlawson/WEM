@@ -16,7 +16,6 @@ import cPickle as pickle
 import fnmatch
 import glob
 import itertools
-import json
 import numpy as N
 import os
 import pdb
@@ -26,7 +25,6 @@ M.use('gtkagg')
 import matplotlib.pyplot as plt
 
 from wrfout import WRFOut
-from axes import Axes
 from figure import Figure
 from birdseye import BirdsEye
 from ruc import RUC
@@ -34,7 +32,6 @@ from skewt import SkewT
 from skewt import Profile
 #import scales
 from defaults import Defaults
-from lookuptable import LookUpTable
 import WEM.utils as utils
 from xsection import CrossSection
 from clicker import Clicker
@@ -56,8 +53,8 @@ class WRFEnviron(object):
         #M.rcParams['savefig.dpi'] = self.dpi
 
     def plot2D(self,vrbl,utc,level,ncdir,outdir,ncf=False,nct=False,
-                f_prefix=0,f_suffix=False,bounding=False,dom=0,
-                plottype='contourf',smooth=0,fig=False,ax=False):
+                f_prefix=0,f_suffix=False,bounding=False,dom=1,
+                plottype='contourf',smooth=1,fig=False,ax=False):
         """
         Basic birds-eye-view plotting.
 
@@ -69,7 +66,7 @@ class WRFEnviron(object):
         Inputs:
         vrbl        :   string of variable name as found in WRF, or one of
                         the computed fields available in WEM
-        utc    :   one date/time.
+        utc    :        one date/time.
                         Can be tuple (YYYY,MM,DD,HH,MM,SS - calendar.timegm)
                         Can be integer of datenum. (time.gmtime)
         level       :   one level.
@@ -104,7 +101,9 @@ class WRFEnviron(object):
 
 
         """
-        outpath = self.get_outpath(outdir)
+        if isinstance(level,int):
+            # Level is in pressure
+            level = '{0}hPa'.format(level)
 
         # Data
         self.W = self.get_netcdf(ncdir,ncf=ncf,nct=nct,dom=dom)
@@ -112,10 +111,26 @@ class WRFEnviron(object):
         data = self.W.get(vrbl,utc,level,lons,lats)
 
         # Figure
-        fname = create_fname(vrbl,utc,level)
+        fname = self.create_fname(vrbl,utc,level)
         F = BirdsEye(self.W,fig=fig,ax=ax)
-        F.plot2D(data,fname,outpath,bounding=bounding,
+        F.plot2D(data,fname,outdir,lats=lats,lons=lons,
                     plottype=plottype,smooth=smooth)
+
+    def create_fname(self,vrbl,utc,level,f_prefix=False,f_suffix=False):
+        """
+        Differentiate between e.g. different domains by using the suffix/prefix
+        options.
+        """
+
+        time_str = utils.string_from_time('output',utc)
+
+        fname = '_'.join((vrbl,time_str,level))
+
+        if isinstance(f_prefix,basestring):
+            fname = f_prefix + fname
+        if isinstance(f_suffix,basestring):
+            fname = fname + f_suffix
+        return fname
 
     def get_netcdf(self,ncdir,ncf=False,nct=False,dom=0,path_only=False):
         """Returns the WRFOut or RUC instance, given arguments:
@@ -128,14 +143,14 @@ class WRFEnviron(object):
         dom         :   domain (for WRF files only)
         path_only   :   if True, return only absolute path+fname
         """
-        # import pdb; pdb.set_trace()
         if ncf:
-            fpath = os.path.join(nc_sd,nc_f)
-            model = utils.determine_model(nc_f)
+            fpath = os.path.join(ncdir,ncf)
+            model = utils.determine_model(ncf)
         else:
             fpath, model = utils.netcdf_files_in(ncdir,init_time=nct,
                                                     dom=dom,return_model=True)
 
+        # import pdb; pdb.set_trace()
         if path_only:
             return fpath
         else:
@@ -197,12 +212,12 @@ class WRFEnviron(object):
         listoftimes = utils.generate_times(itime,ftime,interval)
         return listoftimes
 
-    def plot_diff_energy(self,vrbl,utc,energy,datadir,outdir,dataf=False
+    def plot_diff_energy(self,vrbl,utc,energy,datadir,outdir,dataf=False,
                             outprefix=False,outsuffix=False,clvs=0,
                             title=False,fig=False,ax=False):
         """
         vrbl        :   'sum_z' or 'sum_xyz'
-        utc    :   date/time for plot
+        utc         :   date/time for plot
         energy      :   'kinetic' or 'total'
         datadir     :   directory holding computed data
         outdir      :   root directory for plots
@@ -899,7 +914,7 @@ class WRFEnviron(object):
         Use a centred-in-time derivative; hence, if
         time index is start or end of wrfout file, skip the plot.
 
-        blurn       :   gaussian smooth by this many grid points
+        smooth      :   gaussian smooth by this many grid points
         """
         # Need to rewrite API so sd becomes absolute path.
         outpath = self.get_outpath(out_sd)
