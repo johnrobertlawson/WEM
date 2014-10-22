@@ -121,7 +121,6 @@ class WRFEnviron(object):
         Differentiate between e.g. different domains by using the suffix/prefix
         options.
         """
-
         time_str = utils.string_from_time('output',utc)
 
         fname = '_'.join((vrbl,time_str,level))
@@ -199,7 +198,7 @@ class WRFEnviron(object):
             elif 'wrfout' in wrfpath[:6]:
                 return WRFOut(wrfpath)
             else:
-                print("Unrecognised netCDF4 file type at {0}".format(wrfpath))
+                print("Unrecognised netCDF file type at {0}".format(wrfpath))
 
     def generate_times(self,itime,ftime,interval):
         """
@@ -849,24 +848,29 @@ class WRFEnviron(object):
 
         F.spaghetti(utc,lv,va,contour,ncfiles,outpath)
 
-    def std(self,utc,lv,va,wrf_sds,out_sd,dom=1,clvs=0):
+    def std(self,vrbl,utc,level,outdir,wrfdirs=False,wrfpaths=False,dom=1,
+                clvs=False):
         """Compute standard deviation of all members
         for given variable.
 
         Inputs:
-        utc       :   time
-        lv      :   level
+        utc     :   time
+        level      :   level
         va      :   variable
-        wrf_sds :   list of wrf subdirs to loop over
+
+        Must have one of these two:
+        wrfdirs :   list of wrf dirs to loop over
 
         Optional
         out_sd  :   directory in which to save image
         clvs    :   user-set contour levels
         """
-
-        outpath = self.get_outpath(out_sd)
-
-        ncfiles = self.list_ncfiles(wrf_sds)
+        if wrfdirs is False and wrfpaths is False:
+            print("Must have either wrfdirs or wrfpaths.")
+            raise Exception
+        elif isinstance(wrfdirs,(tuple,list)):
+            ncfiles = self.list_ncfiles(wrf_sds)
+        elif isinstance()
 
         # Use first wrfout to initialise grid, get indices
         self.W = self.get_netcdf(wrf_sds[0],dom=dom)
@@ -906,7 +910,7 @@ class WRFEnviron(object):
         maps.plot_domains(wrfouts,labels,latlons,outpath,colour)
 
 
-    def frontogenesis(self,time,level,ncdir,outdir,ncf=False,nct=False,
+    def frontogenesis(self,utc,level,ncdir,outdir,ncf=False,nct=False,
                         dom=1,smooth=0,clvs=0,title=0):
         """
         Compute and plot (Miller?) frontogenesis as d/dt of theta gradient.
@@ -916,14 +920,10 @@ class WRFEnviron(object):
 
         smooth      :   gaussian smooth by this many grid points
         """
-        # Need to rewrite API so sd becomes absolute path.
-        outpath = self.get_outpath(out_sd)
-        nc_path = os.path.join(self.C.wrfout_root,nc_sd)
-        # import pdb; pdb.set_trace()
-        self.W = self.get_netcdf(nc_path,nc_f,nc_t=nc_init,dom=dom)
-        tstr = utils.string_from_time('output',time)
+        self.W = self.get_netcdf(ncdir,ncf=ncf,nct=nct,dom=dom)
+        fname = self.create_fname(vrbl,utc,level)
 
-        Front = self.W.compute_frontogenesis(time,level)
+        Front = self.W.compute_frontogenesis(utc,level)
         if isinstance(Front,N.ndarray):
 
             if smooth:
