@@ -401,7 +401,7 @@ def latlon_1D(nc):
     lons = nc.variables['XLONG'][0,Ny/2,:]
     return lats, lons
 
-def netcdf_files_in(folder,dom=0,init_time=0,model='auto',return_model=False):
+def netcdf_files_in(folder,dom=1,init_time=0,model='auto',return_model=False):
     """
     Hunt through given folder to find the right netcdf file for data.
 
@@ -471,9 +471,9 @@ def netcdf_files_in(folder,dom=0,init_time=0,model='auto',return_model=False):
         import pdb; pdb.set_trace()
         if len(f) == 1:
             if return_model:
-                return f, model
+                return f[0], model
             else:
-                return f
+                return f[0]
         elif len(f) == 0:
             print("No netCDF4 file found.")
             raise Exception

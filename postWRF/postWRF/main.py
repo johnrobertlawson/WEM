@@ -108,6 +108,8 @@ class WRFEnviron(object):
         self.W = self.get_netcdf(ncdir,ncf=ncf,nct=nct,dom=dom)
         lats, lons = self.W.get_limited_domain(bounding)
         data = self.W.get(vrbl,utc,level,lons,lats)
+        if smooth>1:
+            data = stats.gauss_smooth(data,smooth)
 
         # Scales
         S = Scales(vrbl,level)
@@ -134,7 +136,7 @@ class WRFEnviron(object):
             fname = fname + f_suffix
         return fname
 
-    def get_netcdf(self,ncdir,ncf=False,nct=False,dom=0,path_only=False):
+    def get_netcdf(self,ncdir,ncf=False,nct=False,dom=1,path_only=False):
         """Returns the WRFOut or RUC instance, given arguments:
 
         ncdir       :   absolute path to subdirectory
@@ -165,43 +167,6 @@ class WRFEnviron(object):
                 return WRFOut(fpath)
             else:
                 print("Unrecognised netCDF4 file type at {0}".format(fpath))
-
-    def get_wrfout(self,wrf_sd=0,wrf_nc=0,dom=0,path_only=0):
-        """Returns the WRFOut or RUC instance, given arguments:
-
-        Optional inputs:
-        wrf_sd      :   subdirectory for wrf file
-        wrf_nc      :   filename for wrf file
-        dom         :   domain for wrf file
-        path_only   :   only return absolute path
-        """
-        # Check configuration to see if wrfout files should be
-        # sought inside subdirectories.
-        descend = getattr(self.C,'wrf_folders_descend',1)
-        import pdb; pdb.set_trace()
-
-        if wrf_sd and wrf_nc:
-            wrfpath = os.path.join(self.C.wrfout_root,wrf_sd,wrf_nc)
-        elif wrf_sd:
-            wrfdir = os.path.join(self.C.wrfout_root,wrf_sd)
-            # print wrfdir
-            wrfpath = utils.wrfout_files_in(wrfdir,dom=dom,unambiguous=1,descend=descend)
-        else:
-            wrfdir = os.path.join(self.C.wrfout_root)
-            wrfpath = utils.wrfout_files_in(wrfdir,dom=dom,unambiguous=1,descend=descend)
-
-        if path_only:
-            return wrfpath
-        else:
-            # Check for WRF or RUC
-            # nc = Dataset(wrfpath)
-            # if 'ruc' in nc.grib_source[:3]:
-            if 'ruc' in wrfpath[:5]:
-                return RUC(wrfpath)
-            elif 'wrfout' in wrfpath[:6]:
-                return WRFOut(wrfpath)
-            else:
-                print("Unrecognised netCDF file type at {0}".format(wrfpath))
 
     def generate_times(self,itime,ftime,interval):
         """
@@ -969,4 +934,3 @@ class WRFEnviron(object):
             # Level is in pressure
             level = '{0}hPa'.format(level)
         return level
-
