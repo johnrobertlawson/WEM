@@ -1,20 +1,17 @@
-.. WEM documentation master file, created by
-   sphinx-quickstart on Sat Jul 12 01:40:57 2014.
+.. . documentation master file, created by
+   sphinx-quickstart on Wed Oct 22 00:27:20 2014.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to WEM's documentation!
-===============================
+Welcome to .'s documentation!
+=============================
 
 Contents:
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 4
 
-   intro
-   lazywrf
-   postwrf
-   postwrf_index
+   WEM
 
 
 Indices and tables
