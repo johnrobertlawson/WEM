@@ -468,7 +468,7 @@ def netcdf_files_in(folder,dom=1,init_time=0,model='auto',return_model=False):
 
         fname = get_netcdf_naming(model,t,dom)
         f = glob.glob(os.path.join(folder,fname))
-        import pdb; pdb.set_trace()
+
         if len(f) == 1:
             if return_model:
                 return f[0], model
@@ -759,6 +759,7 @@ def check_vertical_coordinate(level):
                 "{0}".format(type(level)))
         raise Exception
 
+    # import pdb; pdb.set_trace()
     if isinstance(lv,int):
         return 'index'
     if lv.endswith('hPa'):

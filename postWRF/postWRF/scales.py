@@ -50,20 +50,19 @@ class Scales(object):
                     self.clvs = self.A[vrbl][near_lv]
                 except:
                     # Some variables don't live on a vertical level
-                    self.clvs = 0
+                    self.clvs = False
             # except:
                 # raise Exception
-                
-        try:
-            # Need to unify user cms and matplotlib cms.
-            #self.cm = self.A[vrbl]['cmap']        # This is for matplotlib
-            self.cm = self.A[vrbl]['cmap'](clvs)    # This is for user
+        try:  
+            self.cm = self.A[vrbl]['cmap']        # This is for matplotlib
         except KeyError:
-            #print("Using default colourtable.")
-            #def_ct = plt.cm.get_cmap("jet")
-            self.cm = 0
-            #cm = LinearSegmentedColormap('DEF_CT',def_ct)
-        # pdb.set_trace()
+            self.cm = False
+
+        if isinstance(self.cm,(bool,LinearSegmentedColormap)):
+            pass
+        else:
+            self.cm = self.A[vrbl]['cmap'](clvs)    # This is for user
+        
 
     def get_multiplier(self,vrbl,lv):
         m = self.A[vrbl].get('multiplier',1)
@@ -97,11 +96,11 @@ class Scales(object):
         A = {}
         
         # Wind magnitude
-        A['wind10'] = {'cmap':0}
+        A['wind10'] = {'cmap':False}
         A['wind10'][2000] = (5,32.5,2.5)
         
         # Wind magnitude
-        A['wind'] = {'cmap':0}
+        A['wind'] = {'cmap':False}
         A['wind'][2000] = (5,32.5,2.5)
         
         # Theta-e (Equivalent potential temperature)
@@ -128,19 +127,19 @@ class Scales(object):
         A['snow'] = {'cmap':ct.snow2}
         A['snow'][2000] = [0.25,0.5,0.75,1,1.5,2,2.5,3,4,5,6,8,10,12,14,16,18]
         
-        A['shear'] = {'cmap':0}
+        A['shear'] = {'cmap':False}
         A['shear'][0] = (0,33,3)
         
-        A['buoyancy'] = {'cmap':0}
+        A['buoyancy'] = {'cmap':False}
         A['buoyancy'][2000] = (-0.65,0.075,0.025)
         
-        A['dptp'] = {'cmap':0}
+        A['dptp'] = {'cmap':False}
         A['dptp'][2000] = (-15,6,1)
         
-        A['strongestwind'] = {'cmap':0}
+        A['strongestwind'] = {'cmap':False}
         A['strongestwind'][2000] = (10,32.5,2.5)
         
-        A['PMSL'] = {'cmap':0,'multiplier':0.01}
+        A['PMSL'] = {'cmap':False,'multiplier':0.01}
         A['PMSL'][2000] = (97000,103100,100)
 
         # A['RH'] = {'cmap':ct.irsat}

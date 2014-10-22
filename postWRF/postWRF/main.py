@@ -55,7 +55,8 @@ class WRFEnviron(object):
 
     def plot2D(self,vrbl,utc,level,ncdir,outdir,ncf=False,nct=False,
                 f_prefix=0,f_suffix=False,bounding=False,dom=1,
-                plottype='contourf',smooth=1,fig=False,ax=False):
+                plottype='contourf',smooth=1,fig=False,ax=False,
+                clvs=False,cmap=False):
         """
         Basic birds-eye-view plotting.
 
@@ -102,24 +103,37 @@ class WRFEnviron(object):
 
 
         """
+        # TODO: lats/lons False when no bounding, and selected with limited
+        # domain.
+
         level = self.get_level_string(level)
 
         # Data
         self.W = self.get_netcdf(ncdir,ncf=ncf,nct=nct,dom=dom)
-        lats, lons = self.W.get_limited_domain(bounding)
-        data = self.W.get(vrbl,utc,level,lons,lats)
+        # lats, lons = self.W.get_limited_domain(bounding)
+        data = self.W.get(vrbl,utc,level,lons=False,lats=False)
         if smooth>1:
             data = stats.gauss_smooth(data,smooth)
 
         # Scales
-        S = Scales(vrbl,level)
+        if clvs is False and cmap is False:
+            S = Scales(vrbl,level)
+            clvs = S.clvs
+            cmap = S.cm
+        elif clvs is False:
+            S = Scales(vrbl,level)
+            clvs = S.clvs
+        elif cmap is False:
+            S = Scales(vrbl,level)
+            cmap = S.cm
 
         # Figure
         fname = self.create_fname(vrbl,utc,level)
         F = BirdsEye(self.W,fig=fig,ax=ax)
-        F.plot2D(data,fname,outdir,lats=lats,lons=lons,
+        # import pdb; pdb.set_trace()
+        F.plot2D(data,fname,outdir,lats=False,lons=False,
                     plottype=plottype,smooth=smooth,
-                    clvs=S.clvs,cmap=S.cm)
+                    clvs=clvs,cmap=cmap)
 
     def create_fname(self,vrbl,utc,level,f_prefix=False,f_suffix=False):
         """

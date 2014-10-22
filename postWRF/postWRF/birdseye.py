@@ -47,7 +47,7 @@ class BirdsEye(Figure):
         if cmap is not False:
             # cmap = eval('M.cm.{0}'.format(cmap))
             plotkwargs['cmap'] = cmap
-
+        # import pdb; pdb.set_trace()
         return plotargs, plotkwargs
 
     # Old plot_data
@@ -79,6 +79,7 @@ class BirdsEye(Figure):
 
         plotargs, plotkwargs = self.get_plot_arguments(clvs=clvs,cmap=cmap)
 
+        # import pdb; pdb.set_trace()
         if plottype == 'contour':
             f1 = self.bmap.contour(*plotargs,**plotkwargs)
         elif plottype == 'contourf':

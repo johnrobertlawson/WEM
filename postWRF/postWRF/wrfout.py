@@ -188,18 +188,23 @@ class WRFOut(object):
         else:
             print("Invalid lat/lon selection.")
             raise Exception
-       
+        # import pdb; pdb.set_trace()
         # Check if computing required
         # When data is loaded from nc, it is destaggered
         if self.check_compute(vrbl):
             if lvidx is 'isobaric':
                 data = self.get_p(vrbl,tidx,level,lonidx,
                             latidx)[N.newaxis,N.newaxis,:,:]
-            else:
+            elif isinstance(lvidx,(tuple,list,N.ndarray,int)):
                 data = self.load(vrbl,tidx,lvidx,lonidx,latidx)
+            else:
+                raise Exception
         else:
-            data = self.compute(vrbl,tidx,lvidx,lonidx,latidx,other)
-
+            if lvidx is 'isobaric':
+                data = self.get_p(vrbl,tidx,level,lonidx,
+                            latidx)[N.newaxis,N.newaxis,:,:]
+            else:
+                data = self.compute(vrbl,tidx,lvidx,lonidx,latidx,other)
         return data
 
     def load(self,vrbl,tidx,lvidx,lonidx,latidx):
@@ -373,7 +378,7 @@ class WRFOut(object):
         return response
 
     def compute_RH(self,tidx,lvidx,lonidx,latidx,other):
-        T = self.get('temps',tidx,lvidx,lonidx,latidx,units='C')
+        T = self.get('temps',tidx,lvidx,lonidx,latidx,other='C')
         Td = self.get('Td',tidx,lvidx,lonidx,latidx)
         RH = N.exp(0.073*(Td-T))
         # pdb.set_trace()
