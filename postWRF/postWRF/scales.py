@@ -29,6 +29,9 @@ class Scales(object):
         self.A = self.get_dict_of_levels()
         # Variable and vertical level determine contour scale
 
+        if lv.endswith('hPa'):
+            lv = int(lv.split('h')[0])
+
         if clvs:
             # Custom range set by user
             self.clvs = N.arange(*clvs)
@@ -53,7 +56,7 @@ class Scales(object):
                 
         try:
             # Need to unify user cms and matplotlib cms.
-            # self.cm = self.A[vrbl]['cmap']        # This is for matplotlib
+            #self.cm = self.A[vrbl]['cmap']        # This is for matplotlib
             self.cm = self.A[vrbl]['cmap'](clvs)    # This is for user
         except KeyError:
             #print("Using default colourtable.")

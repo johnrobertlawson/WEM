@@ -26,7 +26,7 @@ class BirdsEye(Figure):
     def __init__(self,wrfout,ax=0,fig=0):
         super(BirdsEye,self).__init__(wrfout,ax=ax,fig=fig)
 
-    def get_contouring(self,vrbl='user',lv='user',cmap=False,clvs=False):
+    def get_plot_arguments(self,vrbl='user',lv='user',cmap=False,clvs=False):
         """
         Returns colourmap and contouring levels
 
@@ -39,36 +39,21 @@ class BirdsEye(Figure):
         plotargs = [self.x,self.y,data]
         plotkwargs = {}
 
-        # cmap = getattr(kwargs,'cmap',plt.cm.jet)
-
-
-            # if self.mplcommand == 'contour':
-                # multiplier = S.get_multiplier(vrbl,lv)
+        # if self.mplcommand == 'contour':
+            # multiplier = S.get_multiplier(vrbl,lv)
         if clvs is not False:
-            if isinstance(clvs,N.ndarray):
-                plotkwargs['levels'] = clvs
+            plotkwargs['levels'] = clvs
 
         if cmap is not False:
-            cmap = eval('M.cm.{0}'.format(cmap))
+            # cmap = eval('M.cm.{0}'.format(cmap))
             plotkwargs['cmap'] = cmap
-        # pdb.set_trace()
-
-        if vrbl=='user':
-            pass
-
-        else:
-            S = Scales(vrbl,lv)
-            if S.cm:
-                plotkwargs['cmap'] = S.cm
-            if isinstance(S.clvs,N.ndarray):
-                plotkwargs['levels'] = S.clvs
 
         return plotargs, plotkwargs
         
     # Old plot_data
     def plot2D(self,data,fname,outdir,plottype='contourf',
                     save=1,smooth=1,lats=False,lons=False,
-                    clvs=False,cmap=False):
+                    clvs=False,cmap=False,title=False,colorbar=True):
         
         """
         Generic method that plots any matrix of data on a map
@@ -92,7 +77,7 @@ class BirdsEye(Figure):
         self.la_n = self.data.shape[-2]
         self.lo_n = self.data.shape[-1]
 
-        plotargs, plotkwargs = self.get_contouring(clvs=clvs,cmap=cmap)
+        plotargs, plotkwargs = self.get_plot_arguments(clvs=clvs,cmap=cmap)
 
         if plottype == 'contour':
             f1 = self.bmap.contour(*plotargs,**plotkwargs)
@@ -108,34 +93,14 @@ class BirdsEye(Figure):
             print("Specify correct plot type.")
             raise Exception
 
-        # LABELS, TITLES etc
-        """
-        Change these to hasattr!
-        """
-        #if self.C.plot_titles:
-        if 'title' in kwargs:
-            title_str = utils.string_from_time('title',pt,tupleformat=0)
-            plt.title(title_str)
-        plot_colorbar = 1
-        if plot_colorbar:
-            # self.fig.colorbar(f1,orientation='horizontal')
+        if isinstance(title,basestring):
+            plt.title(title)
+        if colorbar:
             self.fig.colorbar(f1,orientation='vertical')
-        # plt.show(self.fig)
-        # div0 = make_axes_locatable(self.ax)
-        # cax0 = div0.append_axes("bottom", size="20%", pad=0.05)
-        # cb0 = self.fig.colorbar(f1, cax=cax0)
-
-
-        # SAVE FIGURE
-        datestr = utils.string_from_time('output',pt,tupleformat=0)
-        # self.fname = self.create_fname(fpath) # No da variable here
         if save:
-            self.save(p2p,fname)
+            self.save(outdir,fname)
 
         plt.close(self.fig)
-        return f1
-
-        # print("Plot saved to {0}.".format(os.path.join(p2p,fname)))
 
     #def plot2D(self,va,**kwargs):
     def plot2D_old(self,vrbl,utc,level,outdir,dom=1,bounding=0,smooth=1,
@@ -247,48 +212,35 @@ class BirdsEye(Figure):
             return self.data.reshape((self.la_n,self.lo_n))
 
 
-    def plot_streamlines(self,lv,pt,outpath,da=0):
+    def plot_streamlines(self,U,V,outdir,fname,lats=False,lons=False,smooth=1,
+                            title=False,lw_speed=False):
+        """
+        Plot streamlines.
+
+        U       :   U-component of wind (nx x ny)
+        V       :   V-component of wind (same dimensions)
+
+        lw_speed    :   linewidth is proportional to wind speed
+        """
         m,x,y = self.basemap_setup()
-
-        time_idx = self.W.get_time_idx(pt)
-
-        if lv==2000:
-            lv_idx = None
+        
+        if lw_speed:
+            wind = N.sqrt(U**2 + V**2)
+            lw = 5*wind/wind.max()
         else:
-            print("Only support surface right now")
-            raise Exception
+            lw = 1
+        
+        if smooth>1:
+            U = stats.gauss_smooth(U,smooth)
+            V = stats.gauss_smooth(V,smooth)
 
-        lat_sl, lon_sl = self.get_limited_domain(da)
-
-        slices = {'t': time_idx, 'lv': lv_idx, 'la': lat_sl, 'lo': lon_sl}
-
-        if lv == 2000:
-            u = self.W.get('U10',slices)[0,:,:]
-            v = self.W.get('V10',slices)[0,:,:]
-        else:
-            u = self.W.get('U',slices)[0,0,:,:]
-            v = self.W.get('V',slices)[0,0,:,:]
-        # pdb.set_trace()
-
-        #div = N.sum(N.dstack((N.gradient(u)[0],N.gradient(v)[1])),axis=2)*10**4
-        #vort = (N.gradient(v)[0] - N.gradient(u)[1])*10**4
-        #pdb.set_trace()
-        lv_na = utils.get_level_naming('wind',lv=2000)
-
-        m.streamplot(x[self.W.x_dim/2,:],y[:,self.W.y_dim/2],u,v,
-                        density=2.5,linewidth=0.75,color='k')
-        #div_Cs = N.arange(-30,31,1)
-        #divp = m.contourf(x,y,vort,alpha=0.6)
-        #divp = m.contour(x,y,vort)
-
-        #plt.colorbar(divp,orientation='horizontal')
-        if self.C.plot_titles:
-            title = utils.string_from_time('title',pt)
+        m.streamplot(x[self.W.x_dim/2,:],y[:,self.W.y_dim/2],U,V,
+                        density=1.8,linewidth=lw,color='k',arrowsize=3)
+        
+        if isinstance(title,basestring):
             self.ax.set_title(title)
-        datestr = utils.string_from_time('output',pt)
-        na = ('streamlines',lv_na,datestr)
-        fname = self.create_fname(*na)
-        self.save(outpath,fname)
+
+        self.save(outdir,fname)
 
     def spaghetti(self,t,lv,va,contour,wrfouts,outpath,da=0,dom=0):
         """

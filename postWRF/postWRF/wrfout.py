@@ -188,12 +188,13 @@ class WRFOut(object):
         else:
             print("Invalid lat/lon selection.")
             raise Exception
-        
+       
         # Check if computing required
         # When data is loaded from nc, it is destaggered
         if self.check_compute(vrbl):
             if lvidx is 'isobaric':
-                self.get_p(vrbl,tidx,level.split('h')[0],lonidx,latidx)
+                data = self.get_p(vrbl,tidx,level,lonidx,
+                            latidx)[N.newaxis,N.newaxis,:,:]
             else:
                 data = self.load(vrbl,tidx,lvidx,lonidx,latidx)
         else:
@@ -211,7 +212,7 @@ class WRFOut(object):
 
         vrbldata = self.nc.variables[vrbl]
         sl = self.create_slice(vrbl,tidx,lvidx,lonidx,latidx,dim_names)
-
+        # import pdb; pdb.set_trace()
         # If that dimension has a slice of indices, it doesn't need staggering.
         if destag_dim and isinstance(sl[destag_dim],N.ndarray):
             destag_dim = None
@@ -230,32 +231,40 @@ class WRFOut(object):
         sl = []
         # pdb.set_trace()
         if any('Time' in p for p in dim_names):
-            if isinstance(tidx,slice) or isinstance(tidx,N.ndarray):
+            if tidx is False:
+                sl.append(slice(None,None))
+            elif isinstance(tidx,slice) or isinstance(tidx,N.ndarray):
                 sl.append(tidx)
             else:
                 sl.append(slice(tidx,tidx+1))
 
         if any('bottom' in p for p in dim_names):
-            if isinstance(lvidx,int):
+            if lvidx is False:
+                sl.append(slice(None,None))
+            elif isinstance(lvidx,int):
                 sl.append(slice(lvidx,lvidx+1))
             elif isinstance(lvidx,N.ndarray):
                 sl.append(lvidx)
             else: 
                 sl.append(slice(None,None))
 
-        if any('north' in p for p in dim_names):
-            if isinstance(latidx,slice) or isinstance(latidx,N.ndarray):
-                sl.append(latidx)
-            elif isinstance(latidx,int):
-                sl.append(slice(latidx,latidx+1))
-            else:
-                sl.append(slice(None,None))
-
         if any('west' in p for p in dim_names):
-            if isinstance(lonidx,slice) or isinstance(lonidx,N.ndarray):
+            if lonidx is False:
+                sl.append(slice(None,None))
+            elif isinstance(lonidx,slice) or isinstance(lonidx,N.ndarray):
                 sl.append(lonidx)
             elif isinstance(lonidx,int):
                 sl.append(slice(lonidx,lonidx+1))
+            else:
+                sl.append(slice(None,None))
+
+        if any('north' in p for p in dim_names):
+            if latidx is False:
+                sl.append(slice(None,None))
+            elif isinstance(latidx,slice) or isinstance(latidx,N.ndarray):
+                sl.append(latidx)
+            elif isinstance(latidx,int):
+                sl.append(slice(latidx,latidx+1))
             else:
                 sl.append(slice(None,None))
 
@@ -553,12 +562,13 @@ class WRFOut(object):
         """Amend this so variables obtain at start fetch only correct date, lats, lons
         All levels need to be fetched as this is composite reflectivity
         """
-        T2 = self.get('T2',tidx,lvidx,lonidx,latidx)
+        T2 = self.get('T2',tidx,False,lonidx,latidx)
         # QR = self.nc.variables['QRAIN'][PS['t'],:,PS['la'],PS['lo']]
-        QR = self.get('QRAIN',tidx,lonidx,latidx) # This should get all levels
-        PSFC = self.get('PSFC',tidx,lvidx,lonidx,latidx)
+        QR = self.get('QRAIN',tidx,False,lonidx,latidx) # This should get all levels
+        PSFC = self.get('PSFC',tidx,False,lonidx,latidx)
+
         try:
-            QS = self.get('QSNOW',tidx,lonidx,latidx)
+            QS = self.get('QSNOW',tidx,False,lonidx,latidx)
         except:
             QS = N.zeros(N.shape(QR))
         rhor = 1000.0
@@ -572,8 +582,8 @@ class WRFOut(object):
         no_grau = 4.0E6
 
         density = N.divide(PSFC,(287.0 * T2))
-        Qra_all = QR
-        Qsn_all = QS
+        Qra_all = QR[0,...]
+        Qsn_all = QS[0,...]
 
         for j in range(len(Qra_all[1,:,1])):
             curcol_r = []
@@ -855,25 +865,24 @@ class WRFOut(object):
 
         TODO: Need to include limited domain functionality
         """
-        if isinstance(level,int):
+        if isinstance(level,basestring) and level.endswith('hPa'):
+            hPa = 100.0*int(level.split('h')[0])
+            nlv = 1
+        elif isinstance(level,(float,int)):
             hPa = level*100.0
             nlv = 1
-        elif isinstance(level,collections.Sequence):
+        elif isinstance(level,(tuple,list)):
             hPa = [l*100.0 for l in level]
             nlv = len(hPa)
         else:
-            print("Use integer or list of integers for level.")
+            print("Use XXXhPa, an integer, or list of integers for level.")
             raise Exception
 
-        if time<1000:
-            tidx = time
-        else:
-            tidx = self.get_time_idx(time)
-        sl = {'t':tidx}
-
         # If this breaks, user is requesting non-4D data
-        datain = self.get(vrbl,sl)[0,:,:,:]
-        P = self.get('pressure',sl)[0,:,:,:]
+        # Duck-typing for the win
+
+        datain = self.get(vrbl,utc=tidx,lons=lonidx,lats=latidx)[0,...]
+        P = self.get('pressure',utc=tidx,lons=lonidx,lats=latidx)[0,...]
         # import pdb; pdb.set_trace()
         dataout = N.zeros([nlv,P.shape[-2],P.shape[-1]])
         # pdb.set_trace()

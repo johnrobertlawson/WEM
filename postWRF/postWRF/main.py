@@ -37,6 +37,7 @@ from xsection import CrossSection
 from clicker import Clicker
 import maps
 import stats
+from scales import Scales
 
 # TODO: Make this awesome
 
@@ -101,20 +102,22 @@ class WRFEnviron(object):
 
 
         """
-        if isinstance(level,int):
-            # Level is in pressure
-            level = '{0}hPa'.format(level)
+        level = self.get_level_string(level)
 
         # Data
         self.W = self.get_netcdf(ncdir,ncf=ncf,nct=nct,dom=dom)
         lats, lons = self.W.get_limited_domain(bounding)
         data = self.W.get(vrbl,utc,level,lons,lats)
 
+        # Scales
+        S = Scales(vrbl,level)
+
         # Figure
         fname = self.create_fname(vrbl,utc,level)
         F = BirdsEye(self.W,fig=fig,ax=ax)
         F.plot2D(data,fname,outdir,lats=lats,lons=lons,
-                    plottype=plottype,smooth=smooth)
+                    plottype=plottype,smooth=smooth,
+                    clvs=S.clvs,cmap=S.cm)
 
     def create_fname(self,vrbl,utc,level,f_prefix=False,f_suffix=False):
         """
@@ -576,15 +579,30 @@ class WRFEnviron(object):
             #ST = SkewT(self.C)
             pass
 
-    def plot_streamlines(self,utc,lv,wrf_sd=0,wrf_nc=0,out_sd=0,dom=1):
-        self.W = self.get_netcdf(wrf_sd,wrf_nc,dom=dom)
-        outpath = self.get_outpath(out_sd)
+    def plot_streamlines(self,utc,level,ncdir,outdir,ncf=False,nct=False,
+                            f_prefix=False,f_suffix=False,dom=1,smooth=1,
+                            fig=False,ax=False,bounding=False):
+        """
+        Doc me.
+        """
+        level = self.get_level_string(level)
+        # Data
+        self.W = self.get_netcdf(ncdir,ncf=ncf,nct=nct,dom=dom)
+        lats, lons = self.W.get_limited_domain(bounding)
 
-        self.F = BirdsEye(self.C,self.W)
-        disp_t = utils.string_from_time('title',utc)
-        print("Plotting {0} at lv {1} for time {2}.".format(
-                'streamlines',lv,disp_t))
-        self.F.plot_streamlines(lv,utc,outpath)
+        if level=='2000hPa':
+            U = self.W.get('U10',utc,level,lons,lats)[0,:,:]
+            V = self.W.get('V10',utc,level,lons,lats)[0,:,:]
+        else:
+            U = self.W.get('U',utc,level,lons,lats)[0,0,:,:]
+            V = self.W.get('V',utc,level,lons,lats)[0,0,:,:]
+
+        self.F = BirdsEye(self.W,fig=fig,ax=ax)
+        # disp_t = utils.string_from_time('title',utc)
+        # print("Plotting {0} at lv {1} for time {2}.".format(
+                # 'streamlines',lv,disp_t))
+        fname = self.create_fname('streamlines',utc,level)
+        self.F.plot_streamlines(U,V,outdir,fname)
 
     def plot_strongest_wind(self,itime,ftime,levels,wrf_sd=0,wrf_nc=0,out_sd=0,f_prefix=0,f_suffix=0,
                 bounding=0,dom=0):
@@ -870,12 +888,13 @@ class WRFEnviron(object):
             raise Exception
         elif isinstance(wrfdirs,(tuple,list)):
             ncfiles = self.list_ncfiles(wrf_sds)
-        elif isinstance()
+        elif isinstance(wrfpaths,(tuple,list)):
+            ncfiles = wrfpaths
 
         # Use first wrfout to initialise grid, get indices
-        self.W = self.get_netcdf(wrf_sds[0],dom=dom)
+        self.W = self.get_netcdf(ncfiles[0],dom=dom)
 
-        tidx = self.W.get_time_idx(t)
+        tidx = self.W.get_time_idx(utc)
 
         if lv==2000:
             # lvidx = None
@@ -940,3 +959,14 @@ class WRFEnviron(object):
                             no_title=no_title,**kwargs)
         else:
             print("Skipping this time; at start or end of run.")
+
+    def get_level_string(self,level):
+        """
+        Makes sure user's level input is a string.
+        Saves typing hPa for the common usage of pressure levels.
+        """
+        if isinstance(level,int):
+            # Level is in pressure
+            level = '{0}hPa'.format(level)
+        return level
+
