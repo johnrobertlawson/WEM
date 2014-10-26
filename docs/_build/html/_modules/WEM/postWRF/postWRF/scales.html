@@ -1,0 +1,251 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>WEM.postWRF.postWRF.scales &mdash; .  documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <link rel="top" title=".  documentation" href="../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">.  documentation</a> &raquo;</li>
+          <li><a href="../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for WEM.postWRF.postWRF.scales</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot; This file contains colorbar scales for plotting.</span>
+
+<span class="sd">INPUTS</span>
+
+<span class="sd">va      :   variable to be plotted</span>
+<span class="sd">lv      :   level to be plotted</span>
+
+<span class="sd">OUTPUTS</span>
+
+<span class="sd">cm      :   colour map</span>
+<span class="sd">clvs    :   contour levels</span>
+
+<span class="sd">Level = 2000 indicates surface.</span>
+
+<span class="sd">Default settings are listed at the bottom.</span>
+<span class="sd">These can be overwritten in user&#39;s config file... somehow</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">pdb</span>
+<span class="kn">import</span> <span class="nn">matplotlib</span> <span class="kn">as</span> <span class="nn">M</span>
+<span class="kn">from</span> <span class="nn">matplotlib.colors</span> <span class="kn">import</span> <span class="n">LinearSegmentedColormap</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">N</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
+
+<span class="kn">import</span> <span class="nn">colourtables</span> <span class="kn">as</span> <span class="nn">ct</span>
+<span class="kn">import</span> <span class="nn">WEM.utils</span> <span class="kn">as</span> <span class="nn">utils</span>
+
+<div class="viewcode-block" id="Scales"><a class="viewcode-back" href="../../../../WEM.postWRF.postWRF.html#WEM.postWRF.postWRF.scales.Scales">[docs]</a><span class="k">class</span> <span class="nc">Scales</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">vrbl</span><span class="p">,</span><span class="n">lv</span><span class="p">,</span><span class="n">clvs</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">A</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_dict_of_levels</span><span class="p">()</span>
+        <span class="c"># Variable and vertical level determine contour scale</span>
+
+        <span class="k">if</span> <span class="n">lv</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">&#39;hPa&#39;</span><span class="p">):</span>
+            <span class="n">lv</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">lv</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;h&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+
+        <span class="k">if</span> <span class="n">clvs</span><span class="p">:</span>
+            <span class="c"># Custom range set by user</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">clvs</span> <span class="o">=</span> <span class="n">N</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="o">*</span><span class="n">clvs</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">A</span><span class="p">[</span><span class="n">vrbl</span><span class="p">][</span><span class="n">lv</span><span class="p">])</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+                    <span class="c"># This is a min-max-interval list</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">clvs</span> <span class="o">=</span> <span class="n">N</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">A</span><span class="p">[</span><span class="n">vrbl</span><span class="p">][</span><span class="n">lv</span><span class="p">])</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c"># This is an actual list of values</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">clvs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">A</span><span class="p">[</span><span class="n">vrbl</span><span class="p">][</span><span class="n">lv</span><span class="p">]</span>
+            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                <span class="c"># If no level exists, try finding a near one</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">near_lv</span> <span class="o">=</span> <span class="n">find_nearest_level</span><span class="p">(</span><span class="n">lv</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">clvs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">A</span><span class="p">[</span><span class="n">vrbl</span><span class="p">][</span><span class="n">near_lv</span><span class="p">]</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="c"># Some variables don&#39;t live on a vertical level</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">clvs</span> <span class="o">=</span> <span class="bp">False</span>
+            <span class="c"># except:</span>
+                <span class="c"># raise Exception</span>
+        <span class="k">try</span><span class="p">:</span>  
+            <span class="bp">self</span><span class="o">.</span><span class="n">cm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">A</span><span class="p">[</span><span class="n">vrbl</span><span class="p">][</span><span class="s">&#39;cmap&#39;</span><span class="p">]</span>        <span class="c"># This is for matplotlib</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cm</span> <span class="o">=</span> <span class="bp">False</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cm</span><span class="p">,(</span><span class="nb">bool</span><span class="p">,</span><span class="n">LinearSegmentedColormap</span><span class="p">)):</span>
+            <span class="k">pass</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">A</span><span class="p">[</span><span class="n">vrbl</span><span class="p">][</span><span class="s">&#39;cmap&#39;</span><span class="p">](</span><span class="n">clvs</span><span class="p">)</span>    <span class="c"># This is for user</span>
+        
+
+<div class="viewcode-block" id="Scales.get_multiplier"><a class="viewcode-back" href="../../../../WEM.postWRF.postWRF.html#WEM.postWRF.postWRF.scales.Scales.get_multiplier">[docs]</a>    <span class="k">def</span> <span class="nf">get_multiplier</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">vrbl</span><span class="p">,</span><span class="n">lv</span><span class="p">):</span>
+        <span class="n">m</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">A</span><span class="p">[</span><span class="n">vrbl</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;multiplier&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">m</span>
+        </div>
+<div class="viewcode-block" id="Scales.find_nearest_level"><a class="viewcode-back" href="../../../../WEM.postWRF.postWRF.html#WEM.postWRF.postWRF.scales.Scales.find_nearest_level">[docs]</a>    <span class="k">def</span> <span class="nf">find_nearest_level</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">lv</span><span class="p">):</span>
+        <span class="n">lv_type</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">level_type</span><span class="p">(</span><span class="n">lv</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">lv_type</span> <span class="o">==</span> <span class="s">&#39;isentropic&#39;</span><span class="p">:</span>
+            <span class="k">pass</span>
+            <span class="c"># &#39;K&#39; needs stripping</span>
+            <span class="c"># This will be tricky, varies a lot...</span>
+        <span class="k">elif</span> <span class="n">lv_type</span> <span class="o">==</span> <span class="s">&#39;isobaric&#39;</span><span class="p">:</span>
+            <span class="k">pass</span>
+            <span class="c"># Plot logarithmically closest</span>
+        <span class="k">elif</span> <span class="n">lv_type</span> <span class="o">==</span> <span class="s">&#39;surface&#39;</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span>
+            <span class="c"># Shouldn&#39;t get here, surface should be covered.</span>
+        <span class="k">elif</span> <span class="n">lv_type</span> <span class="o">==</span> <span class="s">&#39;PV-surface&#39;</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">elif</span> <span class="n">lv_type</span> <span class="o">==</span> <span class="s">&#39;geometric&#39;</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span>
+            
+        <span class="k">return</span> <span class="n">near_lv</span>
+        
+    <span class="c">######## DEFAULT SETTINGS FOR LEVELS ########</span>
+    </div>
+<div class="viewcode-block" id="Scales.get_dict_of_levels"><a class="viewcode-back" href="../../../../WEM.postWRF.postWRF.html#WEM.postWRF.postWRF.scales.Scales.get_dict_of_levels">[docs]</a>    <span class="k">def</span> <span class="nf">get_dict_of_levels</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">A</span> <span class="o">=</span> <span class="p">{}</span>
+        
+        <span class="c"># Wind magnitude</span>
+        <span class="n">A</span><span class="p">[</span><span class="s">&#39;wind10&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;cmap&#39;</span><span class="p">:</span><span class="bp">False</span><span class="p">}</span>
+        <span class="n">A</span><span class="p">[</span><span class="s">&#39;wind10&#39;</span><span class="p">][</span><span class="mi">2000</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">5</span><span class="p">,</span><span class="mf">32.5</span><span class="p">,</span><span class="mf">2.5</span><span class="p">)</span>
+        
+        <span class="c"># Wind magnitude</span>
+        <span class="n">A</span><span class="p">[</span><span class="s">&#39;wind&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;cmap&#39;</span><span class="p">:</span><span class="bp">False</span><span class="p">}</span>
+        <span class="n">A</span><span class="p">[</span><span class="s">&#39;wind&#39;</span><span class="p">][</span><span class="mi">2000</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">5</span><span class="p">,</span><span class="mf">32.5</span><span class="p">,</span><span class="mf">2.5</span><span class="p">)</span>
+        
+        <span class="c"># Theta-e (Equivalent potential temperature)</span>
+        <span class="c"># A[&#39;thetae&#39;] = {&#39;cmap&#39;:ct.thetae}</span>
+        
+        <span class="c"># Simulated reflectivity</span>
+        <span class="n">A</span><span class="p">[</span><span class="s">&#39;sim_ref&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;cmap&#39;</span><span class="p">:</span><span class="n">ct</span><span class="o">.</span><span class="n">reflect_ncdc</span><span class="p">}</span>
+        <span class="n">A</span><span class="p">[</span><span class="s">&#39;sim_ref&#39;</span><span class="p">][</span><span class="mi">2000</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">5</span><span class="p">,</span><span class="mi">90</span><span class="p">,</span><span class="mi">5</span><span class="p">)</span>
+        
+        <span class="c"># Simulated reflectivity</span>
+        <span class="n">A</span><span class="p">[</span><span class="s">&#39;cref&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;cmap&#39;</span><span class="p">:</span><span class="n">ct</span><span class="o">.</span><span class="n">reflect_ncdc</span><span class="p">}</span>
+        <span class="n">A</span><span class="p">[</span><span class="s">&#39;cref&#39;</span><span class="p">][</span><span class="mi">2000</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">5</span><span class="p">,</span><span class="mi">90</span><span class="p">,</span><span class="mi">5</span><span class="p">)</span>
+        
+        <span class="c"># Precipitation</span>
+        <span class="n">A</span><span class="p">[</span><span class="s">&#39;precip&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;cmap&#39;</span><span class="p">:</span><span class="n">ct</span><span class="o">.</span><span class="n">precip1</span><span class="p">}</span>
+        <span class="n">A</span><span class="p">[</span><span class="s">&#39;precip&#39;</span><span class="p">][</span><span class="mi">2000</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.01</span><span class="p">,</span><span class="mf">0.03</span><span class="p">,</span><span class="mf">0.05</span><span class="p">,</span><span class="mf">0.10</span><span class="p">,</span><span class="mf">0.15</span><span class="p">,</span><span class="mf">0.20</span><span class="p">,</span><span class="mf">0.25</span><span class="p">,</span><span class="mf">0.30</span><span class="p">,</span><span class="mf">0.40</span><span class="p">,</span><span class="mf">0.50</span><span class="p">,</span><span class="mf">0.60</span><span class="p">,</span>
+                                <span class="mf">0.70</span><span class="p">,</span><span class="mf">0.80</span><span class="p">,</span><span class="mf">0.90</span><span class="p">,</span><span class="mf">1.00</span><span class="p">,</span><span class="mf">1.25</span><span class="p">,</span><span class="mf">1.50</span><span class="p">,</span><span class="mf">1.75</span><span class="p">,</span><span class="mf">2.00</span><span class="p">,</span><span class="mf">2.50</span><span class="p">]</span>
+                        
+        <span class="c"># Precipitable water</span>
+        <span class="n">A</span><span class="p">[</span><span class="s">&#39;pwat&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;cmap&#39;</span><span class="p">:</span><span class="n">ct</span><span class="o">.</span><span class="n">precip1</span><span class="p">}</span>
+        <span class="n">A</span><span class="p">[</span><span class="s">&#39;pwat&#39;</span><span class="p">][</span><span class="mi">2000</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.2</span><span class="p">,</span><span class="mf">2.6</span><span class="p">,</span><span class="mf">0.1</span><span class="p">)</span>
+        
+        <span class="c"># Snowfall</span>
+        <span class="n">A</span><span class="p">[</span><span class="s">&#39;snow&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;cmap&#39;</span><span class="p">:</span><span class="n">ct</span><span class="o">.</span><span class="n">snow2</span><span class="p">}</span>
+        <span class="n">A</span><span class="p">[</span><span class="s">&#39;snow&#39;</span><span class="p">][</span><span class="mi">2000</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.25</span><span class="p">,</span><span class="mf">0.5</span><span class="p">,</span><span class="mf">0.75</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mf">1.5</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mf">2.5</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">8</span><span class="p">,</span><span class="mi">10</span><span class="p">,</span><span class="mi">12</span><span class="p">,</span><span class="mi">14</span><span class="p">,</span><span class="mi">16</span><span class="p">,</span><span class="mi">18</span><span class="p">]</span>
+        
+        <span class="n">A</span><span class="p">[</span><span class="s">&#39;shear&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;cmap&#39;</span><span class="p">:</span><span class="bp">False</span><span class="p">}</span>
+        <span class="n">A</span><span class="p">[</span><span class="s">&#39;shear&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">33</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span>
+        
+        <span class="n">A</span><span class="p">[</span><span class="s">&#39;buoyancy&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;cmap&#39;</span><span class="p">:</span><span class="bp">False</span><span class="p">}</span>
+        <span class="n">A</span><span class="p">[</span><span class="s">&#39;buoyancy&#39;</span><span class="p">][</span><span class="mi">2000</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mf">0.65</span><span class="p">,</span><span class="mf">0.075</span><span class="p">,</span><span class="mf">0.025</span><span class="p">)</span>
+        
+        <span class="n">A</span><span class="p">[</span><span class="s">&#39;dptp&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;cmap&#39;</span><span class="p">:</span><span class="bp">False</span><span class="p">}</span>
+        <span class="n">A</span><span class="p">[</span><span class="s">&#39;dptp&#39;</span><span class="p">][</span><span class="mi">2000</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mi">15</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+        
+        <span class="n">A</span><span class="p">[</span><span class="s">&#39;strongestwind&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;cmap&#39;</span><span class="p">:</span><span class="bp">False</span><span class="p">}</span>
+        <span class="n">A</span><span class="p">[</span><span class="s">&#39;strongestwind&#39;</span><span class="p">][</span><span class="mi">2000</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="mf">32.5</span><span class="p">,</span><span class="mf">2.5</span><span class="p">)</span>
+        
+        <span class="n">A</span><span class="p">[</span><span class="s">&#39;PMSL&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;cmap&#39;</span><span class="p">:</span><span class="bp">False</span><span class="p">,</span><span class="s">&#39;multiplier&#39;</span><span class="p">:</span><span class="mf">0.01</span><span class="p">}</span>
+        <span class="n">A</span><span class="p">[</span><span class="s">&#39;PMSL&#39;</span><span class="p">][</span><span class="mi">2000</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">97000</span><span class="p">,</span><span class="mi">103100</span><span class="p">,</span><span class="mi">100</span><span class="p">)</span>
+
+        <span class="c"># A[&#39;RH&#39;] = {&#39;cmap&#39;:ct.irsat}</span>
+        <span class="n">A</span><span class="p">[</span><span class="s">&#39;RH&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;cmap&#39;</span><span class="p">:</span><span class="n">M</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">BrBG</span><span class="p">}</span>
+        <span class="n">A</span><span class="p">[</span><span class="s">&#39;RH&#39;</span><span class="p">][</span><span class="mi">2000</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">110</span><span class="p">,</span><span class="mi">5</span><span class="p">)</span>
+        
+        <span class="n">A</span><span class="p">[</span><span class="s">&#39;olr&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;cmap&#39;</span><span class="p">:</span><span class="n">ct</span><span class="o">.</span><span class="n">irsat</span><span class="p">}</span>
+        <span class="n">A</span><span class="p">[</span><span class="s">&#39;olr&#39;</span><span class="p">][</span><span class="mi">2000</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="mi">100</span><span class="p">,</span><span class="o">-</span><span class="mi">90</span><span class="p">,</span><span class="o">-</span><span class="mi">85</span><span class="p">,</span><span class="o">-</span><span class="mi">80</span><span class="p">,</span><span class="o">-</span><span class="mi">75</span><span class="p">,</span><span class="o">-</span><span class="mi">70</span><span class="p">,</span><span class="o">-</span><span class="mi">65</span><span class="p">,</span><span class="o">-</span><span class="mi">60</span><span class="p">,</span><span class="o">-</span><span class="mi">55</span><span class="p">,</span><span class="o">-</span><span class="mi">50</span><span class="p">,</span>
+                            <span class="o">-</span><span class="mi">46</span><span class="p">,</span><span class="o">-</span><span class="mi">42</span><span class="p">,</span><span class="o">-</span><span class="mi">38</span><span class="p">,</span><span class="o">-</span><span class="mi">36</span><span class="p">,</span><span class="o">-</span><span class="mi">34</span><span class="p">,</span><span class="o">-</span><span class="mi">32</span><span class="p">,</span><span class="o">-</span><span class="mi">30</span><span class="p">,</span><span class="o">-</span><span class="mi">28</span><span class="p">,</span><span class="o">-</span><span class="mi">26</span><span class="p">,</span><span class="o">-</span><span class="mi">24</span><span class="p">,</span>
+                            <span class="o">-</span><span class="mi">22</span><span class="p">,</span><span class="o">-</span><span class="mi">20</span><span class="p">,</span><span class="o">-</span><span class="mi">18</span><span class="p">,</span><span class="o">-</span><span class="mi">16</span><span class="p">,</span><span class="o">-</span><span class="mi">14</span><span class="p">,</span><span class="o">-</span><span class="mi">12</span><span class="p">,</span><span class="o">-</span><span class="mi">10</span><span class="p">,</span><span class="o">-</span><span class="mi">8</span><span class="p">,</span><span class="o">-</span><span class="mi">6</span><span class="p">,</span><span class="o">-</span><span class="mi">4</span><span class="p">,</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span>
+                             <span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">8</span><span class="p">,</span><span class="mi">10</span><span class="p">,</span><span class="mi">12</span><span class="p">,</span><span class="mi">14</span><span class="p">,</span><span class="mi">16</span><span class="p">,</span><span class="mi">18</span><span class="p">,</span><span class="mi">20</span><span class="p">,</span><span class="mi">22</span><span class="p">,</span><span class="mi">24</span><span class="p">,</span><span class="mi">26</span><span class="p">,</span><span class="mi">28</span><span class="p">,</span>
+                             <span class="mi">30</span><span class="p">,</span><span class="mi">32</span><span class="p">,</span><span class="mi">34</span><span class="p">,</span><span class="mi">36</span><span class="p">,</span><span class="mi">38</span><span class="p">,</span><span class="mi">40</span><span class="p">,</span><span class="mi">42</span><span class="p">,</span><span class="mi">44</span><span class="p">,</span><span class="mi">46</span><span class="p">,</span><span class="mi">48</span><span class="p">,</span><span class="mi">50</span><span class="p">,</span><span class="mi">52</span><span class="p">]</span>
+
+
+        <span class="c">#A[&#39;cps&#39;] = {&#39;cmap&#39;:0}</span>
+        
+        <span class="k">return</span> <span class="n">A</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">.  documentation</a> &raquo;</li>
+          <li><a href="../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, Author.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

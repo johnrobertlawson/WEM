@@ -1,0 +1,258 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>WEM.lazyWRF.lazyWRF.getdata &mdash; .  documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <link rel="top" title=".  documentation" href="../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">.  documentation</a> &raquo;</li>
+          <li><a href="../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for WEM.lazyWRF.lazyWRF.getdata</h1><div class="highlight"><pre>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">calendar</span> 
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">pdb</span>
+
+<span class="c"># date format: YYYYMMDD (string)</span>
+
+<div class="viewcode-block" id="getgefs"><a class="viewcode-back" href="../../../../WEM.lazyWRF.lazyWRF.html#WEM.lazyWRF.lazyWRF.getdata.getgefs">[docs]</a><span class="k">def</span> <span class="nf">getgefs</span><span class="p">(</span><span class="n">dates</span><span class="p">,</span><span class="n">download</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">split</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">lowres</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">custom_ens</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">control</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+            <span class="n">coord</span><span class="o">=</span><span class="s">&#39;latlon&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;This script downloads all variables for GEFS R2 reforecasts.</span>
+<span class="sd">    All runs are initialised at 0000 UTC.</span>
+
+<span class="sd">    Inputs (all optional unless stated):</span>
+<span class="sd">    dates       :   YYYYMMDD, list of strings (mandatory)</span>
+<span class="sd">    download    :   whether to download the data</span>
+<span class="sd">    split       :   whether to split up the data</span>
+<span class="sd">    lowres      :   whether to download times after T+190</span>
+<span class="sd">    custom_ens  :   a custom list of perturbation ensemble members</span>
+<span class="sd">    control     :   whether to download the control member</span>
+<span class="sd">    coord       :   latlon/gaussian grid</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c"># This selected all 10 perturbation ensemble members. Change ens for desired member (or mean/sprd)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">custom_ens</span><span class="p">:</span>
+        <span class="n">ens</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;p&#39;</span> <span class="o">+</span> <span class="s">&#39;</span><span class="si">%02u</span><span class="s">&#39;</span> <span class="o">%</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">11</span><span class="p">)]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">ens</span> <span class="o">=</span> <span class="n">custom_ens</span>
+     
+    <span class="k">if</span> <span class="n">control</span><span class="p">:</span>
+        <span class="n">ens</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;c00&#39;</span><span class="p">)</span>
+         
+    <span class="c"># Root directory of FTP site</span>
+    <span class="n">FTP</span> <span class="o">=</span> <span class="s">&#39;ftp://ftp.cdc.noaa.gov/Projects/Reforecast2/&#39;</span>
+     
+    <span class="c"># -nc does not download a renamed multiple copy of file</span>
+    <span class="c"># --output-document=CATNAME concatenates all files together for the big grib file</span>
+    <span class="c"># -nd makes sure hierachy isn&#39;t downloaded too</span>
+
+    <span class="k">if</span> <span class="n">download</span><span class="p">:</span> 
+        <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">dates</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">ens</span><span class="p">:</span>
+                <span class="n">url</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">FTP</span><span class="p">,</span> <span class="n">d</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">4</span><span class="p">],</span> <span class="n">d</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">6</span><span class="p">],</span> <span class="n">d</span><span class="o">+</span><span class="s">&#39;00&#39;</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span> <span class="n">coord</span><span class="p">)</span>
+                <span class="n">fname</span> <span class="o">=</span> <span class="s">&#39;/*&#39;</span> <span class="o">+</span> <span class="n">e</span> <span class="o">+</span> <span class="s">&#39;.grib2&#39;</span>
+                <span class="n">CATNAME</span> <span class="o">=</span> <span class="n">d</span> <span class="o">+</span> <span class="s">&#39;_&#39;</span> <span class="o">+</span> <span class="n">e</span> <span class="o">+</span> <span class="s">&#39;.grib2&#39;</span>
+                <span class="n">cmnd</span> <span class="o">=</span> <span class="s">&quot;wget -nc -nd --output-document=&quot;</span> <span class="o">+</span> <span class="n">CATNAME</span> <span class="o">+</span> <span class="s">&#39; &#39;</span> <span class="o">+</span> <span class="n">url</span> <span class="o">+</span> <span class="n">fname</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="n">cmnd</span><span class="p">)</span>
+                <span class="k">print</span> <span class="n">d</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span> <span class="s">&quot; Downloaded.&quot;</span>
+         
+    <span class="c"># This section will split the data into forecast times for WRF to read</span>
+    <span class="c"># Using WGRIB2</span>
+    <span class="c"># fin : grib2 input file</span>
+    <span class="c"># fout : smaller grib2 output file with just one forecast time</span>
+    <span class="c"># timestr : search pattern to find the forecast time</span>
+
+    <span class="k">if</span> <span class="n">split</span><span class="p">:</span> 
+        <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">dates</span><span class="p">:</span>
+            <span class="c"># Convert this date to python time for later conversion</span>
+            <span class="n">pytime_anl</span> <span class="o">=</span> <span class="n">calendar</span><span class="o">.</span><span class="n">timegm</span><span class="p">((</span><span class="nb">int</span><span class="p">(</span><span class="n">d</span><span class="p">[:</span><span class="mi">4</span><span class="p">]),</span><span class="nb">int</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="mi">4</span><span class="p">:</span><span class="mi">6</span><span class="p">]),</span><span class="nb">int</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="mi">6</span><span class="p">:</span><span class="mi">8</span><span class="p">]),</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">))</span>
+            <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">ens</span><span class="p">:</span>
+                <span class="n">fin</span> <span class="o">=</span> <span class="s">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">((</span><span class="n">d</span><span class="p">,</span><span class="s">&#39;_&#39;</span><span class="p">,</span><span class="n">e</span><span class="p">,</span><span class="s">&#39;.grib2&#39;</span><span class="p">))</span>
+                <span class="n">fprefix</span> <span class="o">=</span> <span class="s">&#39;_&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">((</span><span class="n">d</span><span class="p">,</span><span class="n">e</span><span class="p">,</span><span class="s">&#39;f&#39;</span><span class="p">))</span>
+                <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">198</span><span class="p">,</span><span class="mi">6</span><span class="p">):</span>
+                    <span class="n">ts</span> <span class="o">=</span> <span class="s">&quot;</span><span class="si">%03d</span><span class="s">&quot;</span> <span class="o">%</span><span class="n">t</span> <span class="c"># Gets files into chron order with padded zeroes</span>
+                    <span class="k">if</span> <span class="n">t</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span>
+                        <span class="n">timestr</span> <span class="o">=</span> <span class="s">&#39;&quot;:anl:&quot;&#39;</span>    
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">timestr</span> <span class="o">=</span> <span class="s">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">((</span><span class="s">&#39;&quot;:(&#39;</span><span class="p">,</span><span class="nb">str</span><span class="p">(</span><span class="n">t</span><span class="p">),</span><span class="s">&#39; hour fcst):&quot;&#39;</span><span class="p">))</span>
+                    <span class="n">fout</span> <span class="o">=</span> <span class="n">fprefix</span> <span class="o">+</span> <span class="n">ts</span> <span class="o">+</span> <span class="s">&#39;.grib2&#39;</span>
+                    <span class="n">str1</span> <span class="o">=</span> <span class="s">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">((</span><span class="s">&#39;wgrib2&#39;</span><span class="p">,</span><span class="n">fin</span><span class="p">,</span><span class="s">&#39;-match&#39;</span><span class="p">,</span><span class="n">timestr</span><span class="p">,</span><span class="s">&#39;-grib&#39;</span><span class="p">,</span><span class="n">fout</span><span class="p">))</span> 
+                    <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="n">str1</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="getgfs"><a class="viewcode-back" href="../../../../WEM.lazyWRF.lazyWRF.html#WEM.lazyWRF.lazyWRF.getdata.getgfs">[docs]</a><span class="k">def</span> <span class="nf">getgfs</span><span class="p">(</span><span class="n">dates</span><span class="p">,</span><span class="n">hours</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Downloads GFS analysis data.</span>
+
+<span class="sd">    Inputs:</span>
+<span class="sd">    dates       :   List of strings, YYYYMMDD</span>
+<span class="sd">    hours       :   List of strings, HH </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c"># If date is before 2007, download grib1.</span>
+
+    <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">dates</span><span class="p">:</span>
+        <span class="n">yr_int</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">d</span><span class="p">[:</span><span class="mi">4</span><span class="p">])</span>
+        <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="n">hours</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">yr_int</span> <span class="o">&gt;</span> <span class="mi">2006</span><span class="p">:</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="s">&#39;wget &quot;http://nomads.ncdc.noaa.gov/data/gfsanl/&#39;</span><span class="o">+</span><span class="n">d</span><span class="p">[:</span><span class="mi">6</span><span class="p">]</span><span class="o">+</span><span class="s">&#39;/&#39;</span><span class="o">+</span> <span class="n">d</span><span class="o">+</span><span class="s">&#39;/gfsanl_4_&#39;</span><span class="o">+</span><span class="n">d</span><span class="o">+</span><span class="s">&#39;_&#39;</span><span class="o">+</span><span class="n">h</span><span class="o">+</span><span class="s">&#39;00_000.grb2&quot;&#39;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="s">&#39;wget &quot;http://nomads.ncdc.noaa.gov/data/gfsanl/&#39;</span><span class="o">+</span><span class="n">d</span><span class="p">[:</span><span class="mi">6</span><span class="p">]</span><span class="o">+</span><span class="s">&#39;/&#39;</span><span class="o">+</span> <span class="n">d</span><span class="o">+</span><span class="s">&#39;/gfsanl_3_&#39;</span><span class="o">+</span><span class="n">d</span><span class="o">+</span><span class="s">&#39;_&#39;</span><span class="o">+</span><span class="n">h</span><span class="o">+</span><span class="s">&#39;00_000.grb&quot;&#39;</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="getnam"><a class="viewcode-back" href="../../../../WEM.lazyWRF.lazyWRF.html#WEM.lazyWRF.lazyWRF.getdata.getnam">[docs]</a><span class="k">def</span> <span class="nf">getnam</span><span class="p">(</span><span class="n">dates</span><span class="p">,</span><span class="n">hours</span><span class="p">,</span><span class="n">datatype</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Downloads NAM analysis and forecast data.</span>
+
+<span class="sd">    Inputs:</span>
+<span class="sd">    dates       :   List of strings, YYYYMMDD</span>
+<span class="sd">    hours       :   List of strings, HH </span>
+<span class="sd">    datatype    :   analysis or forecast.</span>
+
+<span class="sd">    Optional arguments for forecasts via kwargs:</span>
+<span class="sd">    tmax        :   maximum forecast time to download (inclusive)</span>
+<span class="sd">    tint        :   internal (hr) between fetched forecasts</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c"># If date is before ####, download grib1, use this:</span>
+    <span class="n">age</span> <span class="o">=</span> <span class="s">&#39;old&#39;</span>
+
+    <span class="k">def</span> <span class="nf">get_anl</span><span class="p">(</span><span class="n">dates</span><span class="p">,</span><span class="n">hours</span><span class="p">,</span><span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">dates</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="n">hours</span><span class="p">:</span>
+                <span class="c">#if age==&#39;new&#39;:</span>
+                <span class="c">#    command = (&#39;wget &quot;http://nomads.ncdc.noaa.gov/data/namanl/&#39;+</span>
+                <span class="c">#                d[:6]+&#39;/&#39;+ d+&#39;/namanl_4_&#39;+d+&#39;_&#39;+h+&#39;00_000.grb2&quot;&#39;)</span>
+                <span class="c">#elif age==&#39;old&#39;:</span>
+                <span class="n">command</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;wget &quot;http://nomads.ncdc.noaa.gov/data/namanl/&#39;</span><span class="o">+</span>
+                            <span class="n">d</span><span class="p">[:</span><span class="mi">6</span><span class="p">]</span><span class="o">+</span><span class="s">&#39;/&#39;</span><span class="o">+</span> <span class="n">d</span><span class="o">+</span><span class="s">&#39;/namanl_218_&#39;</span><span class="o">+</span><span class="n">d</span><span class="o">+</span><span class="s">&#39;_&#39;</span><span class="o">+</span><span class="n">h</span><span class="o">+</span><span class="s">&#39;00_000.grb&quot;&#39;</span><span class="p">)</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="n">command</span><span class="p">)</span>
+         
+    <span class="c"># Where are these forecast archives?                </span>
+    <span class="k">def</span> <span class="nf">get_218fcst</span><span class="p">(</span><span class="n">dates</span><span class="p">,</span><span class="n">hours</span><span class="p">,</span><span class="n">Tmax</span><span class="p">,</span><span class="n">Tint</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">dates</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="n">hours</span><span class="p">:</span>
+                <span class="n">fhs</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">Tmax</span><span class="o">+</span><span class="n">Tint</span><span class="p">,</span><span class="n">Tint</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">fh</span> <span class="ow">in</span> <span class="n">fhs</span><span class="p">:</span>
+                    <span class="n">fpad</span> <span class="o">=</span> <span class="s">&quot;</span><span class="si">%03d</span><span class="s">&quot;</span> <span class="o">%</span><span class="n">fh</span>
+                    <span class="k">if</span> <span class="n">age</span> <span class="o">==</span> <span class="s">&#39;old&#39;</span><span class="p">:</span>
+                        <span class="n">command</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;wget &quot;http://nomads.ncdc.noaa.gov/data/nam/&#39;</span><span class="o">+</span>
+                                    <span class="n">d</span><span class="p">[:</span><span class="mi">6</span><span class="p">]</span><span class="o">+</span><span class="s">&#39;/&#39;</span><span class="o">+</span> <span class="n">d</span><span class="o">+</span><span class="s">&#39;/nam_218_&#39;</span><span class="o">+</span><span class="n">d</span><span class="o">+</span><span class="s">&#39;_&#39;</span><span class="o">+</span><span class="n">h</span><span class="o">+</span><span class="s">&#39;00_&#39;</span><span class="o">+</span><span class="n">fpad</span><span class="o">+</span><span class="s">&#39;.grb&quot;&#39;</span><span class="p">)</span>
+                    <span class="k">elif</span> <span class="n">age</span> <span class="o">==</span> <span class="s">&#39;new&#39;</span><span class="p">:</span> <span class="c"># doesn&#39;t seem to work</span>
+                        <span class="n">command</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;wget &quot;http://nomads.ncdc.noaa.gov/data/nam/&#39;</span><span class="o">+</span>
+                                    <span class="n">d</span><span class="p">[:</span><span class="mi">6</span><span class="p">]</span><span class="o">+</span><span class="s">&#39;/&#39;</span><span class="o">+</span> <span class="n">d</span><span class="o">+</span><span class="s">&#39;/nam_4_&#39;</span><span class="o">+</span><span class="n">d</span><span class="o">+</span><span class="s">&#39;_&#39;</span><span class="o">+</span><span class="n">h</span><span class="o">+</span><span class="s">&#39;00_&#39;</span><span class="o">+</span><span class="n">fpad</span><span class="o">+</span><span class="s">&#39;.grb2&quot;&#39;</span><span class="p">)</span>
+                       
+                    <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="n">command</span><span class="p">)</span>
+
+    <span class="n">CMND</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;forecast&#39;</span><span class="p">:</span><span class="n">get_218fcst</span><span class="p">,</span> <span class="s">&#39;analysis&#39;</span><span class="p">:</span><span class="n">get_anl</span><span class="p">}</span>
+    <span class="n">CMND</span><span class="p">[</span><span class="n">data</span><span class="p">](</span><span class="n">dates</span><span class="p">,</span><span class="n">hours</span><span class="p">,</span><span class="n">Tmax</span><span class="p">,</span><span class="n">Tint</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="getruc"><a class="viewcode-back" href="../../../../WEM.lazyWRF.lazyWRF.html#WEM.lazyWRF.lazyWRF.getdata.getruc">[docs]</a><span class="k">def</span> <span class="nf">getruc</span><span class="p">(</span><span class="n">dates</span><span class="p">,</span><span class="n">hours</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">right_url</span><span class="p">(</span><span class="n">d</span><span class="p">,</span><span class="n">h</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;To work out what URL to use for RUC/RAP data.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">yr</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">d</span><span class="p">[:</span><span class="mi">4</span><span class="p">])</span>
+        <span class="n">mth</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="mi">4</span><span class="p">:</span><span class="mi">6</span><span class="p">])</span>
+
+
+        <span class="k">if</span> <span class="p">(</span><span class="n">yr</span> <span class="o">&gt;</span> <span class="mi">2012</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">mth</span> <span class="o">&gt;</span> <span class="mi">3</span><span class="p">):</span> <span class="c"># With a massive gap for RAP</span>
+            <span class="n">URL_base</span> <span class="o">=</span> <span class="s">&quot;http://nomads.ncdc.noaa.gov/data/rap130/&quot;</span>
+            <span class="n">URL</span> <span class="o">=</span> <span class="s">&#39;/&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">((</span><span class="n">URL_base</span><span class="p">,</span><span class="n">d</span><span class="p">[:</span><span class="mi">6</span><span class="p">],</span><span class="n">d</span><span class="p">,</span><span class="s">&#39;rap_130_&#39;</span><span class="o">+</span><span class="n">d</span><span class="o">+</span><span class="s">&#39;_&#39;</span><span class="o">+</span><span class="n">h</span><span class="o">+</span><span class="s">&#39;00_000.grb2&#39;</span><span class="p">))</span>
+        <span class="k">elif</span> <span class="p">(</span><span class="n">yr</span> <span class="o">&gt;</span> <span class="mi">2007</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">mth</span> <span class="o">&gt;</span> <span class="mi">10</span><span class="p">):</span> <span class="c"># Massive gap after 2012/05 (transition to RAP).</span>
+            <span class="n">URL_base</span> <span class="o">=</span> <span class="s">&quot;http://nomads.ncdc.noaa.gov/data/rucanl/&quot;</span>
+            <span class="n">URL</span> <span class="o">=</span> <span class="s">&#39;/&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">((</span><span class="n">URL_base</span><span class="p">,</span><span class="n">d</span><span class="p">[:</span><span class="mi">6</span><span class="p">],</span><span class="n">d</span><span class="p">,</span><span class="s">&#39;ruc2anl_130_&#39;</span><span class="o">+</span><span class="n">d</span><span class="o">+</span><span class="s">&#39;_&#39;</span><span class="o">+</span><span class="n">h</span><span class="o">+</span><span class="s">&#39;00_000.grb2&#39;</span><span class="p">))</span>
+        <span class="k">elif</span> <span class="p">(</span><span class="n">yr</span><span class="o">&gt;</span><span class="mi">2006</span><span class="p">):</span>
+            <span class="n">URL_base</span> <span class="o">=</span> <span class="s">&quot;http://nomads.ncdc.noaa.gov/data/rucanl/&quot;</span>
+            <span class="n">URL</span> <span class="o">=</span> <span class="s">&#39;/&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">((</span><span class="n">URL_base</span><span class="p">,</span><span class="n">d</span><span class="p">[:</span><span class="mi">6</span><span class="p">],</span><span class="n">d</span><span class="p">,</span><span class="s">&#39;ruc2anl_252_&#39;</span><span class="o">+</span><span class="n">d</span><span class="o">+</span><span class="s">&#39;_&#39;</span><span class="o">+</span><span class="n">h</span><span class="o">+</span><span class="s">&#39;00_000.grb&#39;</span><span class="p">))</span>
+        <span class="k">elif</span> <span class="p">(</span><span class="n">yr</span><span class="o">&gt;</span><span class="mi">2004</span><span class="p">):</span>
+            <span class="n">URL_base</span> <span class="o">=</span> <span class="s">&quot;http://nomads.ncdc.noaa.gov/data/rucanl/&quot;</span>
+            <span class="n">URL</span> <span class="o">=</span> <span class="s">&#39;/&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">((</span><span class="n">URL_base</span><span class="p">,</span><span class="n">d</span><span class="p">[:</span><span class="mi">6</span><span class="p">],</span><span class="n">d</span><span class="p">,</span><span class="s">&#39;ruc2_252_&#39;</span><span class="o">+</span><span class="n">d</span><span class="o">+</span><span class="s">&#39;_&#39;</span><span class="o">+</span><span class="n">h</span><span class="o">+</span><span class="s">&#39;00_000.grb&#39;</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">URL</span>
+
+
+    <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">dates</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="n">hours</span><span class="p">:</span>
+            <span class="n">URL</span> <span class="o">=</span> <span class="n">right_url</span><span class="p">(</span><span class="n">d</span><span class="p">,</span><span class="n">h</span><span class="p">)</span>
+            <span class="n">command</span> <span class="o">=</span> <span class="s">&#39;wget &#39;</span> <span class="o">+</span> <span class="n">URL</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="n">command</span><span class="p">)</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">.  documentation</a> &raquo;</li>
+          <li><a href="../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, Author.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

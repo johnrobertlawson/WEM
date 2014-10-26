@@ -75,19 +75,19 @@ def compute_diff_energy(ptype,energy,files,times,upper=None,lower=None,
 
     Inputs:
 
-    ptype   :   'sum_z' or 'sum_xyz'
-    energy  :   'kinetic' or 'total'
-    upper   :   upper limit of vertical integration
-    lower   :   lower limit of vertical integration
-    files   :   abs paths to all wrfout files
-    times   :   times for computations - tuple format
-    d_save  :   save dictionary to folder (path to folder)
-    d_return:   return dictionary (True or False)
-    d_fname :   custom filename
+    :param ptype:   'sum_z' or 'sum_xyz'
+    :param energy:   'kinetic' or 'total'
+    :param upper:   upper limit of vertical integration
+    :param lower:   lower limit of vertical integration
+    :param files:   abs paths to all wrfout files
+    :param times:   times for computations - tuple format
+    :param d_save:   save dictionary to folder (path to folder)
+    :param d_return:   return dictionary (True or False)
+    :param d_fname:   custom filename
 
     Outputs:
 
-    data    :   time series or list of 2D arrays
+    :returns: N.ndarray -- time series or list of 2D arrays
 
     ptype 'sum_z' integrates vertically between lower and
     upper hPa and creates a time series.

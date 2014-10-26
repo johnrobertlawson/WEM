@@ -1,0 +1,1157 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>WEM.utils.GIS_tools &mdash; .  documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title=".  documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">.  documentation</a> &raquo;</li>
+          <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for WEM.utils.GIS_tools</h1><div class="highlight"><pre>
+<span class="c">#import scipy.ndimage as nd</span>
+<span class="kn">from</span> <span class="nn">netCDF4</span> <span class="kn">import</span> <span class="n">Dataset</span>
+<span class="kn">import</span> <span class="nn">calendar</span>
+<span class="kn">import</span> <span class="nn">collections</span>
+<span class="kn">import</span> <span class="nn">fnmatch</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">matplotlib</span> <span class="kn">as</span> <span class="nn">M</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">N</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">pdb</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">glob</span>
+
+<span class="kn">import</span> <span class="nn">unix_tools</span> <span class="kn">as</span> <span class="nn">utils</span>
+
+<div class="viewcode-block" id="decompose_wind"><a class="viewcode-back" href="../../../WEM.utils.html#WEM.utils.GIS_tools.decompose_wind">[docs]</a><span class="k">def</span> <span class="nf">decompose_wind</span><span class="p">(</span><span class="n">wspd</span><span class="p">,</span><span class="n">wdir</span><span class="p">,</span><span class="n">convert</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    <span class="c"># Split wind speed/wind direction into u,v</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">wspd</span><span class="p">)</span> <span class="o">==</span> <span class="n">N</span><span class="o">.</span><span class="n">array</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">wdir</span><span class="p">)</span> <span class="o">==</span> <span class="n">N</span><span class="o">.</span><span class="n">array</span><span class="p">):</span>
+        <span class="n">uwind</span> <span class="o">=</span> <span class="n">N</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="n">s</span> <span class="o">*</span> <span class="n">N</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">N</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">d</span><span class="p">))</span> <span class="k">if</span> <span class="p">((</span><span class="n">s</span><span class="o">&gt;-</span><span class="mi">1</span><span class="p">)</span><span class="o">&amp;</span><span class="p">(</span><span class="n">d</span><span class="o">&gt;-</span><span class="mi">1</span><span class="p">))</span> <span class="k">else</span> <span class="o">-</span><span class="mi">9999</span>
+                    <span class="k">for</span> <span class="n">s</span><span class="p">,</span><span class="n">d</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">wspd</span><span class="p">,</span><span class="n">wdir</span><span class="p">)])</span>
+        <span class="n">vwind</span> <span class="o">=</span> <span class="n">N</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="n">s</span> <span class="o">*</span> <span class="n">N</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">N</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">d</span><span class="p">))</span> <span class="k">if</span> <span class="p">((</span><span class="n">s</span><span class="o">&gt;-</span><span class="mi">1</span><span class="p">)</span><span class="o">&amp;</span><span class="p">(</span><span class="n">d</span><span class="o">&gt;-</span><span class="mi">1</span><span class="p">))</span> <span class="k">else</span> <span class="o">-</span><span class="mi">9999</span>
+                    <span class="k">for</span> <span class="n">s</span><span class="p">,</span><span class="n">d</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">wspd</span><span class="p">,</span><span class="n">wdir</span><span class="p">)])</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">uwind</span> <span class="o">=</span> <span class="o">-</span><span class="n">wspd</span> <span class="o">*</span> <span class="n">N</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">N</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">wdir</span><span class="p">))</span>
+        <span class="n">vwind</span> <span class="o">=</span> <span class="o">-</span><span class="n">wspd</span> <span class="o">*</span> <span class="n">N</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">N</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">wdir</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">convert</span> <span class="o">==</span> <span class="s">&#39;ms_kt&#39;</span><span class="p">:</span>
+        <span class="n">uwind</span> <span class="o">*=</span> <span class="mf">1.94384449</span>
+        <span class="n">vwind</span> <span class="o">*=</span> <span class="mf">1.94384449</span>
+    <span class="k">elif</span> <span class="n">convert</span> <span class="o">==</span> <span class="s">&#39;ms_mph&#39;</span><span class="p">:</span>
+        <span class="n">uwind</span> <span class="o">*=</span> <span class="mf">2.23694</span>
+        <span class="n">vwind</span> <span class="o">*=</span> <span class="mf">2.23694</span>
+    <span class="k">elif</span> <span class="n">convert</span> <span class="o">==</span> <span class="s">&#39;kt_ms&#39;</span><span class="p">:</span>
+        <span class="n">uwind</span> <span class="o">*=</span> <span class="mf">0.51444444</span>
+        <span class="n">vwind</span> <span class="o">*=</span> <span class="mf">0.51444444</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">pass</span>
+    <span class="k">return</span> <span class="n">uwind</span><span class="p">,</span> <span class="n">vwind</span>
+</div>
+<div class="viewcode-block" id="combine_wind_components"><a class="viewcode-back" href="../../../WEM.utils.html#WEM.utils.GIS_tools.combine_wind_components">[docs]</a><span class="k">def</span> <span class="nf">combine_wind_components</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="n">v</span><span class="p">):</span>
+    <span class="n">wdir</span> <span class="o">=</span> <span class="n">N</span><span class="o">.</span><span class="n">degrees</span><span class="p">(</span><span class="n">N</span><span class="o">.</span><span class="n">arctan2</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="n">v</span><span class="p">))</span> <span class="o">+</span> <span class="mi">180</span>
+    <span class="n">wspd</span> <span class="o">=</span> <span class="n">N</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">u</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">v</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">wspd</span><span class="p">,</span> <span class="n">wdir</span>
+</div>
+<div class="viewcode-block" id="convert_kt2ms"><a class="viewcode-back" href="../../../WEM.utils.html#WEM.utils.GIS_tools.convert_kt2ms">[docs]</a><span class="k">def</span> <span class="nf">convert_kt2ms</span><span class="p">(</span><span class="n">wspd</span><span class="p">):</span>
+    <span class="n">wspd_ms</span> <span class="o">=</span> <span class="n">wspd</span><span class="o">*</span><span class="mf">0.51444</span>
+    <span class="k">return</span> <span class="n">wspd_ms</span>
+</div>
+<div class="viewcode-block" id="dewpoint"><a class="viewcode-back" href="../../../WEM.utils.html#WEM.utils.GIS_tools.dewpoint">[docs]</a><span class="k">def</span> <span class="nf">dewpoint</span><span class="p">(</span><span class="n">T</span><span class="p">,</span><span class="n">RH</span><span class="p">):</span> <span class="c"># Lawrence 2005 BAMS?</span>
+    <span class="c">#T in C</span>
+    <span class="c">#RH in 0-100 format</span>
+    <span class="n">es</span> <span class="o">=</span> <span class="mf">6.11</span> <span class="o">*</span> <span class="p">(</span><span class="mi">10</span><span class="o">**</span><span class="p">((</span><span class="mf">7.5</span><span class="o">*</span><span class="n">T</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="mf">237.7</span><span class="o">+</span><span class="n">T</span><span class="p">)))</span>
+    <span class="n">e</span> <span class="o">=</span> <span class="n">es</span> <span class="o">*</span> <span class="n">RH</span><span class="o">/</span><span class="mf">100.0</span>
+    <span class="n">alog</span> <span class="o">=</span> <span class="mf">0.43429</span><span class="o">*</span><span class="n">N</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">e</span><span class="p">)</span> <span class="o">-</span> <span class="mf">0.43429</span><span class="o">*</span><span class="n">N</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mf">6.11</span><span class="p">)</span>
+    <span class="n">Td</span> <span class="o">=</span> <span class="p">(</span><span class="mf">237.7</span> <span class="o">*</span> <span class="n">alog</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="mf">7.5</span><span class="o">-</span><span class="n">alog</span><span class="p">)</span>
+    <span class="c">#pdb.set_trace()</span>
+    <span class="k">return</span> <span class="n">Td</span>
+</div>
+<div class="viewcode-block" id="csvprocess"><a class="viewcode-back" href="../../../WEM.utils.html#WEM.utils.GIS_tools.csvprocess">[docs]</a><span class="k">def</span> <span class="nf">csvprocess</span><span class="p">(</span><span class="n">data</span><span class="p">,</span><span class="n">names</span><span class="p">,</span><span class="n">convert</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    <span class="c"># Get stations</span>
+    <span class="n">stationlist</span> <span class="o">=</span> <span class="n">N</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s">&#39;stid&#39;</span><span class="p">])</span> <span class="c"># Stations in the record</span>
+    <span class="n">stnum</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">stationlist</span><span class="p">)</span> <span class="c"># Number of them</span>
+
+
+    <span class="c"># Create dictionary from data</span>
+    <span class="n">D</span> <span class="o">=</span> <span class="p">{}</span> <span class="c"># Initialise dictionary of data</span>
+    <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">stationlist</span><span class="p">:</span>
+        <span class="n">D</span><span class="p">[</span><span class="n">s</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span> <span class="c"># Initialise dictionary of station/s</span>
+        <span class="k">print</span> <span class="s">&#39;Loading station data for &#39;</span> <span class="o">+</span> <span class="n">s</span>
+        <span class="n">those</span> <span class="o">=</span> <span class="n">N</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s">&#39;stid&#39;</span><span class="p">]</span><span class="o">==</span><span class="n">s</span><span class="p">)</span> <span class="c"># Indices of obs</span>
+        <span class="n">obNum</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">those</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="c"># Number of obs</span>
+
+        <span class="c"># Entries from MesoWest data</span>
+        <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">names</span><span class="p">:</span>
+            <span class="n">D</span><span class="p">[</span><span class="n">s</span><span class="p">][</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">n</span><span class="p">][</span><span class="n">those</span><span class="p">]</span>
+
+        <span class="c"># Sort times</span>
+        <span class="n">year</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">4</span><span class="p">])</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">D</span><span class="p">[</span><span class="n">s</span><span class="p">][</span><span class="s">&#39;tutc&#39;</span><span class="p">]]</span>
+        <span class="n">month</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="mi">4</span><span class="p">:</span><span class="mi">6</span><span class="p">])</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">D</span><span class="p">[</span><span class="n">s</span><span class="p">][</span><span class="s">&#39;tutc&#39;</span><span class="p">]]</span>
+        <span class="n">day</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="mi">6</span><span class="p">:</span><span class="mi">8</span><span class="p">])</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">D</span><span class="p">[</span><span class="n">s</span><span class="p">][</span><span class="s">&#39;tutc&#39;</span><span class="p">]]</span>
+        <span class="n">hour</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="mi">9</span><span class="p">:</span><span class="mi">11</span><span class="p">])</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">D</span><span class="p">[</span><span class="n">s</span><span class="p">][</span><span class="s">&#39;tutc&#39;</span><span class="p">]]</span>
+        <span class="n">minute</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="mi">11</span><span class="p">:</span><span class="mi">13</span><span class="p">])</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">D</span><span class="p">[</span><span class="n">s</span><span class="p">][</span><span class="s">&#39;tutc&#39;</span><span class="p">]]</span>
+
+        <span class="c"># Create python time</span>
+        <span class="n">D</span><span class="p">[</span><span class="n">s</span><span class="p">][</span><span class="s">&#39;pytime&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">N</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">obNum</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">obNum</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+            <span class="n">D</span><span class="p">[</span><span class="n">s</span><span class="p">][</span><span class="s">&#39;pytime&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">cal</span><span class="o">.</span><span class="n">timegm</span><span class="p">([</span><span class="n">year</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="n">month</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="n">day</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="n">hour</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="n">minute</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="mi">0</span><span class="p">])</span>
+
+        <span class="c"># Convert to S.I. units</span>
+        <span class="k">if</span> <span class="n">convert</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">D</span><span class="p">[</span><span class="n">s</span><span class="p">][</span><span class="s">&#39;tmpc&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">5</span><span class="o">/</span><span class="mf">9.0</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">D</span><span class="p">[</span><span class="n">s</span><span class="p">][</span><span class="s">&#39;tmpf&#39;</span><span class="p">]</span><span class="o">-</span><span class="mi">32</span><span class="p">)</span>
+            <span class="n">D</span><span class="p">[</span><span class="n">s</span><span class="p">][</span><span class="s">&#39;dptc&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">5</span><span class="o">/</span><span class="mf">9.0</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">D</span><span class="p">[</span><span class="n">s</span><span class="p">][</span><span class="s">&#39;dptf&#39;</span><span class="p">]</span><span class="o">-</span><span class="mi">32</span><span class="p">)</span>
+            <span class="n">D</span><span class="p">[</span><span class="n">s</span><span class="p">][</span><span class="s">&#39;wsms&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">D</span><span class="p">[</span><span class="n">s</span><span class="p">][</span><span class="s">&#39;wskn&#39;</span><span class="p">]</span><span class="o">*</span><span class="mf">0.51444</span>
+            <span class="n">D</span><span class="p">[</span><span class="n">s</span><span class="p">][</span><span class="s">&#39;wgms&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">D</span><span class="p">[</span><span class="n">s</span><span class="p">][</span><span class="s">&#39;wgkn&#39;</span><span class="p">]</span><span class="o">*</span><span class="mf">0.51444</span>
+
+        <span class="c">### DATA PROCESSING</span>
+        <span class="c"># Find time of biggest wind increase (DSWS initiation)</span>
+
+        <span class="n">D</span><span class="p">[</span><span class="n">s</span><span class="p">][</span><span class="s">&#39;dVdt&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">N</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">obNum</span><span class="p">)</span> <span class="c"># This is our array of d(wind)/d(time)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">obNum</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">pass</span> <span class="c"># First record is zero as there&#39;s no gradient yet</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">D</span><span class="p">[</span><span class="n">s</span><span class="p">][</span><span class="s">&#39;dVdt&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="p">((</span><span class="n">D</span><span class="p">[</span><span class="n">s</span><span class="p">][</span><span class="s">&#39;wsms&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">D</span><span class="p">[</span><span class="n">s</span><span class="p">][</span><span class="s">&#39;wsms&#39;</span><span class="p">][</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span><span class="o">/</span>
+                                    <span class="p">(</span><span class="n">D</span><span class="p">[</span><span class="n">s</span><span class="p">][</span><span class="s">&#39;pytime&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">D</span><span class="p">[</span><span class="n">s</span><span class="p">][</span><span class="s">&#39;pytime&#39;</span><span class="p">][</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]))</span>
+        <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">D</span><span class="p">[</span><span class="n">s</span><span class="p">][</span><span class="s">&#39;dVdt&#39;</span><span class="p">])</span> <span class="o">==</span> <span class="bp">False</span><span class="p">:</span>
+            <span class="c"># Data were absent (-9999) or rubbish (0)</span>
+            <span class="n">D</span><span class="p">[</span><span class="n">s</span><span class="p">][</span><span class="s">&#39;mwi&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">9999</span>
+            <span class="n">D</span><span class="p">[</span><span class="n">s</span><span class="p">][</span><span class="s">&#39;mwi_t&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">9999</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">D</span><span class="p">[</span><span class="n">s</span><span class="p">][</span><span class="s">&#39;mwi&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">D</span><span class="p">[</span><span class="n">s</span><span class="p">][</span><span class="s">&#39;dVdt&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="c"># max wind increase</span>
+            <span class="n">loc</span> <span class="o">=</span> <span class="n">N</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">D</span><span class="p">[</span><span class="n">s</span><span class="p">][</span><span class="s">&#39;dVdt&#39;</span><span class="p">]</span><span class="o">==</span><span class="n">D</span><span class="p">[</span><span class="n">s</span><span class="p">][</span><span class="s">&#39;mwi&#39;</span><span class="p">])</span>
+            <span class="n">D</span><span class="p">[</span><span class="n">s</span><span class="p">][</span><span class="s">&#39;mwi_t&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">D</span><span class="p">[</span><span class="n">s</span><span class="p">][</span><span class="s">&#39;pytime&#39;</span><span class="p">][</span><span class="n">loc</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="c"># time of max wind increase</span>
+
+        <span class="c"># Find time of maximum wind gust</span>
+        <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">D</span><span class="p">[</span><span class="n">s</span><span class="p">][</span><span class="s">&#39;wgms&#39;</span><span class="p">])</span> <span class="o">==</span> <span class="bp">False</span><span class="p">:</span>
+            <span class="n">D</span><span class="p">[</span><span class="n">s</span><span class="p">][</span><span class="s">&#39;mg&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">9999</span>
+            <span class="n">D</span><span class="p">[</span><span class="n">s</span><span class="p">][</span><span class="s">&#39;mg_t&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">9999</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">D</span><span class="p">[</span><span class="n">s</span><span class="p">][</span><span class="s">&#39;mg&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">D</span><span class="p">[</span><span class="n">s</span><span class="p">][</span><span class="s">&#39;wgms&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="c"># Maximum gust at the station</span>
+            <span class="n">loc</span> <span class="o">=</span> <span class="n">N</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">D</span><span class="p">[</span><span class="n">s</span><span class="p">][</span><span class="s">&#39;wgms&#39;</span><span class="p">]</span><span class="o">==</span><span class="n">D</span><span class="p">[</span><span class="n">s</span><span class="p">][</span><span class="s">&#39;mg&#39;</span><span class="p">])</span>
+            <span class="n">D</span><span class="p">[</span><span class="n">s</span><span class="p">][</span><span class="s">&#39;mg_t&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">D</span><span class="p">[</span><span class="n">s</span><span class="p">][</span><span class="s">&#39;pytime&#39;</span><span class="p">][</span><span class="n">loc</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="c"># time of max gust</span>
+
+        <span class="c"># Find time of maximum wind speed</span>
+        <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">D</span><span class="p">[</span><span class="n">s</span><span class="p">][</span><span class="s">&#39;wsms&#39;</span><span class="p">])</span> <span class="o">==</span> <span class="bp">False</span><span class="p">:</span>
+            <span class="n">D</span><span class="p">[</span><span class="n">s</span><span class="p">][</span><span class="s">&#39;ms&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">9999</span>
+            <span class="n">D</span><span class="p">[</span><span class="n">s</span><span class="p">][</span><span class="s">&#39;ms_t&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">9999</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">D</span><span class="p">[</span><span class="n">s</span><span class="p">][</span><span class="s">&#39;ms&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">D</span><span class="p">[</span><span class="n">s</span><span class="p">][</span><span class="s">&#39;wsms&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="c"># Maximum gust at the station</span>
+            <span class="n">loc</span> <span class="o">=</span> <span class="n">N</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">D</span><span class="p">[</span><span class="n">s</span><span class="p">][</span><span class="s">&#39;wsms&#39;</span><span class="p">]</span><span class="o">==</span><span class="n">D</span><span class="p">[</span><span class="n">s</span><span class="p">][</span><span class="s">&#39;ms&#39;</span><span class="p">])</span>
+            <span class="n">D</span><span class="p">[</span><span class="n">s</span><span class="p">][</span><span class="s">&#39;ms_t&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">D</span><span class="p">[</span><span class="n">s</span><span class="p">][</span><span class="s">&#39;pytime&#39;</span><span class="p">][</span><span class="n">loc</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="c"># time of max gust</span>
+
+
+        <span class="c"># Frequency of observation in minutes</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">D</span><span class="p">[</span><span class="n">s</span><span class="p">][</span><span class="s">&#39;dt&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">D</span><span class="p">[</span><span class="n">s</span><span class="p">][</span><span class="s">&#39;pytime&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">D</span><span class="p">[</span><span class="n">s</span><span class="p">][</span><span class="s">&#39;pytime&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span> <span class="o">/</span> <span class="mi">60</span>
+        <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+            <span class="n">D</span><span class="p">[</span><span class="n">s</span><span class="p">][</span><span class="s">&#39;dt&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">9999</span>
+
+        <span class="c"># Find lowest pressures</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">D</span><span class="p">[</span><span class="n">s</span><span class="p">][</span><span class="s">&#39;lowp&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">D</span><span class="p">[</span><span class="n">s</span><span class="p">][</span><span class="s">&#39;alti&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+            <span class="n">D</span><span class="p">[</span><span class="n">s</span><span class="p">][</span><span class="s">&#39;lowp&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">9999</span>
+            <span class="n">D</span><span class="p">[</span><span class="n">s</span><span class="p">][</span><span class="s">&#39;lowp_t&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">9999</span>
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">D</span><span class="p">[</span><span class="n">s</span><span class="p">][</span><span class="s">&#39;lowp&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">9999</span><span class="p">:</span>
+                <span class="n">D</span><span class="p">[</span><span class="n">s</span><span class="p">][</span><span class="s">&#39;lowp_t&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">N</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">D</span><span class="p">[</span><span class="n">s</span><span class="p">][</span><span class="s">&#39;alti&#39;</span><span class="p">]</span><span class="o">==</span><span class="n">D</span><span class="p">[</span><span class="n">s</span><span class="p">][</span><span class="s">&#39;lowp&#39;</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">pass</span>
+
+    <span class="k">return</span> <span class="n">D</span>
+
+<span class="c"># WRF terrain in height above sea level</span></div>
+<div class="viewcode-block" id="WRFterrain"><a class="viewcode-back" href="../../../WEM.utils.html#WEM.utils.GIS_tools.WRFterrain">[docs]</a><span class="k">def</span> <span class="nf">WRFterrain</span><span class="p">(</span><span class="n">fileselection</span><span class="o">=</span><span class="s">&#39;control&#39;</span><span class="p">,</span><span class="n">dom</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">fileselection</span><span class="o">==</span><span class="s">&#39;nouintah&#39;</span><span class="p">:</span>
+        <span class="n">fname</span> <span class="o">=</span> <span class="s">&#39;/uufs/chpc.utah.edu/common/home/horel-group/lawson/wrfout/1/NAM/2011112906_nouintah/wrfout_d0&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">dom</span><span class="p">)</span><span class="o">+</span><span class="s">&#39;_2011-11-29_06:00:00&#39;</span>
+    <span class="k">elif</span> <span class="n">fileselection</span><span class="o">==</span><span class="s">&#39;withuintah&#39;</span><span class="p">:</span>
+        <span class="n">fname</span> <span class="o">=</span> <span class="s">&#39;/uufs/chpc.utah.edu/common/home/horel-group/lawson/wrfout/1/NAM/2011112906_withuintah/wrfout_d0&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">dom</span><span class="p">)</span><span class="o">+</span><span class="s">&#39;_2011-11-29_06:00:00&#39;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">fname</span> <span class="o">=</span> <span class="s">&#39;/uufs/chpc.utah.edu/common/home/horel-group/lawson/WRFV3/test/em_real/wrfout_1.3_wasatch/wrfout_d0&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">dom</span><span class="p">)</span><span class="o">+</span><span class="s">&#39;_2011-12-01_00:00:00&#39;</span>
+    <span class="n">nc</span> <span class="o">=</span> <span class="n">Dataset</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span><span class="s">&#39;r&#39;</span><span class="p">)</span>
+    <span class="n">terrain</span> <span class="o">=</span> <span class="n">nc</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="s">&#39;HGT&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">,:,:]</span>
+    <span class="n">xlong</span> <span class="o">=</span> <span class="n">nc</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="s">&#39;XLONG&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">xlat</span> <span class="o">=</span> <span class="n">nc</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="s">&#39;XLAT&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">terrain</span><span class="p">,</span> <span class="n">xlong</span><span class="p">,</span> <span class="n">xlat</span>
+
+<span class="c"># WRF terrain in pressure coords...from first time stamp (won&#39;t vary THAT much for a tropospheric plot!)</span>
+<span class="c"># SLICE keyword, when true, gives 1-D vector through middle of square.</span>
+</div>
+<div class="viewcode-block" id="WRFterrain_P"><a class="viewcode-back" href="../../../WEM.utils.html#WEM.utils.GIS_tools.WRFterrain_P">[docs]</a><span class="k">def</span> <span class="nf">WRFterrain_P</span><span class="p">(</span><span class="n">fileselection</span><span class="o">=</span><span class="s">&#39;control&#39;</span><span class="p">,</span><span class="n">dom</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="nb">slice</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">fileselection</span><span class="o">==</span><span class="s">&#39;nouintah&#39;</span><span class="p">:</span>
+        <span class="n">fname</span> <span class="o">=</span> <span class="s">&#39;/uufs/chpc.utah.edu/common/home/horel-group/lawson/wrfout/1/NAM/2011112906_nouintah/wrfout_d0&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">dom</span><span class="p">)</span><span class="o">+</span><span class="s">&#39;_2011-11-29_06:00:00&#39;</span>
+    <span class="k">elif</span> <span class="n">fileselection</span><span class="o">==</span><span class="s">&#39;withuintah&#39;</span><span class="p">:</span>
+        <span class="n">fname</span> <span class="o">=</span> <span class="s">&#39;/uufs/chpc.utah.edu/common/home/horel-group/lawson/wrfout/1/NAM/2011112906_withuintah/wrfout_d0&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">dom</span><span class="p">)</span><span class="o">+</span><span class="s">&#39;_2011-11-29_06:00:00&#39;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">fname</span> <span class="o">=</span> <span class="s">&#39;/uufs/chpc.utah.edu/common/home/horel-group/lawson/WRFV3/test/em_real/wrfout_1.3_wasatch/wrfout_d0&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">dom</span><span class="p">)</span><span class="o">+</span><span class="s">&#39;_2011-12-01_00:00:00&#39;</span>
+    <span class="n">nc</span> <span class="o">=</span> <span class="n">Dataset</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span><span class="s">&#39;r&#39;</span><span class="p">)</span>
+    <span class="n">terrain</span> <span class="o">=</span> <span class="n">nc</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="s">&#39;PSFC&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">,:,:]</span>
+    <span class="n">xlong</span> <span class="o">=</span> <span class="n">nc</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="s">&#39;XLONG&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">xlat</span> <span class="o">=</span> <span class="n">nc</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="s">&#39;XLAT&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">if</span> <span class="nb">slice</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
+        <span class="n">Nx</span> <span class="o">=</span> <span class="n">nc</span><span class="o">.</span><span class="n">getncattr</span><span class="p">(</span><span class="s">&#39;WEST-EAST_GRID_DIMENSION&#39;</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span>
+        <span class="n">Ny</span> <span class="o">=</span> <span class="n">nc</span><span class="o">.</span><span class="n">getncattr</span><span class="p">(</span><span class="s">&#39;SOUTH-NORTH_GRID_DIMENSION&#39;</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span>
+        <span class="n">xlong</span> <span class="o">=</span> <span class="n">xlong</span><span class="p">[</span><span class="n">Ny</span><span class="o">/</span><span class="mi">2</span><span class="p">,:]</span>
+        <span class="n">xlat</span> <span class="o">=</span> <span class="n">xlat</span><span class="p">[:,</span><span class="n">Nx</span><span class="o">/</span><span class="mi">2</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">terrain</span><span class="p">,</span> <span class="n">xlong</span><span class="p">,</span> <span class="n">xlat</span>
+
+<span class="c"># Constants</span></div>
+<span class="n">rE</span> <span class="o">=</span> <span class="mi">6378100</span> <span class="c"># radius of Earth in metres</span>
+
+<span class="c"># Settings</span>
+<span class="c"># plt.rc(&#39;text&#39;,usetex=True)</span>
+<span class="c"># fonts = {&#39;family&#39;:&#39;Computer Modern&#39;,&#39;size&#39;:16}</span>
+<span class="c"># plt.rc(&#39;font&#39;,**fonts)</span>
+<span class="c"># height, width = (9,17)</span>
+
+<span class="c"># outdir = &#39;/uufs/chpc.utah.edu/common/home/u0737349/public_html/thesis/topoxs/&#39;</span>
+
+<span class="c"># Functions</span>
+<span class="c"># First, if topography data is not in memory, load it</span>
+<span class="c"># try:</span>
+    <span class="c"># dataloaded</span>
+<span class="c"># except NameError:</span>
+    <span class="c"># topodata, lats, lons = gridded_data.gettopo()</span>
+    <span class="c"># dataloaded = 1</span>
+
+<div class="viewcode-block" id="get_map"><a class="viewcode-back" href="../../../WEM.utils.html#WEM.utils.GIS_tools.get_map">[docs]</a><span class="k">def</span> <span class="nf">get_map</span><span class="p">(</span><span class="n">Nlim</span><span class="p">,</span><span class="n">Elim</span><span class="p">,</span><span class="n">Slim</span><span class="p">,</span><span class="n">Wlim</span><span class="p">):</span>
+    <span class="n">ymax</span><span class="p">,</span><span class="n">xmax</span> <span class="o">=</span> <span class="n">gridded_data</span><span class="o">.</span><span class="n">getXY</span><span class="p">(</span><span class="n">lats</span><span class="p">,</span><span class="n">lons</span><span class="p">,</span><span class="n">Nlim</span><span class="p">,</span><span class="n">Elim</span><span class="p">)</span> <span class="c">#Here, x is lat, y is lon</span>
+    <span class="n">ymin</span><span class="p">,</span><span class="n">xmin</span> <span class="o">=</span> <span class="n">gridded_data</span><span class="o">.</span><span class="n">getXY</span><span class="p">(</span><span class="n">lats</span><span class="p">,</span><span class="n">lons</span><span class="p">,</span><span class="n">Slim</span><span class="p">,</span><span class="n">Wlim</span><span class="p">)</span> <span class="c"># Not sure why!</span>
+    <span class="n">terrain</span> <span class="o">=</span> <span class="n">topodata</span><span class="p">[</span><span class="n">xmin</span><span class="p">:</span><span class="n">xmax</span><span class="p">,</span><span class="n">ymin</span><span class="p">:</span><span class="n">ymax</span><span class="p">]</span>
+    <span class="n">xlat</span> <span class="o">=</span> <span class="n">lats</span><span class="p">[</span><span class="n">xmin</span><span class="p">:</span><span class="n">xmax</span><span class="p">]</span>
+    <span class="n">xlon</span> <span class="o">=</span> <span class="n">lons</span><span class="p">[</span><span class="n">ymin</span><span class="p">:</span><span class="n">ymax</span><span class="p">]</span>
+    <span class="c">#pdb.set_trace()</span>
+    <span class="k">return</span> <span class="n">terrain</span><span class="p">,</span><span class="n">xlat</span><span class="p">,</span><span class="n">xlon</span>
+</div>
+<div class="viewcode-block" id="get_cross_section"><a class="viewcode-back" href="../../../WEM.utils.html#WEM.utils.GIS_tools.get_cross_section">[docs]</a><span class="k">def</span> <span class="nf">get_cross_section</span><span class="p">(</span><span class="n">Alat</span><span class="p">,</span> <span class="n">Alon</span><span class="p">,</span> <span class="n">Blat</span><span class="p">,</span> <span class="n">Blon</span><span class="p">):</span>
+    <span class="c"># Now find cross-sections</span>
+    <span class="n">Ax</span><span class="p">,</span> <span class="n">Ay</span> <span class="o">=</span> <span class="n">gridded_data</span><span class="o">.</span><span class="n">getXY</span><span class="p">(</span><span class="n">lats</span><span class="p">,</span><span class="n">lons</span><span class="p">,</span><span class="n">Alat</span><span class="p">,</span><span class="n">Alon</span><span class="p">)</span>
+    <span class="n">Bx</span><span class="p">,</span> <span class="n">By</span> <span class="o">=</span> <span class="n">gridded_data</span><span class="o">.</span><span class="n">getXY</span><span class="p">(</span><span class="n">lats</span><span class="p">,</span><span class="n">lons</span><span class="p">,</span><span class="n">Blat</span><span class="p">,</span><span class="n">Blon</span><span class="p">)</span>
+
+    <span class="c"># Number of points along cross-section</span>
+    <span class="n">xspt</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">N</span><span class="o">.</span><span class="n">hypot</span><span class="p">(</span><span class="n">Bx</span><span class="o">-</span><span class="n">Ax</span><span class="p">,</span><span class="n">By</span><span class="o">-</span><span class="n">Ay</span><span class="p">))</span>
+    <span class="n">xx</span> <span class="o">=</span> <span class="n">N</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">Ay</span><span class="p">,</span><span class="n">By</span><span class="p">,</span><span class="n">xspt</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+    <span class="n">yy</span> <span class="o">=</span> <span class="n">N</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">Ax</span><span class="p">,</span><span class="n">Bx</span><span class="p">,</span><span class="n">xspt</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+
+    <span class="c"># Get terrain heights along this transect</span>
+    <span class="n">heights</span> <span class="o">=</span> <span class="n">topodata</span><span class="p">[</span><span class="n">xx</span><span class="p">,</span><span class="n">yy</span><span class="p">]</span>
+
+    <span class="c"># Work out distance along this cross-section in m</span>
+    <span class="n">xsdistance</span> <span class="o">=</span> <span class="n">gridded_data</span><span class="o">.</span><span class="n">xs_distance</span><span class="p">(</span><span class="n">Alat</span><span class="p">,</span><span class="n">Alon</span><span class="p">,</span><span class="n">Blat</span><span class="p">,</span><span class="n">Blon</span><span class="p">)</span>
+
+    <span class="n">xvals</span> <span class="o">=</span> <span class="n">N</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">xsdistance</span><span class="p">,</span><span class="n">xspt</span><span class="p">)</span>
+    <span class="n">xlabels</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;</span><span class="si">%3.1f</span><span class="s">&#39;</span> <span class="o">%</span><span class="p">(</span><span class="n">x</span><span class="o">/</span><span class="mi">1000</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">xvals</span><span class="p">]</span>
+    <span class="c"># Now plot cross-sections</span>
+    <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="n">width</span><span class="p">,</span><span class="n">height</span><span class="p">))</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">xvals</span><span class="p">,</span><span class="n">heights</span><span class="p">)</span>
+    <span class="n">delta</span> <span class="o">=</span> <span class="n">xspt</span><span class="o">/</span><span class="mi">10</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">xticks</span><span class="p">(</span><span class="n">xvals</span><span class="p">[::</span><span class="n">delta</span><span class="p">],</span><span class="n">xlabels</span><span class="p">[::</span><span class="n">delta</span><span class="p">])</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s">&#39;Distance along cross-section (km)&#39;</span><span class="p">)</span>
+    <span class="n">fname</span> <span class="o">=</span> <span class="s">&#39;test1.png&#39;</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">outdir</span><span class="o">+</span><span class="n">fname</span><span class="p">,</span><span class="n">bbox_inches</span><span class="o">=</span><span class="s">&#39;tight&#39;</span><span class="p">,</span><span class="n">pad_inches</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">clf</span><span class="p">()</span>
+
+<span class="c"># datestring needs to be format yyyymmddhh</span></div>
+<div class="viewcode-block" id="wrf_nc_load"><a class="viewcode-back" href="../../../WEM.utils.html#WEM.utils.GIS_tools.wrf_nc_load">[docs]</a><span class="k">def</span> <span class="nf">wrf_nc_load</span><span class="p">(</span><span class="n">dom</span><span class="p">,</span><span class="n">var</span><span class="p">,</span><span class="n">ncfolder</span><span class="p">,</span><span class="n">datestr</span><span class="p">,</span><span class="n">thin</span><span class="p">,</span><span class="n">Nlim</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">Elim</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">Slim</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">Wlim</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    <span class="n">datestr2</span> <span class="o">=</span> <span class="n">datestr</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">4</span><span class="p">]</span><span class="o">+</span><span class="s">&#39;-&#39;</span><span class="o">+</span><span class="n">datestr</span><span class="p">[</span><span class="mi">4</span><span class="p">:</span><span class="mi">6</span><span class="p">]</span><span class="o">+</span><span class="s">&#39;-&#39;</span><span class="o">+</span><span class="n">datestr</span><span class="p">[</span><span class="mi">6</span><span class="p">:</span><span class="mi">8</span><span class="p">]</span><span class="o">+</span><span class="s">&#39;_&#39;</span><span class="o">+</span><span class="n">datestr</span><span class="p">[</span><span class="mi">8</span><span class="p">:</span><span class="mi">10</span><span class="p">]</span><span class="o">+</span><span class="s">&#39;:00:00&#39;</span>
+    <span class="n">fname</span> <span class="o">=</span> <span class="n">ncfolder</span><span class="o">+</span><span class="s">&#39;wrfout_&#39;</span><span class="o">+</span><span class="n">dom</span><span class="o">+</span><span class="s">&#39;_&#39;</span><span class="o">+</span><span class="n">datestr2</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">nc</span> <span class="o">=</span> <span class="n">Dataset</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span><span class="s">&#39;r&#39;</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">RuntimeError</span><span class="p">:</span>
+        <span class="n">fname</span> <span class="o">+=</span> <span class="s">&#39;.nc&#39;</span>
+    <span class="k">finally</span><span class="p">:</span>
+        <span class="n">nc</span> <span class="o">=</span> <span class="n">Dataset</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span><span class="s">&#39;r&#39;</span><span class="p">)</span>
+    <span class="c"># Load in variables here - customise or automate perhaps?</span>
+    <span class="n">u10</span> <span class="o">=</span> <span class="n">nc</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="s">&#39;U10&#39;</span><span class="p">]</span>
+    <span class="n">v10</span> <span class="o">=</span> <span class="n">nc</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="s">&#39;V10&#39;</span><span class="p">]</span>
+    <span class="n">terrain</span> <span class="o">=</span> <span class="n">nc</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="s">&#39;HGT&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">,:,:]</span>
+    <span class="n">times</span> <span class="o">=</span> <span class="n">nc</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="s">&#39;Times&#39;</span><span class="p">]</span>
+
+    <span class="c">### PROCESSING</span>
+    <span class="c"># x_dim and y_dim are the x and y dimensions of the model</span>
+    <span class="c"># domain in gridpoints</span>
+    <span class="n">x_dim</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">nc</span><span class="o">.</span><span class="n">dimensions</span><span class="p">[</span><span class="s">&#39;west_east&#39;</span><span class="p">])</span>
+    <span class="n">y_dim</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">nc</span><span class="o">.</span><span class="n">dimensions</span><span class="p">[</span><span class="s">&#39;south_north&#39;</span><span class="p">])</span>
+
+    <span class="c"># Get the grid spacing</span>
+    <span class="n">dx</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">nc</span><span class="o">.</span><span class="n">DX</span><span class="p">)</span>
+    <span class="n">dy</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">nc</span><span class="o">.</span><span class="n">DY</span><span class="p">)</span>
+
+    <span class="n">width_meters</span> <span class="o">=</span> <span class="n">dx</span> <span class="o">*</span> <span class="p">(</span><span class="n">x_dim</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">height_meters</span> <span class="o">=</span> <span class="n">dy</span> <span class="o">*</span> <span class="p">(</span><span class="n">y_dim</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">cen_lat</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">nc</span><span class="o">.</span><span class="n">CEN_LAT</span><span class="p">)</span>
+    <span class="n">cen_lon</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">nc</span><span class="o">.</span><span class="n">CEN_LON</span><span class="p">)</span>
+    <span class="n">truelat1</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">nc</span><span class="o">.</span><span class="n">TRUELAT1</span><span class="p">)</span>
+    <span class="n">truelat2</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">nc</span><span class="o">.</span><span class="n">TRUELAT2</span><span class="p">)</span>
+    <span class="n">standlon</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">nc</span><span class="o">.</span><span class="n">STAND_LON</span><span class="p">)</span>
+
+    <span class="c"># Draw the base map behind it with the lats and</span>
+    <span class="c"># lons calculated earlier</span>
+
+    <span class="k">if</span> <span class="n">Nlim</span><span class="p">:</span>
+        <span class="n">m</span> <span class="o">=</span> <span class="n">Basemap</span><span class="p">(</span><span class="n">projection</span><span class="o">=</span><span class="s">&#39;lcc&#39;</span><span class="p">,</span><span class="n">lon_0</span><span class="o">=</span><span class="n">cen_lon</span><span class="p">,</span><span class="n">lat_0</span><span class="o">=</span><span class="n">cen_lat</span><span class="p">,</span>
+                    <span class="n">llcrnrlat</span><span class="o">=</span><span class="n">Slim</span><span class="p">,</span><span class="n">urcrnrlat</span><span class="o">=</span><span class="n">Nlim</span><span class="p">,</span><span class="n">llcrnrlon</span><span class="o">=</span><span class="n">Wlim</span><span class="p">,</span>
+                    <span class="n">urcrnrlon</span><span class="o">=</span><span class="n">Elim</span><span class="p">,</span><span class="n">rsphere</span><span class="o">=</span><span class="mf">6371200.</span><span class="p">,</span><span class="n">resolution</span><span class="o">=</span><span class="s">&#39;h&#39;</span><span class="p">,</span>
+                    <span class="n">area_thresh</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">m</span> <span class="o">=</span> <span class="n">Basemap</span><span class="p">(</span><span class="n">resolution</span><span class="o">=</span><span class="s">&#39;i&#39;</span><span class="p">,</span><span class="n">projection</span><span class="o">=</span><span class="s">&#39;lcc&#39;</span><span class="p">,</span>
+            <span class="n">width</span><span class="o">=</span><span class="n">width_meters</span><span class="p">,</span><span class="n">height</span><span class="o">=</span><span class="n">height_meters</span><span class="p">,</span>
+            <span class="n">lat_0</span><span class="o">=</span><span class="n">cen_lat</span><span class="p">,</span><span class="n">lon_0</span><span class="o">=</span><span class="n">cen_lon</span><span class="p">,</span><span class="n">lat_1</span><span class="o">=</span><span class="n">truelat1</span><span class="p">,</span>
+            <span class="n">lat_2</span><span class="o">=</span><span class="n">truelat2</span><span class="p">)</span>
+    <span class="n">xlong</span> <span class="o">=</span> <span class="n">nc</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="s">&#39;XLONG&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">xlat</span> <span class="o">=</span> <span class="n">nc</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="s">&#39;XLAT&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+    <span class="c">#xlong = xlongtot[N.where((xlongtot &lt; Elim) &amp; (xlongtot &gt; Wlim))]</span>
+    <span class="c">#xlat = xlattot[N.where((xlattot &lt; Nlim) &amp; (xlattot &gt; Slim))]</span>
+    <span class="c">#x,y = m(nc.variables[&#39;XLONG&#39;][0],nc.variables[&#39;XLAT&#39;][0])</span>
+    <span class="c">#px,py = m(xlongtot,xlattot)</span>
+    <span class="c">#x,y = N.meshgrid(px,py)</span>
+    <span class="n">x</span><span class="p">,</span><span class="n">y</span> <span class="o">=</span> <span class="n">m</span><span class="p">(</span><span class="n">xlong</span><span class="p">,</span><span class="n">xlat</span><span class="p">)</span>
+    <span class="c"># This sets a thinned out grid point structure for plotting</span>
+    <span class="c"># wind barbs at the interval specified in &quot;thin&quot;</span>
+    <span class="c">#x_th,y_th = m(nc.variables[&#39;XLONG&#39;][0,::thin,::thin],\</span>
+    <span class="c">#        nc.variables[&#39;XLAT&#39;][0,::thin,::thin])</span>
+    <span class="n">x_th</span><span class="p">,</span> <span class="n">y_th</span> <span class="o">=</span> <span class="n">m</span><span class="p">(</span><span class="n">xlong</span><span class="p">[::</span><span class="n">thin</span><span class="p">,</span> <span class="p">::</span><span class="n">thin</span><span class="p">],</span><span class="n">xlat</span><span class="p">[::</span><span class="n">thin</span><span class="p">,::</span><span class="n">thin</span><span class="p">])</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="p">(</span><span class="n">times</span><span class="p">,</span><span class="n">terrain</span><span class="p">,</span><span class="n">u10</span><span class="p">,</span><span class="n">v10</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">m</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">x_th</span><span class="p">,</span> <span class="n">y_th</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">nc</span>
+</div>
+<div class="viewcode-block" id="mkloop"><a class="viewcode-back" href="../../../WEM.utils.html#WEM.utils.GIS_tools.mkloop">[docs]</a><span class="k">def</span> <span class="nf">mkloop</span><span class="p">(</span><span class="n">dom</span><span class="o">=</span><span class="s">&#39;d03&#39;</span><span class="p">,</span><span class="n">fpath</span><span class="o">=</span><span class="s">&#39;./&#39;</span><span class="p">):</span>
+    <span class="k">print</span> <span class="s">&quot;Creating a pretty loop...&quot;</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="s">&#39;convert -delay 50 &#39;</span><span class="o">+</span><span class="n">fpath</span><span class="o">+</span><span class="n">dom</span><span class="o">+</span><span class="s">&#39;*.png &gt; -loop &#39;</span><span class="o">+</span><span class="n">fpath</span><span class="o">+</span><span class="n">dom</span><span class="o">+</span><span class="s">&#39;_windloop.gif&#39;</span><span class="p">)</span>
+    <span class="k">print</span> <span class="s">&quot;Finished!&quot;</span>
+</div>
+<div class="viewcode-block" id="p_interpol"><a class="viewcode-back" href="../../../WEM.utils.html#WEM.utils.GIS_tools.p_interpol">[docs]</a><span class="k">def</span> <span class="nf">p_interpol</span><span class="p">(</span><span class="n">dom</span><span class="p">,</span><span class="n">var</span><span class="p">,</span><span class="n">ncfolder</span><span class="p">,</span><span class="n">datestr</span><span class="p">):</span>
+    <span class="n">datestr2</span> <span class="o">=</span> <span class="n">datestr</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">4</span><span class="p">]</span><span class="o">+</span><span class="s">&#39;-&#39;</span><span class="o">+</span><span class="n">datestr</span><span class="p">[</span><span class="mi">4</span><span class="p">:</span><span class="mi">6</span><span class="p">]</span><span class="o">+</span><span class="s">&#39;-&#39;</span><span class="o">+</span><span class="n">datestr</span><span class="p">[</span><span class="mi">6</span><span class="p">:</span><span class="mi">8</span><span class="p">]</span><span class="o">+</span><span class="s">&#39;_&#39;</span><span class="o">+</span><span class="n">datestr</span><span class="p">[</span><span class="mi">8</span><span class="p">:</span><span class="mi">10</span><span class="p">]</span><span class="o">+</span><span class="s">&#39;:00:00&#39;</span>
+    <span class="n">fname</span> <span class="o">=</span> <span class="n">ncfolder</span><span class="o">+</span><span class="s">&#39;wrfout_&#39;</span><span class="o">+</span><span class="n">dom</span><span class="o">+</span><span class="s">&#39;_&#39;</span><span class="o">+</span><span class="n">datestr2</span>
+    <span class="n">nc</span> <span class="o">=</span> <span class="n">Dataset</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span><span class="s">&#39;r&#39;</span><span class="p">)</span>
+    <span class="n">var_data</span> <span class="o">=</span> <span class="n">nc</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">var</span><span class="p">][:]</span>
+    <span class="k">if</span> <span class="n">var</span> <span class="o">==</span> <span class="s">&#39;T&#39;</span><span class="p">:</span> <span class="c"># pert. theta</span>
+        <span class="n">var_data</span> <span class="o">+=</span> <span class="mi">300</span> <span class="c"># Add base state</span>
+    <span class="n">pert_pressure</span> <span class="o">=</span> <span class="n">nc</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="s">&#39;P&#39;</span><span class="p">][:]</span> <span class="c">#This is perturbation pressure</span>
+    <span class="n">base_pressure</span> <span class="o">=</span> <span class="n">nc</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="s">&#39;PB&#39;</span><span class="p">][:]</span> <span class="c"># This is base pressure</span>
+    <span class="n">pressure</span> <span class="o">=</span> <span class="n">pert_pressure</span> <span class="o">+</span> <span class="n">base_pressure</span> <span class="c"># Get into absolute pressure in Pa.</span>
+    <span class="n">p_levels</span> <span class="o">=</span> <span class="n">N</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">10000</span><span class="p">,</span><span class="mi">100000</span><span class="p">,</span><span class="mi">1000</span><span class="p">)</span>
+    <span class="n">var_interp</span> <span class="o">=</span> <span class="n">N</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">pressure</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="nb">len</span><span class="p">(</span><span class="n">p_levels</span><span class="p">),</span><span class="n">pressure</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span><span class="n">pressure</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">3</span><span class="p">]))</span>
+    <span class="c">#pdb.set_trace()</span>
+    <span class="k">for</span> <span class="p">(</span><span class="n">t</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">x</span><span class="p">),</span><span class="n">v</span> <span class="ow">in</span> <span class="n">N</span><span class="o">.</span><span class="n">ndenumerate</span><span class="p">(</span><span class="n">var_interp</span><span class="p">[:,</span><span class="mi">0</span><span class="p">,:,:]):</span>
+        <span class="n">var_interp</span><span class="p">[</span><span class="n">t</span><span class="p">,:,</span><span class="n">y</span><span class="p">,</span><span class="n">x</span><span class="p">]</span> <span class="o">=</span> <span class="n">N</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span><span class="n">p_levels</span><span class="p">,</span><span class="n">pressure</span><span class="p">[</span><span class="n">t</span><span class="p">,::</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">x</span><span class="p">],</span><span class="n">var_data</span><span class="p">[</span><span class="n">t</span><span class="p">,::</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">x</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">var_interpi</span>
+</div>
+<div class="viewcode-block" id="hgt_from_sigma"><a class="viewcode-back" href="../../../WEM.utils.html#WEM.utils.GIS_tools.hgt_from_sigma">[docs]</a><span class="k">def</span> <span class="nf">hgt_from_sigma</span><span class="p">(</span><span class="n">nc</span><span class="p">):</span>
+    <span class="n">vert_coord</span> <span class="o">=</span> <span class="p">(</span><span class="n">nc</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="s">&#39;PH&#39;</span><span class="p">][:]</span> <span class="o">+</span> <span class="n">nc</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="s">&#39;PHB&#39;</span><span class="p">][:])</span> <span class="o">/</span> <span class="mf">9.81</span>
+    <span class="k">return</span> <span class="n">vert_coord</span>
+
+<span class="c"># This converts wrf&#39;s time to python and human time</span></div>
+<div class="viewcode-block" id="find_time_index"><a class="viewcode-back" href="../../../WEM.utils.html#WEM.utils.GIS_tools.find_time_index">[docs]</a><span class="k">def</span> <span class="nf">find_time_index</span><span class="p">(</span><span class="n">wrftime</span><span class="p">,</span><span class="n">reqtimetuple</span><span class="p">,</span><span class="n">tupleformat</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+    <span class="c"># wrftime = WRF Times in array</span>
+    <span class="c"># reqtime = desired time in six-tuple</span>
+
+    <span class="c"># Convert required time to Python time if required</span>
+    <span class="k">if</span> <span class="n">tupleformat</span><span class="p">:</span>
+        <span class="n">reqtime</span> <span class="o">=</span> <span class="n">calendar</span><span class="o">.</span><span class="n">timegm</span><span class="p">(</span><span class="n">reqtimetuple</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">reqtime</span> <span class="o">=</span> <span class="n">reqtimetuple</span>
+    <span class="n">nt</span> <span class="o">=</span> <span class="n">wrftime</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">pytime</span> <span class="o">=</span> <span class="n">N</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="n">nt</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">t</span> <span class="o">=</span> <span class="n">wrftime</span>
+    <span class="c"># Now convert WRF time to Python time</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nt</span><span class="p">):</span>
+        <span class="n">yr</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="s">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="mi">0</span><span class="p">:</span><span class="mi">4</span><span class="p">]))</span>
+        <span class="n">mth</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="s">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="mi">5</span><span class="p">:</span><span class="mi">7</span><span class="p">]))</span>
+        <span class="n">day</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="s">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="mi">8</span><span class="p">:</span><span class="mi">10</span><span class="p">]))</span>
+        <span class="n">hr</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="s">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="mi">11</span><span class="p">:</span><span class="mi">13</span><span class="p">]))</span>
+        <span class="nb">min</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="s">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="mi">14</span><span class="p">:</span><span class="mi">16</span><span class="p">]))</span>
+        <span class="n">sec</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="s">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="mi">17</span><span class="p">:</span><span class="mi">19</span><span class="p">]))</span>
+        <span class="n">pytime</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">calendar</span><span class="o">.</span><span class="n">timegm</span><span class="p">([</span><span class="n">yr</span><span class="p">,</span><span class="n">mth</span><span class="p">,</span><span class="n">day</span><span class="p">,</span><span class="n">hr</span><span class="p">,</span><span class="nb">min</span><span class="p">,</span><span class="n">sec</span><span class="p">])</span>
+
+    <span class="c"># Now find closest WRF time</span>
+    <span class="n">timeInd</span> <span class="o">=</span> <span class="n">N</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">pytime</span><span class="o">-</span><span class="n">reqtime</span><span class="p">)</span> <span class="o">==</span> <span class="nb">abs</span><span class="p">(</span><span class="n">pytime</span><span class="o">-</span><span class="n">reqtime</span><span class="p">)</span><span class="o">.</span><span class="n">min</span><span class="p">())[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">timeInd</span>
+
+<span class="c"># Find data for certain time, locations, level, variables</span>
+<span class="c"># For surface data</span></div>
+<div class="viewcode-block" id="TimeSfcLatLon"><a class="viewcode-back" href="../../../WEM.utils.html#WEM.utils.GIS_tools.TimeSfcLatLon">[docs]</a><span class="k">def</span> <span class="nf">TimeSfcLatLon</span><span class="p">(</span><span class="n">nc</span><span class="p">,</span><span class="n">varlist</span><span class="p">,</span><span class="n">times</span><span class="p">,</span><span class="n">latslons</span><span class="o">=</span><span class="s">&#39;all&#39;</span><span class="p">):</span>
+    <span class="c"># Time (DateTime in string)</span>
+    <span class="k">if</span> <span class="n">times</span> <span class="o">==</span> <span class="s">&#39;all&#39;</span><span class="p">:</span>
+        <span class="n">timeInds</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="n">nc</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="s">&#39;Times&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">times</span><span class="p">)</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span> <span class="c"># If only one time is desired</span>
+        <span class="c"># Time is in 6-tuple format</span>
+        <span class="n">timeInds</span> <span class="o">=</span> <span class="n">find_time_index</span><span class="p">(</span><span class="n">nc</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="s">&#39;Times&#39;</span><span class="p">],</span><span class="n">times</span><span class="p">)</span> <span class="c"># This function is from this module</span>
+    <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">times</span><span class="p">)</span><span class="o">==</span><span class="mi">2</span><span class="p">:</span> <span class="c"># Find all times between A and B</span>
+        <span class="n">timeIndA</span> <span class="o">=</span> <span class="n">find_time_index</span><span class="p">(</span><span class="n">nc</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="s">&#39;Times&#39;</span><span class="p">],</span><span class="n">times</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">timeIndB</span> <span class="o">=</span> <span class="n">find_time_index</span><span class="p">(</span><span class="n">nc</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="s">&#39;Times&#39;</span><span class="p">],</span><span class="n">times</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">timeInds</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="n">timeIndA</span><span class="p">,</span><span class="n">timeIndB</span><span class="p">)</span>
+    <span class="c"># Lat/lon of interest and their grid pointd</span>
+    <span class="n">lats</span> <span class="o">=</span> <span class="n">nc</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="s">&#39;XLAT&#39;</span><span class="p">][:]</span>
+    <span class="n">lons</span> <span class="o">=</span> <span class="n">nc</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="s">&#39;XLONG&#39;</span><span class="p">][:]</span>
+    <span class="k">if</span> <span class="n">latslons</span> <span class="o">==</span> <span class="s">&#39;all&#39;</span><span class="p">:</span>
+        <span class="n">latInds</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="n">lats</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">])</span>
+        <span class="n">lonInds</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="n">lons</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">xmin</span><span class="p">,</span><span class="n">ymax</span> <span class="o">=</span> <span class="n">gridded_data</span><span class="o">.</span><span class="n">getXY</span><span class="p">(</span><span class="n">lats</span><span class="p">,</span><span class="n">lons</span><span class="p">,</span><span class="n">Nlim</span><span class="p">,</span><span class="n">Wlim</span><span class="p">)</span>
+        <span class="n">xmax</span><span class="p">,</span><span class="n">ymin</span> <span class="o">=</span> <span class="n">gridded_data</span><span class="o">.</span><span class="n">getXY</span><span class="p">(</span><span class="n">lats</span><span class="p">,</span><span class="n">lons</span><span class="p">,</span><span class="n">Slim</span><span class="p">,</span><span class="n">Elim</span><span class="p">)</span>
+        <span class="n">latInds</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="n">ymin</span><span class="p">,</span><span class="n">ymax</span><span class="p">)</span>
+        <span class="n">lonInds</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="n">xmin</span><span class="p">,</span><span class="n">xmax</span><span class="p">)</span>
+
+    <span class="c"># Return sliced data</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">varlist</span><span class="p">:</span>
+        <span class="n">data</span><span class="p">[</span><span class="n">v</span><span class="p">]</span> <span class="o">=</span> <span class="n">nc</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">v</span><span class="p">][</span><span class="n">timeInds</span><span class="p">,</span><span class="n">latInds</span><span class="p">,</span><span class="n">lonInds</span><span class="p">]</span>
+        <span class="c"># Reshape if only one time</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">times</span><span class="p">)</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
+            <span class="n">data</span><span class="p">[</span><span class="n">v</span><span class="p">]</span> <span class="o">=</span> <span class="n">N</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">v</span><span class="p">],(</span><span class="nb">len</span><span class="p">(</span><span class="n">latInds</span><span class="p">),</span><span class="nb">len</span><span class="p">(</span><span class="n">lonInds</span><span class="p">)))</span>
+    <span class="k">return</span> <span class="n">data</span>
+
+<span class="c"># Get lat/lon as 1D arrays from WRF</span></div>
+<div class="viewcode-block" id="latlon_1D"><a class="viewcode-back" href="../../../WEM.utils.html#WEM.utils.GIS_tools.latlon_1D">[docs]</a><span class="k">def</span> <span class="nf">latlon_1D</span><span class="p">(</span><span class="n">nc</span><span class="p">):</span>
+    <span class="n">Nx</span> <span class="o">=</span> <span class="n">nc</span><span class="o">.</span><span class="n">getncattr</span><span class="p">(</span><span class="s">&#39;WEST-EAST_GRID_DIMENSION&#39;</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span>
+    <span class="n">Ny</span> <span class="o">=</span> <span class="n">nc</span><span class="o">.</span><span class="n">getncattr</span><span class="p">(</span><span class="s">&#39;SOUTH-NORTH_GRID_DIMENSION&#39;</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span>
+    <span class="n">lats</span> <span class="o">=</span> <span class="n">nc</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="s">&#39;XLAT&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">,:,</span><span class="n">Nx</span><span class="o">/</span><span class="mi">2</span><span class="p">]</span>
+    <span class="n">lons</span> <span class="o">=</span> <span class="n">nc</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="s">&#39;XLONG&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">,</span><span class="n">Ny</span><span class="o">/</span><span class="mi">2</span><span class="p">,:]</span>
+    <span class="k">return</span> <span class="n">lats</span><span class="p">,</span> <span class="n">lons</span>
+</div>
+<div class="viewcode-block" id="netcdf_files_in"><a class="viewcode-back" href="../../../WEM.utils.html#WEM.utils.GIS_tools.netcdf_files_in">[docs]</a><span class="k">def</span> <span class="nf">netcdf_files_in</span><span class="p">(</span><span class="n">folder</span><span class="p">,</span><span class="n">dom</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">init_time</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">model</span><span class="o">=</span><span class="s">&#39;auto&#39;</span><span class="p">,</span><span class="n">return_model</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Hunt through given folder to find the right netcdf file for data.</span>
+
+
+<span class="sd">    Inputs:</span>
+<span class="sd">    folder      :   Absolute path to directory</span>
+<span class="sd">    dom         :   specify domain. None specified if zero.</span>
+<span class="sd">    init_time   :   initialisation time. Can be tuple or datenum.</span>
+<span class="sd">                    If zero, then folder must contain one unambiguous file.</span>
+<span class="sd">    model       :   Default: automatically detect the type of netcdf file</span>
+<span class="sd">                    (RUC data, wrfout file, etc)</span>
+<span class="sd">    Returns:</span>
+<span class="sd">    ncpath      :   Absolute path to file</span>
+<span class="sd">    model       :   Model (RUC, WRF) of netcdf file,</span>
+<span class="sd">                    if return_model is True and model is &#39;auto&#39;.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">t</span> <span class="o">=</span> <span class="s">&#39;auto&#39;</span>
+    <span class="k">if</span> <span class="n">init_time</span><span class="p">:</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="n">ensure_timetuple</span><span class="p">(</span><span class="n">init_time</span><span class="p">,</span><span class="n">fmt</span><span class="o">=</span><span class="s">&#39;single&#39;</span><span class="p">)</span>
+
+    <span class="c"># Set the model type to load.</span>
+    <span class="k">if</span> <span class="n">model</span><span class="o">==</span><span class="s">&#39;auto&#39;</span><span class="p">:</span>
+        <span class="c"># Get files, check prefix</span>
+        <span class="n">files</span> <span class="o">=</span> <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">folder</span><span class="p">,</span><span class="s">&#39;*&#39;</span><span class="p">))</span>
+        <span class="n">matches</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+            <span class="n">model_test</span> <span class="o">=</span> <span class="n">determine_model</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">model_test</span><span class="p">:</span>
+                <span class="n">matches</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="n">model</span> <span class="o">=</span> <span class="n">model_test</span>
+
+        <span class="k">if</span> <span class="n">matches</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">print</span><span class="p">(</span><span class="s">&quot;No netcdf files found.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">Exception</span>
+        <span class="k">elif</span> <span class="n">matches</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">t</span><span class="p">,</span><span class="nb">str</span><span class="p">):</span>
+            <span class="k">print</span><span class="p">(</span><span class="s">&quot;Ambiguous netcdf file selection. Specify model?&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">Exception</span>
+
+    <span class="c"># import pdb; pdb.set_trace()</span>
+    <span class="k">if</span> <span class="n">model</span><span class="o">==</span><span class="s">&#39;wrfout&#39;</span><span class="p">:</span>
+        <span class="n">pfx</span> <span class="o">=</span> <span class="s">&#39;wrfout&#39;</span> <span class="c"># Assume the prefix</span>
+    <span class="k">elif</span> <span class="n">model</span><span class="o">==</span><span class="s">&#39;ruc&#39;</span><span class="p">:</span>
+        <span class="n">pfx</span> <span class="o">=</span> <span class="s">&#39;ruc&#39;</span>
+        <span class="c"># TODO: logic that considers the four versions of RUC</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span>
+
+    <span class="c"># Pick unambiguous</span>
+    <span class="k">if</span> <span class="n">t</span><span class="o">==</span><span class="s">&#39;auto&#39;</span><span class="p">:</span>
+        <span class="c"># We assume the user has wrfout files in different folders for different times</span>
+        <span class="n">f</span> <span class="o">=</span> <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">folder</span><span class="p">,</span><span class="n">pfx</span><span class="o">+</span><span class="s">&#39;*&#39;</span><span class="p">))</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">f</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">print</span><span class="p">(</span><span class="s">&quot;Ambiguous netCDF4 selection.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">Exception</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">return_model</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">f</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">model</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">f</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">dom</span> <span class="o">&gt;</span> <span class="mi">8</span><span class="p">):</span>
+            <span class="k">print</span><span class="p">(</span><span class="s">&quot;Domain is out of range. Choose number between 1 and 8 inclusive.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">IndexError</span>
+
+        <span class="n">fname</span> <span class="o">=</span> <span class="n">get_netcdf_naming</span><span class="p">(</span><span class="n">model</span><span class="p">,</span><span class="n">t</span><span class="p">,</span><span class="n">dom</span><span class="p">)</span>
+        <span class="n">f</span> <span class="o">=</span> <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">folder</span><span class="p">,</span><span class="n">fname</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">f</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">return_model</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">f</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">model</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">f</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">f</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">print</span><span class="p">(</span><span class="s">&quot;No netCDF4 file found.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">Exception</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">print</span><span class="p">(</span><span class="s">&quot;Ambiguous netCDF4 selection.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">Exception</span>
+
+</div>
+<div class="viewcode-block" id="wrfout_files_in"><a class="viewcode-back" href="../../../WEM.utils.html#WEM.utils.GIS_tools.wrfout_files_in">[docs]</a><span class="k">def</span> <span class="nf">wrfout_files_in</span><span class="p">(</span><span class="n">folders</span><span class="p">,</span><span class="n">dom</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">init_time</span><span class="o">=</span><span class="s">&#39;notset&#39;</span><span class="p">,</span><span class="n">descend</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">avoid</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                    <span class="n">unambiguous</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Hunt through given folder(s) to find all occurrences of wrfout</span>
+<span class="sd">    files.</span>
+
+<span class="sd">    Inputs:</span>
+<span class="sd">    folders     :   list of absolute paths to directories</span>
+<span class="sd">    dom         :   specify domain. None specified if zero.</span>
+<span class="sd">    init_time   :   tuple of initialisation time</span>
+<span class="sd">    descend     :   boolean: go into subfolders</span>
+<span class="sd">    avoid       :   string of filenames. if a subfolder contains</span>
+<span class="sd">                    the string, do not descend into this one.</span>
+<span class="sd">    unambiguous :   only return a single absolute path, else throw</span>
+<span class="sd">                    an Exception.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">    wrfouts     :   list of absolute paths to wrfout files</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">folders</span> <span class="o">=</span> <span class="n">get_sequence</span><span class="p">(</span><span class="n">folders</span><span class="p">)</span>
+    <span class="n">avoids</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="s">&#39;avoid&#39;</span><span class="p">:</span>
+        <span class="c"># Avoid folder names with this string</span>
+        <span class="c"># or list of strings</span>
+        <span class="n">avoid</span> <span class="o">=</span> <span class="n">get_sequence</span><span class="p">(</span><span class="n">avoid</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">avoid</span><span class="p">:</span>
+            <span class="n">avoids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;/{0}/&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">a</span><span class="p">))</span>
+
+
+    <span class="n">w</span> <span class="o">=</span> <span class="s">&#39;wrfout&#39;</span> <span class="c"># Assume the prefix</span>
+    <span class="k">if</span> <span class="n">init_time</span><span class="o">==</span><span class="s">&#39;notset&#39;</span><span class="p">:</span>
+        <span class="n">suffix</span> <span class="o">=</span> <span class="s">&#39;*0&#39;</span>
+        <span class="c"># We assume the user has wrfout files in different folders for different times</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">it</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">string_from_time</span><span class="p">(</span><span class="s">&#39;wrfout&#39;</span><span class="p">,</span><span class="n">init_time</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">print</span><span class="p">(</span><span class="s">&quot;Not a valid wrfout initialisation time; try again.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">Error</span>
+        <span class="n">suffix</span> <span class="o">=</span> <span class="s">&#39;*&#39;</span> <span class="o">+</span> <span class="n">it</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">dom</span><span class="p">:</span>
+    <span class="c"># Presume all domains are desired.</span>
+        <span class="n">prefix</span> <span class="o">=</span> <span class="n">w</span> <span class="o">+</span> <span class="s">&#39;_d&#39;</span>
+    <span class="k">elif</span> <span class="p">(</span><span class="n">dom</span> <span class="o">&gt;</span> <span class="mi">8</span><span class="p">):</span>
+        <span class="k">print</span><span class="p">(</span><span class="s">&quot;Domain is out of range. Choose number between 1 and 8 inclusive.&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">IndexError</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">dom</span> <span class="o">=</span> <span class="s">&#39;d{0:02d}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">dom</span><span class="p">)</span>
+        <span class="n">prefix</span> <span class="o">=</span> <span class="n">w</span> <span class="o">+</span> <span class="s">&#39;_&#39;</span> <span class="o">+</span> <span class="n">dom</span>
+
+    <span class="n">wrfouts</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="n">descend</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">folder</span> <span class="ow">in</span> <span class="n">folders</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">root</span><span class="p">,</span><span class="n">dirs</span><span class="p">,</span><span class="n">files</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">folder</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">fname</span> <span class="ow">in</span> <span class="n">fnmatch</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">files</span><span class="p">,</span><span class="n">prefix</span><span class="o">+</span><span class="n">suffix</span><span class="p">):</span>
+                    <span class="n">skip_me</span> <span class="o">=</span> <span class="mi">0</span>
+                    <span class="n">fpath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">root</span><span class="p">,</span><span class="n">fname</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">avoids</span><span class="p">:</span>
+                        <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">avoids</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">fpath</span><span class="p">:</span>
+                                <span class="n">skip_me</span> <span class="o">=</span> <span class="mi">1</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="k">pass</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">skip_me</span><span class="p">:</span>
+                        <span class="n">wrfouts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fpath</span><span class="p">)</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">folder</span> <span class="ow">in</span> <span class="n">folders</span><span class="p">:</span>
+            <span class="n">findfile</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">folder</span><span class="p">,</span><span class="n">prefix</span><span class="o">+</span><span class="n">suffix</span><span class="p">)</span>
+            <span class="n">files</span> <span class="o">=</span> <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">findfile</span><span class="p">)</span>
+            <span class="c"># pdb.set_trace()</span>
+            <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+                <span class="n">wrfouts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">folder</span><span class="p">,</span><span class="n">f</span><span class="p">))</span>
+    <span class="c"># pdb.set_trace()</span>
+    <span class="k">if</span> <span class="n">unambiguous</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="n">wrfouts</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">print</span><span class="p">(</span><span class="s">&quot;Found {0} wrfout files.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">wrfouts</span><span class="p">)))</span>
+            <span class="k">raise</span> <span class="ne">Exception</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">wrfouts</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">wrfouts</span>
+</div>
+<div class="viewcode-block" id="getXY"><a class="viewcode-back" href="../../../WEM.utils.html#WEM.utils.GIS_tools.getXY">[docs]</a><span class="k">def</span> <span class="nf">getXY</span><span class="p">(</span><span class="n">lats</span><span class="p">,</span><span class="n">lons</span><span class="p">,</span><span class="n">ptlat</span><span class="p">,</span><span class="n">ptlon</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Output is lat, lon so y,x</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c"># Find closest lat/lon in array</span>
+    <span class="n">minlat</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">lats</span><span class="o">-</span><span class="n">ptlat</span><span class="p">)</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+    <span class="n">minlon</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">lons</span><span class="o">-</span><span class="n">ptlon</span><span class="p">)</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+    <span class="c"># Find where these are in the grid</span>
+    <span class="n">wherelat</span> <span class="o">=</span> <span class="n">N</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">lats</span><span class="o">-</span><span class="n">ptlat</span><span class="p">)</span> <span class="o">==</span> <span class="n">minlat</span><span class="p">)</span>
+    <span class="n">wherelon</span> <span class="o">=</span> <span class="n">N</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">lons</span><span class="o">-</span><span class="n">ptlon</span><span class="p">)</span> <span class="o">==</span> <span class="n">minlon</span><span class="p">)</span>
+    <span class="c"># pdb.set_trace()</span>
+    <span class="n">lat_idx</span> <span class="o">=</span> <span class="n">N</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">lats</span><span class="o">==</span><span class="n">lats</span><span class="p">[</span><span class="n">wherelat</span><span class="p">])[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">lon_idx</span> <span class="o">=</span> <span class="n">N</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">lons</span><span class="o">==</span><span class="n">lons</span><span class="p">[</span><span class="n">wherelon</span><span class="p">])[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">exactlat</span> <span class="o">=</span> <span class="n">lats</span><span class="p">[</span><span class="n">wherelat</span><span class="p">]</span>
+    <span class="n">exactlon</span> <span class="o">=</span> <span class="n">lons</span><span class="p">[</span><span class="n">wherelon</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">lat_idx</span><span class="p">,</span><span class="n">lon_idx</span><span class="p">,</span> <span class="n">exactlat</span><span class="p">,</span> <span class="n">exactlon</span>
+</div>
+<div class="viewcode-block" id="gettopo"><a class="viewcode-back" href="../../../WEM.utils.html#WEM.utils.GIS_tools.gettopo">[docs]</a><span class="k">def</span> <span class="nf">gettopo</span><span class="p">():</span>
+    <span class="n">fname</span> <span class="o">=</span> <span class="s">&#39;/uufs/chpc.utah.edu/common/home/u0737349/dsws/topodata/globe30.bin&#39;</span>
+    <span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span><span class="s">&#39;r&#39;</span><span class="p">)</span>
+    <span class="n">fdata</span> <span class="o">=</span> <span class="n">N</span><span class="o">.</span><span class="n">fromfile</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="n">dtype</span><span class="o">=</span><span class="s">&#39;int16&#39;</span><span class="p">)</span>
+    <span class="c"># Transposes and reshapes to a lat-lon grid</span>
+    <span class="c"># Changes negative values to 0 (sea level)</span>
+    <span class="n">xnum</span> <span class="o">=</span> <span class="mf">43200.0</span>
+    <span class="n">ynum</span> <span class="o">=</span> <span class="mf">18000.0</span>
+    <span class="n">topodata</span> <span class="o">=</span> <span class="n">N</span><span class="o">.</span><span class="n">flipud</span><span class="p">(</span><span class="n">N</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">fdata</span><span class="p">,(</span><span class="n">ynum</span><span class="p">,</span><span class="n">xnum</span><span class="p">)))</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+    <span class="c">#topodata = ((N.reshape(fdata,(xnum,ynum))).clip(0))</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">();</span> <span class="k">del</span> <span class="n">fdata</span>
+    <span class="c"># Define size of pixels</span>
+    <span class="n">xpixel</span> <span class="o">=</span> <span class="mi">360</span><span class="o">/</span><span class="n">xnum</span>
+    <span class="n">ypixel</span> <span class="o">=</span> <span class="mi">150</span><span class="o">/</span><span class="n">ynum</span> <span class="c"># Note only 150 degrees!</span>
+    <span class="c"># Create lat/lon grid</span>
+    <span class="n">lats</span> <span class="o">=</span> <span class="n">N</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="o">-</span><span class="mi">60</span><span class="p">,</span><span class="mi">90</span><span class="p">,</span><span class="n">ypixel</span><span class="p">)</span><span class="c">#[::-1]</span>
+    <span class="n">lons</span> <span class="o">=</span> <span class="n">N</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="o">-</span><span class="mi">180</span><span class="p">,</span><span class="mi">180</span><span class="p">,</span><span class="n">xpixel</span><span class="p">)</span><span class="c">#[::-1]</span>
+    <span class="k">print</span> <span class="s">&#39;Topographic data has been loaded. Everest is but a mere pixel.&#39;</span>
+    <span class="k">return</span> <span class="n">topodata</span><span class="p">,</span> <span class="n">lats</span><span class="p">,</span> <span class="n">lons</span>
+</div>
+<div class="viewcode-block" id="xs_distance"><a class="viewcode-back" href="../../../WEM.utils.html#WEM.utils.GIS_tools.xs_distance">[docs]</a><span class="k">def</span> <span class="nf">xs_distance</span><span class="p">(</span><span class="n">Alat</span><span class="p">,</span> <span class="n">Alon</span><span class="p">,</span> <span class="n">Blat</span><span class="p">,</span> <span class="n">Blon</span><span class="p">):</span>
+    <span class="n">phi1</span> <span class="o">=</span> <span class="n">N</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="mf">90.0</span><span class="o">-</span><span class="n">Alat</span><span class="p">)</span>
+    <span class="n">phi2</span> <span class="o">=</span> <span class="n">N</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="mf">90.0</span><span class="o">-</span><span class="n">Blat</span><span class="p">)</span>
+    <span class="n">theta1</span> <span class="o">=</span> <span class="n">N</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">Alon</span><span class="p">)</span>
+    <span class="n">theta2</span> <span class="o">=</span> <span class="n">N</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">Blon</span><span class="p">)</span>
+    <span class="n">arc</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">acos</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">phi1</span><span class="p">)</span><span class="o">*</span><span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">phi2</span><span class="p">)</span><span class="o">*</span><span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta1</span><span class="o">-</span><span class="n">theta2</span><span class="p">)</span> <span class="o">+</span>
+                    <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">phi1</span><span class="p">)</span><span class="o">*</span><span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">phi2</span><span class="p">))</span>
+    <span class="n">xsdistance</span> <span class="o">=</span> <span class="n">rE</span> <span class="o">*</span> <span class="n">arc</span>
+    <span class="k">return</span> <span class="n">xsdistance</span>
+
+<span class="c"># This dstacks arrays, unless it&#39;s the first time through, in which case it initialises the variable</span></div>
+<span class="k">def</span> <span class="nf">dstack_loop</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Key</span><span class="p">):</span>
+    <span class="c"># Try evaluating dict[key]. If it doesn&#39;t exist, then initialise it</span>
+    <span class="c"># If it does exist, stack data</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">Dict</span><span class="p">[</span><span class="n">Key</span><span class="p">]</span>
+    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+        <span class="n">stack</span> <span class="o">=</span> <span class="n">data</span>
+        <span class="c">#Dict[Key] = data</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">stack</span> <span class="o">=</span> <span class="n">N</span><span class="o">.</span><span class="n">dstack</span><span class="p">((</span><span class="n">Dict</span><span class="p">[</span><span class="n">Key</span><span class="p">],</span><span class="n">data</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">stack</span>
+    <span class="k">pass</span>
+
+<span class="c"># Create thinned pressure levels for skew T barb plotting</span>
+<div class="viewcode-block" id="thinned_barbs"><a class="viewcode-back" href="../../../WEM.utils.html#WEM.utils.GIS_tools.thinned_barbs">[docs]</a><span class="k">def</span> <span class="nf">thinned_barbs</span><span class="p">(</span><span class="n">pres</span><span class="p">):</span>
+    <span class="n">levels</span> <span class="o">=</span> <span class="n">N</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mf">20000.0</span><span class="p">,</span><span class="mf">105000.0</span><span class="p">,</span><span class="mf">5000.0</span><span class="p">)</span>
+    <span class="n">plocs</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">levels</span><span class="p">:</span>
+        <span class="n">ploc</span> <span class="o">=</span> <span class="n">N</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">pres</span><span class="o">-</span><span class="n">l</span><span class="p">)</span><span class="o">==</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">pres</span><span class="o">-</span><span class="n">l</span><span class="p">)</span><span class="o">.</span><span class="n">min</span><span class="p">()))[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">plocs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ploc</span><span class="p">)</span>
+    <span class="n">thin_locs</span> <span class="o">=</span> <span class="n">N</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">plocs</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">thin_locs</span> <span class="c"># Locations of data at thinned levels</span>
+</div>
+<div class="viewcode-block" id="trycreate"><a class="viewcode-back" href="../../../WEM.utils.html#WEM.utils.GIS_tools.trycreate">[docs]</a><span class="k">def</span> <span class="nf">trycreate</span><span class="p">(</span><span class="n">loc</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">stat</span><span class="p">(</span><span class="n">loc</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">loc</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="padded_times"><a class="viewcode-back" href="../../../WEM.utils.html#WEM.utils.GIS_tools.padded_times">[docs]</a><span class="k">def</span> <span class="nf">padded_times</span><span class="p">(</span><span class="n">timeseq</span><span class="p">):</span>
+    <span class="n">padded</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;{0:04d}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">timeseq</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">padded</span>
+</div>
+<div class="viewcode-block" id="string_from_time"><a class="viewcode-back" href="../../../WEM.utils.html#WEM.utils.GIS_tools.string_from_time">[docs]</a><span class="k">def</span> <span class="nf">string_from_time</span><span class="p">(</span><span class="n">usage</span><span class="p">,</span><span class="n">t</span><span class="p">,</span><span class="n">dom</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">strlen</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">conven</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    conven  :   convection of MM/DD versus DD/MM</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">t</span><span class="p">,</span><span class="nb">str</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">usage</span> <span class="o">==</span> <span class="s">&#39;output&#39;</span><span class="p">:</span>
+            <span class="n">usage</span> <span class="o">=</span> <span class="s">&#39;skip&#39;</span> <span class="c"># Time is already a string</span>
+        <span class="k">elif</span> <span class="n">usage</span> <span class="o">==</span> <span class="s">&#39;title&#39;</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="c">#    if kwargs[&#39;itime&#39;]: # For averages or maxima over time</span>
+        <span class="c">#        itime = kwargs[&#39;itime&#39;]</span>
+        <span class="c">#        ftime = kwargs[&#39;ftime&#39;]</span>
+        <span class="c">#    else:</span>
+        <span class="c">#        pass</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">t</span><span class="p">,</span><span class="nb">float</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">t</span><span class="p">,</span><span class="nb">int</span><span class="p">):</span>
+        <span class="c"># In this case, time is in datenum. Get it into tuple format.</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">gmtime</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">pass</span>
+
+    <span class="k">if</span> <span class="n">usage</span> <span class="o">==</span> <span class="s">&#39;title&#39;</span><span class="p">:</span>
+        <span class="c"># Generates string for titles</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="s">&#39;itime&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span> <span class="c"># i.e. for specific times</span>
+        <span class="c">#if not hasattr(kwargs,&#39;itime&#39;): # i.e. for specific times</span>
+            <span class="n">strg</span> <span class="o">=</span> <span class="s">&#39;{3:02d}:{4:02d}Z on {2:02d}/{1:02d}/{0:04d}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="o">*</span><span class="n">t</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span> <span class="c"># i.e. for ranges (average over time)</span>
+            <span class="n">s1</span> <span class="o">=</span> <span class="s">&#39;{3:02d}:{4:02d}Z to &#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="o">*</span><span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;itime&#39;</span><span class="p">])</span>
+            <span class="n">s2</span> <span class="o">=</span> <span class="s">&#39;{3:02d}:{4:02d}Z&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="o">*</span><span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;ftime&#39;</span><span class="p">])</span>
+            <span class="n">strg</span> <span class="o">=</span> <span class="n">s1</span> <span class="o">+</span> <span class="n">s2</span>
+    <span class="k">elif</span> <span class="n">usage</span> <span class="o">==</span> <span class="s">&#39;wrfout&#39;</span><span class="p">:</span>
+        <span class="c"># Generates string for wrfout file finding</span>
+        <span class="c"># Needs dom</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">dom</span><span class="p">:</span>
+            <span class="k">print</span><span class="p">(</span><span class="s">&quot;No domain specified; using domain #1.&quot;</span><span class="p">)</span>
+            <span class="n">dom</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">strg</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;wrfout_d0&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">dom</span><span class="p">)</span> <span class="o">+</span>
+               <span class="s">&#39;{0:04d}-{1:02d}-{2:02d}_{3:02d}:{4:02d}:{5:02d}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="o">*</span><span class="n">t</span><span class="p">))</span>
+    <span class="k">elif</span> <span class="n">usage</span> <span class="o">==</span> <span class="s">&#39;ruc&#39;</span><span class="p">:</span>
+        <span class="c"># This depends on the RUC version? Will break?</span>
+        <span class="n">strg</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;ruc2_252_{0:04d}{1:02d}{2:02d}_&#39;</span> <span class="o">+</span>
+                <span class="s">&#39;{3:02d}{4:02d}_{5:02d}0.nc&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="o">*</span><span class="n">t</span><span class="p">))</span>
+    <span class="k">elif</span> <span class="n">usage</span> <span class="o">==</span> <span class="s">&#39;output&#39;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">conven</span><span class="p">:</span>
+            <span class="c"># No convention set, assume DD/MM (I&#39;m biased)</span>
+            <span class="n">conven</span> <span class="o">=</span> <span class="s">&#39;full&#39;</span>
+        <span class="c"># Generates string for output file creation</span>
+        <span class="k">if</span> <span class="n">conven</span> <span class="o">==</span> <span class="s">&#39;DM&#39;</span><span class="p">:</span>
+            <span class="n">strg</span> <span class="o">=</span> <span class="s">&#39;{2:02d}{1:02d}_{3:02d}{4:02d}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="o">*</span><span class="n">t</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">conven</span> <span class="o">==</span> <span class="s">&#39;MD&#39;</span><span class="p">:</span>
+            <span class="n">strg</span> <span class="o">=</span> <span class="s">&#39;{1:02d}{2:02d}_{3:02d}{4:02d}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="o">*</span><span class="n">t</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">conven</span> <span class="o">==</span> <span class="s">&#39;full&#39;</span><span class="p">:</span>
+            <span class="n">strg</span> <span class="o">=</span> <span class="s">&#39;{0:04d}{1:02d}{2:02d}{3:02d}{4:02d}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="o">*</span><span class="n">t</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">print</span><span class="p">(</span><span class="s">&quot;Set convention for date format: DM or MD.&quot;</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">usage</span> <span class="o">==</span> <span class="s">&#39;dir&#39;</span><span class="p">:</span>
+        <span class="c"># Generates string for directory names</span>
+        <span class="c"># Needs strlen which sets smallest scope of time for string</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">strlen</span><span class="p">:</span>
+             <span class="k">print</span><span class="p">(</span><span class="s">&quot;No timescope strlen set; using hour as minimum.&quot;</span><span class="p">)</span>
+             <span class="n">strlen</span> <span class="o">=</span> <span class="s">&#39;hour&#39;</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="n">lookup_time</span><span class="p">(</span><span class="n">strlen</span><span class="p">)</span>
+        <span class="n">strg</span> <span class="o">=</span> <span class="s">&quot;{0:04d}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="s">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                <span class="p">[</span><span class="s">&quot;{0:02d}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">a</span><span class="p">)</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">t</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="p">]])</span>
+    <span class="k">elif</span> <span class="n">usage</span> <span class="o">==</span> <span class="s">&#39;skip&#39;</span><span class="p">:</span>
+        <span class="n">strg</span> <span class="o">=</span> <span class="n">t</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">print</span><span class="p">(</span><span class="s">&quot;Usage for string not valid.&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">Exception</span>
+    <span class="k">return</span> <span class="n">strg</span>
+</div>
+<div class="viewcode-block" id="lookup_time"><a class="viewcode-back" href="../../../WEM.utils.html#WEM.utils.GIS_tools.lookup_time">[docs]</a><span class="k">def</span> <span class="nf">lookup_time</span><span class="p">(</span><span class="nb">str</span><span class="p">):</span>
+    <span class="n">D</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;year&#39;</span><span class="p">:</span><span class="mi">0</span><span class="p">,</span> <span class="s">&#39;month&#39;</span><span class="p">:</span><span class="mi">1</span><span class="p">,</span> <span class="s">&#39;day&#39;</span><span class="p">:</span><span class="mi">2</span><span class="p">,</span> <span class="s">&#39;hour&#39;</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span> <span class="s">&#39;minute&#39;</span><span class="p">:</span><span class="mi">4</span><span class="p">,</span> <span class="s">&#39;second&#39;</span><span class="p">:</span><span class="mi">5</span><span class="p">}</span>
+    <span class="k">return</span> <span class="n">D</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+</div>
+<div class="viewcode-block" id="get_level_naming"><a class="viewcode-back" href="../../../WEM.utils.html#WEM.utils.GIS_tools.get_level_naming">[docs]</a><span class="k">def</span> <span class="nf">get_level_naming</span><span class="p">(</span><span class="n">va</span><span class="p">,</span><span class="n">lv</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="c">#lv = kwargs[&#39;lv&#39;]</span>
+
+    <span class="k">if</span> <span class="n">lv</span> <span class="o">&lt;</span> <span class="mi">1500</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">lv</span><span class="p">)</span><span class="o">+</span><span class="s">&#39;hPa&#39;</span>
+    <span class="k">elif</span> <span class="n">lv</span> <span class="o">==</span> <span class="mi">2000</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s">&#39;sfc&#39;</span>
+    <span class="k">elif</span> <span class="n">lv</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">&#39;K&#39;</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">lv</span>
+    <span class="k">elif</span> <span class="n">lv</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">&#39;PVU&#39;</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">lv</span>
+    <span class="k">elif</span> <span class="n">lv</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">&#39;km&#39;</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">lv</span>
+    <span class="k">elif</span> <span class="n">lv</span> <span class="o">==</span> <span class="s">&#39;all&#39;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">va</span> <span class="o">==</span> <span class="s">&#39;shear&#39;</span><span class="p">:</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="s">&#39;{0}to{1}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;bottom&#39;</span><span class="p">],</span><span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;top&#39;</span><span class="p">])</span>
+            <span class="k">return</span> <span class="n">name</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s">&#39;all_lev&#39;</span>
+
+</div>
+<div class="viewcode-block" id="check_vertical_coordinate"><a class="viewcode-back" href="../../../WEM.utils.html#WEM.utils.GIS_tools.check_vertical_coordinate">[docs]</a><span class="k">def</span> <span class="nf">check_vertical_coordinate</span><span class="p">(</span><span class="n">level</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Check to see what type of level is requested by user.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">level</span><span class="p">,(</span><span class="nb">basestring</span><span class="p">,</span><span class="nb">int</span><span class="p">)):</span>
+        <span class="n">lv</span> <span class="o">=</span> <span class="n">level</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">level</span><span class="p">,(</span><span class="nb">list</span><span class="p">,</span><span class="nb">tuple</span><span class="p">,</span><span class="n">N</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)):</span>
+        <span class="n">lv</span> <span class="o">=</span> <span class="n">level</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">print</span><span class="p">(</span><span class="s">&quot;What have you given me here? Level is&quot;</span>
+                <span class="s">&quot;{0}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">level</span><span class="p">)))</span>
+        <span class="k">raise</span> <span class="ne">Exception</span>
+
+    <span class="c"># import pdb; pdb.set_trace()</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lv</span><span class="p">,</span><span class="nb">int</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&#39;index&#39;</span>
+    <span class="k">if</span> <span class="n">lv</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">&#39;hPa&#39;</span><span class="p">):</span>
+        <span class="c"># import pdb; pdb.set_trace()</span>
+        <span class="k">if</span> <span class="n">lv</span><span class="p">[:</span><span class="mi">4</span><span class="p">]</span> <span class="o">==</span> <span class="s">&#39;2000&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s">&#39;surface&#39;</span>
+        <span class="k">elif</span> <span class="nb">int</span><span class="p">(</span><span class="n">lv</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;h&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&lt;</span> <span class="mi">2000</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s">&#39;isobaric&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">print</span><span class="p">(</span><span class="s">&quot;Pressure is in hPa. Requested value too large.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">Exception</span>
+
+    <span class="k">elif</span> <span class="n">lv</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">&#39;K&#39;</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&#39;isentropic&#39;</span>
+
+    <span class="k">elif</span> <span class="n">lv</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">&#39;PVU&#39;</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&#39;PV-surface&#39;</span>
+
+    <span class="k">elif</span> <span class="n">lv</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">&#39;km&#39;</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&#39;geometric&#39;</span>
+
+    <span class="k">elif</span> <span class="n">lv</span> <span class="o">==</span> <span class="s">&#39;all&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s">&#39;eta&#39;</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">print</span><span class="p">(</span><span class="s">&#39;Unknown vertical coordinate.&#39;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">Exception</span>
+</div>
+<div class="viewcode-block" id="closest"><a class="viewcode-back" href="../../../WEM.utils.html#WEM.utils.GIS_tools.closest">[docs]</a><span class="k">def</span> <span class="nf">closest</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span><span class="n">val</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Find index of closest value.</span>
+<span class="sd">    Only working on 1D array right now.</span>
+
+<span class="sd">    Inputs:</span>
+<span class="sd">    val     :   required value</span>
+<span class="sd">    arr     :   array of values</span>
+
+<span class="sd">    Output:</span>
+
+<span class="sd">    idx     :   index of closest value</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">idx</span> <span class="o">=</span> <span class="n">N</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">N</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">arr</span> <span class="o">-</span> <span class="n">val</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">idx</span>
+</div>
+<div class="viewcode-block" id="dstack_loop"><a class="viewcode-back" href="../../../WEM.utils.html#WEM.utils.GIS_tools.dstack_loop">[docs]</a><span class="k">def</span> <span class="nf">dstack_loop</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Tries to stack numpy array (data) into &#39;stack&#39; object (obj).</span>
+<span class="sd">    If obj doesn&#39;t exist, then initialise it</span>
+<span class="sd">    If obj does exist, stack data.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span><span class="n">N</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+        <span class="n">stack</span> <span class="o">=</span> <span class="n">N</span><span class="o">.</span><span class="n">dstack</span><span class="p">((</span><span class="n">obj</span><span class="p">,</span><span class="n">data</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">stack</span> <span class="o">=</span> <span class="n">data</span>
+
+    <span class="k">return</span> <span class="n">stack</span>
+</div>
+<div class="viewcode-block" id="dstack_loop_v2"><a class="viewcode-back" href="../../../WEM.utils.html#WEM.utils.GIS_tools.dstack_loop_v2">[docs]</a><span class="k">def</span> <span class="nf">dstack_loop_v2</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Need to set obj = 0 at start of loop in master script</span>
+
+<span class="sd">    Tries to stack numpy array (data) into &#39;stack&#39; object (obj).</span>
+<span class="sd">    If obj doesn&#39;t exist, then initialise it</span>
+<span class="sd">    If obj does exist, stack data.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">print</span> <span class="n">obj</span>
+    <span class="k">except</span> <span class="ne">NameError</span><span class="p">:</span>
+        <span class="n">stack</span> <span class="o">=</span> <span class="n">data</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">stack</span> <span class="o">=</span> <span class="n">N</span><span class="o">.</span><span class="n">dstack</span><span class="p">((</span><span class="n">obj</span><span class="p">,</span><span class="n">data</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">stack</span>
+</div>
+<div class="viewcode-block" id="vstack_loop"><a class="viewcode-back" href="../../../WEM.utils.html#WEM.utils.GIS_tools.vstack_loop">[docs]</a><span class="k">def</span> <span class="nf">vstack_loop</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Need to set obj = 0 at start of loop in master script</span>
+
+<span class="sd">    Tries to stack numpy array (data) into &#39;stack&#39; object (obj).</span>
+<span class="sd">    If obj doesn&#39;t exist, then initialise it</span>
+<span class="sd">    If obj does exist, stack data.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span><span class="n">N</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+        <span class="n">stack</span> <span class="o">=</span> <span class="n">N</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">obj</span><span class="p">,</span><span class="n">data</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">stack</span> <span class="o">=</span> <span class="n">data</span>
+
+    <span class="k">return</span> <span class="n">stack</span>
+
+</div>
+<div class="viewcode-block" id="generate_times"><a class="viewcode-back" href="../../../WEM.utils.html#WEM.utils.GIS_tools.generate_times">[docs]</a><span class="k">def</span> <span class="nf">generate_times</span><span class="p">(</span><span class="n">idate</span><span class="p">,</span><span class="n">fdate</span><span class="p">,</span><span class="n">interval</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Interval in seconds</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">i</span> <span class="o">=</span> <span class="n">calendar</span><span class="o">.</span><span class="n">timegm</span><span class="p">(</span><span class="n">idate</span><span class="p">)</span>
+    <span class="n">f</span> <span class="o">=</span> <span class="n">calendar</span><span class="o">.</span><span class="n">timegm</span><span class="p">(</span><span class="n">fdate</span><span class="p">)</span>
+    <span class="n">times</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">f</span><span class="p">,</span><span class="n">interval</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">times</span>
+</div>
+<div class="viewcode-block" id="generate_colours"><a class="viewcode-back" href="../../../WEM.utils.html#WEM.utils.GIS_tools.generate_colours">[docs]</a><span class="k">def</span> <span class="nf">generate_colours</span><span class="p">(</span><span class="n">M</span><span class="p">,</span><span class="n">n</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    M       :   Matplotlib instance</span>
+<span class="sd">    n       :   number of colours you want</span>
+
+<span class="sd">    Returns</span>
+
+<span class="sd">    Usage: when cycling over n plots, the colour should</span>
+<span class="sd">    be colourlist[n].</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">colourlist</span> <span class="o">=</span> <span class="p">[</span><span class="n">M</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">spectral</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">N</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.08</span><span class="p">,</span><span class="mf">0.97</span><span class="p">,</span><span class="n">n</span><span class="p">)]</span>
+    <span class="k">return</span> <span class="n">colourlist</span>
+</div>
+<div class="viewcode-block" id="get_sequence"><a class="viewcode-back" href="../../../WEM.utils.html#WEM.utils.GIS_tools.get_sequence">[docs]</a><span class="k">def</span> <span class="nf">get_sequence</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">sos</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Returns a sequence (tuple or list) for iteration.</span>
+<span class="sd">    Avoids an error for strings/integers.</span>
+<span class="sd">    SoS = 1 enables the check for a sequence of sequences (list of dates)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c"># If sos is True, then use its first element as an example.</span>
+    <span class="k">if</span> <span class="n">sos</span><span class="p">:</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">x</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">collections</span><span class="o">.</span><span class="n">Sequence</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="nb">basestring</span><span class="p">):</span>
+        <span class="c"># i.e., if y is a list or tuple</span>
+        <span class="k">return</span> <span class="n">x</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c"># make a one-element list</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">x</span><span class="p">,]</span>
+</div>
+<div class="viewcode-block" id="convert_tuple_to_dntimes"><a class="viewcode-back" href="../../../WEM.utils.html#WEM.utils.GIS_tools.convert_tuple_to_dntimes">[docs]</a><span class="k">def</span> <span class="nf">convert_tuple_to_dntimes</span><span class="p">(</span><span class="n">times</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Convert tuple or tuple of tuples to datenum date format.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">timelist</span> <span class="o">=</span> <span class="n">get_sequence</span><span class="p">(</span><span class="n">times</span><span class="p">,</span><span class="n">sos</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">dntimes</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">timelist</span><span class="p">:</span>
+        <span class="n">dntimes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">calendar</span><span class="o">.</span><span class="n">timegm</span><span class="p">(</span><span class="n">t</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">dntimes</span>
+</div>
+<div class="viewcode-block" id="ensure_datenum"><a class="viewcode-back" href="../../../WEM.utils.html#WEM.utils.GIS_tools.ensure_datenum">[docs]</a><span class="k">def</span> <span class="nf">ensure_datenum</span><span class="p">(</span><span class="n">times</span><span class="p">,</span><span class="n">fmt</span><span class="o">=</span><span class="s">&#39;list&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Make sure times are in list-of-datenums format.</span>
+<span class="sd">    If not, convert them.</span>
+
+<span class="sd">    Possibilities:</span>
+<span class="sd">    times = 123456                                      #1</span>
+<span class="sd">    times = (123456,)                                   #2</span>
+<span class="sd">    times = (123456,234567)                             #3</span>
+<span class="sd">    times = (2011,12,1,18,0,0)                          #4</span>
+<span class="sd">    times = ((2011,12,1,18,0,0),(2011,12,2,6,0,0))      #5</span>
+
+<span class="sd">    fmt     :   whether to return list of integers or an integer</span>
+<span class="sd">                &#39;int&#39; or &#39;list&#39;</span>
+
+<span class="sd">    Output:</span>
+<span class="sd">    dntimes = (123456,) or (123456,234567)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">times</span><span class="p">,</span><span class="nb">int</span><span class="p">):</span>
+        <span class="n">dntimes</span> <span class="o">=</span> <span class="p">[</span><span class="n">times</span><span class="p">,]</span> <span class="c">#1</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">times</span><span class="p">,</span><span class="nb">basestring</span><span class="p">):</span>
+        <span class="k">print</span><span class="p">(</span><span class="s">&quot;Don&#39;t give me strings...&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">Exception</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">times</span><span class="p">,</span><span class="n">collections</span><span class="o">.</span><span class="n">Sequence</span><span class="p">):</span> <span class="c">#2,3,4,5</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">times</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="nb">int</span><span class="p">):</span> <span class="c">#5</span>
+            <span class="n">dntimes</span> <span class="o">=</span> <span class="n">convert_tuple_to_dntimes</span><span class="p">(</span><span class="n">times</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">times</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">&lt;</span><span class="mi">3000</span><span class="p">:</span> <span class="c">#4</span>
+            <span class="n">dntimes</span> <span class="o">=</span> <span class="n">convert_tuple_to_dntimes</span><span class="p">(</span><span class="n">times</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span> <span class="c">#2,3</span>
+            <span class="n">dntimes</span> <span class="o">=</span> <span class="n">times</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">fmt</span> <span class="o">==</span> <span class="s">&#39;list&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">dntimes</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">1</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">dntimes</span>
+    <span class="k">elif</span> <span class="p">(</span><span class="n">fmt</span> <span class="o">==</span> <span class="s">&#39;int&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">dntimes</span><span class="p">)</span><span class="o">==</span><span class="mi">1</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">dntimes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">print</span><span class="p">(</span><span class="s">&quot;Nonsense format choice.&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">Exception</span>
+</div>
+<div class="viewcode-block" id="ensure_timetuple"><a class="viewcode-back" href="../../../WEM.utils.html#WEM.utils.GIS_tools.ensure_timetuple">[docs]</a><span class="k">def</span> <span class="nf">ensure_timetuple</span><span class="p">(</span><span class="n">times</span><span class="p">,</span><span class="n">fmt</span><span class="o">=</span><span class="s">&#39;list&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    MAke sure time(s) are in six-item tuple format</span>
+<span class="sd">    (YYYY,MM,DD,HH,MM,SS)</span>
+
+<span class="sd">    fmt     :   whether to return a list of tuples or single tuple.</span>
+<span class="sd">                &#39;list&#39; or &#39;single&#39;</span>
+
+<span class="sd">    Possibilities:</span>
+<span class="sd">    times = 123456                                      #1</span>
+<span class="sd">    times = (123456,)                                   #2</span>
+<span class="sd">    times = (123456,234567)                             #3</span>
+<span class="sd">    times = (2011,12,1,18,0,0)                          #4</span>
+<span class="sd">    times = ((2011,12,1,18,0,0),(2011,12,2,6,0,0))      #5</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">times</span><span class="p">,</span><span class="nb">int</span><span class="p">):</span>
+        <span class="n">tttimes</span> <span class="o">=</span> <span class="p">[</span><span class="n">calendar</span><span class="o">.</span><span class="n">timegm</span><span class="p">(</span><span class="n">times</span><span class="p">),]</span> <span class="c">#1</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">times</span><span class="p">,</span><span class="nb">basestring</span><span class="p">):</span>
+        <span class="k">print</span><span class="p">(</span><span class="s">&quot;Don&#39;t give me strings...&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">Exception</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">times</span><span class="p">,</span><span class="n">collections</span><span class="o">.</span><span class="n">Sequence</span><span class="p">):</span> <span class="c">#2,3,4,5</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">times</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="nb">int</span><span class="p">):</span> <span class="c">#5</span>
+            <span class="n">tttimes</span> <span class="o">=</span> <span class="n">times</span>
+        <span class="k">elif</span> <span class="n">times</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">&lt;</span><span class="mi">3000</span><span class="p">:</span> <span class="c">#4</span>
+            <span class="n">tttimes</span> <span class="o">=</span> <span class="p">[</span><span class="n">times</span><span class="p">,]</span>
+        <span class="k">else</span><span class="p">:</span> <span class="c">#2,3</span>
+            <span class="n">tttimes</span> <span class="o">=</span> <span class="p">[</span><span class="n">calendar</span><span class="o">.</span><span class="n">timegm</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">times</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">fmt</span> <span class="o">==</span> <span class="s">&#39;list&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">tttimes</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">1</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">tttimes</span>
+    <span class="k">elif</span> <span class="p">(</span><span class="n">fmt</span> <span class="o">==</span> <span class="s">&#39;single&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">tttimes</span><span class="p">)</span><span class="o">==</span><span class="mi">1</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">tttimes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">print</span><span class="p">(</span><span class="s">&quot;Nonsense format choice.&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">Exception</span>
+</div>
+<div class="viewcode-block" id="get_netcdf_naming"><a class="viewcode-back" href="../../../WEM.utils.html#WEM.utils.GIS_tools.get_netcdf_naming">[docs]</a><span class="k">def</span> <span class="nf">get_netcdf_naming</span><span class="p">(</span><span class="n">model</span><span class="p">,</span><span class="n">t</span><span class="p">,</span><span class="n">dom</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    By default:</span>
+<span class="sd">    wrfout files don&#39;t have an extension</span>
+<span class="sd">    other files have .nc extension (convert first)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">model</span><span class="o">==</span><span class="s">&#39;wrfout&#39;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">dom</span><span class="p">:</span>
+            <span class="k">print</span><span class="p">(</span><span class="s">&quot;No domain specified; using domain #1.&quot;</span><span class="p">)</span>
+            <span class="n">dom</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">fname</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;wrfout_d{0:02d}_{1:04d}-{2:02d}-{3:02d}_{4:02d}:{5:02d}:{6:02d}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">dom</span><span class="p">,</span><span class="o">*</span><span class="n">t</span><span class="p">))</span>
+    <span class="k">elif</span> <span class="n">model</span> <span class="o">==</span> <span class="s">&#39;ruc&#39;</span><span class="p">:</span>
+        <span class="c"># This depends on the RUC version? Will break?</span>
+        <span class="n">fname</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;ruc2_252_{0:04d}{1:02d}{2:02d}_{3:02d}{4:02d}_{5:02d}0.nc&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="o">*</span><span class="n">t</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">print</span><span class="p">(</span><span class="s">&quot;Model format not supported yet.&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">Exception</span>
+    <span class="k">return</span> <span class="n">fname</span>
+</div>
+<div class="viewcode-block" id="determine_model"><a class="viewcode-back" href="../../../WEM.utils.html#WEM.utils.GIS_tools.determine_model">[docs]</a><span class="k">def</span> <span class="nf">determine_model</span><span class="p">(</span><span class="n">fname</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return model depending on naming convention.</span>
+
+<span class="sd">    If no model exists, return false.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">models</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;wrfout_d&#39;</span><span class="p">:</span><span class="s">&#39;wrfout&#39;</span><span class="p">,</span><span class="s">&#39;ruc2&#39;</span><span class="p">:</span><span class="s">&#39;ruc&#39;</span><span class="p">}</span>
+
+    <span class="k">for</span> <span class="n">k</span><span class="p">,</span><span class="n">v</span> <span class="ow">in</span> <span class="n">models</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">fname</span><span class="p">[:</span><span class="mi">10</span><span class="p">]:</span>
+            <span class="k">return</span> <span class="n">v</span>
+
+    <span class="k">return</span> <span class="bp">False</span>
+</div>
+<div class="viewcode-block" id="save_data"><a class="viewcode-back" href="../../../WEM.utils.html#WEM.utils.GIS_tools.save_data">[docs]</a><span class="k">def</span> <span class="nf">save_data</span><span class="p">(</span><span class="n">data</span><span class="p">,</span><span class="n">folder</span><span class="p">,</span><span class="n">fname</span><span class="p">,</span><span class="n">format</span><span class="o">=</span><span class="s">&#39;pickle&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Save array to file.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c"># Strip file extension given</span>
+    <span class="n">fname_base</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">fname</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="c"># Check for folder, create if necessary</span>
+    <span class="n">trycreate</span><span class="p">(</span><span class="n">folder</span><span class="p">)</span>
+    <span class="c"># Create absolute path</span>
+    <span class="n">fpath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">folder</span><span class="p">,</span><span class="n">fname_base</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">format</span><span class="o">==</span><span class="s">&#39;pickle&#39;</span><span class="p">:</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">fpath</span><span class="o">+</span><span class="s">&#39;.pickle&#39;</span><span class="p">,</span><span class="s">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">data</span><span class="p">,</span><span class="n">f</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">format</span><span class="o">==</span><span class="s">&#39;numpy&#39;</span><span class="p">:</span>
+        <span class="n">N</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">fpath</span><span class="p">,</span><span class="n">data</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">format</span><span class="o">==</span><span class="s">&#39;json&#39;</span><span class="p">:</span>
+        <span class="n">j</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">fpath</span><span class="o">+</span><span class="s">&#39;.json&#39;</span><span class="p">,</span><span class="s">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="k">print</span> <span class="o">&gt;&gt;</span> <span class="n">f</span><span class="p">,</span><span class="n">j</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">print</span><span class="p">(</span><span class="s">&quot;Give suitable saving format.&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">Exception</span>
+
+    <span class="k">print</span><span class="p">(</span><span class="s">&quot;Saved file {0} to {1}.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span><span class="n">folder</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="load_data"><a class="viewcode-back" href="../../../WEM.utils.html#WEM.utils.GIS_tools.load_data">[docs]</a><span class="k">def</span> <span class="nf">load_data</span><span class="p">(</span><span class="n">folder</span><span class="p">,</span><span class="n">fname</span><span class="p">,</span><span class="n">format</span><span class="o">=</span><span class="s">&#39;pickle&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Load array from file.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">fname2</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">fname</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">fpath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">folder</span><span class="p">,</span><span class="n">fname2</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">format</span><span class="o">==</span><span class="s">&#39;pickle&#39;</span><span class="p">:</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">fpath</span><span class="o">+</span><span class="s">&#39;.pickle&#39;</span><span class="p">,</span><span class="s">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">format</span><span class="o">==</span><span class="s">&#39;numpy&#39;</span><span class="p">:</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">N</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">fpath</span><span class="o">+</span><span class="s">&#39;.npy&#39;</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">format</span><span class="o">==</span><span class="s">&#39;json&#39;</span><span class="p">:</span>
+        <span class="k">print</span><span class="p">(</span><span class="s">&quot;JSON stuff not coded yet.&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">Exception</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">print</span><span class="p">(</span><span class="s">&quot;Give suitable loading format.&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">Exception</span>
+
+    <span class="k">print</span><span class="p">(</span><span class="s">&quot;Loaded file {0} from {1}.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span><span class="n">folder</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">data</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">.  documentation</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, Author.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

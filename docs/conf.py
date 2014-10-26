@@ -19,8 +19,14 @@ import os
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
-sys.path.insert(0, os.path.abspath('/Users/johnlawson/gitprojects/WEM'))
-sys.path.append(('/Users/johnlawson/gitprojects/WEM','/Users/johnlawson/gitprojects/WEM/postWRF','/Users/johnlawson/gitprojects/WEM/postWRF/postWRF'))
+# sys.path.insert(0, os.path.abspath("../"))
+sys.path.append('/Users/johnlawson/gitprojects/WEM')
+sys.path.append('/Users/johnlawson/gitprojects/WEM/lazyWRF')
+sys.path.append('/Users/johnlawson/gitprojects/WEM/lazyWRF/lazyWRF')
+sys.path.append('/Users/johnlawson/gitprojects/WEM/utils')
+sys.path.append('/Users/johnlawson/gitprojects/WEM/postWRF/postWRF')
+sys.path.append('/Users/johnlawson/gitprojects/WEM/postWRF/')
+# sys.path.append(('/Users/johnlawson/gitprojects/WEM','/Users/johnlawson/gitprojects/WEM/postWRF','/Users/johnlawson/gitprojects/WEM/postWRF/postWRF'))
 
 # -- General configuration ------------------------------------------------
 
@@ -103,7 +109,7 @@ pygments_style = 'sphinx'
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-html_theme = 'default'
+html_theme = 'sphinxdoc'
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
@@ -158,7 +164,7 @@ html_static_path = ['_static']
 #html_domain_indices = True
 
 # If false, no index is generated.
-#html_use_index = True
+html_use_index = True
 
 # If true, the index is split into individual pages for each letter.
 #html_split_index = False
@@ -331,3 +337,5 @@ epub_exclude_files = ['search.html']
 
 # If false, no index is generated.
 #epub_use_index = True
+
+autoclass_content = 'both'

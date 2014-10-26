@@ -1,0 +1,143 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>WEM.lazyWRF.lazyWRF.getnam &mdash; .  documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <link rel="top" title=".  documentation" href="../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">.  documentation</a> &raquo;</li>
+          <li><a href="../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for WEM.lazyWRF.lazyWRF.getnam</h1><div class="highlight"><pre>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">pdb</span>
+
+<span class="c"># Specify type of file required</span>
+<span class="n">data</span> <span class="o">=</span> <span class="s">&#39;fcst&#39;</span>
+<span class="c">#data = &#39;anl&#39;</span>
+
+
+<span class="c"># Dates of initialisation YYYYMMDD, list of strings</span>
+<span class="c">#dates = [&#39;201104{0:02d}&#39;.format(n) for n in (19,20)]</span>
+<span class="n">dates</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;20110419&#39;</span><span class="p">]</span>
+<span class="c"># Hours of initialisation HH, list of strings</span>
+<span class="n">hours</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;00&#39;</span><span class="p">,</span><span class="s">&#39;12&#39;</span><span class="p">]</span>
+
+<span class="c"># For forecasts only</span>
+<span class="c"># Maximum forecast time to download (inclusive)</span>
+<span class="n">Tmax</span> <span class="o">=</span> <span class="mi">48</span>
+<span class="c"># Interval (hr) to fetch forecasts</span>
+<span class="n">Tint</span> <span class="o">=</span> <span class="mi">3</span>
+<span class="c"># If date is before ####, download grib1, use this:</span>
+<span class="n">age</span> <span class="o">=</span> <span class="s">&#39;old&#39;</span>
+
+<div class="viewcode-block" id="get_anl"><a class="viewcode-back" href="../../../../WEM.lazyWRF.lazyWRF.html#WEM.lazyWRF.lazyWRF.getnam.get_anl">[docs]</a><span class="k">def</span> <span class="nf">get_anl</span><span class="p">(</span><span class="n">dates</span><span class="p">,</span><span class="n">hours</span><span class="p">,</span><span class="o">*</span><span class="n">args</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">dates</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="n">hours</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">age</span><span class="o">==</span><span class="s">&#39;new&#39;</span><span class="p">:</span>
+                <span class="n">command</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;wget &quot;http://nomads.ncdc.noaa.gov/data/namanl/&#39;</span><span class="o">+</span>
+                            <span class="n">d</span><span class="p">[:</span><span class="mi">6</span><span class="p">]</span><span class="o">+</span><span class="s">&#39;/&#39;</span><span class="o">+</span> <span class="n">d</span><span class="o">+</span><span class="s">&#39;/namanl_4_&#39;</span><span class="o">+</span><span class="n">d</span><span class="o">+</span><span class="s">&#39;_&#39;</span><span class="o">+</span><span class="n">h</span><span class="o">+</span><span class="s">&#39;00_000.grb2&quot;&#39;</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">age</span><span class="o">==</span><span class="s">&#39;old&#39;</span><span class="p">:</span>
+                <span class="n">command</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;wget &quot;http://nomads.ncdc.noaa.gov/data/namanl/&#39;</span><span class="o">+</span>
+                            <span class="n">d</span><span class="p">[:</span><span class="mi">6</span><span class="p">]</span><span class="o">+</span><span class="s">&#39;/&#39;</span><span class="o">+</span> <span class="n">d</span><span class="o">+</span><span class="s">&#39;/namanl_218_&#39;</span><span class="o">+</span><span class="n">d</span><span class="o">+</span><span class="s">&#39;_&#39;</span><span class="o">+</span><span class="n">h</span><span class="o">+</span><span class="s">&#39;00_000.grb&quot;&#39;</span><span class="p">)</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="n">command</span><span class="p">)</span>
+                </div>
+<div class="viewcode-block" id="get_218fcst"><a class="viewcode-back" href="../../../../WEM.lazyWRF.lazyWRF.html#WEM.lazyWRF.lazyWRF.getnam.get_218fcst">[docs]</a><span class="k">def</span> <span class="nf">get_218fcst</span><span class="p">(</span><span class="n">dates</span><span class="p">,</span><span class="n">hours</span><span class="p">,</span><span class="n">Tmax</span><span class="p">,</span><span class="n">Tint</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">dates</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="n">hours</span><span class="p">:</span>
+            <span class="n">fhs</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">Tmax</span><span class="o">+</span><span class="n">Tint</span><span class="p">,</span><span class="n">Tint</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">fh</span> <span class="ow">in</span> <span class="n">fhs</span><span class="p">:</span>
+                <span class="n">fpad</span> <span class="o">=</span> <span class="s">&quot;</span><span class="si">%03d</span><span class="s">&quot;</span> <span class="o">%</span><span class="n">fh</span>
+                <span class="k">if</span> <span class="n">age</span> <span class="o">==</span> <span class="s">&#39;old&#39;</span><span class="p">:</span>
+                    <span class="n">command</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;wget &quot;http://nomads.ncdc.noaa.gov/data/nam/&#39;</span><span class="o">+</span>
+                                <span class="n">d</span><span class="p">[:</span><span class="mi">6</span><span class="p">]</span><span class="o">+</span><span class="s">&#39;/&#39;</span><span class="o">+</span> <span class="n">d</span><span class="o">+</span><span class="s">&#39;/nam_218_&#39;</span><span class="o">+</span><span class="n">d</span><span class="o">+</span><span class="s">&#39;_&#39;</span><span class="o">+</span><span class="n">h</span><span class="o">+</span><span class="s">&#39;00_&#39;</span><span class="o">+</span><span class="n">fpad</span><span class="o">+</span><span class="s">&#39;.grb&quot;&#39;</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="n">age</span> <span class="o">==</span> <span class="s">&#39;new&#39;</span><span class="p">:</span> <span class="c"># doesn&#39;t seem to work</span>
+                    <span class="n">command</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;wget &quot;http://nomads.ncdc.noaa.gov/data/nam/&#39;</span><span class="o">+</span>
+                                <span class="n">d</span><span class="p">[:</span><span class="mi">6</span><span class="p">]</span><span class="o">+</span><span class="s">&#39;/&#39;</span><span class="o">+</span> <span class="n">d</span><span class="o">+</span><span class="s">&#39;/nam_4_&#39;</span><span class="o">+</span><span class="n">d</span><span class="o">+</span><span class="s">&#39;_&#39;</span><span class="o">+</span><span class="n">h</span><span class="o">+</span><span class="s">&#39;00_&#39;</span><span class="o">+</span><span class="n">fpad</span><span class="o">+</span><span class="s">&#39;.grb2&quot;&#39;</span><span class="p">)</span>
+                   
+                <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="n">command</span><span class="p">)</span>
+</div>
+<span class="n">CMND</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;fcst&#39;</span><span class="p">:</span><span class="n">get_218fcst</span><span class="p">,</span> <span class="s">&#39;anl&#39;</span><span class="p">:</span><span class="n">get_anl</span><span class="p">}</span>
+
+<span class="n">CMND</span><span class="p">[</span><span class="n">data</span><span class="p">](</span><span class="n">dates</span><span class="p">,</span><span class="n">hours</span><span class="p">,</span><span class="n">Tmax</span><span class="p">,</span><span class="n">Tint</span><span class="p">)</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">.  documentation</a> &raquo;</li>
+          <li><a href="../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, Author.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

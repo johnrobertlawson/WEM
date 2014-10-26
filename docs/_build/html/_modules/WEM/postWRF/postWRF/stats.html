@@ -1,0 +1,415 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>WEM.postWRF.postWRF.stats &mdash; .  documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <link rel="top" title=".  documentation" href="../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">.  documentation</a> &raquo;</li>
+          <li><a href="../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for WEM.postWRF.postWRF.stats</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Scripts involving statistics or data manipulation here.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">N</span>
+<span class="kn">import</span> <span class="nn">pdb</span>
+<span class="kn">import</span> <span class="nn">scipy</span>
+<span class="kn">import</span> <span class="nn">scipy.signal</span>
+
+<span class="kn">from</span> <span class="nn">wrfout</span> <span class="kn">import</span> <span class="n">WRFOut</span>
+
+<div class="viewcode-block" id="std"><a class="viewcode-back" href="../../../../WEM.postWRF.postWRF.html#WEM.postWRF.postWRF.stats.std">[docs]</a><span class="k">def</span> <span class="nf">std</span><span class="p">(</span><span class="n">ncfiles</span><span class="p">,</span><span class="n">va</span><span class="p">,</span><span class="n">tidx</span><span class="p">,</span><span class="n">lvidx</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Find standard deviation in along axis of ensemble</span>
+<span class="sd">    members. Returns matrix x-y for plotting</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">nc</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">ncfiles</span><span class="p">):</span>
+        <span class="n">W</span> <span class="o">=</span> <span class="n">WRFOut</span><span class="p">(</span><span class="n">nc</span><span class="p">)</span>
+        <span class="n">slices</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;lv&#39;</span><span class="p">:</span><span class="n">lvidx</span><span class="p">,</span> <span class="s">&#39;t&#39;</span><span class="p">:</span><span class="n">tidx</span><span class="p">}</span>
+        <span class="n">va_array</span> <span class="o">=</span> <span class="n">W</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">va</span><span class="p">,</span><span class="n">slices</span><span class="p">)</span>
+        <span class="n">dims</span> <span class="o">=</span> <span class="n">va_array</span><span class="o">.</span><span class="n">shape</span>
+
+        <span class="k">if</span> <span class="n">n</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span>
+            <span class="n">all_members</span> <span class="o">=</span> <span class="n">N</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="nb">len</span><span class="p">(</span><span class="n">ncfiles</span><span class="p">),</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="n">dims</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">],</span><span class="n">dims</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]])</span>
+        <span class="n">all_members</span><span class="p">[</span><span class="n">n</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,:,:]</span> <span class="o">=</span> <span class="n">va_array</span><span class="p">[</span><span class="o">...</span><span class="p">]</span>
+
+    <span class="n">std</span> <span class="o">=</span> <span class="n">N</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">all_members</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">([</span><span class="n">dims</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">],</span><span class="n">dims</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]])</span>
+    <span class="c"># pdb.set_trace()</span>
+    <span class="k">return</span> <span class="n">std</span>
+</div>
+<div class="viewcode-block" id="gauss_kern"><a class="viewcode-back" href="../../../../WEM.postWRF.postWRF.html#WEM.postWRF.postWRF.stats.gauss_kern">[docs]</a><span class="k">def</span> <span class="nf">gauss_kern</span><span class="p">(</span><span class="n">size</span><span class="p">,</span> <span class="n">sizey</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Taken from scipy cookbook online.</span>
+<span class="sd">    Returns a normalized 2D gauss kernel array for convolutions &quot;&quot;&quot;</span>
+    <span class="n">size</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">size</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">sizey</span><span class="p">:</span>
+        <span class="n">sizey</span> <span class="o">=</span> <span class="n">size</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">sizey</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">sizey</span><span class="p">)</span>
+    <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">mgrid</span><span class="p">[</span><span class="o">-</span><span class="n">size</span><span class="p">:</span><span class="n">size</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="n">sizey</span><span class="p">:</span><span class="n">sizey</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">g</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="n">x</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="nb">float</span><span class="p">(</span><span class="n">size</span><span class="p">)</span><span class="o">+</span><span class="n">y</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="nb">float</span><span class="p">(</span><span class="n">sizey</span><span class="p">)))</span>
+    <span class="k">return</span> <span class="n">g</span> <span class="o">/</span> <span class="n">g</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="gauss_smooth"><a class="viewcode-back" href="../../../../WEM.postWRF.postWRF.html#WEM.postWRF.postWRF.stats.gauss_smooth">[docs]</a><span class="k">def</span> <span class="nf">gauss_smooth</span><span class="p">(</span><span class="n">im</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">ny</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">pad</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">pad_values</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Taken from scipy cookbook online.</span>
+<span class="sd">    Blur the image by convolving with a gaussian kernel of typical</span>
+<span class="sd">    size n. The optional keyword argument ny allows for a different</span>
+<span class="sd">    size in the y direction.</span>
+
+<span class="sd">    Pad     :   put zeros on edge of length n so that output</span>
+<span class="sd">                array equals input array size.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c"># Create list from fill values</span>
+    <span class="k">if</span> <span class="n">pad_values</span> <span class="o">==</span> <span class="s">&#39;nan&#39;</span><span class="p">:</span>
+        <span class="n">constant_values</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">constant_values</span> <span class="o">=</span> <span class="p">[</span><span class="n">pad_values</span><span class="p">,]</span>
+
+    <span class="n">g</span> <span class="o">=</span> <span class="n">gauss_kern</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">sizey</span><span class="o">=</span><span class="n">ny</span><span class="p">)</span>
+    <span class="n">improc</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">signal</span><span class="o">.</span><span class="n">convolve</span><span class="p">(</span><span class="n">im</span><span class="p">,</span><span class="n">g</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s">&#39;valid&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">pad</span><span class="p">:</span>
+        <span class="n">improc</span> <span class="o">=</span> <span class="n">N</span><span class="o">.</span><span class="n">pad</span><span class="p">(</span><span class="n">improc</span><span class="p">,</span><span class="n">n</span><span class="p">,</span><span class="s">&#39;constant&#39;</span><span class="p">,</span><span class="n">constant_values</span><span class="o">=</span><span class="n">constant_values</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">pad_values</span><span class="o">==</span><span class="s">&#39;nan&#39;</span><span class="p">:</span>
+            <span class="n">improc</span><span class="p">[</span><span class="n">improc</span><span class="o">==</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">N</span><span class="o">.</span><span class="n">nan</span>
+    <span class="k">return</span><span class="p">(</span><span class="n">improc</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="compute_diff_energy"><a class="viewcode-back" href="../../../../WEM.postWRF.postWRF.html#WEM.postWRF.postWRF.stats.compute_diff_energy">[docs]</a><span class="k">def</span> <span class="nf">compute_diff_energy</span><span class="p">(</span><span class="n">ptype</span><span class="p">,</span><span class="n">energy</span><span class="p">,</span><span class="n">files</span><span class="p">,</span><span class="n">times</span><span class="p">,</span><span class="n">upper</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span><span class="n">lower</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                        <span class="n">d_save</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">d_return</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">d_fname</span><span class="o">=</span><span class="s">&#39;diff_energy_data&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This method computes difference kinetic energy (DKE)</span>
+<span class="sd">    or different total energy (DTE, including temp)</span>
+<span class="sd">    between WRFout files for a given depth of the</span>
+<span class="sd">    atmosphere, at given time intervals</span>
+
+<span class="sd">    Inputs:</span>
+
+<span class="sd">    :param ptype:   &#39;sum_z&#39; or &#39;sum_xyz&#39;</span>
+<span class="sd">    :param energy:   &#39;kinetic&#39; or &#39;total&#39;</span>
+<span class="sd">    :param upper:   upper limit of vertical integration</span>
+<span class="sd">    :param lower:   lower limit of vertical integration</span>
+<span class="sd">    :param files:   abs paths to all wrfout files</span>
+<span class="sd">    :param times:   times for computations - tuple format</span>
+<span class="sd">    :param d_save:   save dictionary to folder (path to folder)</span>
+<span class="sd">    :param d_return:   return dictionary (True or False)</span>
+<span class="sd">    :param d_fname:   custom filename</span>
+
+<span class="sd">    Outputs:</span>
+
+<span class="sd">    :returns: N.ndarray -- time series or list of 2D arrays</span>
+
+<span class="sd">    ptype &#39;sum_z&#39; integrates vertically between lower and</span>
+<span class="sd">    upper hPa and creates a time series.</span>
+
+<span class="sd">    ptype &#39;sum_xyz&#39; integrates over the 3D space (again between</span>
+<span class="sd">    the upper and lower bounds) and creates 2D arrays.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">d_save</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">d_save</span><span class="p">,</span><span class="nb">basestring</span><span class="p">):</span>
+        <span class="n">d_save</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s">&#39;HOME&#39;</span><span class="p">]</span>
+
+    <span class="c"># First, save or output? Can&#39;t be neither!</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">d_save</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">d_return</span><span class="p">:</span>
+        <span class="k">print</span><span class="p">(</span><span class="s">&quot;Pick save or output, otherwise it&#39;s a waste of computer&quot;</span>
+                <span class="s">&quot;power&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">Exception</span>
+
+    <span class="k">print</span><span class="p">(</span><span class="s">&quot;Saving pickle file to {0}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">d_save</span><span class="p">))</span>
+    <span class="c"># Look up the method to use depending on type of plot</span>
+    <span class="n">PLOTS</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;sum_z&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">DE_z</span><span class="p">,</span> <span class="s">&#39;sum_xyz&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">DE_xyz</span><span class="p">}</span>
+
+    <span class="k">print</span><span class="p">(</span><span class="s">&#39;Get sequence of time&#39;</span><span class="p">)</span>
+    <span class="c"># Creates sequence of times</span>
+    <span class="n">ts</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">get_sequence</span><span class="p">(</span><span class="n">times</span><span class="p">)</span>
+
+    <span class="c"># Dictionary of data</span>
+    <span class="n">DATA</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">print</span><span class="p">(</span><span class="s">&#39;Get permutations&#39;</span><span class="p">)</span>
+    <span class="c"># Get all permutations of files</span>
+    <span class="n">nperm</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">itertools</span><span class="o">.</span><span class="n">combinations</span><span class="p">(</span><span class="n">files</span><span class="p">,</span><span class="mi">2</span><span class="p">)))</span>
+    <span class="k">print</span><span class="p">(</span><span class="s">&#39;Start loop&#39;</span><span class="p">)</span>
+    <span class="c"># pdb.set_trace()</span>
+    <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">perm</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">itertools</span><span class="o">.</span><span class="n">combinations</span><span class="p">(</span><span class="n">files</span><span class="p">,</span><span class="mi">2</span><span class="p">)):</span>
+        <span class="k">print</span><span class="p">(</span><span class="s">&quot;No. {0} from {1} permutations&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="n">nperm</span><span class="p">))</span>
+        <span class="n">perm_start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        <span class="n">DATA</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">n</span><span class="p">)]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">f1</span><span class="p">,</span> <span class="n">f2</span> <span class="o">=</span> <span class="n">perm</span>
+        <span class="n">W1</span> <span class="o">=</span> <span class="n">WRFOut</span><span class="p">(</span><span class="n">f1</span><span class="p">)</span>
+        <span class="n">W2</span> <span class="o">=</span> <span class="n">WRFOut</span><span class="p">(</span><span class="n">f2</span><span class="p">)</span>
+        <span class="k">print</span><span class="p">(</span><span class="s">&#39;WRFOuts loaded.&#39;</span><span class="p">)</span>
+        <span class="c">#pdb.set_trace()</span>
+        <span class="c"># Make sure times are the same in both files</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">N</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">N</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">W1</span><span class="o">.</span><span class="n">wrf_times</span><span class="p">)</span> <span class="o">==</span> <span class="n">N</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">W2</span><span class="o">.</span><span class="n">wrf_times</span><span class="p">)):</span>
+            <span class="k">print</span><span class="p">(</span><span class="s">&quot;Times are not identical between input files.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">Exception</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">print</span><span class="p">(</span><span class="s">&quot;Passed check for identical timestamps between &quot;</span>
+                  <span class="s">&quot;NetCDF files&quot;</span><span class="p">)</span>
+
+        <span class="c"># Find indices of each time</span>
+        <span class="k">print</span><span class="p">(</span><span class="s">&#39;Finding time indices&#39;</span><span class="p">)</span>
+        <span class="n">t_idx</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">ts</span><span class="p">:</span>
+            <span class="n">t_idx</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">W1</span><span class="o">.</span><span class="n">get_time_idx</span><span class="p">(</span><span class="n">t</span><span class="p">))</span>
+
+        <span class="k">print</span><span class="p">(</span><span class="s">&quot;Calculating values now...&quot;</span><span class="p">)</span>
+        <span class="n">DATA</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">n</span><span class="p">)][</span><span class="s">&#39;times&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ts</span>
+        <span class="n">DATA</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">n</span><span class="p">)][</span><span class="s">&#39;values&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">t_idx</span><span class="p">:</span>
+            <span class="n">DATA</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">n</span><span class="p">)][</span><span class="s">&#39;values&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">PLOTS</span><span class="p">[</span><span class="n">ptype</span><span class="p">](</span><span class="n">W1</span><span class="o">.</span><span class="n">nc</span><span class="p">,</span><span class="n">W2</span><span class="o">.</span><span class="n">nc</span><span class="p">,</span><span class="n">t</span><span class="p">,</span>
+                                            <span class="n">energy</span><span class="p">,</span><span class="n">lower</span><span class="p">,</span><span class="n">upper</span><span class="p">))</span>
+        <span class="n">DATA</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">n</span><span class="p">)][</span><span class="s">&#39;file1&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">f1</span>
+        <span class="n">DATA</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">n</span><span class="p">)][</span><span class="s">&#39;file2&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">f2</span>
+
+        <span class="k">print</span> <span class="s">&quot;Calculation #{0} took {1:2.2f} seconds.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span><span class="o">-</span><span class="n">perm_start</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">d_return</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">d_save</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">DATA</span>
+    <span class="k">elif</span> <span class="n">d_save</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">d_return</span><span class="p">:</span>
+        <span class="c">#self.save_data(DATA,d_save,d_fname)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">save_data</span><span class="p">(</span><span class="n">DATA</span><span class="p">,</span><span class="n">d_save</span><span class="p">,</span><span class="n">d_fname</span><span class="p">)</span>
+        <span class="c">#self.json_data(DATA,d_save,d_fname)</span>
+        <span class="k">return</span>
+    <span class="k">elif</span> <span class="n">d_return</span> <span class="ow">and</span> <span class="n">d_save</span><span class="p">:</span>
+        <span class="c">#self.save_data(DATA,d_save,d_fname)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">save_data</span><span class="p">(</span><span class="n">DATA</span><span class="p">,</span><span class="n">d_save</span><span class="p">,</span><span class="n">d_fname</span><span class="p">)</span>
+        <span class="c">#self.json_data(DATA,d_save,d_fname)</span>
+        <span class="k">return</span> <span class="n">DATA</span>
+</div>
+<div class="viewcode-block" id="DE_xyz"><a class="viewcode-back" href="../../../../WEM.postWRF.postWRF.html#WEM.postWRF.postWRF.stats.DE_xyz">[docs]</a><span class="k">def</span> <span class="nf">DE_xyz</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">nc0</span><span class="p">,</span><span class="n">nc1</span><span class="p">,</span><span class="n">t_idx</span><span class="p">,</span><span class="n">energy</span><span class="p">,</span><span class="o">*</span><span class="n">args</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Computation for difference kinetic energy (DKE).</span>
+<span class="sd">    Sums DKE over the 3D space, returns a time series.</span>
+
+<span class="sd">    Destaggering is not enabled as it introduces</span>
+<span class="sd">    computational cost that is of miniscule value considering</span>
+<span class="sd">    the magnitudes of output values.</span>
+
+<span class="sd">    Inputs:</span>
+
+<span class="sd">    nc0     :   netCDF file</span>
+<span class="sd">    nc1     :   netCDF file</span>
+<span class="sd">    t_idx   :   times indices to difference</span>
+<span class="sd">    energy  :   kinetic or total</span>
+<span class="sd">    *args   :   to catch lower/upper boundary which isn&#39;t relevant here</span>
+
+<span class="sd">    Outputs:</span>
+
+<span class="sd">    data    :   time series.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c"># Wind data</span>
+    <span class="n">U0</span> <span class="o">=</span> <span class="n">nc0</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="s">&#39;U&#39;</span><span class="p">]</span>
+    <span class="n">V0</span> <span class="o">=</span> <span class="n">nc0</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="s">&#39;V&#39;</span><span class="p">]</span>
+    <span class="n">U1</span> <span class="o">=</span> <span class="n">nc1</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="s">&#39;U&#39;</span><span class="p">]</span>
+    <span class="n">V1</span> <span class="o">=</span> <span class="n">nc1</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="s">&#39;V&#39;</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">energy</span><span class="o">==</span><span class="s">&#39;total&#39;</span><span class="p">:</span>
+        <span class="n">T0</span> <span class="o">=</span> <span class="n">nc0</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="s">&#39;T&#39;</span><span class="p">]</span>
+        <span class="n">T1</span> <span class="o">=</span> <span class="n">nc1</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="s">&#39;T&#39;</span><span class="p">]</span>
+        <span class="n">R</span> <span class="o">=</span> <span class="mf">287.0</span> <span class="c"># Universal gas constant (J / deg K * kg)</span>
+        <span class="n">Cp</span> <span class="o">=</span> <span class="mf">1004.0</span> <span class="c"># Specific heat of dry air at constant pressure (J / deg K * kg)</span>
+        <span class="n">kappa</span> <span class="o">=</span> <span class="p">(</span><span class="n">R</span><span class="o">/</span><span class="n">Cp</span><span class="p">)</span>
+
+    <span class="n">xlen</span> <span class="o">=</span> <span class="n">U0</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+
+    <span class="n">DKE</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">n</span><span class="p">,</span><span class="n">t</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">t_idx</span><span class="p">):</span>
+        <span class="k">print</span><span class="p">(</span><span class="s">&quot;Finding DKE at time {0} of {1}.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">t</span><span class="p">)))</span>
+        <span class="n">DKE_hr</span> <span class="o">=</span> <span class="mi">0</span>   <span class="c"># Sum up all DKE for the 3D space</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">xlen</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">energy</span><span class="o">==</span><span class="s">&#39;kinetic&#39;</span><span class="p">:</span>
+                <span class="n">DKE_hr</span> <span class="o">+=</span> <span class="n">N</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="p">((</span><span class="n">U0</span><span class="p">[</span><span class="n">t</span><span class="p">,:,:,</span><span class="n">i</span><span class="p">]</span><span class="o">-</span><span class="n">U1</span><span class="p">[</span><span class="n">t</span><span class="p">,:,:,</span><span class="n">i</span><span class="p">])</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span>
+                            <span class="p">(</span><span class="n">V0</span><span class="p">[</span><span class="n">t</span><span class="p">,:,:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">i</span><span class="p">]</span><span class="o">-</span><span class="n">V1</span><span class="p">[</span><span class="n">t</span><span class="p">,:,:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">i</span><span class="p">])</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
+            <span class="k">elif</span> <span class="n">energy</span><span class="o">==</span><span class="s">&#39;total&#39;</span><span class="p">:</span>
+                <span class="n">DKE_hr</span> <span class="o">+=</span> <span class="n">N</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="p">((</span><span class="n">U0</span><span class="p">[</span><span class="n">t</span><span class="p">,:,:,</span><span class="n">i</span><span class="p">]</span><span class="o">-</span><span class="n">U1</span><span class="p">[</span><span class="n">t</span><span class="p">,:,:,</span><span class="n">i</span><span class="p">])</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span>
+                            <span class="p">(</span><span class="n">V0</span><span class="p">[</span><span class="n">t</span><span class="p">,:,:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">i</span><span class="p">]</span><span class="o">-</span><span class="n">V1</span><span class="p">[</span><span class="n">t</span><span class="p">,:,:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">i</span><span class="p">])</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span>
+                            <span class="n">kappa</span><span class="o">*</span><span class="p">(</span><span class="n">T0</span><span class="p">[</span><span class="n">t</span><span class="p">,:,:,</span><span class="n">i</span><span class="p">]</span><span class="o">-</span><span class="n">T1</span><span class="p">[</span><span class="n">t</span><span class="p">,:,:,</span><span class="n">i</span><span class="p">])</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
+        <span class="k">print</span><span class="p">(</span><span class="s">&quot;DTE at this time: {0}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">DKE_hr</span><span class="p">))</span>
+        <span class="n">DKE</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">DKE_hr</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">DKE</span>
+</div>
+<div class="viewcode-block" id="DE_z"><a class="viewcode-back" href="../../../../WEM.postWRF.postWRF.html#WEM.postWRF.postWRF.stats.DE_z">[docs]</a><span class="k">def</span> <span class="nf">DE_z</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">nc0</span><span class="p">,</span><span class="n">nc1</span><span class="p">,</span><span class="n">t</span><span class="p">,</span><span class="n">energy</span><span class="p">,</span><span class="n">lower</span><span class="p">,</span><span class="n">upper</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Computation for difference kinetic energy (DKE).</span>
+<span class="sd">    Sums DKE over all levels between lower and upper,</span>
+<span class="sd">    for each grid point, and returns a 2D array.</span>
+
+<span class="sd">    Destaggering is not enabled as it introduces</span>
+<span class="sd">    computational cost that is of miniscule value considering</span>
+<span class="sd">    the magnitudes of output values.</span>
+
+<span class="sd">    Method finds levels nearest lower/upper hPa and sums between</span>
+<span class="sd">    them inclusively.</span>
+
+<span class="sd">    Inputs:</span>
+
+<span class="sd">    nc0     :   netCDF file</span>
+<span class="sd">    nc1     :   netCDF file</span>
+<span class="sd">    t       :   times index to difference</span>
+<span class="sd">    energy  :   kinetic or total</span>
+<span class="sd">    lower   :   lowest level, hPa</span>
+<span class="sd">    upper   :   highest level, hPa</span>
+
+<span class="sd">    Outputs:</span>
+
+<span class="sd">    data    :   2D array.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c"># Speed up script by only referencing data, not</span>
+    <span class="c"># loading it to a variable yet</span>
+
+    <span class="c"># WIND</span>
+    <span class="n">U0</span> <span class="o">=</span> <span class="n">nc0</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="s">&#39;U&#39;</span><span class="p">][</span><span class="n">t</span><span class="p">,</span><span class="o">...</span><span class="p">]</span>
+    <span class="n">U1</span> <span class="o">=</span> <span class="n">nc1</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="s">&#39;U&#39;</span><span class="p">][</span><span class="n">t</span><span class="p">,</span><span class="o">...</span><span class="p">]</span>
+    <span class="n">Ud</span> <span class="o">=</span> <span class="n">U0</span> <span class="o">-</span> <span class="n">U1</span>
+    <span class="c">#del U0, U1</span>
+
+    <span class="n">V0</span> <span class="o">=</span> <span class="n">nc0</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="s">&#39;V&#39;</span><span class="p">][</span><span class="n">t</span><span class="p">,</span><span class="o">...</span><span class="p">]</span>
+    <span class="n">V1</span> <span class="o">=</span> <span class="n">nc1</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="s">&#39;V&#39;</span><span class="p">][</span><span class="n">t</span><span class="p">,</span><span class="o">...</span><span class="p">]</span>
+    <span class="n">Vd</span> <span class="o">=</span> <span class="n">V0</span> <span class="o">-</span> <span class="n">V1</span>
+    <span class="c">#del V0, V1</span>
+
+    <span class="c"># PERT and BASE PRESSURE</span>
+    <span class="k">if</span> <span class="n">lower</span> <span class="ow">or</span> <span class="n">upper</span><span class="p">:</span>
+        <span class="n">P0</span> <span class="o">=</span> <span class="n">nc0</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="s">&#39;P&#39;</span><span class="p">][</span><span class="n">t</span><span class="p">,</span><span class="o">...</span><span class="p">]</span>
+        <span class="n">PB0</span> <span class="o">=</span> <span class="n">nc0</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="s">&#39;PB&#39;</span><span class="p">][</span><span class="n">t</span><span class="p">,</span><span class="o">...</span><span class="p">]</span>
+        <span class="n">Pr</span> <span class="o">=</span> <span class="n">P0</span> <span class="o">+</span> <span class="n">PB0</span>
+        <span class="c">#del P0, PB1</span>
+        <span class="c"># Here we assume pressure columns are</span>
+        <span class="c"># roughly the same between the two...</span>
+
+    <span class="k">if</span> <span class="n">energy</span><span class="o">==</span><span class="s">&#39;total&#39;</span><span class="p">:</span>
+        <span class="n">T0</span> <span class="o">=</span> <span class="n">nc0</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="s">&#39;T&#39;</span><span class="p">][</span><span class="n">t</span><span class="p">,</span><span class="o">...</span><span class="p">]</span>
+        <span class="n">T1</span> <span class="o">=</span> <span class="n">nc1</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="s">&#39;T&#39;</span><span class="p">][</span><span class="n">t</span><span class="p">,</span><span class="o">...</span><span class="p">]</span>
+        <span class="n">Td</span> <span class="o">=</span> <span class="n">T0</span> <span class="o">-</span> <span class="n">T1</span>
+        <span class="c">#del T0, T1</span>
+
+        <span class="n">R</span> <span class="o">=</span> <span class="mf">287.0</span> <span class="c"># Universal gas constant (J / deg K * kg)</span>
+        <span class="n">Cp</span> <span class="o">=</span> <span class="mf">1004.0</span> <span class="c"># Specific heat of dry air at constant pressure (J / deg K * kg)</span>
+        <span class="n">kappa</span> <span class="o">=</span> <span class="n">R</span><span class="o">/</span><span class="n">Cp</span>
+
+    <span class="n">xlen</span> <span class="o">=</span> <span class="n">Ud</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="c"># 1 less than in V</span>
+    <span class="n">ylen</span> <span class="o">=</span> <span class="n">Vd</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="c"># 1 less than in U</span>
+    <span class="n">zlen</span> <span class="o">=</span> <span class="n">Ud</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="c"># identical in U &amp; V</span>
+
+    <span class="c"># Generator for lat/lon points</span>
+    <span class="k">def</span> <span class="nf">latlon</span><span class="p">(</span><span class="n">nlats</span><span class="p">,</span><span class="n">nlons</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nlats</span><span class="p">):</span> <span class="c"># y-axis</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nlons</span><span class="p">):</span> <span class="c"># x-axis</span>
+                <span class="k">yield</span> <span class="n">i</span><span class="p">,</span><span class="n">j</span>
+
+    <span class="n">DKE</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">DKE2D</span> <span class="o">=</span> <span class="n">N</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">xlen</span><span class="p">,</span><span class="n">ylen</span><span class="p">))</span>
+    <span class="n">print_time</span> <span class="o">=</span> <span class="s">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">((</span><span class="n">nc0</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="s">&#39;Times&#39;</span><span class="p">][</span><span class="n">t</span><span class="p">]))</span>
+    <span class="k">print</span><span class="p">(</span><span class="s">&quot;Calculating 2D grid for time {0}...&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">print_time</span><span class="p">))</span>
+    <span class="n">gridpts</span> <span class="o">=</span> <span class="n">latlon</span><span class="p">(</span><span class="n">xlen</span><span class="p">,</span><span class="n">ylen</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">gridpt</span> <span class="ow">in</span> <span class="n">gridpts</span><span class="p">:</span>
+        <span class="n">i</span><span class="p">,</span><span class="n">j</span> <span class="o">=</span> <span class="n">gridpt</span>
+        <span class="c"># Find closest level to &#39;lower&#39;, &#39;upper&#39;</span>
+        <span class="k">if</span> <span class="n">lower</span> <span class="ow">or</span> <span class="n">upper</span><span class="p">:</span>
+            <span class="n">P_col</span> <span class="o">=</span> <span class="n">Pr</span><span class="p">[:,</span><span class="n">j</span><span class="p">,</span><span class="n">i</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">lower</span><span class="p">:</span>
+            <span class="n">low_idx</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">closest</span><span class="p">(</span><span class="n">P_col</span><span class="p">,</span><span class="n">lower</span><span class="o">*</span><span class="mf">100.0</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">low_idx</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="k">if</span> <span class="n">upper</span><span class="p">:</span>
+            <span class="n">upp_idx</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">closest</span><span class="p">(</span><span class="n">P_col</span><span class="p">,</span><span class="n">upper</span><span class="o">*</span><span class="mf">100.0</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">upp_idx</span> <span class="o">=</span> <span class="bp">None</span>
+
+        <span class="n">zidx</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span><span class="n">low_idx</span><span class="p">,</span><span class="n">upp_idx</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">energy</span><span class="o">==</span><span class="s">&#39;kinetic&#39;</span><span class="p">:</span>
+            <span class="n">DKE2D</span><span class="p">[</span><span class="n">j</span><span class="p">,</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">N</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="p">((</span><span class="n">Ud</span><span class="p">[</span><span class="n">zidx</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">i</span><span class="p">])</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span>
+                                <span class="p">(</span><span class="n">Vd</span><span class="p">[</span><span class="n">zidx</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">i</span><span class="p">])</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
+        <span class="k">elif</span> <span class="n">energy</span><span class="o">==</span><span class="s">&#39;total&#39;</span><span class="p">:</span>
+            <span class="n">DKE2D</span><span class="p">[</span><span class="n">j</span><span class="p">,</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">N</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="p">((</span><span class="n">Ud</span><span class="p">[</span><span class="n">zidx</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">i</span><span class="p">])</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span>
+                                <span class="p">(</span><span class="n">Vd</span><span class="p">[</span><span class="n">zidx</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">i</span><span class="p">])</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span>
+                                <span class="n">kappa</span><span class="o">*</span><span class="p">(</span><span class="n">Td</span><span class="p">[</span><span class="n">zidx</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">i</span><span class="p">])</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
+
+    <span class="n">DKE</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">DKE2D</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">DKE</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">.  documentation</a> &raquo;</li>
+          <li><a href="../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, Author.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

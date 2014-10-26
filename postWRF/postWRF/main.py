@@ -1,4 +1,4 @@
-"""This handles user requests and controls computations and plotting.
+""" This handles user requests and controls computations and plotting.
 
 This script is API and should not be doing any hard work of
 importing matplotlib etc!
@@ -42,6 +42,8 @@ from scales import Scales
 # TODO: Make this awesome
 
 class WRFEnviron(object):
+    """Main environment API.
+    """
     def __init__(self):
         # Set defaults
         self.D = Defaults()
@@ -57,8 +59,7 @@ class WRFEnviron(object):
                 f_prefix=0,f_suffix=False,bounding=False,dom=1,
                 plottype='contourf',smooth=1,fig=False,ax=False,
                 clvs=False,cmap=False):
-        """
-        Basic birds-eye-view plotting.
+        """Basic birds-eye-view plotting.
 
         This script is top-most and decides if the variables is
         built into WRF default output or needs computing. It unstaggers
@@ -87,7 +88,7 @@ class WRFEnviron(object):
                         ambiguous within ncdir.
         f_prefix    :   custom filename prefix for output
         f_suffix    :   custom filename suffix for output
-        bounding    :   dictionary of four floats (Nlime, Elim, Slim, Wlim):
+        bounding    :   dictionary of four floats (Nlim, Elim, Slim, Wlim):
             Nlim    :   northern limit
             Elim    :   eastern limit
             Slim    :   southern limit
