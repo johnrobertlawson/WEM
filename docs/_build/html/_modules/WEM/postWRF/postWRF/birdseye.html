@@ -1,0 +1,293 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>WEM.postWRF.postWRF.birdseye &mdash; .  documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <link rel="top" title=".  documentation" href="../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../index.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">.  documentation</a> &raquo;</li>
+          <li><a href="../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for WEM.postWRF.postWRF.birdseye</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Top-down 2D plots, which are so common in meteorology</span>
+<span class="sd">that they get their own file here.</span>
+
+<span class="sd">Subclass of Figure.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">pdb</span>
+<span class="kn">import</span> <span class="nn">matplotlib</span> <span class="kn">as</span> <span class="nn">M</span>
+<span class="n">M</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="s">&#39;Agg&#39;</span><span class="p">)</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
+<span class="kn">from</span> <span class="nn">mpl_toolkits.basemap</span> <span class="kn">import</span> <span class="n">Basemap</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">N</span>
+<span class="kn">import</span> <span class="nn">collections</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">mpl_toolkits.axes_grid1</span> <span class="kn">import</span> <span class="n">make_axes_locatable</span>
+
+<span class="kn">from</span> <span class="nn">wrfout</span> <span class="kn">import</span> <span class="n">WRFOut</span>
+<span class="kn">from</span> <span class="nn">defaults</span> <span class="kn">import</span> <span class="n">Defaults</span>
+<span class="kn">from</span> <span class="nn">figure</span> <span class="kn">import</span> <span class="n">Figure</span>
+<span class="kn">import</span> <span class="nn">WEM.utils</span> <span class="kn">as</span> <span class="nn">utils</span>
+<span class="kn">from</span> <span class="nn">scales</span> <span class="kn">import</span> <span class="n">Scales</span>
+<span class="kn">import</span> <span class="nn">stats</span>
+
+<div class="viewcode-block" id="BirdsEye"><a class="viewcode-back" href="../../../../WEM.postWRF.postWRF.html#WEM.postWRF.postWRF.birdseye.BirdsEye">[docs]</a><span class="k">class</span> <span class="nc">BirdsEye</span><span class="p">(</span><span class="n">Figure</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">wrfout</span><span class="p">,</span><span class="n">ax</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">fig</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">BirdsEye</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">wrfout</span><span class="p">,</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span><span class="n">fig</span><span class="o">=</span><span class="n">fig</span><span class="p">)</span>
+
+<div class="viewcode-block" id="BirdsEye.get_plot_arguments"><a class="viewcode-back" href="../../../../WEM.postWRF.postWRF.html#WEM.postWRF.postWRF.birdseye.BirdsEye.get_plot_arguments">[docs]</a>    <span class="k">def</span> <span class="nf">get_plot_arguments</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">cmap</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span><span class="n">clvs</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns colourmap and contouring levels</span>
+
+<span class="sd">        Options keyword arguments:</span>
+<span class="sd">        clvs    :   manually override contour levels</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">la_n</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">lo_n</span><span class="p">))</span>
+
+        <span class="c"># List of args and dictionary of kwargs</span>
+        <span class="n">plotargs</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">,</span><span class="n">data</span><span class="p">]</span>
+        <span class="n">plotkwargs</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="c"># if self.mplcommand == &#39;contour&#39;:</span>
+            <span class="c"># multiplier = S.get_multiplier(vrbl,lv)</span>
+        <span class="k">if</span> <span class="n">clvs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">False</span><span class="p">:</span>
+            <span class="n">plotkwargs</span><span class="p">[</span><span class="s">&#39;levels&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">clvs</span>
+
+        <span class="k">if</span> <span class="n">cmap</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">False</span><span class="p">:</span>
+            <span class="c"># cmap = eval(&#39;M.cm.{0}&#39;.format(cmap))</span>
+            <span class="n">plotkwargs</span><span class="p">[</span><span class="s">&#39;cmap&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">cmap</span>
+        <span class="c"># import pdb; pdb.set_trace()</span>
+        <span class="k">return</span> <span class="n">plotargs</span><span class="p">,</span> <span class="n">plotkwargs</span>
+
+    <span class="c"># Old plot_data</span></div>
+<div class="viewcode-block" id="BirdsEye.plot2D"><a class="viewcode-back" href="../../../../WEM.postWRF.postWRF.html#WEM.postWRF.postWRF.birdseye.BirdsEye.plot2D">[docs]</a>    <span class="k">def</span> <span class="nf">plot2D</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">data</span><span class="p">,</span><span class="n">fname</span><span class="p">,</span><span class="n">outdir</span><span class="p">,</span><span class="n">plottype</span><span class="o">=</span><span class="s">&#39;contourf&#39;</span><span class="p">,</span>
+                    <span class="n">save</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">smooth</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">lats</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span><span class="n">lons</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+                    <span class="n">clvs</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span><span class="n">cmap</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span><span class="n">title</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span><span class="n">colorbar</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Generic method that plots any matrix of data on a map</span>
+
+<span class="sd">        Inputs:</span>
+<span class="sd">        data        :   2D matrix of data</span>
+<span class="sd">        outdir      :   path to plots</span>
+<span class="sd">        outf        :   filename for output (with or without .png)</span>
+
+<span class="sd">        Optional:</span>
+<span class="sd">        plottype    :   matplotlib function for plotting</span>
+<span class="sd">        smooth      :   Gaussian smooth by this many grid spaces</span>
+<span class="sd">        clvs        :   scale for contours</span>
+<span class="sd">        title       :   title on plot</span>
+<span class="sd">        save        :   whether to save to file</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># INITIALISE</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bmap</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">basemap_setup</span><span class="p">(</span><span class="n">smooth</span><span class="o">=</span><span class="n">smooth</span><span class="p">,</span><span class="n">lats</span><span class="o">=</span><span class="n">lats</span><span class="p">,</span>
+                                                    <span class="n">lons</span><span class="o">=</span><span class="n">lons</span><span class="p">,)</span><span class="c">#ax=self.ax)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">la_n</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lo_n</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="n">plotargs</span><span class="p">,</span> <span class="n">plotkwargs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_plot_arguments</span><span class="p">(</span><span class="n">clvs</span><span class="o">=</span><span class="n">clvs</span><span class="p">,</span><span class="n">cmap</span><span class="o">=</span><span class="n">cmap</span><span class="p">)</span>
+
+        <span class="c"># import pdb; pdb.set_trace()</span>
+        <span class="k">if</span> <span class="n">plottype</span> <span class="o">==</span> <span class="s">&#39;contour&#39;</span><span class="p">:</span>
+            <span class="n">f1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bmap</span><span class="o">.</span><span class="n">contour</span><span class="p">(</span><span class="o">*</span><span class="n">plotargs</span><span class="p">,</span><span class="o">**</span><span class="n">plotkwargs</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">plottype</span> <span class="o">==</span> <span class="s">&#39;contourf&#39;</span><span class="p">:</span>
+            <span class="n">f1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bmap</span><span class="o">.</span><span class="n">contourf</span><span class="p">(</span><span class="o">*</span><span class="n">plotargs</span><span class="p">,</span><span class="o">**</span><span class="n">plotkwargs</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">plottype</span> <span class="o">==</span> <span class="s">&#39;pcolor&#39;</span><span class="p">:</span>
+            <span class="n">f1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bmap</span><span class="o">.</span><span class="n">pcolor</span><span class="p">(</span><span class="o">*</span><span class="n">plotargs</span><span class="p">,</span><span class="o">**</span><span class="n">plotkwargs</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">plottype</span> <span class="o">==</span> <span class="s">&#39;pcolormesh&#39;</span><span class="p">:</span>
+            <span class="n">f1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bmap</span><span class="o">.</span><span class="n">pcolormesh</span><span class="p">(</span><span class="o">*</span><span class="n">plotargs</span><span class="p">,</span><span class="o">**</span><span class="n">plotkwargs</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">plottype</span> <span class="o">==</span> <span class="s">&#39;scatter&#39;</span><span class="p">:</span>
+            <span class="n">f1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bmap</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="o">*</span><span class="n">plotargs</span><span class="p">,</span><span class="o">**</span><span class="n">plotkwargs</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">print</span><span class="p">(</span><span class="s">&quot;Specify correct plot type.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">Exception</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">title</span><span class="p">,</span><span class="nb">basestring</span><span class="p">):</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="n">title</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">colorbar</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fig</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">f1</span><span class="p">,</span><span class="n">orientation</span><span class="o">=</span><span class="s">&#39;vertical&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">save</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">outdir</span><span class="p">,</span><span class="n">fname</span><span class="p">)</span>
+
+        <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fig</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="BirdsEye.plot_streamlines"><a class="viewcode-back" href="../../../../WEM.postWRF.postWRF.html#WEM.postWRF.postWRF.birdseye.BirdsEye.plot_streamlines">[docs]</a>    <span class="k">def</span> <span class="nf">plot_streamlines</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">U</span><span class="p">,</span><span class="n">V</span><span class="p">,</span><span class="n">outdir</span><span class="p">,</span><span class="n">fname</span><span class="p">,</span><span class="n">lats</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span><span class="n">lons</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span><span class="n">smooth</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                            <span class="n">title</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span><span class="n">lw_speed</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Plot streamlines.</span>
+
+<span class="sd">        U       :   U-component of wind (nx x ny)</span>
+<span class="sd">        V       :   V-component of wind (same dimensions)</span>
+
+<span class="sd">        lw_speed    :   linewidth is proportional to wind speed</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">m</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">basemap_setup</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">lw_speed</span><span class="p">:</span>
+            <span class="n">wind</span> <span class="o">=</span> <span class="n">N</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">U</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">V</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+            <span class="n">lw</span> <span class="o">=</span> <span class="mi">5</span><span class="o">*</span><span class="n">wind</span><span class="o">/</span><span class="n">wind</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">lw</span> <span class="o">=</span> <span class="mi">1</span>
+
+        <span class="k">if</span> <span class="n">smooth</span><span class="o">&gt;</span><span class="mi">1</span><span class="p">:</span>
+            <span class="n">U</span> <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">gauss_smooth</span><span class="p">(</span><span class="n">U</span><span class="p">,</span><span class="n">smooth</span><span class="p">)</span>
+            <span class="n">V</span> <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">gauss_smooth</span><span class="p">(</span><span class="n">V</span><span class="p">,</span><span class="n">smooth</span><span class="p">)</span>
+
+        <span class="n">m</span><span class="o">.</span><span class="n">streamplot</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">W</span><span class="o">.</span><span class="n">x_dim</span><span class="o">/</span><span class="mi">2</span><span class="p">,:],</span><span class="n">y</span><span class="p">[:,</span><span class="bp">self</span><span class="o">.</span><span class="n">W</span><span class="o">.</span><span class="n">y_dim</span><span class="o">/</span><span class="mi">2</span><span class="p">],</span><span class="n">U</span><span class="p">,</span><span class="n">V</span><span class="p">,</span>
+                        <span class="n">density</span><span class="o">=</span><span class="mf">1.8</span><span class="p">,</span><span class="n">linewidth</span><span class="o">=</span><span class="n">lw</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="s">&#39;k&#39;</span><span class="p">,</span><span class="n">arrowsize</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">title</span><span class="p">,</span><span class="nb">basestring</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="n">title</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">outdir</span><span class="p">,</span><span class="n">fname</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="BirdsEye.spaghetti"><a class="viewcode-back" href="../../../../WEM.postWRF.postWRF.html#WEM.postWRF.postWRF.birdseye.BirdsEye.spaghetti">[docs]</a>    <span class="k">def</span> <span class="nf">spaghetti</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">t</span><span class="p">,</span><span class="n">lv</span><span class="p">,</span><span class="n">va</span><span class="p">,</span><span class="n">contour</span><span class="p">,</span><span class="n">wrfouts</span><span class="p">,</span><span class="n">outpath</span><span class="p">,</span><span class="n">da</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">dom</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        wrfouts     :   list of wrfout files</span>
+
+<span class="sd">        Only change dom if there are multiple domains.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">m</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">basemap_setup</span><span class="p">()</span>
+
+        <span class="n">time_idx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">W</span><span class="o">.</span><span class="n">get_time_idx</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+
+        <span class="n">colours</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">generate_colours</span><span class="p">(</span><span class="n">M</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">wrfouts</span><span class="p">))</span>
+
+        <span class="c"># import pdb; pdb.set_trace()</span>
+        <span class="k">if</span> <span class="n">lv</span><span class="o">==</span><span class="mi">2000</span><span class="p">:</span>
+            <span class="n">lv_idx</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">print</span><span class="p">(</span><span class="s">&quot;Only support surface right now&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">Exception</span>
+
+        <span class="n">lat_sl</span><span class="p">,</span> <span class="n">lon_sl</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_limited_domain</span><span class="p">(</span><span class="n">da</span><span class="p">)</span>
+
+        <span class="n">slices</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;t&#39;</span><span class="p">:</span> <span class="n">time_idx</span><span class="p">,</span> <span class="s">&#39;lv&#39;</span><span class="p">:</span> <span class="n">lv_idx</span><span class="p">,</span> <span class="s">&#39;la&#39;</span><span class="p">:</span> <span class="n">lat_sl</span><span class="p">,</span> <span class="s">&#39;lo&#39;</span><span class="p">:</span> <span class="n">lon_sl</span><span class="p">}</span>
+
+        <span class="c"># self.ax.set_color_cycle(colours)</span>
+        <span class="n">ctlist</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">n</span><span class="p">,</span><span class="n">wrfout</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">wrfouts</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">W</span> <span class="o">=</span> <span class="n">WRFOut</span><span class="p">(</span><span class="n">wrfout</span><span class="p">)</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">W</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">va</span><span class="p">,</span><span class="n">slices</span><span class="p">)[</span><span class="mi">0</span><span class="p">,</span><span class="o">...</span><span class="p">]</span>
+            <span class="c"># m.contour(x,y,data,levels=[contour,])</span>
+            <span class="n">ct</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">contour</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">data</span><span class="p">,</span><span class="n">colors</span><span class="o">=</span><span class="p">[</span><span class="n">colours</span><span class="p">[</span><span class="n">n</span><span class="p">],],</span><span class="n">levels</span><span class="o">=</span><span class="p">[</span><span class="n">contour</span><span class="p">,],</span><span class="n">label</span><span class="o">=</span><span class="n">wrfout</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">2</span><span class="p">])</span>
+            <span class="k">print</span><span class="p">(</span><span class="s">&quot;Plotting contour level {0} for {1} from file </span><span class="se">\n</span><span class="s"> {2}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                            <span class="n">contour</span><span class="p">,</span><span class="n">va</span><span class="p">,</span><span class="n">wrfout</span><span class="p">))</span>
+            <span class="c"># ctlist.append(ct)</span>
+            <span class="c"># self.ax.legend()</span>
+
+        <span class="c"># labels = [w.split(&#39;/&#39;)[-2] for w in wrfouts]</span>
+        <span class="c"># print labels</span>
+        <span class="c"># self.fig.legend(handles=ctlist)</span>
+        <span class="c"># plt.legend(handles=ctlist,labels=labels)</span>
+        <span class="c">#labels,ncol=3, loc=3,</span>
+        <span class="c">#                bbox_to_anchor=[0.5,1.5])</span>
+
+        <span class="n">datestr</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">string_from_time</span><span class="p">(</span><span class="s">&#39;output&#39;</span><span class="p">,</span><span class="n">t</span><span class="p">,</span><span class="n">tupleformat</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">lv_na</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">get_level_naming</span><span class="p">(</span><span class="n">va</span><span class="p">,</span><span class="n">lv</span><span class="p">)</span>
+        <span class="n">naming</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;spaghetti&#39;</span><span class="p">,</span><span class="n">va</span><span class="p">,</span><span class="n">lv_na</span><span class="p">,</span><span class="n">datestr</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">dom</span><span class="p">:</span>
+            <span class="n">naming</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dom</span><span class="p">)</span>
+        <span class="n">fname</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_fname</span><span class="p">(</span><span class="o">*</span><span class="n">naming</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">outpath</span><span class="p">,</span><span class="n">fname</span><span class="p">)</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../../index.html">.</a></h1>
+
+
+
+
+
+<p>
+<iframe src="http://ghbtns.com/github-btn.html?user=&repo=&type=watch&count=true&size=large"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../WEM.html">WEM package</a></li>
+</ul>
+
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2014, Author.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.2.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.6.1</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

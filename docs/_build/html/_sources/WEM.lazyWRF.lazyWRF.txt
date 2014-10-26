@@ -12,14 +12,6 @@ WEM.lazyWRF.lazyWRF.._getdata module
     :undoc-members:
     :show-inheritance:
 
-WEM.lazyWRF.lazyWRF.copyfilescript module
------------------------------------------
-
-.. automodule:: WEM.lazyWRF.lazyWRF.copyfilescript
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 WEM.lazyWRF.lazyWRF.getdata module
 ----------------------------------
 
@@ -28,58 +20,10 @@ WEM.lazyWRF.lazyWRF.getdata module
     :undoc-members:
     :show-inheritance:
 
-WEM.lazyWRF.lazyWRF.getgefs module
-----------------------------------
+WEM.lazyWRF.lazyWRF.main module
+-------------------------------
 
-.. automodule:: WEM.lazyWRF.lazyWRF.getgefs
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-WEM.lazyWRF.lazyWRF.getgfs module
----------------------------------
-
-.. automodule:: WEM.lazyWRF.lazyWRF.getgfs
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-WEM.lazyWRF.lazyWRF.getnam module
----------------------------------
-
-.. automodule:: WEM.lazyWRF.lazyWRF.getnam
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-WEM.lazyWRF.lazyWRF.lazyWRF module
-----------------------------------
-
-.. automodule:: WEM.lazyWRF.lazyWRF.lazyWRF
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-WEM.lazyWRF.lazyWRF.sensitivity_ensemble_old module
----------------------------------------------------
-
-.. automodule:: WEM.lazyWRF.lazyWRF.sensitivity_ensemble_old
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-WEM.lazyWRF.lazyWRF.setup_gefs module
--------------------------------------
-
-.. automodule:: WEM.lazyWRF.lazyWRF.setup_gefs
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-WEM.lazyWRF.lazyWRF.setup_gefs_isu module
------------------------------------------
-
-.. automodule:: WEM.lazyWRF.lazyWRF.setup_gefs_isu
+.. automodule:: WEM.lazyWRF.lazyWRF.main
     :members:
     :undoc-members:
     :show-inheritance:

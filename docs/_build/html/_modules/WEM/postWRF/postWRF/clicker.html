@@ -1,0 +1,256 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>WEM.postWRF.postWRF.clicker &mdash; .  documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <link rel="top" title=".  documentation" href="../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../index.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">.  documentation</a> &raquo;</li>
+          <li><a href="../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for WEM.postWRF.postWRF.clicker</h1><div class="highlight"><pre>
+<span class="kn">import</span> <span class="nn">matplotlib</span> <span class="kn">as</span> <span class="nn">M</span>
+<span class="n">M</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="s">&#39;gtkagg&#39;</span><span class="p">)</span>
+
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">N</span>
+<span class="kn">import</span> <span class="nn">collections</span>
+<span class="kn">import</span> <span class="nn">pdb</span>
+
+<span class="c"># from figure import Figure</span>
+<span class="kn">import</span> <span class="nn">colourtables</span> <span class="kn">as</span> <span class="nn">ct</span>
+<span class="kn">from</span> <span class="nn">scales</span> <span class="kn">import</span> <span class="n">Scales</span>
+<span class="kn">from</span> <span class="nn">figure</span> <span class="kn">import</span> <span class="n">Figure</span>
+<span class="kn">from</span> <span class="nn">defaults</span> <span class="kn">import</span> <span class="n">Defaults</span>
+
+<div class="viewcode-block" id="Clicker"><a class="viewcode-back" href="../../../../WEM.postWRF.postWRF.html#WEM.postWRF.postWRF.clicker.Clicker">[docs]</a><span class="k">class</span> <span class="nc">Clicker</span><span class="p">(</span><span class="n">Figure</span><span class="p">):</span>
+    <span class="c"># def __init__(self,config,wrfout,ax=0):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">config</span><span class="p">,</span><span class="n">wrfout</span><span class="p">,</span><span class="n">data</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">fig</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">ax</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="c"># import pdb; pdb.set_trace()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">C</span> <span class="o">=</span> <span class="n">config</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">D</span> <span class="o">=</span> <span class="n">Defaults</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">W</span> <span class="o">=</span> <span class="n">wrfout</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span><span class="n">M</span><span class="o">.</span><span class="n">figure</span><span class="o">.</span><span class="n">Figure</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fig</span> <span class="o">=</span> <span class="n">fig</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ax</span> <span class="o">=</span> <span class="n">ax</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">super</span><span class="p">(</span><span class="n">Clicker</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">config</span><span class="p">,</span><span class="n">wrfout</span><span class="p">,</span><span class="n">fig</span><span class="o">=</span><span class="n">fig</span><span class="p">,</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">)</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">bmap</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">basemap_setup</span><span class="p">()</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span><span class="n">N</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+            <span class="c"># Lazily assuming it&#39;s reflectivity</span>
+            <span class="n">S</span> <span class="o">=</span> <span class="n">Scales</span><span class="p">(</span><span class="s">&#39;cref&#39;</span><span class="p">,</span><span class="mi">2000</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">overlay_data</span><span class="p">(</span><span class="n">data</span><span class="p">,</span><span class="n">V</span><span class="o">=</span><span class="n">S</span><span class="o">.</span><span class="n">clvs</span><span class="p">,</span><span class="n">cmap</span><span class="o">=</span><span class="n">S</span><span class="o">.</span><span class="n">cm</span><span class="p">)</span>
+        
+<div class="viewcode-block" id="Clicker.click_x_y"><a class="viewcode-back" href="../../../../WEM.postWRF.postWRF.html#WEM.postWRF.postWRF.clicker.Clicker.click_x_y">[docs]</a>    <span class="k">def</span> <span class="nf">click_x_y</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">plotpoint</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        plotpoint       :   boolean. If yes, plot point.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># self.plotpoint = plotpoint</span>
+        <span class="c"># self.fig.canvas.mpl_connect(&#39;pick_event&#39;,self.onpick)</span>
+        <span class="c"># self.point = M.patches.Circle((0,0),radius=1, color=&#39;g&#39;)</span>
+        <span class="c"># self.ax.add_patch(self.point)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">figure</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">mpl_connect</span><span class="p">(</span><span class="s">&#39;button_press_event&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">on_press</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">figure</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">mpl_connect</span><span class="p">(</span><span class="s">&#39;button_release_event&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">on_release_point</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fig</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="Clicker.draw_box"><a class="viewcode-back" href="../../../../WEM.postWRF.postWRF.html#WEM.postWRF.postWRF.clicker.Clicker.draw_box">[docs]</a>    <span class="k">def</span> <span class="nf">draw_box</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rect</span> <span class="o">=</span> <span class="n">M</span><span class="o">.</span><span class="n">patches</span><span class="o">.</span><span class="n">Rectangle</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">add_patch</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rect</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">figure</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">mpl_connect</span><span class="p">(</span><span class="s">&#39;button_press_event&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">on_press</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">figure</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">mpl_connect</span><span class="p">(</span><span class="s">&#39;button_release_event&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">on_release_box</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fig</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="Clicker.draw_line"><a class="viewcode-back" href="../../../../WEM.postWRF.postWRF.html#WEM.postWRF.postWRF.clicker.Clicker.draw_line">[docs]</a>    <span class="k">def</span> <span class="nf">draw_line</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">line</span> <span class="o">=</span> <span class="n">M</span><span class="o">.</span><span class="n">lines</span><span class="o">.</span><span class="n">Line2D</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">),(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">add_line</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">line</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">figure</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">mpl_connect</span><span class="p">(</span><span class="s">&#39;button_press_event&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">on_press</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">figure</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">mpl_connect</span><span class="p">(</span><span class="s">&#39;button_release_event&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">on_release_line</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fig</span><span class="p">)</span>
+        </div>
+<div class="viewcode-block" id="Clicker.on_press"><a class="viewcode-back" href="../../../../WEM.postWRF.postWRF.html#WEM.postWRF.postWRF.clicker.Clicker.on_press">[docs]</a>    <span class="k">def</span> <span class="nf">on_press</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+        <span class="k">print</span> <span class="s">&#39;press&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">x0</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">xdata</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">y0</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">ydata</span>
+</div>
+<div class="viewcode-block" id="Clicker.on_release_point"><a class="viewcode-back" href="../../../../WEM.postWRF.postWRF.html#WEM.postWRF.postWRF.clicker.Clicker.on_release_point">[docs]</a>    <span class="k">def</span> <span class="nf">on_release_point</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">event</span><span class="p">):</span>
+        <span class="c"># self.point.set_xy((self.x0,self.y0))</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s">&#39;scatt&#39;</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scatt</span><span class="p">,</span> <span class="n">M</span><span class="o">.</span><span class="n">collections</span><span class="o">.</span><span class="n">PathCollection</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">scatt</span><span class="o">.</span><span class="n">remove</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scatt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x0</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">y0</span><span class="p">,</span><span class="n">marker</span><span class="o">=</span><span class="s">&#39;x&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">figure</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">draw</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="Clicker.on_release_box"><a class="viewcode-back" href="../../../../WEM.postWRF.postWRF.html#WEM.postWRF.postWRF.clicker.Clicker.on_release_box">[docs]</a>    <span class="k">def</span> <span class="nf">on_release_box</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+        <span class="k">print</span> <span class="s">&#39;release&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">x1</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">xdata</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">y1</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">ydata</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rect</span><span class="o">.</span><span class="n">set_width</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x1</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">x0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rect</span><span class="o">.</span><span class="n">set_height</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">y1</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">y0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rect</span><span class="o">.</span><span class="n">set_xy</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">x0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y0</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">figure</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">draw</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="Clicker.on_release_line"><a class="viewcode-back" href="../../../../WEM.postWRF.postWRF.html#WEM.postWRF.postWRF.clicker.Clicker.on_release_line">[docs]</a>    <span class="k">def</span> <span class="nf">on_release_line</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+        <span class="k">print</span> <span class="s">&#39;release&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">x1</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">xdata</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">y1</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">ydata</span>
+        <span class="c"># self.rect.set_width(self.x1 - self.x0)</span>
+        <span class="c"># self.rect.set_height(self.y1 - self.y0)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">line</span><span class="o">.</span><span class="n">set_data</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">x0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">x1</span><span class="p">),(</span><span class="bp">self</span><span class="o">.</span><span class="n">y0</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">y1</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">figure</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">draw</span><span class="p">()</span>
+        </div>
+<div class="viewcode-block" id="Clicker.onpick"><a class="viewcode-back" href="../../../../WEM.postWRF.postWRF.html#WEM.postWRF.postWRF.clicker.Clicker.onpick">[docs]</a>    <span class="k">def</span> <span class="nf">onpick</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">event</span><span class="p">):</span>
+        <span class="n">artist</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">artist</span>
+        <span class="n">mouseevent</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">mouseevent</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">mouseevent</span><span class="o">.</span><span class="n">xdata</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">mouseevent</span><span class="o">.</span><span class="n">ydata</span>
+        </div>
+<div class="viewcode-block" id="Clicker.overlay_data"><a class="viewcode-back" href="../../../../WEM.postWRF.postWRF.html#WEM.postWRF.postWRF.clicker.Clicker.overlay_data">[docs]</a>    <span class="k">def</span> <span class="nf">overlay_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">data</span><span class="p">,</span><span class="n">V</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">cmap</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="n">xlen</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">ylen</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{}</span>
+        
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">V</span><span class="p">,</span><span class="n">N</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+            <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;levels&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">V</span>
+            
+        <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;cmap&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">cmap</span>
+        <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;extent&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">xlen</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="n">ylen</span><span class="p">)</span>
+        <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;picker&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">5</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">cf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bmap</span><span class="o">.</span><span class="n">contourf</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">,</span><span class="n">data</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="c"># self.fig.colorbar(cf,ax=self.ax,shrink=0.5,orientation=&#39;horizontal&#39;)</span>
+        <span class="c"># pdb.set_trace()</span>
+        
+        <span class="k">return</span>
+    </div>
+<div class="viewcode-block" id="Clicker.set_box_width"><a class="viewcode-back" href="../../../../WEM.postWRF.postWRF.html#WEM.postWRF.postWRF.clicker.Clicker.set_box_width">[docs]</a>    <span class="k">def</span> <span class="nf">set_box_width</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">X</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Ask user to specify a width that is normal to the</span>
+<span class="sd">        cross-section X. The plot will show with the box displayed.</span>
+<span class="sd">        If the user is not happy, they can try again.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fig</span><span class="p">)</span>
+        <span class="n">user_is_happy</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">while</span> <span class="ow">not</span> <span class="n">user_is_happy</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">km</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">raw_input</span><span class="p">(</span><span class="s">&quot;Specify line-normal width (km): &quot;</span><span class="p">))</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">km</span><span class="p">,</span><span class="nb">int</span><span class="p">):</span>
+                <span class="k">print</span><span class="p">(</span><span class="s">&quot;Value is not integer.&quot;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">Exception</span>
+                
+            <span class="bp">self</span><span class="o">.</span><span class="n">rect</span> <span class="o">=</span> <span class="n">M</span><span class="o">.</span><span class="n">patches</span><span class="o">.</span><span class="n">Rectangle</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">x0</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">y0</span><span class="p">),</span><span class="n">X</span><span class="o">.</span><span class="n">hyp_pts</span><span class="p">,</span><span class="n">X</span><span class="o">.</span><span class="n">angle</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">add_patch</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rect</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">figure</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">draw</span><span class="p">()</span>
+
+            <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fig</span><span class="p">)</span>
+            
+            <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
+                <span class="n">doesitwork</span> <span class="o">=</span> <span class="nb">raw_input</span><span class="p">(</span><span class="s">&quot;Does this work? (y/n/x): &quot;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">doesitwork</span> <span class="o">==</span> <span class="s">&#39;y&#39;</span><span class="p">:</span>
+                    <span class="n">user_is_happy</span> <span class="o">=</span> <span class="mi">1</span>
+                    <span class="k">break</span>
+                <span class="k">elif</span> <span class="n">doesitwork</span> <span class="o">==</span> <span class="s">&#39;n&#39;</span><span class="p">:</span>
+                    <span class="k">break</span>
+                <span class="k">elif</span> <span class="n">doesitwork</span> <span class="o">==</span> <span class="s">&#39;x&#39;</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">Exception</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">print</span><span class="p">(</span><span class="s">&quot;Try again.&quot;</span><span class="p">)</span>
+                    </div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../../index.html">.</a></h1>
+
+
+
+
+
+<p>
+<iframe src="http://ghbtns.com/github-btn.html?user=&repo=&type=watch&count=true&size=large"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../WEM.html">WEM package</a></li>
+</ul>
+
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2014, Author.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.2.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.6.1</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

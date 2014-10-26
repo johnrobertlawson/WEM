@@ -1,0 +1,157 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>WEM.postWRF.postWRF.map &mdash; .  documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <link rel="top" title=".  documentation" href="../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../index.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">.  documentation</a> &raquo;</li>
+          <li><a href="../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for WEM.postWRF.postWRF.map</h1><div class="highlight"><pre>
+<span class="kn">from</span> <span class="nn">figure</span> <span class="kn">import</span> <span class="n">Figure</span>
+
+<div class="viewcode-block" id="Map"><a class="viewcode-back" href="../../../../WEM.postWRF.postWRF.html#WEM.postWRF.postWRF.map.Map">[docs]</a><span class="k">class</span> <span class="nc">Map</span><span class="p">(</span><span class="n">Figure</span><span class="p">):</span>
+<div class="viewcode-block" id="Map.plot_domains"><a class="viewcode-back" href="../../../../WEM.postWRF.postWRF.html#WEM.postWRF.postWRF.map.Map.plot_domains">[docs]</a>    <span class="k">def</span> <span class="nf">plot_domains</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">wrfouts</span><span class="p">,</span><span class="n">labels</span><span class="p">,</span><span class="n">latlons</span><span class="p">,</span><span class="n">colour</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        wrfouts     :   list of wrfout file paths</span>
+<span class="sd">        latlons     :   dictionary of Nlim,Elim,Slim,Wlim</span>
+<span class="sd">                        for plot</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+
+        <span class="c"># Create basemap first of all</span>
+        <span class="n">basemap_res</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">C</span><span class="p">,</span><span class="s">&#39;basemap_res&#39;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">D</span><span class="o">.</span><span class="n">basemap_res</span><span class="p">)</span>
+
+        <span class="n">m</span> <span class="o">=</span> <span class="n">Basemap</span><span class="p">(</span>
+            <span class="n">projection</span><span class="o">=</span><span class="s">&#39;merc&#39;</span><span class="p">,</span>
+            <span class="n">llcrnrlon</span><span class="o">=</span><span class="n">latlons</span><span class="p">[</span><span class="s">&#39;Wlim&#39;</span><span class="p">],</span><span class="n">llcrnrlat</span><span class="o">=</span><span class="n">latlons</span><span class="p">[</span><span class="s">&#39;Slim&#39;</span><span class="p">],</span>
+            <span class="n">urcrnrlon</span><span class="o">=</span><span class="n">latlons</span><span class="p">[</span><span class="s">&#39;Elim&#39;</span><span class="p">],</span><span class="n">urcrnrlat</span><span class="o">=</span><span class="n">latlons</span><span class="p">[</span><span class="s">&#39;Nlim&#39;</span><span class="p">],</span>
+            <span class="n">lat_0</span><span class="o">=</span><span class="n">latlons</span><span class="p">[</span><span class="s">&#39;lat0&#39;</span><span class="p">],</span><span class="n">lon_0</span><span class="o">=</span><span class="n">latlons</span><span class="p">[</span><span class="s">&#39;lon0&#39;</span><span class="p">],</span>
+            <span class="n">resolution</span><span class="o">=</span><span class="n">basemap_res</span><span class="p">,</span><span class="n">area_thresh</span><span class="o">=</span><span class="mi">500</span>
+            <span class="p">)</span>
+
+        <span class="n">m</span><span class="o">.</span><span class="n">drawcoastlines</span><span class="p">()</span>
+        <span class="n">m</span><span class="o">.</span><span class="n">drawstates</span><span class="p">()</span>
+        <span class="n">m</span><span class="o">.</span><span class="n">drawcountries</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">colour</span><span class="p">,</span><span class="n">collections</span><span class="o">.</span><span class="n">Sequence</span><span class="p">):</span>
+            <span class="n">colours</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;k&#39;</span><span class="p">,]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">wrfouts</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">colours</span> <span class="o">=</span> <span class="n">colour</span>
+        <span class="c"># Get corners of each domain</span>
+        <span class="k">for</span> <span class="n">gridlabel</span><span class="p">,</span><span class="n">fpath</span><span class="p">,</span><span class="n">colour</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">labels</span><span class="p">,</span><span class="n">wrfouts</span><span class="p">,</span><span class="n">colours</span><span class="p">):</span>
+            <span class="n">W</span> <span class="o">=</span> <span class="n">WRFOut</span><span class="p">(</span><span class="n">fpath</span><span class="p">)</span>
+            <span class="k">print</span><span class="p">(</span><span class="s">&quot;Plotting domain {0} for {1}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">gridlabel</span><span class="p">,</span><span class="n">fpath</span><span class="p">))</span>
+            <span class="c">#Nlim, Elim, Slim, Wlim = W.get_limits()</span>
+            <span class="n">x</span><span class="p">,</span><span class="n">y</span> <span class="o">=</span> <span class="n">m</span><span class="p">(</span><span class="n">W</span><span class="o">.</span><span class="n">lons</span><span class="p">,</span><span class="n">W</span><span class="o">.</span><span class="n">lats</span><span class="p">)</span>
+            <span class="n">xl</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">,:])</span>
+            <span class="n">midpt</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">[</span><span class="mi">0</span><span class="p">,:])</span><span class="o">/</span><span class="mi">2</span>         
+            <span class="n">plt</span><span class="o">.</span><span class="n">annotate</span><span class="p">(</span><span class="n">gridlabel</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="n">colour</span><span class="p">,</span><span class="n">fontsize</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span><span class="n">xy</span><span class="o">=</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="o">-</span><span class="p">(</span><span class="mf">0.12</span><span class="o">*</span><span class="n">xl</span><span class="p">)],</span><span class="n">y</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="n">midpt</span><span class="p">]),</span>
+                         <span class="n">bbox</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">fc</span><span class="o">=</span><span class="s">&#39;white&#39;</span><span class="p">),</span><span class="n">alpha</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">va</span><span class="o">=</span><span class="s">&#39;center&#39;</span><span class="p">,</span><span class="n">ha</span><span class="o">=</span><span class="s">&#39;left&#39;</span><span class="p">)</span>    
+            <span class="n">m</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">,:],</span><span class="n">y</span><span class="p">[</span><span class="mi">0</span><span class="p">,:],</span><span class="n">colour</span><span class="p">,</span><span class="n">lw</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span><span class="n">y</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span><span class="n">colour</span><span class="p">,</span><span class="n">lw</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span> 
+            <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">,:],</span><span class="n">y</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">,:],</span><span class="n">colour</span><span class="p">,</span><span class="n">lw</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>     
+            <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">[:,</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span><span class="n">y</span><span class="p">[:,</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span><span class="n">colour</span><span class="p">,</span><span class="n">lw</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>    
+
+        <span class="n">fpath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">C</span><span class="o">.</span><span class="n">output_root</span><span class="p">,</span><span class="s">&#39;domains.png&#39;</span><span class="p">)</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">fpath</span><span class="p">)</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../../index.html">.</a></h1>
+
+
+
+
+
+<p>
+<iframe src="http://ghbtns.com/github-btn.html?user=&repo=&type=watch&count=true&size=large"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../WEM.html">WEM package</a></li>
+</ul>
+
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2014, Author.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.2.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.6.1</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,529 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>WEM.postWRF.postWRF.skewt &mdash; .  documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <link rel="top" title=".  documentation" href="../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../index.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">.  documentation</a> &raquo;</li>
+          <li><a href="../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for WEM.postWRF.postWRF.skewt</h1><div class="highlight"><pre>
+<span class="c"># Run this script with and without uintah by changing pywrfplotParams variable &#39;uintah&#39;.</span>
+
+<span class="c">### IMPORTS</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">N</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">matplotlib</span> <span class="kn">as</span> <span class="nn">M</span>
+<span class="n">M</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="s">&#39;Agg&#39;</span><span class="p">)</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">pdb</span>
+<span class="kn">import</span> <span class="nn">cPickle</span> <span class="kn">as</span> <span class="nn">pickle</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="c"># User imports</span>
+
+<span class="c">#from Params import mc.Tz,mc.Tb,mc.kappa,barb_increments,self.P_bot,outdir,ens</span>
+<span class="c">#from Utils import gamma_s,td,e,openWRF,getDimensions,convert_time</span>
+
+<span class="kn">from</span> <span class="nn">figure</span> <span class="kn">import</span> <span class="n">Figure</span>
+<span class="kn">from</span> <span class="nn">wrfout</span> <span class="kn">import</span> <span class="n">WRFOut</span>
+<span class="kn">import</span> <span class="nn">WEM.utils</span> <span class="kn">as</span> <span class="nn">utils</span>
+<span class="kn">import</span> <span class="nn">metconstants</span> <span class="kn">as</span> <span class="nn">mc</span>
+
+<div class="viewcode-block" id="Profile"><a class="viewcode-back" href="../../../../WEM.postWRF.postWRF.html#WEM.postWRF.postWRF.skewt.Profile">[docs]</a><span class="k">class</span> <span class="nc">Profile</span><span class="p">(</span><span class="n">Figure</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">config</span><span class="p">,</span><span class="n">wrfout</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="c"># self.C = config</span>
+        <span class="c"># self.path_to_WRF = self.C.wrfout_root</span>
+        <span class="c"># self.path_to_output = self.C.output_root</span>
+        <span class="c"># if wrfout:</span>
+            <span class="c"># self.W = wrfout</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Profile</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">config</span><span class="p">,</span><span class="n">wrfout</span><span class="p">,</span><span class="n">ax</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">fig</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Profile.composite_profile"><a class="viewcode-back" href="../../../../WEM.postWRF.postWRF.html#WEM.postWRF.postWRF.skewt.Profile.composite_profile">[docs]</a>    <span class="k">def</span> <span class="nf">composite_profile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">va</span><span class="p">,</span><span class="n">plot_time</span><span class="p">,</span><span class="n">plot_latlon</span><span class="p">,</span><span class="n">wrfouts</span><span class="p">,</span><span class="n">outpath</span><span class="p">,</span>
+                            <span class="n">dom</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">mean</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">std</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">xlim</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">ylim</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">fig</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">ax</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                            <span class="n">locname</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">ml</span><span class="o">=-</span><span class="mi">2</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Loop over wrfout files.</span>
+<span class="sd">        Get profile of variable</span>
+<span class="sd">        Plot all members</span>
+
+<span class="sd">        Optional standard deviation</span>
+<span class="sd">        Optional mean</span>
+
+<span class="sd">        If ax, save image to that axis</span>
+
+<span class="sd">        ml     :   member level. negative number that corresponds to the </span>
+<span class="sd">                            folder in absolute string for naming purposes.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># Set up figure</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span><span class="n">M</span><span class="o">.</span><span class="n">figure</span><span class="o">.</span><span class="n">Figure</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fig</span> <span class="o">=</span> <span class="n">fig</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ax</span> <span class="o">=</span> <span class="n">ax</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fig</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
+            
+        <span class="c"># Plot settings</span>
+        <span class="k">if</span> <span class="n">xlim</span><span class="p">:</span>
+            <span class="n">xmin</span><span class="p">,</span> <span class="n">xmax</span><span class="p">,</span> <span class="n">xint</span> <span class="o">=</span> <span class="n">xlim</span>
+        <span class="k">if</span> <span class="n">ylim</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">ylim</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">ylim</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+                <span class="c"># top to bottom</span>
+                <span class="n">P_top</span><span class="p">,</span> <span class="n">P_bot</span><span class="p">,</span> <span class="n">dp</span> <span class="o">=</span> <span class="p">[</span><span class="n">y</span><span class="o">*</span><span class="mf">100.0</span> <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">ylim</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">P_bot</span><span class="p">,</span> <span class="n">P_top</span><span class="p">,</span> <span class="n">dp</span> <span class="o">=</span> <span class="p">[</span><span class="n">y</span><span class="o">*</span><span class="mf">100.0</span> <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">ylim</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">P_bot</span> <span class="o">=</span> <span class="mf">100000.0</span>
+            <span class="n">P_top</span> <span class="o">=</span> <span class="mf">20000.0</span>
+            <span class="n">dp</span> <span class="o">=</span> <span class="mf">10000.0</span>
+
+        <span class="c"># plevs = N.arange(P_bot,P_top,dp)</span>
+
+        <span class="c"># Get wrfout prototype for information</span>
+        <span class="n">W</span> <span class="o">=</span> <span class="n">WRFOut</span><span class="p">(</span><span class="n">wrfouts</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+        <span class="n">lat</span><span class="p">,</span> <span class="n">lon</span> <span class="o">=</span> <span class="n">plot_latlon</span>
+        <span class="n">datestr</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">string_from_time</span><span class="p">(</span><span class="s">&#39;output&#39;</span><span class="p">,</span><span class="n">plot_time</span><span class="p">)</span>
+        <span class="n">t_idx</span> <span class="o">=</span> <span class="n">W</span><span class="o">.</span><span class="n">get_time_idx</span><span class="p">(</span><span class="n">plot_time</span><span class="p">,)</span>
+        <span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">exact_lat</span><span class="p">,</span> <span class="n">exact_lon</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">getXY</span><span class="p">(</span><span class="n">W</span><span class="o">.</span><span class="n">lats1D</span><span class="p">,</span><span class="n">W</span><span class="o">.</span><span class="n">lons1D</span><span class="p">,</span><span class="n">lat</span><span class="p">,</span><span class="n">lon</span><span class="p">)</span>
+        <span class="n">slices</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;t&#39;</span><span class="p">:</span> <span class="n">t_idx</span><span class="p">,</span> <span class="s">&#39;la&#39;</span><span class="p">:</span> <span class="n">y</span><span class="p">,</span> <span class="s">&#39;lo&#39;</span><span class="p">:</span> <span class="n">x</span><span class="p">}</span>
+        <span class="c">#var_slices = {&#39;t&#39;: t_idx, &#39;lv&#39;:0, &#39;la&#39;:y, &#39;lo&#39;:x}</span>
+
+        <span class="c"># Initialise array</span>
+        <span class="c"># Number of levels and ensembles:</span>
+        <span class="n">nPlevs</span> <span class="o">=</span> <span class="n">W</span><span class="o">.</span><span class="n">z_dim</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">W</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">va</span><span class="p">,</span><span class="n">slices</span><span class="p">)</span>
+        <span class="n">nvarlevs</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">nens</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">wrfouts</span><span class="p">)</span>
+
+        <span class="c"># 2D: (profile,member)</span>
+        <span class="n">profile_arr</span> <span class="o">=</span> <span class="n">N</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">nvarlevs</span><span class="p">,</span><span class="n">nens</span><span class="p">))</span>
+        <span class="n">composite_P</span> <span class="o">=</span> <span class="n">N</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">nPlevs</span><span class="p">,</span><span class="n">nens</span><span class="p">))</span>
+
+        <span class="c"># Set up legend</span>
+        <span class="n">labels</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">colourlist</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">generate_colours</span><span class="p">(</span><span class="n">M</span><span class="p">,</span><span class="n">nens</span><span class="p">)</span>
+        <span class="c"># M.rcParams[&#39;axes.color_cycle&#39;] = colourlist</span>
+
+        <span class="c"># Collect profiles</span>
+        <span class="k">for</span> <span class="n">n</span><span class="p">,</span><span class="n">wrfout</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">wrfouts</span><span class="p">):</span>
+            <span class="n">W</span> <span class="o">=</span> <span class="n">WRFOut</span><span class="p">(</span><span class="n">wrfout</span><span class="p">)</span>
+
+            <span class="c"># Get pressure levels</span>
+            <span class="n">composite_P</span><span class="p">[:,</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="n">W</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;pressure&#39;</span><span class="p">,</span><span class="n">slices</span><span class="p">)[</span><span class="mi">0</span><span class="p">,:,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span>
+            <span class="c">#elev = self.W.get(&#39;HGT&#39;,H_slices)</span>
+
+            <span class="c">#pdb.set_trace()</span>
+            <span class="c"># Grab variable</span>
+            <span class="n">profile_arr</span><span class="p">[:,</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="n">W</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">va</span><span class="p">,</span><span class="n">slices</span><span class="p">)[</span><span class="mi">0</span><span class="p">,:,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span>
+
+            <span class="c"># Plot variable on graph</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">profile_arr</span><span class="p">[:,</span><span class="n">n</span><span class="p">],</span><span class="n">composite_P</span><span class="p">[:,</span><span class="n">n</span><span class="p">],</span><span class="n">color</span><span class="o">=</span><span class="n">colourlist</span><span class="p">[</span><span class="n">n</span><span class="p">])</span>
+           
+            <span class="n">member</span> <span class="o">=</span> <span class="n">wrfout</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">)[</span><span class="n">ml</span><span class="p">]</span>
+            <span class="n">labels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">member</span><span class="p">)</span>
+            <span class="c"># if locname==&#39;KOAX&#39;: pdb.set_trace()</span>
+
+        <span class="c"># Compute mean, std etc</span>
+        <span class="k">if</span> <span class="n">mean</span><span class="p">:</span>
+            <span class="n">profile_mean</span> <span class="o">=</span> <span class="n">N</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">profile_arr</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">profile_mean_P</span> <span class="o">=</span> <span class="n">N</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">composite_P</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">profile_mean</span><span class="p">,</span><span class="n">profile_mean_P</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="s">&#39;black&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">std</span><span class="p">:</span>
+            <span class="c"># Assume mean P across ensemble is correct level</span>
+            <span class="c"># to plot standard deviation</span>
+            <span class="n">profile_std</span> <span class="o">=</span> <span class="n">N</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">profile_arr</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">std_upper</span> <span class="o">=</span> <span class="n">profile_mean</span> <span class="o">+</span> <span class="n">profile_std</span>
+            <span class="n">std_lower</span> <span class="o">=</span> <span class="n">profile_mean</span> <span class="o">-</span> <span class="n">profile_std</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">std_upper</span><span class="p">,</span><span class="n">profile_mean_P</span><span class="p">,</span><span class="s">&#39;k--&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">std_lower</span><span class="p">,</span><span class="n">profile_mean_P</span><span class="p">,</span><span class="s">&#39;k--&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">locname</span><span class="p">:</span>
+            <span class="n">fname</span> <span class="o">=</span> <span class="s">&#39;_&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">((</span><span class="s">&#39;profile_comp&#39;</span><span class="p">,</span><span class="n">va</span><span class="p">,</span><span class="n">datestr</span><span class="p">,</span><span class="s">&#39;{0:03d}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">x</span><span class="p">),</span><span class="s">&#39;{0:03d}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">y</span><span class="p">)))</span> <span class="o">+</span> <span class="s">&#39;.png&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">fname</span> <span class="o">=</span> <span class="s">&#39;_&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">((</span><span class="s">&#39;profile_comp&#39;</span><span class="p">,</span><span class="n">va</span><span class="p">,</span><span class="n">datestr</span><span class="p">,</span><span class="n">locname</span><span class="p">))</span> <span class="o">+</span> <span class="s">&#39;.png&#39;</span>
+
+        <span class="c"># Set semi-log graph</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">set_yscale</span><span class="p">(</span><span class="s">&#39;log&#39;</span><span class="p">)</span>
+        <span class="c"># Plot limits, ticks</span>
+        <span class="n">yticks</span> <span class="o">=</span> <span class="n">N</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">P_bot</span><span class="p">,</span><span class="n">P_top</span><span class="o">+</span><span class="n">dp</span><span class="o">*</span><span class="mf">100.0</span><span class="p">,</span><span class="o">-</span><span class="mi">100</span><span class="o">*</span><span class="mf">100.0</span><span class="p">)</span>
+        <span class="c"># yticks = N.arange(P_bot,P_top+dp,-dp*100)</span>
+        <span class="c"># self.ax.set_yticks(yticks)</span>
+        <span class="n">ylabels</span> <span class="o">=</span> <span class="p">[</span><span class="s">&quot;</span><span class="si">%4u</span><span class="s">&quot;</span> <span class="o">%</span><span class="p">(</span><span class="n">p</span><span class="o">/</span><span class="mf">100.0</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">yticks</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">set_yticks</span><span class="p">(</span><span class="n">yticks</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">set_yticklabels</span><span class="p">(</span><span class="n">ylabels</span><span class="p">)</span>
+        <span class="c"># import pdb; pdb.set_trace()</span>
+        <span class="c"># self.ax.yaxis.tick_right()</span>
+
+        <span class="c">#plt.axis([-20,50,105000.0,20000.0])</span>
+        <span class="c">#plt.xlabel(r&#39;Temperature ($^{\circ}$C) at 1000 hPa&#39;)</span>
+        <span class="c">#plt.xticks(xticks,[&#39;&#39; if tick%10!=0 else str(tick) for tick in xticks])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s">&#39;Pressure (hPa)&#39;</span><span class="p">)</span>
+        <span class="c">#yticks = N.arange(self.P_bot,P_t-1,-10**4)</span>
+        <span class="c">#plt.yticks(yticks,yticks/100)</span>
+
+        <span class="k">if</span> <span class="n">xlim</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">([</span><span class="n">xmin</span><span class="p">,</span><span class="n">xmax</span><span class="p">])</span>
+            <span class="n">xticks</span> <span class="o">=</span> <span class="n">N</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">xmin</span><span class="p">,</span><span class="n">xmax</span><span class="o">+</span><span class="n">xint</span><span class="p">,</span><span class="n">xint</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">(</span><span class="n">xticks</span><span class="p">)</span>
+
+        <span class="c"># Flip y axis</span>
+        <span class="c"># Limits are already set</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">([</span><span class="n">P_bot</span><span class="p">,</span><span class="n">P_top</span><span class="p">])</span>
+
+        <span class="c"># plt.tight_layout(self.fig)</span>
+        <span class="c">#plt.autoscale(enable=1,axis=&#39;x&#39;)</span>
+        <span class="c">#ax = plt.gca()</span>
+        <span class="c">#ax.relim()</span>
+        <span class="c">#ax.autoscale_view()</span>
+        <span class="c">#plt.draw()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">labels</span><span class="p">,</span><span class="n">loc</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span><span class="n">fontsize</span><span class="o">=</span><span class="mi">6</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">outpath</span><span class="p">,</span><span class="n">fname</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fig</span><span class="p">)</span>
+</div></div>
+<div class="viewcode-block" id="SkewT"><a class="viewcode-back" href="../../../../WEM.postWRF.postWRF.html#WEM.postWRF.postWRF.skewt.SkewT">[docs]</a><span class="k">class</span> <span class="nc">SkewT</span><span class="p">(</span><span class="n">Figure</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">config</span><span class="p">,</span><span class="n">wrfout</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="c"># self.C = config</span>
+        <span class="c"># self.path_to_WRF = self.C.wrfout_root</span>
+        <span class="c"># self.path_to_output = self.C.output_root</span>
+        <span class="c"># if wrfout:</span>
+            <span class="c"># self.W = wrfout</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">SkewT</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">config</span><span class="p">,</span><span class="n">wrfout</span><span class="p">,</span><span class="n">ax</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">fig</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="c">#self.plevs = self.W.z_dim-1</span>
+
+
+<div class="viewcode-block" id="SkewT.plot_skewT"><a class="viewcode-back" href="../../../../WEM.postWRF.postWRF.html#WEM.postWRF.postWRF.skewt.SkewT.plot_skewT">[docs]</a>    <span class="k">def</span> <span class="nf">plot_skewT</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">plot_time</span><span class="p">,</span><span class="n">plot_latlon</span><span class="p">,</span><span class="n">dom</span><span class="p">,</span><span class="n">outpath</span><span class="p">,</span><span class="n">save_output</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">save_plot</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        
+
+        <span class="c"># Defines the ranges of the plot, do not confuse with self.P_bot and self.P_top</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">barb_increments</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;half&#39;</span><span class="p">:</span> <span class="mf">2.5</span><span class="p">,</span><span class="s">&#39;full&#39;</span><span class="p">:</span><span class="mf">5.0</span><span class="p">,</span><span class="s">&#39;flag&#39;</span><span class="p">:</span><span class="mf">25.0</span><span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">skewness</span> <span class="o">=</span> <span class="mf">37.5</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">P_bot</span> <span class="o">=</span> <span class="mf">100000.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">P_top</span> <span class="o">=</span> <span class="mf">10000.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dp</span> <span class="o">=</span> <span class="mf">100.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plevs</span> <span class="o">=</span> <span class="n">N</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">P_bot</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">P_top</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">dp</span><span class="p">)</span>
+
+        <span class="c"># pdb.set_trace()</span>
+        <span class="n">prof_lat</span><span class="p">,</span> <span class="n">prof_lon</span> <span class="o">=</span> <span class="n">plot_latlon</span>
+        <span class="n">datestr</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">string_from_time</span><span class="p">(</span><span class="s">&#39;output&#39;</span><span class="p">,</span><span class="n">plot_time</span><span class="p">)</span>
+        <span class="n">t_idx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">W</span><span class="o">.</span><span class="n">get_time_idx</span><span class="p">(</span><span class="n">plot_time</span><span class="p">)</span>
+        <span class="n">y</span><span class="p">,</span><span class="n">x</span><span class="p">,</span> <span class="n">exact_lat</span><span class="p">,</span> <span class="n">exact_lon</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">getXY</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">W</span><span class="o">.</span><span class="n">lats1D</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">W</span><span class="o">.</span><span class="n">lons1D</span><span class="p">,</span><span class="n">prof_lat</span><span class="p">,</span><span class="n">prof_lon</span><span class="p">)</span>
+
+
+        <span class="c"># Create figure</span>
+        <span class="k">if</span> <span class="n">save_plot</span><span class="p">:</span>
+            <span class="c"># height, width = (10,10)</span>
+
+            <span class="c"># fig = plt.figure(figsize=(width,height))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">isotherms</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">isobars</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dry_adiabats</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">moist_adiabats</span><span class="p">()</span>
+
+
+            <span class="n">P_slices</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;t&#39;</span><span class="p">:</span> <span class="n">t_idx</span><span class="p">,</span> <span class="s">&#39;la&#39;</span><span class="p">:</span> <span class="n">y</span><span class="p">,</span> <span class="s">&#39;lo&#39;</span><span class="p">:</span> <span class="n">x</span><span class="p">}</span>
+            <span class="n">H_slices</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;t&#39;</span><span class="p">:</span><span class="n">t_idx</span><span class="p">,</span> <span class="s">&#39;lv&#39;</span><span class="p">:</span><span class="mi">0</span><span class="p">,</span> <span class="s">&#39;la&#39;</span><span class="p">:</span><span class="n">y</span><span class="p">,</span> <span class="s">&#39;lo&#39;</span><span class="p">:</span><span class="n">x</span><span class="p">}</span>
+            <span class="c"># pdb.set_trace()</span>
+            <span class="n">P</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">W</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;pressure&#39;</span><span class="p">,</span><span class="n">P_slices</span><span class="p">)[</span><span class="mi">0</span><span class="p">,:,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span>
+
+            <span class="n">elev</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">W</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;HGT&#39;</span><span class="p">,</span><span class="n">H_slices</span><span class="p">)</span>
+
+            <span class="n">thin_locs</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">thinned_barbs</span><span class="p">(</span><span class="n">P</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">windbarbs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">W</span><span class="o">.</span><span class="n">nc</span><span class="p">,</span><span class="n">t_idx</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">P</span><span class="p">,</span><span class="n">thin_locs</span><span class="p">,</span><span class="n">n</span><span class="o">=</span><span class="mi">45</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="s">&#39;blue&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">temperature</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">W</span><span class="o">.</span><span class="n">nc</span><span class="p">,</span><span class="n">t_idx</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">P</span><span class="p">,</span><span class="n">linestyle</span><span class="o">=</span><span class="s">&#39;solid&#39;</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="s">&#39;blue&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dewpoint</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">W</span><span class="o">.</span><span class="n">nc</span><span class="p">,</span><span class="n">t_idx</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">P</span><span class="p">,</span><span class="n">linestyle</span><span class="o">=</span><span class="s">&#39;dashed&#39;</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="s">&#39;blue&#39;</span><span class="p">)</span>
+
+            <span class="n">xticks</span> <span class="o">=</span> <span class="n">N</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="o">-</span><span class="mi">20</span><span class="p">,</span><span class="mi">51</span><span class="p">,</span><span class="mi">5</span><span class="p">)</span>
+            <span class="n">yticks</span> <span class="o">=</span> <span class="n">N</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mf">100000.0</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">P_top</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">10</span><span class="o">**</span><span class="mi">4</span><span class="p">)</span>
+            <span class="n">ytix</span> <span class="o">=</span> <span class="p">[</span><span class="s">&quot;</span><span class="si">%4u</span><span class="s">&quot;</span> <span class="o">%</span><span class="p">(</span><span class="n">p</span><span class="o">/</span><span class="mf">100.0</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">yticks</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">(</span><span class="n">xticks</span><span class="p">,[</span><span class="s">&#39;&#39;</span> <span class="k">if</span> <span class="n">tick</span><span class="o">%</span><span class="mi">10</span><span class="o">!=</span><span class="mi">0</span> <span class="k">else</span> <span class="nb">str</span><span class="p">(</span><span class="n">tick</span><span class="p">)</span> <span class="k">for</span> <span class="n">tick</span> <span class="ow">in</span> <span class="n">xticks</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">set_yticks</span><span class="p">(</span><span class="n">yticks</span><span class="p">,</span><span class="n">ytix</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">axis</span><span class="p">([</span><span class="o">-</span><span class="mi">20</span><span class="p">,</span><span class="mi">50</span><span class="p">,</span><span class="mf">105000.0</span><span class="p">,</span><span class="mf">20000.0</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s">r&#39;Temperature ($^{\circ}$C) at 1000 hPa&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">(</span><span class="n">xticks</span><span class="p">,[</span><span class="s">&#39;&#39;</span> <span class="k">if</span> <span class="n">tick</span><span class="o">%</span><span class="mi">10</span><span class="o">!=</span><span class="mi">0</span> <span class="k">else</span> <span class="nb">str</span><span class="p">(</span><span class="n">tick</span><span class="p">)</span> <span class="k">for</span> <span class="n">tick</span> <span class="ow">in</span> <span class="n">xticks</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s">&#39;Pressure (hPa)&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">set_yticks</span><span class="p">(</span><span class="n">yticks</span><span class="p">,</span><span class="n">ytix</span><span class="p">)</span>
+            <span class="c">#yticks = N.arange(self.P_bot,P_t-1,-10**4)</span>
+            <span class="c">#plt.yticks(yticks,yticks/100)</span>
+
+            <span class="n">fname</span> <span class="o">=</span> <span class="s">&#39;_&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">((</span><span class="s">&#39;skewT&#39;</span><span class="p">,</span><span class="n">datestr</span><span class="p">,</span><span class="s">&#39;{0:03d}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">x</span><span class="p">),</span><span class="s">&#39;{0:03d}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">y</span><span class="p">)))</span> <span class="o">+</span> <span class="s">&#39;.png&#39;</span>
+            <span class="c"># utils.trycreate(self.path_to_output)</span>
+
+            <span class="c"># fpath = os.path.join(self.path_to_output,fname)</span>
+            <span class="c"># plt.savefig(fpath)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">outpath</span><span class="p">,</span><span class="n">fname</span><span class="p">)</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+        <span class="c"># For saving Skew T data</span>
+        <span class="k">if</span> <span class="n">save_output</span><span class="p">:</span>
+
+            <span class="c"># Pickle files are saved here:</span>
+            <span class="n">pickle_fname</span> <span class="o">=</span> <span class="s">&#39;_&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">((</span><span class="s">&#39;WRFsounding&#39;</span><span class="p">,</span><span class="n">datestr</span><span class="p">,</span><span class="s">&#39;{0:03d}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">x</span><span class="p">),</span>
+                            <span class="s">&#39;{0:03d}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">y</span><span class="p">)</span><span class="o">+</span><span class="s">&#39;.p&#39;</span><span class="p">))</span>
+            <span class="n">pickle_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">C</span><span class="o">.</span><span class="n">pickledir</span><span class="p">,</span><span class="n">pickle_fname</span><span class="p">)</span>
+            <span class="n">u</span><span class="p">,</span><span class="n">v</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">return_data</span><span class="p">(</span><span class="s">&#39;wind&#39;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">W</span><span class="o">.</span><span class="n">nc</span><span class="p">,</span><span class="n">t_idx</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">thin_locs</span><span class="p">)</span>
+            <span class="n">T</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">return_data</span><span class="p">(</span><span class="s">&#39;temp&#39;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">W</span><span class="o">.</span><span class="n">nc</span><span class="p">,</span><span class="n">t_idx</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">thin_locs</span><span class="p">,</span><span class="n">P</span><span class="o">=</span><span class="n">P</span><span class="p">)</span>
+            <span class="n">Td</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">return_data</span><span class="p">(</span><span class="s">&#39;dwpt&#39;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">W</span><span class="o">.</span><span class="n">nc</span><span class="p">,</span><span class="n">t_idx</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">thin_locs</span><span class="p">,</span><span class="n">P</span><span class="o">=</span><span class="n">P</span><span class="p">)</span>
+            
+            <span class="n">data_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;u&#39;</span><span class="p">:</span><span class="n">u</span><span class="p">,</span><span class="s">&#39;v&#39;</span><span class="p">:</span><span class="n">v</span><span class="p">,</span><span class="s">&#39;T&#39;</span><span class="p">:</span><span class="n">T</span><span class="p">,</span><span class="s">&#39;Td&#39;</span><span class="p">:</span><span class="n">Td</span><span class="p">,</span><span class="s">&#39;P&#39;</span><span class="p">:</span><span class="n">P</span><span class="p">}</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">pickle_path</span><span class="p">,</span><span class="s">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">p</span><span class="p">:</span>
+                <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">data_dict</span><span class="p">,</span><span class="n">p</span><span class="p">)</span>
+            <span class="k">print</span><span class="p">(</span><span class="s">&quot;Saving data to {0}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">pickle_path</span><span class="p">))</span>
+
+            <span class="k">return</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span>
+</div>
+<div class="viewcode-block" id="SkewT.skewT_composite"><a class="viewcode-back" href="../../../../WEM.postWRF.postWRF.html#WEM.postWRF.postWRF.skewt.SkewT.skewT_composite">[docs]</a>    <span class="k">def</span> <span class="nf">skewT_composite</span><span class="p">(</span><span class="bp">self</span><span class="p">,):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Open pickle files from multiple soundings</span>
+<span class="sd">        Find mean Td/T</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span>
+</div>
+<div class="viewcode-block" id="SkewT.skewnessTerm"><a class="viewcode-back" href="../../../../WEM.postWRF.postWRF.html#WEM.postWRF.postWRF.skewt.SkewT.skewnessTerm">[docs]</a>    <span class="k">def</span> <span class="nf">skewnessTerm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">P</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">skewness</span> <span class="o">*</span> <span class="n">N</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">P_bot</span><span class="o">/</span><span class="n">P</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="SkewT.windbarbs"><a class="viewcode-back" href="../../../../WEM.postWRF.postWRF.html#WEM.postWRF.postWRF.skewt.SkewT.windbarbs">[docs]</a>    <span class="k">def</span> <span class="nf">windbarbs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">nc</span><span class="p">,</span><span class="n">time</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">P</span><span class="p">,</span><span class="n">thin_locs</span><span class="p">,</span><span class="n">n</span><span class="o">=</span><span class="mf">45.0</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="s">&#39;black&#39;</span><span class="p">):</span>
+        <span class="n">uwind</span> <span class="o">=</span> <span class="mf">0.5</span><span class="o">*</span><span class="p">(</span><span class="n">nc</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="s">&#39;U&#39;</span><span class="p">][</span><span class="n">time</span><span class="p">,:,</span><span class="n">y</span><span class="p">,</span><span class="n">x</span><span class="p">]</span><span class="o">+</span><span class="n">nc</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="s">&#39;U&#39;</span><span class="p">][</span><span class="n">time</span><span class="p">,:,</span><span class="n">y</span><span class="p">,</span><span class="n">x</span><span class="o">+</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">vwind</span> <span class="o">=</span> <span class="mf">0.5</span><span class="o">*</span><span class="p">(</span><span class="n">nc</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="s">&#39;V&#39;</span><span class="p">][</span><span class="n">time</span><span class="p">,:,</span><span class="n">y</span><span class="p">,</span><span class="n">x</span><span class="p">]</span><span class="o">+</span><span class="n">nc</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="s">&#39;V&#39;</span><span class="p">][</span><span class="n">time</span><span class="p">,:,</span><span class="n">y</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">x</span><span class="p">])</span>
+        <span class="n">zmax</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">uwind</span><span class="p">[</span><span class="n">thin_locs</span><span class="p">])</span>
+        <span class="n">delta</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">baraxis</span> <span class="o">=</span> <span class="p">[</span><span class="n">n</span> <span class="k">for</span> <span class="n">_j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">zmax</span><span class="p">,</span><span class="n">delta</span><span class="p">)]</span>
+        <span class="c"># pdb.set_trace()</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">barbs</span><span class="p">(</span><span class="n">baraxis</span><span class="p">,</span><span class="n">P</span><span class="p">[</span><span class="n">thin_locs</span><span class="p">],</span><span class="n">uwind</span><span class="p">[</span><span class="n">thin_locs</span><span class="p">],</span><span class="n">vwind</span><span class="p">[</span><span class="n">thin_locs</span><span class="p">],</span>
+                 <span class="n">barb_increments</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">barb_increments</span><span class="p">,</span> <span class="n">linewidth</span> <span class="o">=</span> <span class="o">.</span><span class="mi">75</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="SkewT.windbarbs_real"><a class="viewcode-back" href="../../../../WEM.postWRF.postWRF.html#WEM.postWRF.postWRF.skewt.SkewT.windbarbs_real">[docs]</a>    <span class="k">def</span> <span class="nf">windbarbs_real</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">uwind</span><span class="p">,</span><span class="n">vwind</span><span class="p">,</span><span class="n">P</span><span class="p">,</span><span class="n">delta</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="s">&#39;red&#39;</span><span class="p">,</span><span class="n">n</span><span class="o">=</span><span class="mf">37.5</span><span class="p">):</span>
+        <span class="c"># Is wind in kt or m/s?   .... uwind*</span>
+        <span class="n">those</span> <span class="o">=</span> <span class="n">N</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">uwind</span><span class="o">==-</span><span class="mi">9999</span><span class="p">)</span> <span class="c"># Find nonsense values</span>
+        <span class="n">uwind</span> <span class="o">=</span> <span class="n">N</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">uwind</span><span class="p">,</span><span class="n">those</span><span class="p">)</span>
+        <span class="n">vwind</span> <span class="o">=</span> <span class="n">N</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">vwind</span><span class="p">,</span><span class="n">those</span><span class="p">)</span>
+        <span class="n">P</span> <span class="o">=</span> <span class="n">N</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">P</span><span class="p">,</span><span class="n">those</span><span class="p">)</span>
+        <span class="n">zmax</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">uwind</span><span class="p">)</span>
+        <span class="c"># n is x-ax position on skewT for barbs.</span>
+        <span class="n">baraxis</span> <span class="o">=</span> <span class="p">[</span><span class="n">n</span> <span class="k">for</span> <span class="n">_j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">zmax</span><span class="p">,</span><span class="n">delta</span><span class="p">)]</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">barbs</span><span class="p">(</span><span class="n">baraxis</span><span class="p">,</span><span class="n">P</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">zmax</span><span class="p">:</span><span class="n">delta</span><span class="p">],</span><span class="n">uwind</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">zmax</span><span class="p">:</span><span class="n">delta</span><span class="p">],</span><span class="n">vwind</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">zmax</span><span class="p">:</span><span class="n">delta</span><span class="p">],</span>
+        <span class="n">barb_increments</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">barb_increments</span><span class="p">,</span> <span class="n">linewidth</span> <span class="o">=</span> <span class="o">.</span><span class="mi">75</span><span class="p">,</span> <span class="n">barbcolor</span> <span class="o">=</span> <span class="n">color</span><span class="p">,</span> <span class="n">flagcolor</span> <span class="o">=</span> <span class="n">color</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="SkewT.temperature"><a class="viewcode-back" href="../../../../WEM.postWRF.postWRF.html#WEM.postWRF.postWRF.skewt.SkewT.temperature">[docs]</a>    <span class="k">def</span> <span class="nf">temperature</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">nc</span><span class="p">,</span><span class="n">time</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">P</span><span class="p">,</span><span class="n">linestyle</span><span class="o">=</span><span class="s">&#39;solid&#39;</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="s">&#39;black&#39;</span><span class="p">):</span>
+        <span class="n">theta</span> <span class="o">=</span> <span class="n">nc</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="s">&#39;T&#39;</span><span class="p">][</span><span class="n">time</span><span class="p">,:,</span><span class="n">y</span><span class="p">,</span><span class="n">x</span><span class="p">]</span> <span class="o">+</span> <span class="n">mc</span><span class="o">.</span><span class="n">Tb</span>
+        <span class="n">T</span> <span class="o">=</span> <span class="n">theta</span><span class="o">*</span><span class="p">(</span><span class="n">P</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">P_bot</span><span class="p">)</span><span class="o">**</span><span class="n">mc</span><span class="o">.</span><span class="n">kappa</span> <span class="o">-</span> <span class="n">mc</span><span class="o">.</span><span class="n">Tz</span> <span class="c"># Temperatur i halvflatene (C)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">semilogy</span><span class="p">(</span><span class="n">T</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">skewnessTerm</span><span class="p">(</span><span class="n">P</span><span class="p">),</span> <span class="n">P</span><span class="p">,</span> <span class="n">basey</span><span class="o">=</span><span class="n">math</span><span class="o">.</span><span class="n">e</span><span class="p">,</span> <span class="n">color</span> <span class="o">=</span> <span class="n">color</span><span class="p">,</span> \
+                     <span class="n">linestyle</span><span class="o">=</span><span class="n">linestyle</span><span class="p">,</span> <span class="n">linewidth</span> <span class="o">=</span> <span class="mf">1.5</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="SkewT.temperature_real"><a class="viewcode-back" href="../../../../WEM.postWRF.postWRF.html#WEM.postWRF.postWRF.skewt.SkewT.temperature_real">[docs]</a>    <span class="k">def</span> <span class="nf">temperature_real</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">T</span><span class="p">,</span><span class="n">P</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="s">&#39;red&#39;</span><span class="p">,</span><span class="n">linestyle</span><span class="o">=</span><span class="s">&#39;dashed&#39;</span><span class="p">):</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">semilogy</span><span class="p">(</span><span class="n">T</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">skewnessTerm</span><span class="p">(</span><span class="n">P</span><span class="p">),</span> <span class="n">P</span><span class="p">,</span> <span class="n">basey</span><span class="o">=</span><span class="n">math</span><span class="o">.</span><span class="n">e</span><span class="p">,</span> <span class="n">color</span> <span class="o">=</span> <span class="n">color</span><span class="p">,</span> \
+                     <span class="n">linestyle</span><span class="o">=</span><span class="n">linestyle</span><span class="p">,</span> <span class="n">linewidth</span> <span class="o">=</span> <span class="mf">1.5</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="SkewT.dewpoint"><a class="viewcode-back" href="../../../../WEM.postWRF.postWRF.html#WEM.postWRF.postWRF.skewt.SkewT.dewpoint">[docs]</a>    <span class="k">def</span> <span class="nf">dewpoint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">nc</span><span class="p">,</span><span class="n">time</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">P</span><span class="p">,</span><span class="n">linestyle</span><span class="o">=</span><span class="s">&#39;dashed&#39;</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="s">&#39;black&#39;</span><span class="p">):</span>
+        <span class="n">w</span> <span class="o">=</span> <span class="n">nc</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="s">&#39;QVAPOR&#39;</span><span class="p">][</span><span class="n">time</span><span class="p">,:,</span><span class="n">y</span><span class="p">,</span><span class="n">x</span><span class="p">]</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">semilogy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">td</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">e</span><span class="p">(</span><span class="n">w</span><span class="p">,</span><span class="n">P</span><span class="p">))</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">skewnessTerm</span><span class="p">(</span><span class="n">P</span><span class="p">),</span> <span class="n">P</span><span class="p">,</span> <span class="n">basey</span><span class="o">=</span><span class="n">math</span><span class="o">.</span><span class="n">e</span><span class="p">,</span> <span class="n">color</span> <span class="o">=</span> <span class="n">color</span><span class="p">,</span> \
+                     <span class="n">linestyle</span><span class="o">=</span><span class="n">linestyle</span><span class="p">,</span> <span class="n">linewidth</span> <span class="o">=</span> <span class="mf">1.5</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="SkewT.dewpoint_real"><a class="viewcode-back" href="../../../../WEM.postWRF.postWRF.html#WEM.postWRF.postWRF.skewt.SkewT.dewpoint_real">[docs]</a>    <span class="k">def</span> <span class="nf">dewpoint_real</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">td</span><span class="p">,</span><span class="n">P</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="s">&#39;red&#39;</span><span class="p">,</span><span class="n">linestyle</span><span class="o">=</span><span class="s">&#39;dashed&#39;</span><span class="p">):</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">semilogy</span><span class="p">(</span><span class="n">td</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">skewnessTerm</span><span class="p">(</span><span class="n">P</span><span class="p">),</span> <span class="n">P</span><span class="p">,</span> <span class="n">basey</span><span class="o">=</span><span class="n">math</span><span class="o">.</span><span class="n">e</span><span class="p">,</span> <span class="n">color</span> <span class="o">=</span> <span class="n">color</span><span class="p">,</span> \
+                     <span class="n">linestyle</span><span class="o">=</span><span class="n">linestyle</span><span class="p">,</span> <span class="n">linewidth</span> <span class="o">=</span> <span class="mf">1.5</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="SkewT.return_data"><a class="viewcode-back" href="../../../../WEM.postWRF.postWRF.html#WEM.postWRF.postWRF.skewt.SkewT.return_data">[docs]</a>    <span class="k">def</span> <span class="nf">return_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">whichdata</span><span class="p">,</span><span class="n">nc</span><span class="p">,</span><span class="n">time</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">thin_locs</span><span class="p">,</span><span class="n">P</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">whichdata</span> <span class="o">==</span> <span class="s">&#39;wind&#39;</span><span class="p">:</span>
+            <span class="n">uwind</span> <span class="o">=</span> <span class="mf">0.5</span><span class="o">*</span><span class="p">(</span><span class="n">nc</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="s">&#39;U&#39;</span><span class="p">][</span><span class="n">time</span><span class="p">,:,</span><span class="n">y</span><span class="p">,</span><span class="n">x</span><span class="p">]</span><span class="o">+</span><span class="n">nc</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="s">&#39;U&#39;</span><span class="p">][</span><span class="n">time</span><span class="p">,:,</span><span class="n">y</span><span class="p">,</span><span class="n">x</span><span class="o">+</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">vwind</span> <span class="o">=</span> <span class="mf">0.5</span><span class="o">*</span><span class="p">(</span><span class="n">nc</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="s">&#39;V&#39;</span><span class="p">][</span><span class="n">time</span><span class="p">,:,</span><span class="n">y</span><span class="p">,</span><span class="n">x</span><span class="p">]</span><span class="o">+</span><span class="n">nc</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="s">&#39;V&#39;</span><span class="p">][</span><span class="n">time</span><span class="p">,:,</span><span class="n">y</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">x</span><span class="p">])</span>
+            <span class="k">return</span> <span class="n">uwind</span><span class="p">[</span><span class="n">thin_locs</span><span class="p">],</span><span class="n">vwind</span><span class="p">[</span><span class="n">thin_locs</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="n">whichdata</span> <span class="o">==</span> <span class="s">&#39;temp&#39;</span><span class="p">:</span>
+            <span class="n">theta</span> <span class="o">=</span> <span class="n">nc</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="s">&#39;T&#39;</span><span class="p">][</span><span class="n">time</span><span class="p">,:,</span><span class="n">y</span><span class="p">,</span><span class="n">x</span><span class="p">]</span> <span class="o">+</span> <span class="n">mc</span><span class="o">.</span><span class="n">Tb</span>
+            <span class="n">T</span> <span class="o">=</span> <span class="n">theta</span><span class="o">*</span><span class="p">(</span><span class="n">P</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">P_bot</span><span class="p">)</span><span class="o">**</span><span class="n">mc</span><span class="o">.</span><span class="n">kappa</span> <span class="o">-</span> <span class="n">mc</span><span class="o">.</span><span class="n">Tz</span>
+            <span class="k">return</span> <span class="n">T</span>
+        <span class="k">elif</span> <span class="n">whichdata</span> <span class="o">==</span> <span class="s">&#39;dwpt&#39;</span><span class="p">:</span>
+            <span class="n">w</span> <span class="o">=</span> <span class="n">nc</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="s">&#39;QVAPOR&#39;</span><span class="p">][</span><span class="n">time</span><span class="p">,:,</span><span class="n">y</span><span class="p">,</span><span class="n">x</span><span class="p">]</span>
+            <span class="n">Td</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">td</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">e</span><span class="p">(</span><span class="n">w</span><span class="p">,</span><span class="n">P</span><span class="p">))</span>
+            <span class="k">return</span> <span class="n">Td</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">print</span> <span class="s">&#39;Use valid variable.&#39;</span>
+</div>
+<div class="viewcode-block" id="SkewT.gettime"><a class="viewcode-back" href="../../../../WEM.postWRF.postWRF.html#WEM.postWRF.postWRF.skewt.SkewT.gettime">[docs]</a>    <span class="k">def</span> <span class="nf">gettime</span><span class="p">(</span><span class="bp">self</span><span class="p">,):</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="n">convert_time</span><span class="p">(</span><span class="n">dom</span><span class="p">,</span><span class="n">timetuple</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">t</span>
+</div>
+<div class="viewcode-block" id="SkewT.isotherms"><a class="viewcode-back" href="../../../../WEM.postWRF.postWRF.html#WEM.postWRF.postWRF.skewt.SkewT.isotherms">[docs]</a>    <span class="k">def</span> <span class="nf">isotherms</span><span class="p">(</span><span class="bp">self</span><span class="p">,):</span>
+        <span class="k">for</span> <span class="n">temp</span> <span class="ow">in</span> <span class="n">N</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="o">-</span><span class="mi">140</span><span class="p">,</span><span class="mi">50</span><span class="p">,</span><span class="mi">10</span><span class="p">):</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">semilogy</span><span class="p">(</span><span class="n">temp</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">skewnessTerm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">plevs</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">plevs</span><span class="p">,</span>  <span class="n">basey</span><span class="o">=</span><span class="n">math</span><span class="o">.</span><span class="n">e</span><span class="p">,</span> \
+                         <span class="n">color</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;blue&#39;</span> <span class="k">if</span> <span class="n">temp</span> <span class="o">&lt;=</span> <span class="mi">0</span> <span class="k">else</span> <span class="s">&#39;red&#39;</span><span class="p">),</span> \
+                         <span class="n">linestyle</span><span class="o">=</span><span class="p">(</span><span class="s">&#39;solid&#39;</span> <span class="k">if</span> <span class="n">temp</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="s">&#39;dashed&#39;</span><span class="p">),</span> <span class="n">linewidth</span> <span class="o">=</span> <span class="o">.</span><span class="mi">5</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="SkewT.isobars"><a class="viewcode-back" href="../../../../WEM.postWRF.postWRF.html#WEM.postWRF.postWRF.skewt.SkewT.isobars">[docs]</a>    <span class="k">def</span> <span class="nf">isobars</span><span class="p">(</span><span class="bp">self</span><span class="p">,):</span>
+        <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">N</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">P_bot</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">P_top</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">10</span><span class="o">**</span><span class="mi">4</span><span class="p">):</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="o">-</span><span class="mi">40</span><span class="p">,</span><span class="mi">50</span><span class="p">],</span> <span class="p">[</span><span class="n">n</span><span class="p">,</span><span class="n">n</span><span class="p">],</span> <span class="n">color</span> <span class="o">=</span> <span class="s">&#39;black&#39;</span><span class="p">,</span> <span class="n">linewidth</span> <span class="o">=</span> <span class="o">.</span><span class="mi">5</span><span class="p">)</span>
+            </div>
+<div class="viewcode-block" id="SkewT.dry_adiabats"><a class="viewcode-back" href="../../../../WEM.postWRF.postWRF.html#WEM.postWRF.postWRF.skewt.SkewT.dry_adiabats">[docs]</a>    <span class="k">def</span> <span class="nf">dry_adiabats</span><span class="p">(</span><span class="bp">self</span><span class="p">,):</span>
+        <span class="k">for</span> <span class="n">tk</span> <span class="ow">in</span> <span class="n">mc</span><span class="o">.</span><span class="n">Tz</span><span class="o">+</span><span class="n">N</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="o">-</span><span class="mi">30</span><span class="p">,</span><span class="mi">210</span><span class="p">,</span><span class="mi">10</span><span class="p">):</span>
+            <span class="n">dry_adiabat</span> <span class="o">=</span> <span class="n">tk</span> <span class="o">*</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">plevs</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">P_bot</span><span class="p">)</span><span class="o">**</span><span class="n">mc</span><span class="o">.</span><span class="n">kappa</span> <span class="o">-</span> <span class="n">mc</span><span class="o">.</span><span class="n">Tz</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">skewnessTerm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">plevs</span><span class="p">)</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">semilogy</span><span class="p">(</span><span class="n">dry_adiabat</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">plevs</span><span class="p">,</span> <span class="n">basey</span><span class="o">=</span><span class="n">math</span><span class="o">.</span><span class="n">e</span><span class="p">,</span> <span class="n">color</span> <span class="o">=</span> <span class="s">&#39;brown&#39;</span><span class="p">,</span> \
+                         <span class="n">linestyle</span><span class="o">=</span><span class="s">&#39;dashed&#39;</span><span class="p">,</span> <span class="n">linewidth</span> <span class="o">=</span> <span class="o">.</span><span class="mi">5</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="SkewT.moist_adiabats"><a class="viewcode-back" href="../../../../WEM.postWRF.postWRF.html#WEM.postWRF.postWRF.skewt.SkewT.moist_adiabats">[docs]</a>    <span class="k">def</span> <span class="nf">moist_adiabats</span><span class="p">(</span><span class="bp">self</span><span class="p">,):</span>
+        <span class="n">ps</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">plevs</span> <span class="k">if</span> <span class="n">p</span><span class="o">&lt;=</span><span class="bp">self</span><span class="o">.</span><span class="n">P_bot</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">temp</span> <span class="ow">in</span> <span class="n">N</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">N</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="o">-</span><span class="mf">40.</span><span class="p">,</span><span class="mf">10.1</span><span class="p">,</span><span class="mf">5.</span><span class="p">),</span><span class="n">N</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mf">12.5</span><span class="p">,</span><span class="mf">45.1</span><span class="p">,</span><span class="mf">2.5</span><span class="p">))):</span>
+            <span class="n">moist_adiabat</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">ps</span><span class="p">:</span>
+                <span class="n">temp</span> <span class="o">-=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dp</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">gamma_s</span><span class="p">(</span><span class="n">temp</span><span class="p">,</span><span class="n">p</span><span class="p">)</span>
+                <span class="n">moist_adiabat</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">temp</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">skewnessTerm</span><span class="p">(</span><span class="n">p</span><span class="p">))</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">semilogy</span><span class="p">(</span><span class="n">moist_adiabat</span><span class="p">,</span> <span class="n">ps</span><span class="p">,</span> <span class="n">basey</span><span class="o">=</span><span class="n">math</span><span class="o">.</span><span class="n">e</span><span class="p">,</span> <span class="n">color</span> <span class="o">=</span> <span class="s">&#39;green&#39;</span><span class="p">,</span> \
+                         <span class="n">linestyle</span> <span class="o">=</span> <span class="s">&#39;dotted&#39;</span><span class="p">,</span> <span class="n">linewidth</span> <span class="o">=</span> <span class="o">.</span><span class="mi">5</span><span class="p">)</span>
+
+ 
+</div>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">     Plots skewT-lN-diagram from WRF-output file.</span>
+<span class="sd">    author Geir Arne Waagbo</span>
+<span class="sd">    see http://code.google.com/p/pywrfplot/</span>
+<span class="sd">     </span>
+<span class="sd">     Formulas taken from Rogers&amp;Yau: A short course in cloud physics (Third edition)</span>
+<span class="sd">     Some inspiration from:</span>
+<span class="sd">     http://www.atmos.washington.edu/~lmadaus/pyscript/plot_wrf_skewt.txt</span>
+
+<span class="sd">    from Params import mc.Tz,mc.Tb,mc.kappa,barb_increments,self.P_bot, naming, outdir</span>
+<span class="sd">    from Utils import gamma_s,td,e,openWRF,getDimensions,convert_time</span>
+
+<span class="sd">    skewness = 37.5</span>
+<span class="sd">    # Defines the ranges of the plot, do not confuse with self.P_bot and self.P_top</span>
+<span class="sd">    P_b = 105000.</span>
+<span class="sd">    P_t = 10000.</span>
+<span class="sd">    self.dp = 100.</span>
+<span class="sd">    self.plevs = N.arange(P_b,P_t-1,-self.dp)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="SkewT.gamma_s"><a class="viewcode-back" href="../../../../WEM.postWRF.postWRF.html#WEM.postWRF.postWRF.skewt.SkewT.gamma_s">[docs]</a>    <span class="k">def</span> <span class="nf">gamma_s</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">T</span><span class="p">,</span><span class="n">p</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Calculates moist adiabatic lapse rate for T (Celsius) and p (Pa)</span>
+<span class="sd">        Note: We calculate dT/dp, not dT/dz</span>
+<span class="sd">        See formula 3.16 in Rogers&amp;Yau for dT/dz, but this must be combined with</span>
+<span class="sd">        the dry adiabatic lapse rate (gamma = g/cp) and the</span>
+<span class="sd">        inverse of the hydrostatic equation (dz/dp = -RT/pg)&quot;&quot;&quot;</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="mf">2.</span><span class="o">/</span><span class="mf">7.</span>
+        <span class="n">b</span> <span class="o">=</span> <span class="p">((</span><span class="n">mc</span><span class="o">.</span><span class="n">R</span><span class="o">/</span><span class="n">mc</span><span class="o">.</span><span class="n">Rv</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">mc</span><span class="o">.</span><span class="n">L</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span><span class="o">/</span><span class="p">(</span><span class="n">mc</span><span class="o">.</span><span class="n">R</span><span class="o">*</span><span class="n">mc</span><span class="o">.</span><span class="n">cp</span><span class="p">)</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="n">a</span><span class="o">*</span><span class="p">(</span><span class="n">mc</span><span class="o">.</span><span class="n">L</span><span class="o">/</span><span class="n">mc</span><span class="o">.</span><span class="n">R</span><span class="p">)</span>
+
+        <span class="n">esat</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">es</span><span class="p">(</span><span class="n">T</span><span class="p">)</span>
+        <span class="n">wsat</span> <span class="o">=</span> <span class="p">(</span><span class="n">mc</span><span class="o">.</span><span class="n">R</span><span class="o">/</span><span class="n">mc</span><span class="o">.</span><span class="n">Rv</span><span class="p">)</span><span class="o">*</span><span class="n">esat</span><span class="o">/</span><span class="p">(</span><span class="n">p</span><span class="o">-</span><span class="n">esat</span><span class="p">)</span> <span class="c"># Rogers&amp;Yau 2.18</span>
+        <span class="n">numer</span> <span class="o">=</span> <span class="n">a</span><span class="o">*</span><span class="p">(</span><span class="n">T</span><span class="o">+</span><span class="n">mc</span><span class="o">.</span><span class="n">Tz</span><span class="p">)</span> <span class="o">+</span> <span class="n">c</span><span class="o">*</span><span class="n">wsat</span>
+        <span class="n">denom</span> <span class="o">=</span> <span class="n">p</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">b</span><span class="o">*</span><span class="n">wsat</span><span class="o">/</span><span class="p">((</span><span class="n">T</span><span class="o">+</span><span class="n">mc</span><span class="o">.</span><span class="n">Tz</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">numer</span><span class="o">/</span><span class="n">denom</span> <span class="c"># Rogers&amp;Yau 3.16</span>
+</div>
+<div class="viewcode-block" id="SkewT.td"><a class="viewcode-back" href="../../../../WEM.postWRF.postWRF.html#WEM.postWRF.postWRF.skewt.SkewT.td">[docs]</a>    <span class="k">def</span> <span class="nf">td</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">e</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns dew point temperature (C) at vapor pressure e (Pa)</span>
+<span class="sd">        Insert Td in 2.17 in Rogers&amp;Yau and solve for Td&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="mf">243.5</span> <span class="o">*</span> <span class="n">N</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">e</span><span class="o">/</span><span class="mf">611.2</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="mf">17.67</span><span class="o">-</span><span class="n">N</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">e</span><span class="o">/</span><span class="mf">611.2</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="SkewT.e"><a class="viewcode-back" href="../../../../WEM.postWRF.postWRF.html#WEM.postWRF.postWRF.skewt.SkewT.e">[docs]</a>    <span class="k">def</span> <span class="nf">e</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">w</span><span class="p">,</span><span class="n">p</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns vapor pressure (Pa) at mixing ratio w (kg/kg) and pressure p (Pa)</span>
+<span class="sd">        Formula 2.18 in Rogers&amp;Yau&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">w</span><span class="o">*</span><span class="n">p</span><span class="o">/</span><span class="p">(</span><span class="n">w</span><span class="o">+</span><span class="p">(</span><span class="n">mc</span><span class="o">.</span><span class="n">R</span><span class="o">/</span><span class="n">mc</span><span class="o">.</span><span class="n">Rv</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="SkewT.es"><a class="viewcode-back" href="../../../../WEM.postWRF.postWRF.html#WEM.postWRF.postWRF.skewt.SkewT.es">[docs]</a>    <span class="k">def</span> <span class="nf">es</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">T</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns saturation vapor pressure (Pascal) at temperature T (Celsius)</span>
+<span class="sd">        Formula 2.17 in Rogers&amp;Yau&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="mf">611.2</span><span class="o">*</span><span class="n">N</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="mf">17.67</span><span class="o">*</span><span class="n">T</span><span class="o">/</span><span class="p">(</span><span class="n">T</span><span class="o">+</span><span class="mf">243.5</span><span class="p">))</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../../index.html">.</a></h1>
+
+
+
+
+
+<p>
+<iframe src="http://ghbtns.com/github-btn.html?user=&repo=&type=watch&count=true&size=large"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../WEM.html">WEM package</a></li>
+</ul>
+
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2014, Author.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.2.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.6.1</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

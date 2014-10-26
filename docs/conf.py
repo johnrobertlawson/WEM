@@ -16,6 +16,7 @@
 import sys
 import os
 
+import alabaster
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
@@ -39,6 +40,7 @@ sys.path.append('/Users/johnlawson/gitprojects/WEM/postWRF/')
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.viewcode',
+    'alabaster'
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -339,3 +341,12 @@ epub_exclude_files = ['search.html']
 #epub_use_index = True
 
 autoclass_content = 'both'
+
+
+html_theme_path = [alabaster.get_path()]
+html_theme = 'alabaster'
+html_sidebars = {
+   '**': [
+       'about.html', 'navigation.html', 'searchbox.html', 'donate.html',
+   ]
+}
