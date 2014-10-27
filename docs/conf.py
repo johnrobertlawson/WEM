@@ -21,12 +21,12 @@ import os
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 # sys.path.insert(0, os.path.abspath("../"))
-sys.path.append(os.path.abspath('../'))
-sys.path.append(os.path.abspath('../lazyWRF/'))
-sys.path.append(os.path.abspath('../lazyWRF/lazyWRF/'))
-sys.path.append(os.path.abspath('../utils/'))
-sys.path.append(os.path.abspath('../postWRF/postWRF/'))
-sys.path.append(os.path.abspath('../postWRF/'))
+sys.path.insert(0,os.path.abspath('../'))
+sys.path.insert(0,os.path.abspath('../lazyWRF/'))
+sys.path.insert(0,os.path.abspath('../lazyWRF/lazyWRF/'))
+sys.path.insert(0,os.path.abspath('../utils/'))
+sys.path.insert(0,os.path.abspath('../postWRF/postWRF/'))
+sys.path.insert(0,os.path.abspath('../postWRF/'))
 # sys.path.append(('/Users/johnlawson/gitprojects/WEM','/Users/johnlawson/gitprojects/WEM/postWRF','/Users/johnlawson/gitprojects/WEM/postWRF/postWRF'))
 
 # -- General configuration ------------------------------------------------
