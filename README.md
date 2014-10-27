@@ -10,7 +10,7 @@ via submodule **postWRF**.
 Where do I start?
 =================
 
-Documentation is here: http://johnrobertlawson.github.io/WEM/
+Documentation is here (incomplete): http://johnrobertlawson.github.io/WEM/
 
 ```./lazyWRF/``` contains scripts that form the basis of automating your WRF 
 ensemble runs. ```./postWRF/bin/``` contains examples of post-processing that
