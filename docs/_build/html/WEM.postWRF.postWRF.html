@@ -379,6 +379,7 @@ TODO: move more utilities to utils.</p>
 <em class="property">class </em><tt class="descclassname">WEM.postWRF.postWRF.main.</tt><tt class="descname">WRFEnviron</tt><a class="reference internal" href="_modules/WEM/postWRF/postWRF/main.html#WRFEnviron"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#WEM.postWRF.postWRF.main.WRFEnviron" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
 <p>Main environment API.</p>
+<p>This currently only loads default settings.</p>
 <dl class="method">
 <dt id="WEM.postWRF.postWRF.main.WRFEnviron.cold_pool_strength">
 <tt class="descname">cold_pool_strength</tt><big>(</big><em>utc</em>, <em>wrf_sd=0</em>, <em>wrf_nc=0</em>, <em>out_sd=0</em>, <em>swath_width=100</em>, <em>dom=1</em>, <em>twoplot=0</em>, <em>fig=0</em>, <em>axes=0</em>, <em>dz=0</em><big>)</big><a class="reference internal" href="_modules/WEM/postWRF/postWRF/main.html#WRFEnviron.cold_pool_strength"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#WEM.postWRF.postWRF.main.WRFEnviron.cold_pool_strength" title="Permalink to this definition">¶</a></dt>
@@ -511,33 +512,37 @@ of 1D values, and numpy array.</p>
 <p>This script is top-most and decides if the variables is
 built into WRF default output or needs computing. It unstaggers
 and slices data from the wrfout file appropriately.</p>
-<p>Inputs:
-vrbl        :   string of variable name as found in WRF, or one of</p>
-<blockquote>
-<div>the computed fields available in WEM</div></blockquote>
-<dl class="docutils">
-<dt>utc <span class="classifier-delimiter">:</span> <span class="classifier">one date/time.</span></dt>
-<dd>Can be tuple (YYYY,MM,DD,HH,MM,SS - calendar.timegm)
-Can be integer of datenum. (time.gmtime)</dd>
-<dt>level <span class="classifier-delimiter">:</span> <span class="classifier">one level.</span></dt>
-<dd>Lowest model level is integer 2000.
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>vrbl</strong> (<em>str</em>) &#8211; variable name as found in WRF, or one of
+the computed fields available in WEM</li>
+<li><strong>utc</strong> (<em>tuple,list,int</em>) &#8211; One date/time. The tuple/list format is
+YYYY,MM,DD,HH,MM,SS (calendar.timegm).
+The integer format is epoch/datenum (time.gmtime).</li>
+<li><strong>level</strong> (<em>int,str</em>) &#8211; Required level. 
+Lowest model level is integer 2000.
 Pressure level is integer in hPa, e.g. 850
 Isentropic surface is a string + K, e.g. &#8216;320K&#8217;
-Geometric height is a string + m, e.g. &#8216;4000m&#8217;</dd>
-</dl>
-<p>ncdir       :   directory of netcdf data file
-outdir      :   directory to save output figures</p>
-<p>Optional
-ncf         :   filename of netcdf data file if ambiguous within ncdir.</p>
-<blockquote>
-<div>If no wrfout file is explicitly specified, the
-netCDF file in that folder is chosen if unambiguous.</div></blockquote>
-<dl class="docutils">
-<dt>nct <span class="classifier-delimiter">:</span> <span class="classifier">initialisation time of netcdf data file, if</span></dt>
-<dd>ambiguous within ncdir.</dd>
-</dl>
-<p>f_prefix    :   custom filename prefix for output
-f_suffix    :   custom filename suffix for output
+Geometric height is a string + m, e.g. &#8216;4000m&#8217;</li>
+<li><strong>ncdir</strong> (<em>str</em>) &#8211; directory of netcdf data file</li>
+<li><strong>ncf</strong> (<em>bool,str</em>) &#8211; filename of netcdf data file if ambiguous within ncdir.
+If no wrfout file is explicitly specified, the
+netCDF file in that folder is chosen if unambiguous.</li>
+<li><strong>nct</strong> (<em>bool,str</em>) &#8211; initialisation time of netcdf data file, if
+ambiguous within ncdir.</li>
+<li><strong>f_prefix</strong> (<em>bool,str</em>) &#8211; custom filename prefix for output</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Outdir:</th><td class="field-body"><p class="first last">directory to save output figures</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>f_suffix    :   custom filename suffix for output
 bounding    :   dictionary of four floats (Nlim, Elim, Slim, Wlim):</p>
 <blockquote>
 <div>Nlim    :   northern limit
