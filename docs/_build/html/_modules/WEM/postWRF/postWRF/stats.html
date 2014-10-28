@@ -94,15 +94,21 @@
     <span class="n">g</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="n">x</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="nb">float</span><span class="p">(</span><span class="n">size</span><span class="p">)</span><span class="o">+</span><span class="n">y</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="nb">float</span><span class="p">(</span><span class="n">sizey</span><span class="p">)))</span>
     <span class="k">return</span> <span class="n">g</span> <span class="o">/</span> <span class="n">g</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
 </div>
-<div class="viewcode-block" id="gauss_smooth"><a class="viewcode-back" href="../../../../WEM.postWRF.postWRF.html#WEM.postWRF.postWRF.stats.gauss_smooth">[docs]</a><span class="k">def</span> <span class="nf">gauss_smooth</span><span class="p">(</span><span class="n">im</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">ny</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">pad</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">pad_values</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="p">:</span>
+<div class="viewcode-block" id="gauss_smooth"><a class="viewcode-back" href="../../../../WEM.postWRF.postWRF.html#WEM.postWRF.postWRF.stats.gauss_smooth">[docs]</a><span class="k">def</span> <span class="nf">gauss_smooth</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">ny</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">pad</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">pad_values</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Taken from scipy cookbook online.</span>
-<span class="sd">    Blur the image by convolving with a gaussian kernel of typical</span>
+<span class="sd">    Blur the data by convolving with a gaussian kernel of typical</span>
 <span class="sd">    size n. The optional keyword argument ny allows for a different</span>
 <span class="sd">    size in the y direction.</span>
 
-<span class="sd">    Pad     :   put zeros on edge of length n so that output</span>
-<span class="sd">                array equals input array size.</span>
+<span class="sd">    :param data:    data (2D only?)</span>
+<span class="sd">    :type data:     N.ndarray</span>
+<span class="sd">    :param pad:     put zeros on edge of length n so that output</span>
+<span class="sd">                    array equals input array size.</span>
+<span class="sd">    :type pad:      bool</span>
+<span class="sd">    :param pad_values:  if pad, then use this value to fill edges.</span>
+<span class="sd">    :type pad_values:   int,float</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c"># Create list from fill values</span>
     <span class="k">if</span> <span class="n">pad_values</span> <span class="o">==</span> <span class="s">&#39;nan&#39;</span><span class="p">:</span>
@@ -111,24 +117,26 @@
         <span class="n">constant_values</span> <span class="o">=</span> <span class="p">[</span><span class="n">pad_values</span><span class="p">,]</span>
 
     <span class="n">g</span> <span class="o">=</span> <span class="n">gauss_kern</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">sizey</span><span class="o">=</span><span class="n">ny</span><span class="p">)</span>
-    <span class="n">improc</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">signal</span><span class="o">.</span><span class="n">convolve</span><span class="p">(</span><span class="n">im</span><span class="p">,</span><span class="n">g</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s">&#39;valid&#39;</span><span class="p">)</span>
+    <span class="n">dataproc</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">signal</span><span class="o">.</span><span class="n">convolve</span><span class="p">(</span><span class="n">data</span><span class="p">,</span><span class="n">g</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s">&#39;valid&#39;</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">pad</span><span class="p">:</span>
-        <span class="n">improc</span> <span class="o">=</span> <span class="n">N</span><span class="o">.</span><span class="n">pad</span><span class="p">(</span><span class="n">improc</span><span class="p">,</span><span class="n">n</span><span class="p">,</span><span class="s">&#39;constant&#39;</span><span class="p">,</span><span class="n">constant_values</span><span class="o">=</span><span class="n">constant_values</span><span class="p">)</span>
+        <span class="n">dataproc</span> <span class="o">=</span> <span class="n">N</span><span class="o">.</span><span class="n">pad</span><span class="p">(</span><span class="n">dataproc</span><span class="p">,</span><span class="n">n</span><span class="p">,</span><span class="s">&#39;constant&#39;</span><span class="p">,</span><span class="n">constant_values</span><span class="o">=</span><span class="n">constant_values</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">pad_values</span><span class="o">==</span><span class="s">&#39;nan&#39;</span><span class="p">:</span>
-            <span class="n">improc</span><span class="p">[</span><span class="n">improc</span><span class="o">==</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">N</span><span class="o">.</span><span class="n">nan</span>
-    <span class="k">return</span><span class="p">(</span><span class="n">improc</span><span class="p">)</span>
+            <span class="n">dataproc</span><span class="p">[</span><span class="n">dataproc</span><span class="o">==</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">N</span><span class="o">.</span><span class="n">nan</span>
+    <span class="k">return</span><span class="p">(</span><span class="n">dataproc</span><span class="p">)</span>
 </div>
 <div class="viewcode-block" id="compute_diff_energy"><a class="viewcode-back" href="../../../../WEM.postWRF.postWRF.html#WEM.postWRF.postWRF.stats.compute_diff_energy">[docs]</a><span class="k">def</span> <span class="nf">compute_diff_energy</span><span class="p">(</span><span class="n">ptype</span><span class="p">,</span><span class="n">energy</span><span class="p">,</span><span class="n">files</span><span class="p">,</span><span class="n">times</span><span class="p">,</span><span class="n">upper</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span><span class="n">lower</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                        <span class="n">d_save</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">d_return</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">d_fname</span><span class="o">=</span><span class="s">&#39;diff_energy_data&#39;</span><span class="p">):</span>
+                        <span class="n">d_save</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span><span class="n">d_return</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span><span class="n">d_fname</span><span class="o">=</span><span class="s">&#39;diff_energy_data&#39;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This method computes difference kinetic energy (DKE)</span>
 <span class="sd">    or different total energy (DTE, including temp)</span>
 <span class="sd">    between WRFout files for a given depth of the</span>
 <span class="sd">    atmosphere, at given time intervals</span>
 
-<span class="sd">    Inputs:</span>
-
-<span class="sd">    :param ptype:   &#39;sum_z&#39; or &#39;sum_xyz&#39;</span>
+<span class="sd">    :param ptype:   &#39;sum_z&#39; or &#39;sum_xyz&#39;.</span>
+<span class="sd">                    &#39;sum_z&#39; integrates vertically between lower and</span>
+<span class="sd">                    upper hPa and creates a time series.</span>
+<span class="sd">                    &#39;sum_xyz&#39; integrates over the 3D space (again between</span>
+<span class="sd">                    the upper and lower bounds) and creates 2D arrays.</span>
 <span class="sd">    :param energy:   &#39;kinetic&#39; or &#39;total&#39;</span>
 <span class="sd">    :param upper:   upper limit of vertical integration</span>
 <span class="sd">    :param lower:   lower limit of vertical integration</span>
@@ -138,15 +146,8 @@
 <span class="sd">    :param d_return:   return dictionary (True or False)</span>
 <span class="sd">    :param d_fname:   custom filename</span>
 
-<span class="sd">    Outputs:</span>
-
 <span class="sd">    :returns: N.ndarray -- time series or list of 2D arrays</span>
 
-<span class="sd">    ptype &#39;sum_z&#39; integrates vertically between lower and</span>
-<span class="sd">    upper hPa and creates a time series.</span>
-
-<span class="sd">    ptype &#39;sum_xyz&#39; integrates over the 3D space (again between</span>
-<span class="sd">    the upper and lower bounds) and creates 2D arrays.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">d_save</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">d_save</span><span class="p">,</span><span class="nb">basestring</span><span class="p">):</span>
         <span class="n">d_save</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s">&#39;HOME&#39;</span><span class="p">]</span>

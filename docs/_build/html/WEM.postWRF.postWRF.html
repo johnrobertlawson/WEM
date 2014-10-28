@@ -1083,18 +1083,21 @@ upper   :   highest level, hPa</p>
 
 <dl class="function">
 <dt id="WEM.postWRF.postWRF.stats.compute_diff_energy">
-<tt class="descclassname">WEM.postWRF.postWRF.stats.</tt><tt class="descname">compute_diff_energy</tt><big>(</big><em>ptype</em>, <em>energy</em>, <em>files</em>, <em>times</em>, <em>upper=None</em>, <em>lower=None</em>, <em>d_save=1</em>, <em>d_return=1</em>, <em>d_fname='diff_energy_data'</em><big>)</big><a class="reference internal" href="_modules/WEM/postWRF/postWRF/stats.html#compute_diff_energy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#WEM.postWRF.postWRF.stats.compute_diff_energy" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">WEM.postWRF.postWRF.stats.</tt><tt class="descname">compute_diff_energy</tt><big>(</big><em>ptype</em>, <em>energy</em>, <em>files</em>, <em>times</em>, <em>upper=None</em>, <em>lower=None</em>, <em>d_save=True</em>, <em>d_return=True</em>, <em>d_fname='diff_energy_data'</em><big>)</big><a class="reference internal" href="_modules/WEM/postWRF/postWRF/stats.html#compute_diff_energy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#WEM.postWRF.postWRF.stats.compute_diff_energy" title="Permalink to this definition">¶</a></dt>
 <dd><p>This method computes difference kinetic energy (DKE)
 or different total energy (DTE, including temp)
 between WRFout files for a given depth of the
 atmosphere, at given time intervals</p>
-<p>Inputs:</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>ptype</strong> &#8211; &#8216;sum_z&#8217; or &#8216;sum_xyz&#8217;</li>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>ptype</strong> &#8211; &#8216;sum_z&#8217; or &#8216;sum_xyz&#8217;.
+&#8216;sum_z&#8217; integrates vertically between lower and
+upper hPa and creates a time series.
+&#8216;sum_xyz&#8217; integrates over the 3D space (again between
+the upper and lower bounds) and creates 2D arrays.</li>
 <li><strong>energy</strong> &#8211; &#8216;kinetic&#8217; or &#8216;total&#8217;</li>
 <li><strong>upper</strong> &#8211; upper limit of vertical integration</li>
 <li><strong>lower</strong> &#8211; lower limit of vertical integration</li>
@@ -1106,21 +1109,11 @@ atmosphere, at given time intervals</p>
 </ul>
 </td>
 </tr>
-</tbody>
-</table>
-<p>Outputs:</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">N.ndarray &#8211; time series or list of 2D arrays</td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">N.ndarray &#8211; time series or list of 2D arrays</p>
+</td>
 </tr>
 </tbody>
 </table>
-<p>ptype &#8216;sum_z&#8217; integrates vertically between lower and
-upper hPa and creates a time series.</p>
-<p>ptype &#8216;sum_xyz&#8217; integrates over the 3D space (again between
-the upper and lower bounds) and creates 2D arrays.</p>
 </dd></dl>
 
 <dl class="function">
@@ -1132,15 +1125,25 @@ Returns a normalized 2D gauss kernel array for convolutions</p>
 
 <dl class="function">
 <dt id="WEM.postWRF.postWRF.stats.gauss_smooth">
-<tt class="descclassname">WEM.postWRF.postWRF.stats.</tt><tt class="descname">gauss_smooth</tt><big>(</big><em>im</em>, <em>n</em>, <em>ny=None</em>, <em>pad=1</em>, <em>pad_values=0</em><big>)</big><a class="reference internal" href="_modules/WEM/postWRF/postWRF/stats.html#gauss_smooth"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#WEM.postWRF.postWRF.stats.gauss_smooth" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">WEM.postWRF.postWRF.stats.</tt><tt class="descname">gauss_smooth</tt><big>(</big><em>data</em>, <em>n</em>, <em>ny=None</em>, <em>pad=1</em>, <em>pad_values=0</em><big>)</big><a class="reference internal" href="_modules/WEM/postWRF/postWRF/stats.html#gauss_smooth"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#WEM.postWRF.postWRF.stats.gauss_smooth" title="Permalink to this definition">¶</a></dt>
 <dd><p>Taken from scipy cookbook online.
-Blur the image by convolving with a gaussian kernel of typical
+Blur the data by convolving with a gaussian kernel of typical
 size n. The optional keyword argument ny allows for a different
 size in the y direction.</p>
-<dl class="docutils">
-<dt>Pad <span class="classifier-delimiter">:</span> <span class="classifier">put zeros on edge of length n so that output</span></dt>
-<dd>array equals input array size.</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>data</strong> (<em>N.ndarray</em>) &#8211; data (2D only?)</li>
+<li><strong>pad</strong> (<em>bool</em>) &#8211; put zeros on edge of length n so that output
+array equals input array size.</li>
+<li><strong>pad_values</strong> (<em>int,float</em>) &#8211; if pad, then use this value to fill edges.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">

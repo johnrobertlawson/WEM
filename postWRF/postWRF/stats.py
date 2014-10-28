@@ -41,15 +41,21 @@ def gauss_kern(size, sizey=None):
     g = scipy.exp(-(x**2/float(size)+y**2/float(sizey)))
     return g / g.sum()
 
-def gauss_smooth(im, n, ny=None, pad=1, pad_values=0) :
+def gauss_smooth(data, n, ny=None, pad=1, pad_values=0) :
     """
     Taken from scipy cookbook online.
-    Blur the image by convolving with a gaussian kernel of typical
+    Blur the data by convolving with a gaussian kernel of typical
     size n. The optional keyword argument ny allows for a different
     size in the y direction.
 
-    Pad     :   put zeros on edge of length n so that output
-                array equals input array size.
+    :param data:    data (2D only?)
+    :type data:     N.ndarray
+    :param pad:     put zeros on edge of length n so that output
+                    array equals input array size.
+    :type pad:      bool
+    :param pad_values:  if pad, then use this value to fill edges.
+    :type pad_values:   int,float
+
     """
     # Create list from fill values
     if pad_values == 'nan':
@@ -58,24 +64,26 @@ def gauss_smooth(im, n, ny=None, pad=1, pad_values=0) :
         constant_values = [pad_values,]
 
     g = gauss_kern(n, sizey=ny)
-    improc = scipy.signal.convolve(im,g, mode='valid')
+    dataproc = scipy.signal.convolve(data,g, mode='valid')
     if pad:
-        improc = N.pad(improc,n,'constant',constant_values=constant_values)
+        dataproc = N.pad(dataproc,n,'constant',constant_values=constant_values)
         if pad_values=='nan':
-            improc[improc==0] = N.nan
-    return(improc)
+            dataproc[dataproc==0] = N.nan
+    return(dataproc)
 
 def compute_diff_energy(ptype,energy,files,times,upper=None,lower=None,
-                        d_save=1,d_return=1,d_fname='diff_energy_data'):
+                        d_save=True,d_return=True,d_fname='diff_energy_data'):
     """
     This method computes difference kinetic energy (DKE)
     or different total energy (DTE, including temp)
     between WRFout files for a given depth of the
     atmosphere, at given time intervals
 
-    Inputs:
-
-    :param ptype:   'sum_z' or 'sum_xyz'
+    :param ptype:   'sum_z' or 'sum_xyz'.
+                    'sum_z' integrates vertically between lower and
+                    upper hPa and creates a time series.
+                    'sum_xyz' integrates over the 3D space (again between
+                    the upper and lower bounds) and creates 2D arrays.
     :param energy:   'kinetic' or 'total'
     :param upper:   upper limit of vertical integration
     :param lower:   lower limit of vertical integration
@@ -85,15 +93,8 @@ def compute_diff_energy(ptype,energy,files,times,upper=None,lower=None,
     :param d_return:   return dictionary (True or False)
     :param d_fname:   custom filename
 
-    Outputs:
-
     :returns: N.ndarray -- time series or list of 2D arrays
 
-    ptype 'sum_z' integrates vertically between lower and
-    upper hPa and creates a time series.
-
-    ptype 'sum_xyz' integrates over the 3D space (again between
-    the upper and lower bounds) and creates 2D arrays.
     """
     if d_save and not isinstance(d_save,basestring):
         d_save = os.environ['HOME']
