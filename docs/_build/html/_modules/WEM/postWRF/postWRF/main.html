@@ -123,14 +123,18 @@
 <span class="sd">        :param vrbl:        variable name as found in WRF, or one of</span>
 <span class="sd">                            the computed fields available in WEM</span>
 <span class="sd">        :type vrbl:         str</span>
-<span class="sd">        :param utc:         One date/time. The tuple/list format is</span>
+<span class="sd">        :param utc:         one date/time. The tuple/list format is</span>
 <span class="sd">                            YYYY,MM,DD,HH,MM,SS (calendar.timegm).</span>
-<span class="sd">                            The integer format is epoch/datenum (time.gmtime).</span>
+<span class="sd">                            the integer format is epoch/datenum (time.gmtime).</span>
 <span class="sd">        :type utc:          tuple,list,int</span>
-<span class="sd">        :param level:       Required level. </span>
+<span class="sd">        :param level:       required level. </span>
+
 <span class="sd">                            Lowest model level is integer 2000.</span>
-<span class="sd">                            Pressure level is integer in hPa, e.g. 850</span>
+
+<span class="sd">                            Pressure level is integer in hPa, e.g. 850.</span>
+
 <span class="sd">                            Isentropic surface is a string + K, e.g. &#39;320K&#39;</span>
+<span class="sd">                            </span>
 <span class="sd">                            Geometric height is a string + m, e.g. &#39;4000m&#39;</span>
 <span class="sd">        :type level:        int,str </span>
 <span class="sd">        :param ncdir:       directory of netcdf data file</span>
@@ -144,10 +148,11 @@
 <span class="sd">        :param nct:         initialisation time of netcdf data file, if</span>
 <span class="sd">                            ambiguous within ncdir.</span>
 <span class="sd">        :type nct:          bool,str</span>
-<span class="sd">        :param f_prefix:    custom filename prefix for output</span>
+<span class="sd">        :param f_prefix:    custom filename prefix for output. Ignore if False.</span>
 <span class="sd">        :type f_prefix:     bool,str</span>
-<span class="sd">        f_suffix    :   custom filename suffix for output</span>
-<span class="sd">        bounding    :   dictionary of four floats (Nlim, Elim, Slim, Wlim):</span>
+<span class="sd">        :param f_suffix     custom filename suffix for output. Ignore if False.</span>
+<span class="sd">        :type f_suffix      bool,str</span>
+<span class="sd">        :bounding           four floats (Nlim, Elim, Slim, Wlim):</span>
 <span class="sd">            Nlim    :   northern limit</span>
 <span class="sd">            Elim    :   eastern limit</span>
 <span class="sd">            Slim    :   southern limit</span>
