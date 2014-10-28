@@ -71,14 +71,15 @@ class WRFEnviron(object):
                             the computed fields available in WEM
         :type vrbl:         str
         :param utc:         one date/time. The tuple/list format is
-                            YYYY,MM,DD,HH,MM,SS (calendar.timegm).
-                            Integer format is epoch/datenum (time.gmtime).
+                            YYYY,MM,DD,HH,MM,SS (ready for calendar.timegm).
+                            Integer format is epoch/datenum (ready for
+                            time.gmtime).
         :type utc:          tuple,list,int
         :param level:       required level. Lowest model level is integer 2000.
-                            Pressure level is integer in hPa, e.g. 850.  
+                            Pressure level is integer in hPa, e.g. 850.
                             Isentropic surface is a string + K, e.g. '320K'.
                             Geometric height is a string + m, e.g. '4000m'.
-        :type level:        int,str 
+        :type level:        int,str
         :param ncdir:       directory of netcdf data file
         :type ncdir:        str
         :outdir:            directory to save output figures
@@ -94,24 +95,32 @@ class WRFEnviron(object):
         :type f_prefix:     bool,str
         :param f_suffix     custom filename suffix for output. Ignore if False.
         :type f_suffix      bool,str
-        :param bounding:    bounding box for domain. 
+        :param bounding:    bounding box for domain.
                             Dictionary contains four keys (Nlim, Elim, Slim, Wlim)
-                            with float values (northern latitude limit, eastern 
+                            with float values (northern latitude limit, eastern
                             longitude limit, southern latitude limit, western
                             latitude limit, respectively).
         :type bounding:     dict
         :param smooth:      pass data through a Gaussian filter. Value of 1 is
-                            essentially `off'. 
+                            essentially `off'.
                             Integer greater than zero is the degree of smoothing,
                             in grid spacing.
         :type smooth:       int
-        dom         :   domain for plotting (for WRF data). If zero, the only netCDF file
-                        present will be plotted.
-        plottype    :   matplotlib command for plotting data.
-                        contour or contourf.
-        fig         :   matplotlib.figure object to plot onto
-        ax          :   matplotlib.axis object to plot onto
+        :param dom:         domain for plotting (for WRF data).
+                            If zero, the only netCDF file present will be
+                            plotted.
+        :type dom:          int
+        :params plottype:   matplotlib command for plotting data
+                            (contour or contourf).
+        :type plottype:     str
+        :param fig:         value of False will create new figure. A value of
+                            matplotlib.figure object will plot data onto
+                            this figure (similarly for axis, below).
+        :type fig:          bool,matplotlib.figure
+        :param ax:          matplotlib.axis object to plot onto
+        :type ax:           bool,matplotlib.axis
 
+        :returns:           None.
 
         """
         # TODO: lats/lons False when no bounding, and selected with limited
@@ -148,8 +157,25 @@ class WRFEnviron(object):
 
     def create_fname(self,vrbl,utc,level,f_prefix=False,f_suffix=False):
         """
-        Differentiate between e.g. different domains by using the suffix/prefix
-        options.
+        Generate a filename (without extension) for saving a figure.
+        Differentiate between similar plots for e.g. different domains by
+        using the f_suffix/f_prefix options.
+
+        :param vrbl:        variable name as found in WRF, or one of
+                            the computed fields available in WEM.
+        :type vrbl:         str
+        :param utc:         one date/time. The tuple/list format is
+                            YYYY,MM,DD,HH,MM,SS (ready for calendar.timegm).
+                            Integer format is epoch/datenum (time.gmtime).
+        :type utc:          tuple,list,int
+        :param level:       required level.
+        :type level:        str
+        :param f_prefix:    custom filename prefix for output. Ignore if False.
+        :type f_prefix:     bool,str
+        :param f_suffix     custom filename suffix for output. Ignore if False.
+        :type f_suffix      bool,str
+
+        :returns:           str -- filename with extension.
         """
         time_str = utils.string_from_time('output',utc)
 
@@ -162,15 +188,27 @@ class WRFEnviron(object):
         return fname
 
     def get_netcdf(self,ncdir,ncf=False,nct=False,dom=1,path_only=False):
-        """Returns the WRFOut or RUC instance, given arguments:
+        """
+        Returns the WRFOut, ECMWF, or RUC instance.
 
-        ncdir       :   absolute path to subdirectory
+        :param ncdir:       absolute path to directory that contains the
+                            netCDF file.
 
-        Optional inputs:
-        ncf         :   file name
-        nct         :   initialisation time (tuple)
-        dom         :   domain (for WRF files only)
-        path_only   :   if True, return only absolute path+fname
+        :param ncf:         filename of netcdf data file if ambiguous within ncdir.
+                            If no wrfout file is explicitly specified, the
+                            netCDF file in that folder is chosen if unambiguous.
+        :type ncf:          bool,str
+        :param nct:         initialisation time of netcdf data file, if
+                            ambiguous within ncdir.
+        :type nct:          bool,str
+        :param dom:         domain for plotting (for WRF data).
+                            If zero, the only netCDF file present will be
+                            plotted.
+        :type dom:          int
+        :param path_only:   if True, return only absolute path to file.
+                            This is useful to loop over ensemble members and
+                            generate a list of files.
+        :type path_only:    bool
         """
         if ncf:
             fpath = os.path.join(ncdir,ncf)
@@ -195,11 +233,10 @@ class WRFEnviron(object):
 
     def generate_times(self,itime,ftime,interval):
         """
-        Wrapper for utility method.
+        Wrapper for utility method
+        :func:`WEM.utils.GIS_tools.generate_times`, so user can access
+        this at the top level to loop over times.
 
-        itime   :   Time tuple of start time
-        ftime   :   Time tuple of end time
-        interval:   interval
         """
         listoftimes = utils.generate_times(itime,ftime,interval)
         return listoftimes
@@ -208,26 +245,45 @@ class WRFEnviron(object):
                             outprefix=False,outsuffix=False,clvs=0,
                             title=False,fig=False,ax=False):
         """
-        vrbl        :   'sum_z' or 'sum_xyz'
-        utc         :   date/time for plot
-        energy      :   'kinetic' or 'total'
-        datadir     :   directory holding computed data
-        outdir      :   root directory for plots
+        This function requires data already generated by
+        :func:`WEM.postWRF.postWRF.stats.compute_diff_energy`.
 
-        Optional
-        dataf       :   file name of data file, if ambiguous
-        outprefix   :   prefix for output files
-        outsuffix   :   suffix for output files
-        clvs        :   contour levels
-        title       :   title for output
-        fig         :   matplotlib.figure object to plot on
-        ax          :   matplotib.axis object to plot on
+        :param vrbl:    Vertically integrated ('sum_z') or summated over all
+                        dimensions ('sum_xyz').
+        :type vrbl:     str
+        :param utc:     one date/time. The tuple/list format is
+                        YYYY,MM,DD,HH,MM,SS (ready for calendar.timegm).
+                        Integer format is epoch/datenum (ready for
+                        time.gmtime).
+        :type utc:      tuple,list,int
+        :param energy:  DKE ('kinetic') or DTE ('total').
+        :type energy:   str
+        :param datadir: directory holding computed data
+        :type datadir:  str
+        :param outdir:  root directory for plots
+        :type outdir:   str
+        :param dataf:   file name of data file, if ambiguous
+        :type dataf:    str
+        :param f_prefix: custom filename prefix for output. Ignore if False.
+        :type f_prefix: bool,str
+        :param f_suffix: custom filename suffix for output. Ignore if False.
+        :type f_suffix: bool,str
+        :param clvs:    contour levels for plot. Generate with
+                        :func:`numpy.arange`.
+        :type clvs:     bool,N.ndarray
+        :param title:   title for output
+        :type title:    bool,str
+        :param fig:         value of False will create new figure. A value of
+                            matplotlib.figure object will plot data onto
+                            this figure (similarly for axis, below).
+        :type fig:          bool,matplotlib.figure
+        :param ax:          matplotlib.axis object to plot onto
+        :type ax:           bool,matplotlib.axis
 
-        TODO: find data file automatically, given folder
         """
         DATA = utils.load_data(folder,fname,format='pickle')
 
-        if isinstance(utc,collections.Sequence):
+        if isinstance(utc,(list,tuple)):
             utc = calendar.timegm(utc)
 
         for pn,perm in enumerate(DATA):
@@ -259,8 +315,6 @@ class WRFEnviron(object):
         F = BirdsEye(self.C,W1,**kwargs1)    # 2D figure class
         tstr = utils.string_from_time('output',utc)
         fname_t = ''.join((plotname,'_{0}'.format(tstr)))
-        # fpath = os.path.join(p2p,fname_t)
-        import pdb; pdb.set_trace()
 
         fig_obj = F.plot_data(stack_average,'contourf',p2p,fname_t,utc,V,
                                 **kwargs2)
@@ -271,30 +325,53 @@ class WRFEnviron(object):
                             dataf=False,outprefix=False,outsuffix=False,
                             clvs=0,title=False,fig=False,ax=False,ncdata=False):
         """
-        Plot DKE/DTE growth with time, DDKE/DDTE (contours) over (optional)
-        ensemble mean of a variable.
+        Plot DKE/DTE growth with time: delta DKE/DTE (DDKE/DDTE).
+        Filled contours of DDKE or DDTE is optionally plotted over
+        the ensemble mean of a variable (contours). DDKE/DDTE is valid
+        halfway between the first and second times specified.
 
-        Will calculate DDKE/DDTE for halfway between time0 and time1.
+        :param vrbl:    Vertically integrated ('sum_z') or summated over all
+                        dimensions ('sum_xyz').
+        :type vrbl:     str
+        :param utc0:    First date/time. The tuple/list format is
+                        YYYY,MM,DD,HH,MM,SS (ready for calendar.timegm).
+                        Integer format is epoch/datenum (ready for
+                        time.gmtime).
+        :type utc0:     tuple,list,int
+        :param utc1:    as for `utc0`, but for the second time.
+        :type utc1:     tuple,list,int
+        :param energy:  DKE ('kinetic') or DTE ('total').
+        :type energy:   str
+        :param datadir: directory holding computed data
+        :type datadir:  str
+        :param outdir:  root directory for plots
+        :type outdir:   str
+        :param dataf:   file name of data file, if ambiguous
+        :type dataf:    str
+        :param f_prefix: custom filename prefix for output. Ignore if False.
+        :type f_prefix: bool,str
+        :param f_suffix: custom filename suffix for output. Ignore if False.
+        :type f_suffix: bool,str
+        :param clvs:    contour levels for DDKE/DDTE. Generate with
+                        :func:`numpy.arange`.
+        :type clvs:     bool,N.ndarray
+        :param meanclvs:    contour levels for ensemble mean. Generate with
+                        :func:`numpy.arange`.
+        :type meanclvs:     bool,N.ndarray
+        :param title:   title for output
+        :type title:    bool,str
+        :param fig:         value of False will create new figure. A value of
+                            matplotlib.figure object will plot data onto
+                            this figure (similarly for axis, below).
+        :type fig:          bool,matplotlib.figure
+        :param ax:          matplotlib.axis object to plot onto
+        :type ax:           bool,matplotlib.axis
 
-        vrbl        :   'sum_z' or 'sum_xyz'
-        utc0       :   first time, must exist in pickle file
-        utc1       :   second time, ditto
-        energy      :   'kinetic' or 'total'
-        datadir     :   directory holding computed data
-        outdir      :   root directory for plots
-
-        Optional
         meanvrbl    :   variable of ensemble mean
         meanlevel   :   level for ensemble mean variable
         ncdata      :   if meanvrbl is not False, link to all netcdf files of
                         ensemble members for ensemble
-        dataf       :   file name of data file, if ambiguous
-        outprefix   :   prefix for output files
-        outsuffix   :   suffix for output files
-        clvs        :   contour levels
-        title       :   title for output
-        fig         :   matplotlib.figure object to plot on
-        ax          :   matplotib.axis object to plot on
+
 
         TODO: Interpolate geopotential height to pressure level.
         """

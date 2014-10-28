@@ -852,13 +852,21 @@ def vstack_loop(data, obj):
     return stack
 
 
-def generate_times(idate,fdate,interval):
+def generate_times(itime,ftime,interval):
     """
-    Interval in seconds
+    :param itime:       Start date/time. Format is
+                        YYYY,MM,DD,HH,MM,SS (calendar.timegm).
+    :type itime:        list,tuple
+    :param ftime:       End date/time. Same format as itime.
+    :type ftime:        list,tuple
+    :param interval:    interval between output times, in seconds.
+    :type interval:     int
+    :returns:           list of times in datenum format.
+
     """
-    i = calendar.timegm(idate)
-    f = calendar.timegm(fdate)
-    times = range(i,f,interval)
+    it = calendar.timegm(idate)
+    ft = calendar.timegm(fdate)
+    times = range(it,ft,interval)
     return times
 
 def generate_colours(M,n):

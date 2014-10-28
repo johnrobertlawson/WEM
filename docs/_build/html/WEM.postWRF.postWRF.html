@@ -415,8 +415,36 @@ axes    :   if two-length tuple, this is the first and second axes for</p>
 <dl class="method">
 <dt id="WEM.postWRF.postWRF.main.WRFEnviron.create_fname">
 <tt class="descname">create_fname</tt><big>(</big><em>vrbl</em>, <em>utc</em>, <em>level</em>, <em>f_prefix=False</em>, <em>f_suffix=False</em><big>)</big><a class="reference internal" href="_modules/WEM/postWRF/postWRF/main.html#WRFEnviron.create_fname"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#WEM.postWRF.postWRF.main.WRFEnviron.create_fname" title="Permalink to this definition">¶</a></dt>
-<dd><p>Differentiate between e.g. different domains by using the suffix/prefix
-options.</p>
+<dd><p>Generate a filename (without extension) for saving a figure.
+Differentiate between similar plots for e.g. different domains by
+using the f_suffix/f_prefix options.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>vrbl</strong> (<em>str</em>) &#8211; variable name as found in WRF, or one of
+the computed fields available in WEM.</li>
+<li><strong>utc</strong> (<em>tuple,list,int</em>) &#8211; one date/time. The tuple/list format is
+YYYY,MM,DD,HH,MM,SS (ready for calendar.timegm).
+Integer format is epoch/datenum (time.gmtime).</li>
+<li><strong>level</strong> (<em>str</em>) &#8211; required level.</li>
+<li><strong>f_prefix</strong> (<em>bool,str</em>) &#8211; custom filename prefix for output. Ignore if False.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>:param f_suffix     custom filename suffix for output. Ignore if False.
+:type f_suffix      bool,str</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">str &#8211; filename with extension.</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
@@ -459,10 +487,9 @@ time index is start or end of wrfout file, skip the plot.</p>
 <dl class="method">
 <dt id="WEM.postWRF.postWRF.main.WRFEnviron.generate_times">
 <tt class="descname">generate_times</tt><big>(</big><em>itime</em>, <em>ftime</em>, <em>interval</em><big>)</big><a class="reference internal" href="_modules/WEM/postWRF/postWRF/main.html#WRFEnviron.generate_times"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#WEM.postWRF.postWRF.main.WRFEnviron.generate_times" title="Permalink to this definition">¶</a></dt>
-<dd><p>Wrapper for utility method.</p>
-<p>itime   :   Time tuple of start time
-ftime   :   Time tuple of end time
-interval:   interval</p>
+<dd><p>Wrapper for utility method
+<a class="reference internal" href="WEM.utils.html#WEM.utils.GIS_tools.generate_times" title="WEM.utils.GIS_tools.generate_times"><tt class="xref py py-func docutils literal"><span class="pre">WEM.utils.GIS_tools.generate_times()</span></tt></a>, so user can access
+this at the top level to loop over times.</p>
 </dd></dl>
 
 <dl class="method">
@@ -483,13 +510,30 @@ If the value is an integer, make a list of one.</p>
 <dl class="method">
 <dt id="WEM.postWRF.postWRF.main.WRFEnviron.get_netcdf">
 <tt class="descname">get_netcdf</tt><big>(</big><em>ncdir</em>, <em>ncf=False</em>, <em>nct=False</em>, <em>dom=1</em>, <em>path_only=False</em><big>)</big><a class="reference internal" href="_modules/WEM/postWRF/postWRF/main.html#WRFEnviron.get_netcdf"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#WEM.postWRF.postWRF.main.WRFEnviron.get_netcdf" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the WRFOut or RUC instance, given arguments:</p>
-<p>ncdir       :   absolute path to subdirectory</p>
-<p>Optional inputs:
-ncf         :   file name
-nct         :   initialisation time (tuple)
-dom         :   domain (for WRF files only)
-path_only   :   if True, return only absolute path+fname</p>
+<dd><p>Returns the WRFOut, ECMWF, or RUC instance.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>ncdir</strong> &#8211; absolute path to directory that contains the
+netCDF file.</li>
+<li><strong>ncf</strong> (<em>bool,str</em>) &#8211; filename of netcdf data file if ambiguous within ncdir.
+If no wrfout file is explicitly specified, the
+netCDF file in that folder is chosen if unambiguous.</li>
+<li><strong>nct</strong> (<em>bool,str</em>) &#8211; initialisation time of netcdf data file, if
+ambiguous within ncdir.</li>
+<li><strong>dom</strong> (<em>int</em>) &#8211; domain for plotting (for WRF data).
+If zero, the only netCDF file present will be
+plotted.</li>
+<li><strong>path_only</strong> (<em>bool</em>) &#8211; if True, return only absolute path to file.
+This is useful to loop over ensemble members and
+generate a list of files.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
@@ -520,14 +564,13 @@ and slices data from the wrfout file appropriately.</p>
 <li><strong>vrbl</strong> (<em>str</em>) &#8211; variable name as found in WRF, or one of
 the computed fields available in WEM</li>
 <li><strong>utc</strong> (<em>tuple,list,int</em>) &#8211; one date/time. The tuple/list format is
-YYYY,MM,DD,HH,MM,SS (calendar.timegm).
-the integer format is epoch/datenum (time.gmtime).</li>
-<li><strong>level</strong> (<em>int,str</em>) &#8211; <p>required level.</p>
-<p>Lowest model level is integer 2000.</p>
-<p>Pressure level is integer in hPa, e.g. 850.</p>
-<p>Isentropic surface is a string + K, e.g. &#8216;320K&#8217;</p>
-<p>Geometric height is a string + m, e.g. &#8216;4000m&#8217;</p>
-</li>
+YYYY,MM,DD,HH,MM,SS (ready for calendar.timegm).
+Integer format is epoch/datenum (ready for
+time.gmtime).</li>
+<li><strong>level</strong> (<em>int,str</em>) &#8211; required level. Lowest model level is integer 2000.
+Pressure level is integer in hPa, e.g. 850.
+Isentropic surface is a string + K, e.g. &#8216;320K&#8217;.
+Geometric height is a string + m, e.g. &#8216;4000m&#8217;.</li>
 <li><strong>ncdir</strong> (<em>str</em>) &#8211; directory of netcdf data file</li>
 <li><strong>ncf</strong> (<em>bool,str</em>) &#8211; filename of netcdf data file if ambiguous within ncdir.
 If no wrfout file is explicitly specified, the
@@ -545,41 +588,79 @@ ambiguous within ncdir.</li>
 </table>
 <p>:param f_suffix     custom filename suffix for output. Ignore if False.
 :type f_suffix      bool,str
-:bounding           four floats (Nlim, Elim, Slim, Wlim):</p>
+:param bounding:    bounding box for domain.</p>
 <blockquote>
-<div>Nlim    :   northern limit
-Elim    :   eastern limit
-Slim    :   southern limit
-Wlim    :   western limit</div></blockquote>
-<dl class="docutils">
-<dt>smooth <span class="classifier-delimiter">:</span> <span class="classifier">smoothing. 0 is off. non-zero integer is the degree</span></dt>
-<dd>of smoothing, to be specified.</dd>
-<dt>dom <span class="classifier-delimiter">:</span> <span class="classifier">domain for plotting (for WRF data). If zero, the only netCDF file</span></dt>
-<dd>present will be plotted.</dd>
-<dt>plottype <span class="classifier-delimiter">:</span> <span class="classifier">matplotlib command for plotting data.</span></dt>
-<dd>contour or contourf.</dd>
-</dl>
-<p>fig         :   matplotlib.figure object to plot onto
-ax          :   matplotlib.axis object to plot onto</p>
+<div>Dictionary contains four keys (Nlim, Elim, Slim, Wlim)
+with float values (northern latitude limit, eastern
+longitude limit, southern latitude limit, western
+latitude limit, respectively).</div></blockquote>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>smooth</strong> (<em>int</em>) &#8211; pass data through a Gaussian filter. Value of 1 is
+essentially <a href="#id1"><span class="problematic" id="id2">`</span></a>off&#8217;.
+Integer greater than zero is the degree of smoothing,
+in grid spacing.</li>
+<li><strong>dom</strong> (<em>int</em>) &#8211; domain for plotting (for WRF data).
+If zero, the only netCDF file present will be
+plotted.</li>
+<li><strong>fig</strong> (<em>bool,matplotlib.figure</em>) &#8211; value of False will create new figure. A value of
+matplotlib.figure object will plot data onto
+this figure (similarly for axis, below).</li>
+<li><strong>ax</strong> (<em>bool,matplotlib.axis</em>) &#8211; matplotlib.axis object to plot onto</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Params plottype:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><p class="first">matplotlib command for plotting data
+(contour or contourf).</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None.</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="WEM.postWRF.postWRF.main.WRFEnviron.plot_diff_energy">
 <tt class="descname">plot_diff_energy</tt><big>(</big><em>vrbl</em>, <em>utc</em>, <em>energy</em>, <em>datadir</em>, <em>outdir</em>, <em>dataf=False</em>, <em>outprefix=False</em>, <em>outsuffix=False</em>, <em>clvs=0</em>, <em>title=False</em>, <em>fig=False</em>, <em>ax=False</em><big>)</big><a class="reference internal" href="_modules/WEM/postWRF/postWRF/main.html#WRFEnviron.plot_diff_energy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#WEM.postWRF.postWRF.main.WRFEnviron.plot_diff_energy" title="Permalink to this definition">¶</a></dt>
-<dd><p>vrbl        :   &#8216;sum_z&#8217; or &#8216;sum_xyz&#8217;
-utc         :   date/time for plot
-energy      :   &#8216;kinetic&#8217; or &#8216;total&#8217;
-datadir     :   directory holding computed data
-outdir      :   root directory for plots</p>
-<p>Optional
-dataf       :   file name of data file, if ambiguous
-outprefix   :   prefix for output files
-outsuffix   :   suffix for output files
-clvs        :   contour levels
-title       :   title for output
-fig         :   matplotlib.figure object to plot on
-ax          :   matplotib.axis object to plot on</p>
-<p>TODO: find data file automatically, given folder</p>
+<dd><p>This function requires data already generated by
+<a class="reference internal" href="#WEM.postWRF.postWRF.stats.compute_diff_energy" title="WEM.postWRF.postWRF.stats.compute_diff_energy"><tt class="xref py py-func docutils literal"><span class="pre">WEM.postWRF.postWRF.stats.compute_diff_energy()</span></tt></a>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>vrbl</strong> (<em>str</em>) &#8211; Vertically integrated (&#8216;sum_z&#8217;) or summated over all
+dimensions (&#8216;sum_xyz&#8217;).</li>
+<li><strong>utc</strong> (<em>tuple,list,int</em>) &#8211; one date/time. The tuple/list format is
+YYYY,MM,DD,HH,MM,SS (ready for calendar.timegm).
+Integer format is epoch/datenum (ready for
+time.gmtime).</li>
+<li><strong>energy</strong> (<em>str</em>) &#8211; DKE (&#8216;kinetic&#8217;) or DTE (&#8216;total&#8217;).</li>
+<li><strong>datadir</strong> (<em>str</em>) &#8211; directory holding computed data</li>
+<li><strong>outdir</strong> (<em>str</em>) &#8211; root directory for plots</li>
+<li><strong>dataf</strong> (<em>str</em>) &#8211; file name of data file, if ambiguous</li>
+<li><strong>f_prefix</strong> (<em>bool,str</em>) &#8211; custom filename prefix for output. Ignore if False.</li>
+<li><strong>f_suffix</strong> (<em>bool,str</em>) &#8211; custom filename suffix for output. Ignore if False.</li>
+<li><strong>clvs</strong> (<em>bool,N.ndarray</em>) &#8211; contour levels for plot. Generate with
+<tt class="xref py py-func docutils literal"><span class="pre">numpy.arange()</span></tt>.</li>
+<li><strong>fig</strong> (<em>bool,matplotlib.figure</em>) &#8211; value of False will create new figure. A value of
+matplotlib.figure object will plot data onto
+this figure (similarly for axis, below).</li>
+<li><strong>ax</strong> (<em>bool,matplotlib.axis</em>) &#8211; matplotlib.axis object to plot onto</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Title:</th><td class="field-body"><p class="first last">title for output</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
@@ -1061,7 +1142,7 @@ the magnitudes of output values.</p>
 nc1     :   netCDF file
 t_idx   :   times indices to difference
 energy  :   kinetic or total
-<a href="#id1"><span class="problematic" id="id2">*</span></a>args   :   to catch lower/upper boundary which isn&#8217;t relevant here</p>
+<a href="#id3"><span class="problematic" id="id4">*</span></a>args   :   to catch lower/upper boundary which isn&#8217;t relevant here</p>
 <p>Outputs:</p>
 <p>data    :   time series.</p>
 </dd></dl>

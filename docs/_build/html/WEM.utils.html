@@ -202,8 +202,24 @@ be colourlist[n].</p>
 
 <dl class="function">
 <dt id="WEM.utils.GIS_tools.generate_times">
-<tt class="descclassname">WEM.utils.GIS_tools.</tt><tt class="descname">generate_times</tt><big>(</big><em>idate</em>, <em>fdate</em>, <em>interval</em><big>)</big><a class="reference internal" href="_modules/WEM/utils/GIS_tools.html#generate_times"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#WEM.utils.GIS_tools.generate_times" title="Permalink to this definition">¶</a></dt>
-<dd><p>Interval in seconds</p>
+<tt class="descclassname">WEM.utils.GIS_tools.</tt><tt class="descname">generate_times</tt><big>(</big><em>itime</em>, <em>ftime</em>, <em>interval</em><big>)</big><a class="reference internal" href="_modules/WEM/utils/GIS_tools.html#generate_times"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#WEM.utils.GIS_tools.generate_times" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>itime</strong> (<em>list,tuple</em>) &#8211; Start date/time. Format is
+YYYY,MM,DD,HH,MM,SS (calendar.timegm).</li>
+<li><strong>ftime</strong> (<em>list,tuple</em>) &#8211; End date/time. Same format as itime.</li>
+<li><strong>interval</strong> (<em>int</em>) &#8211; interval between output times, in seconds.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">list of times in datenum format.</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">

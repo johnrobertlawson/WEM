@@ -905,13 +905,21 @@
     <span class="k">return</span> <span class="n">stack</span>
 
 </div>
-<div class="viewcode-block" id="generate_times"><a class="viewcode-back" href="../../../WEM.utils.html#WEM.utils.GIS_tools.generate_times">[docs]</a><span class="k">def</span> <span class="nf">generate_times</span><span class="p">(</span><span class="n">idate</span><span class="p">,</span><span class="n">fdate</span><span class="p">,</span><span class="n">interval</span><span class="p">):</span>
+<div class="viewcode-block" id="generate_times"><a class="viewcode-back" href="../../../WEM.utils.html#WEM.utils.GIS_tools.generate_times">[docs]</a><span class="k">def</span> <span class="nf">generate_times</span><span class="p">(</span><span class="n">itime</span><span class="p">,</span><span class="n">ftime</span><span class="p">,</span><span class="n">interval</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Interval in seconds</span>
+<span class="sd">    :param itime:       Start date/time. Format is</span>
+<span class="sd">                        YYYY,MM,DD,HH,MM,SS (calendar.timegm).</span>
+<span class="sd">    :type itime:        list,tuple</span>
+<span class="sd">    :param ftime:       End date/time. Same format as itime.</span>
+<span class="sd">    :type ftime:        list,tuple</span>
+<span class="sd">    :param interval:    interval between output times, in seconds.</span>
+<span class="sd">    :type interval:     int</span>
+<span class="sd">    :returns:           list of times in datenum format.</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">i</span> <span class="o">=</span> <span class="n">calendar</span><span class="o">.</span><span class="n">timegm</span><span class="p">(</span><span class="n">idate</span><span class="p">)</span>
-    <span class="n">f</span> <span class="o">=</span> <span class="n">calendar</span><span class="o">.</span><span class="n">timegm</span><span class="p">(</span><span class="n">fdate</span><span class="p">)</span>
-    <span class="n">times</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">f</span><span class="p">,</span><span class="n">interval</span><span class="p">)</span>
+    <span class="n">it</span> <span class="o">=</span> <span class="n">calendar</span><span class="o">.</span><span class="n">timegm</span><span class="p">(</span><span class="n">idate</span><span class="p">)</span>
+    <span class="n">ft</span> <span class="o">=</span> <span class="n">calendar</span><span class="o">.</span><span class="n">timegm</span><span class="p">(</span><span class="n">fdate</span><span class="p">)</span>
+    <span class="n">times</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="n">it</span><span class="p">,</span><span class="n">ft</span><span class="p">,</span><span class="n">interval</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">times</span>
 </div>
 <div class="viewcode-block" id="generate_colours"><a class="viewcode-back" href="../../../WEM.utils.html#WEM.utils.GIS_tools.generate_colours">[docs]</a><span class="k">def</span> <span class="nf">generate_colours</span><span class="p">(</span><span class="n">M</span><span class="p">,</span><span class="n">n</span><span class="p">):</span>

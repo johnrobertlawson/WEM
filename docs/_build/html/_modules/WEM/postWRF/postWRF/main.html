@@ -124,19 +124,15 @@
 <span class="sd">                            the computed fields available in WEM</span>
 <span class="sd">        :type vrbl:         str</span>
 <span class="sd">        :param utc:         one date/time. The tuple/list format is</span>
-<span class="sd">                            YYYY,MM,DD,HH,MM,SS (calendar.timegm).</span>
-<span class="sd">                            the integer format is epoch/datenum (time.gmtime).</span>
+<span class="sd">                            YYYY,MM,DD,HH,MM,SS (ready for calendar.timegm).</span>
+<span class="sd">                            Integer format is epoch/datenum (ready for</span>
+<span class="sd">                            time.gmtime).</span>
 <span class="sd">        :type utc:          tuple,list,int</span>
-<span class="sd">        :param level:       required level. </span>
-
-<span class="sd">                            Lowest model level is integer 2000.</span>
-
+<span class="sd">        :param level:       required level. Lowest model level is integer 2000.</span>
 <span class="sd">                            Pressure level is integer in hPa, e.g. 850.</span>
-
-<span class="sd">                            Isentropic surface is a string + K, e.g. &#39;320K&#39;</span>
-<span class="sd">                            </span>
-<span class="sd">                            Geometric height is a string + m, e.g. &#39;4000m&#39;</span>
-<span class="sd">        :type level:        int,str </span>
+<span class="sd">                            Isentropic surface is a string + K, e.g. &#39;320K&#39;.</span>
+<span class="sd">                            Geometric height is a string + m, e.g. &#39;4000m&#39;.</span>
+<span class="sd">        :type level:        int,str</span>
 <span class="sd">        :param ncdir:       directory of netcdf data file</span>
 <span class="sd">        :type ncdir:        str</span>
 <span class="sd">        :outdir:            directory to save output figures</span>
@@ -152,20 +148,32 @@
 <span class="sd">        :type f_prefix:     bool,str</span>
 <span class="sd">        :param f_suffix     custom filename suffix for output. Ignore if False.</span>
 <span class="sd">        :type f_suffix      bool,str</span>
-<span class="sd">        :bounding           four floats (Nlim, Elim, Slim, Wlim):</span>
-<span class="sd">            Nlim    :   northern limit</span>
-<span class="sd">            Elim    :   eastern limit</span>
-<span class="sd">            Slim    :   southern limit</span>
-<span class="sd">            Wlim    :   western limit</span>
-<span class="sd">        smooth      :   smoothing. 0 is off. non-zero integer is the degree</span>
-<span class="sd">                        of smoothing, to be specified.</span>
-<span class="sd">        dom         :   domain for plotting (for WRF data). If zero, the only netCDF file</span>
-<span class="sd">                        present will be plotted.</span>
-<span class="sd">        plottype    :   matplotlib command for plotting data.</span>
-<span class="sd">                        contour or contourf.</span>
-<span class="sd">        fig         :   matplotlib.figure object to plot onto</span>
-<span class="sd">        ax          :   matplotlib.axis object to plot onto</span>
+<span class="sd">        :param bounding:    bounding box for domain.</span>
+<span class="sd">                            Dictionary contains four keys (Nlim, Elim, Slim, Wlim)</span>
+<span class="sd">                            with float values (northern latitude limit, eastern</span>
+<span class="sd">                            longitude limit, southern latitude limit, western</span>
+<span class="sd">                            latitude limit, respectively).</span>
+<span class="sd">        :type bounding:     dict</span>
+<span class="sd">        :param smooth:      pass data through a Gaussian filter. Value of 1 is</span>
+<span class="sd">                            essentially `off&#39;.</span>
+<span class="sd">                            Integer greater than zero is the degree of smoothing,</span>
+<span class="sd">                            in grid spacing.</span>
+<span class="sd">        :type smooth:       int</span>
+<span class="sd">        :param dom:         domain for plotting (for WRF data).</span>
+<span class="sd">                            If zero, the only netCDF file present will be</span>
+<span class="sd">                            plotted.</span>
+<span class="sd">        :type dom:          int</span>
+<span class="sd">        :params plottype:   matplotlib command for plotting data</span>
+<span class="sd">                            (contour or contourf).</span>
+<span class="sd">        :type plottype:     str</span>
+<span class="sd">        :param fig:         value of False will create new figure. A value of</span>
+<span class="sd">                            matplotlib.figure object will plot data onto</span>
+<span class="sd">                            this figure (similarly for axis, below).</span>
+<span class="sd">        :type fig:          bool,matplotlib.figure</span>
+<span class="sd">        :param ax:          matplotlib.axis object to plot onto</span>
+<span class="sd">        :type ax:           bool,matplotlib.axis</span>
 
+<span class="sd">        :returns:           None.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c"># TODO: lats/lons False when no bounding, and selected with limited</span>
@@ -202,8 +210,25 @@
 </div>
 <div class="viewcode-block" id="WRFEnviron.create_fname"><a class="viewcode-back" href="../../../../WEM.postWRF.postWRF.html#WEM.postWRF.postWRF.main.WRFEnviron.create_fname">[docs]</a>    <span class="k">def</span> <span class="nf">create_fname</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">vrbl</span><span class="p">,</span><span class="n">utc</span><span class="p">,</span><span class="n">level</span><span class="p">,</span><span class="n">f_prefix</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span><span class="n">f_suffix</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Differentiate between e.g. different domains by using the suffix/prefix</span>
-<span class="sd">        options.</span>
+<span class="sd">        Generate a filename (without extension) for saving a figure.</span>
+<span class="sd">        Differentiate between similar plots for e.g. different domains by</span>
+<span class="sd">        using the f_suffix/f_prefix options.</span>
+
+<span class="sd">        :param vrbl:        variable name as found in WRF, or one of</span>
+<span class="sd">                            the computed fields available in WEM.</span>
+<span class="sd">        :type vrbl:         str</span>
+<span class="sd">        :param utc:         one date/time. The tuple/list format is</span>
+<span class="sd">                            YYYY,MM,DD,HH,MM,SS (ready for calendar.timegm).</span>
+<span class="sd">                            Integer format is epoch/datenum (time.gmtime).</span>
+<span class="sd">        :type utc:          tuple,list,int</span>
+<span class="sd">        :param level:       required level.</span>
+<span class="sd">        :type level:        str</span>
+<span class="sd">        :param f_prefix:    custom filename prefix for output. Ignore if False.</span>
+<span class="sd">        :type f_prefix:     bool,str</span>
+<span class="sd">        :param f_suffix     custom filename suffix for output. Ignore if False.</span>
+<span class="sd">        :type f_suffix      bool,str</span>
+
+<span class="sd">        :returns:           str -- filename with extension.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">time_str</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">string_from_time</span><span class="p">(</span><span class="s">&#39;output&#39;</span><span class="p">,</span><span class="n">utc</span><span class="p">)</span>
 
@@ -216,15 +241,27 @@
         <span class="k">return</span> <span class="n">fname</span>
 </div>
 <div class="viewcode-block" id="WRFEnviron.get_netcdf"><a class="viewcode-back" href="../../../../WEM.postWRF.postWRF.html#WEM.postWRF.postWRF.main.WRFEnviron.get_netcdf">[docs]</a>    <span class="k">def</span> <span class="nf">get_netcdf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">ncdir</span><span class="p">,</span><span class="n">ncf</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span><span class="n">nct</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span><span class="n">dom</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">path_only</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Returns the WRFOut or RUC instance, given arguments:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the WRFOut, ECMWF, or RUC instance.</span>
 
-<span class="sd">        ncdir       :   absolute path to subdirectory</span>
+<span class="sd">        :param ncdir:       absolute path to directory that contains the</span>
+<span class="sd">                            netCDF file.</span>
 
-<span class="sd">        Optional inputs:</span>
-<span class="sd">        ncf         :   file name</span>
-<span class="sd">        nct         :   initialisation time (tuple)</span>
-<span class="sd">        dom         :   domain (for WRF files only)</span>
-<span class="sd">        path_only   :   if True, return only absolute path+fname</span>
+<span class="sd">        :param ncf:         filename of netcdf data file if ambiguous within ncdir.</span>
+<span class="sd">                            If no wrfout file is explicitly specified, the</span>
+<span class="sd">                            netCDF file in that folder is chosen if unambiguous.</span>
+<span class="sd">        :type ncf:          bool,str</span>
+<span class="sd">        :param nct:         initialisation time of netcdf data file, if</span>
+<span class="sd">                            ambiguous within ncdir.</span>
+<span class="sd">        :type nct:          bool,str</span>
+<span class="sd">        :param dom:         domain for plotting (for WRF data).</span>
+<span class="sd">                            If zero, the only netCDF file present will be</span>
+<span class="sd">                            plotted.</span>
+<span class="sd">        :type dom:          int</span>
+<span class="sd">        :param path_only:   if True, return only absolute path to file.</span>
+<span class="sd">                            This is useful to loop over ensemble members and</span>
+<span class="sd">                            generate a list of files.</span>
+<span class="sd">        :type path_only:    bool</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">ncf</span><span class="p">:</span>
             <span class="n">fpath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ncdir</span><span class="p">,</span><span class="n">ncf</span><span class="p">)</span>
@@ -249,11 +286,10 @@
 </div>
 <div class="viewcode-block" id="WRFEnviron.generate_times"><a class="viewcode-back" href="../../../../WEM.postWRF.postWRF.html#WEM.postWRF.postWRF.main.WRFEnviron.generate_times">[docs]</a>    <span class="k">def</span> <span class="nf">generate_times</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">itime</span><span class="p">,</span><span class="n">ftime</span><span class="p">,</span><span class="n">interval</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Wrapper for utility method.</span>
+<span class="sd">        Wrapper for utility method</span>
+<span class="sd">        :func:`WEM.utils.GIS_tools.generate_times`, so user can access</span>
+<span class="sd">        this at the top level to loop over times.</span>
 
-<span class="sd">        itime   :   Time tuple of start time</span>
-<span class="sd">        ftime   :   Time tuple of end time</span>
-<span class="sd">        interval:   interval</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">listoftimes</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">generate_times</span><span class="p">(</span><span class="n">itime</span><span class="p">,</span><span class="n">ftime</span><span class="p">,</span><span class="n">interval</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">listoftimes</span>
@@ -262,26 +298,44 @@
                             <span class="n">outprefix</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span><span class="n">outsuffix</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span><span class="n">clvs</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
                             <span class="n">title</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span><span class="n">fig</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span><span class="n">ax</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        vrbl        :   &#39;sum_z&#39; or &#39;sum_xyz&#39;</span>
-<span class="sd">        utc         :   date/time for plot</span>
-<span class="sd">        energy      :   &#39;kinetic&#39; or &#39;total&#39;</span>
-<span class="sd">        datadir     :   directory holding computed data</span>
-<span class="sd">        outdir      :   root directory for plots</span>
+<span class="sd">        This function requires data already generated by</span>
+<span class="sd">        :func:`WEM.postWRF.postWRF.stats.compute_diff_energy`.</span>
 
-<span class="sd">        Optional</span>
-<span class="sd">        dataf       :   file name of data file, if ambiguous</span>
-<span class="sd">        outprefix   :   prefix for output files</span>
-<span class="sd">        outsuffix   :   suffix for output files</span>
-<span class="sd">        clvs        :   contour levels</span>
-<span class="sd">        title       :   title for output</span>
-<span class="sd">        fig         :   matplotlib.figure object to plot on</span>
-<span class="sd">        ax          :   matplotib.axis object to plot on</span>
+<span class="sd">        :param vrbl:    Vertically integrated (&#39;sum_z&#39;) or summated over all</span>
+<span class="sd">                        dimensions (&#39;sum_xyz&#39;).</span>
+<span class="sd">        :type vrbl:     str</span>
+<span class="sd">        :param utc:     one date/time. The tuple/list format is</span>
+<span class="sd">                        YYYY,MM,DD,HH,MM,SS (ready for calendar.timegm).</span>
+<span class="sd">                        Integer format is epoch/datenum (ready for</span>
+<span class="sd">                        time.gmtime).</span>
+<span class="sd">        :type utc:      tuple,list,int</span>
+<span class="sd">        :param energy:  DKE (&#39;kinetic&#39;) or DTE (&#39;total&#39;).</span>
+<span class="sd">        :type energy:   str</span>
+<span class="sd">        :param datadir: directory holding computed data</span>
+<span class="sd">        :type datadir:  str</span>
+<span class="sd">        :param outdir:  root directory for plots</span>
+<span class="sd">        :type outdir:   str</span>
+<span class="sd">        :param dataf:   file name of data file, if ambiguous</span>
+<span class="sd">        :type dataf:    str</span>
+<span class="sd">        :param f_prefix: custom filename prefix for output. Ignore if False.</span>
+<span class="sd">        :type f_prefix: bool,str</span>
+<span class="sd">        :param f_suffix: custom filename suffix for output. Ignore if False.</span>
+<span class="sd">        :type f_suffix: bool,str</span>
+<span class="sd">        :param clvs:    contour levels for plot. Generate with</span>
+<span class="sd">                        :func:`numpy.arange`.</span>
+<span class="sd">        :type clvs:     bool,N.ndarray</span>
+<span class="sd">        :title:   title for output</span>
+<span class="sd">        :param fig:         value of False will create new figure. A value of</span>
+<span class="sd">                            matplotlib.figure object will plot data onto</span>
+<span class="sd">                            this figure (similarly for axis, below).</span>
+<span class="sd">        :type fig:          bool,matplotlib.figure</span>
+<span class="sd">        :param ax:          matplotlib.axis object to plot onto</span>
+<span class="sd">        :type ax:           bool,matplotlib.axis</span>
 
-<span class="sd">        TODO: find data file automatically, given folder</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">DATA</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">load_data</span><span class="p">(</span><span class="n">folder</span><span class="p">,</span><span class="n">fname</span><span class="p">,</span><span class="n">format</span><span class="o">=</span><span class="s">&#39;pickle&#39;</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">utc</span><span class="p">,</span><span class="n">collections</span><span class="o">.</span><span class="n">Sequence</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">utc</span><span class="p">,(</span><span class="nb">list</span><span class="p">,</span><span class="nb">tuple</span><span class="p">)):</span>
             <span class="n">utc</span> <span class="o">=</span> <span class="n">calendar</span><span class="o">.</span><span class="n">timegm</span><span class="p">(</span><span class="n">utc</span><span class="p">)</span>
 
         <span class="k">for</span> <span class="n">pn</span><span class="p">,</span><span class="n">perm</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">DATA</span><span class="p">):</span>
@@ -313,8 +367,6 @@
         <span class="n">F</span> <span class="o">=</span> <span class="n">BirdsEye</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">C</span><span class="p">,</span><span class="n">W1</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs1</span><span class="p">)</span>    <span class="c"># 2D figure class</span>
         <span class="n">tstr</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">string_from_time</span><span class="p">(</span><span class="s">&#39;output&#39;</span><span class="p">,</span><span class="n">utc</span><span class="p">)</span>
         <span class="n">fname_t</span> <span class="o">=</span> <span class="s">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">((</span><span class="n">plotname</span><span class="p">,</span><span class="s">&#39;_{0}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">tstr</span><span class="p">)))</span>
-        <span class="c"># fpath = os.path.join(p2p,fname_t)</span>
-        <span class="kn">import</span> <span class="nn">pdb</span><span class="p">;</span> <span class="n">pdb</span><span class="o">.</span><span class="n">set_trace</span><span class="p">()</span>
 
         <span class="n">fig_obj</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">plot_data</span><span class="p">(</span><span class="n">stack_average</span><span class="p">,</span><span class="s">&#39;contourf&#39;</span><span class="p">,</span><span class="n">p2p</span><span class="p">,</span><span class="n">fname_t</span><span class="p">,</span><span class="n">utc</span><span class="p">,</span><span class="n">V</span><span class="p">,</span>
                                 <span class="o">**</span><span class="n">kwargs2</span><span class="p">)</span>
