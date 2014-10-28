@@ -72,17 +72,12 @@ class WRFEnviron(object):
         :type vrbl:         str
         :param utc:         one date/time. The tuple/list format is
                             YYYY,MM,DD,HH,MM,SS (calendar.timegm).
-                            the integer format is epoch/datenum (time.gmtime).
+                            Integer format is epoch/datenum (time.gmtime).
         :type utc:          tuple,list,int
-        :param level:       required level. 
-
-                            Lowest model level is integer 2000.
-
-                            Pressure level is integer in hPa, e.g. 850.
-
-                            Isentropic surface is a string + K, e.g. '320K'
-                            
-                            Geometric height is a string + m, e.g. '4000m'
+        :param level:       required level. Lowest model level is integer 2000.
+                            Pressure level is integer in hPa, e.g. 850.  
+                            Isentropic surface is a string + K, e.g. '320K'.
+                            Geometric height is a string + m, e.g. '4000m'.
         :type level:        int,str 
         :param ncdir:       directory of netcdf data file
         :type ncdir:        str
@@ -99,13 +94,17 @@ class WRFEnviron(object):
         :type f_prefix:     bool,str
         :param f_suffix     custom filename suffix for output. Ignore if False.
         :type f_suffix      bool,str
-        :bounding           four floats (Nlim, Elim, Slim, Wlim):
-            Nlim    :   northern limit
-            Elim    :   eastern limit
-            Slim    :   southern limit
-            Wlim    :   western limit
-        smooth      :   smoothing. 0 is off. non-zero integer is the degree
-                        of smoothing, to be specified.
+        :param bounding:    bounding box for domain. 
+                            Dictionary contains four keys (Nlim, Elim, Slim, Wlim)
+                            with float values (northern latitude limit, eastern 
+                            longitude limit, southern latitude limit, western
+                            latitude limit, respectively).
+        :type bounding:     dict
+        :param smooth:      pass data through a Gaussian filter. Value of 1 is
+                            essentially `off'. 
+                            Integer greater than zero is the degree of smoothing,
+                            in grid spacing.
+        :type smooth:       int
         dom         :   domain for plotting (for WRF data). If zero, the only netCDF file
                         present will be plotted.
         plottype    :   matplotlib command for plotting data.
