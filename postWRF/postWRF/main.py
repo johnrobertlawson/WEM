@@ -70,14 +70,18 @@ class WRFEnviron(object):
         :param vrbl:        variable name as found in WRF, or one of
                             the computed fields available in WEM
         :type vrbl:         str
-        :param utc:         One date/time. The tuple/list format is
+        :param utc:         one date/time. The tuple/list format is
                             YYYY,MM,DD,HH,MM,SS (calendar.timegm).
-                            The integer format is epoch/datenum (time.gmtime).
+                            the integer format is epoch/datenum (time.gmtime).
         :type utc:          tuple,list,int
-        :param level:       Required level. 
+        :param level:       required level. 
+
                             Lowest model level is integer 2000.
-                            Pressure level is integer in hPa, e.g. 850
+
+                            Pressure level is integer in hPa, e.g. 850.
+
                             Isentropic surface is a string + K, e.g. '320K'
+                            
                             Geometric height is a string + m, e.g. '4000m'
         :type level:        int,str 
         :param ncdir:       directory of netcdf data file
@@ -91,10 +95,11 @@ class WRFEnviron(object):
         :param nct:         initialisation time of netcdf data file, if
                             ambiguous within ncdir.
         :type nct:          bool,str
-        :param f_prefix:    custom filename prefix for output
+        :param f_prefix:    custom filename prefix for output. Ignore if False.
         :type f_prefix:     bool,str
-        f_suffix    :   custom filename suffix for output
-        bounding    :   dictionary of four floats (Nlim, Elim, Slim, Wlim):
+        :param f_suffix     custom filename suffix for output. Ignore if False.
+        :type f_suffix      bool,str
+        :bounding           four floats (Nlim, Elim, Slim, Wlim):
             Nlim    :   northern limit
             Elim    :   eastern limit
             Slim    :   southern limit
