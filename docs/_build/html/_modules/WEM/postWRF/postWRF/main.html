@@ -98,6 +98,8 @@
     <span class="sd">&quot;&quot;&quot;Main environment API.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; This currently only loads default settings.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="c"># Set defaults</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">D</span> <span class="o">=</span> <span class="n">Defaults</span><span class="p">()</span>
 
@@ -118,28 +120,32 @@
 <span class="sd">        built into WRF default output or needs computing. It unstaggers</span>
 <span class="sd">        and slices data from the wrfout file appropriately.</span>
 
-
-<span class="sd">        Inputs:</span>
-<span class="sd">        vrbl        :   string of variable name as found in WRF, or one of</span>
-<span class="sd">                        the computed fields available in WEM</span>
-<span class="sd">        utc    :        one date/time.</span>
-<span class="sd">                        Can be tuple (YYYY,MM,DD,HH,MM,SS - calendar.timegm)</span>
-<span class="sd">                        Can be integer of datenum. (time.gmtime)</span>
-<span class="sd">        level       :   one level.</span>
-<span class="sd">                        Lowest model level is integer 2000.</span>
-<span class="sd">                        Pressure level is integer in hPa, e.g. 850</span>
-<span class="sd">                        Isentropic surface is a string + K, e.g. &#39;320K&#39;</span>
-<span class="sd">                        Geometric height is a string + m, e.g. &#39;4000m&#39;</span>
-<span class="sd">        ncdir       :   directory of netcdf data file</span>
-<span class="sd">        outdir      :   directory to save output figures</span>
-
-<span class="sd">        Optional</span>
-<span class="sd">        ncf         :   filename of netcdf data file if ambiguous within ncdir.</span>
-<span class="sd">                        If no wrfout file is explicitly specified, the</span>
-<span class="sd">                        netCDF file in that folder is chosen if unambiguous.</span>
-<span class="sd">        nct         :   initialisation time of netcdf data file, if</span>
-<span class="sd">                        ambiguous within ncdir.</span>
-<span class="sd">        f_prefix    :   custom filename prefix for output</span>
+<span class="sd">        :param vrbl:        variable name as found in WRF, or one of</span>
+<span class="sd">                            the computed fields available in WEM</span>
+<span class="sd">        :type vrbl:         str</span>
+<span class="sd">        :param utc:         One date/time. The tuple/list format is</span>
+<span class="sd">                            YYYY,MM,DD,HH,MM,SS (calendar.timegm).</span>
+<span class="sd">                            The integer format is epoch/datenum (time.gmtime).</span>
+<span class="sd">        :type utc:          tuple,list,int</span>
+<span class="sd">        :param level:       Required level. </span>
+<span class="sd">                            Lowest model level is integer 2000.</span>
+<span class="sd">                            Pressure level is integer in hPa, e.g. 850</span>
+<span class="sd">                            Isentropic surface is a string + K, e.g. &#39;320K&#39;</span>
+<span class="sd">                            Geometric height is a string + m, e.g. &#39;4000m&#39;</span>
+<span class="sd">        :type level:        int,str </span>
+<span class="sd">        :param ncdir:       directory of netcdf data file</span>
+<span class="sd">        :type ncdir:        str</span>
+<span class="sd">        :outdir:            directory to save output figures</span>
+<span class="sd">        :type outdir:       str</span>
+<span class="sd">        :param ncf:         filename of netcdf data file if ambiguous within ncdir.</span>
+<span class="sd">                            If no wrfout file is explicitly specified, the</span>
+<span class="sd">                            netCDF file in that folder is chosen if unambiguous.</span>
+<span class="sd">        :type ncf:          bool,str</span>
+<span class="sd">        :param nct:         initialisation time of netcdf data file, if</span>
+<span class="sd">                            ambiguous within ncdir.</span>
+<span class="sd">        :type nct:          bool,str</span>
+<span class="sd">        :param f_prefix:    custom filename prefix for output</span>
+<span class="sd">        :type f_prefix:     bool,str</span>
 <span class="sd">        f_suffix    :   custom filename suffix for output</span>
 <span class="sd">        bounding    :   dictionary of four floats (Nlim, Elim, Slim, Wlim):</span>
 <span class="sd">            Nlim    :   northern limit</span>
