@@ -519,21 +519,22 @@ and slices data from the wrfout file appropriately.</p>
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>vrbl</strong> (<em>str</em>) &#8211; variable name as found in WRF, or one of
 the computed fields available in WEM</li>
-<li><strong>utc</strong> (<em>tuple,list,int</em>) &#8211; One date/time. The tuple/list format is
+<li><strong>utc</strong> (<em>tuple,list,int</em>) &#8211; one date/time. The tuple/list format is
 YYYY,MM,DD,HH,MM,SS (calendar.timegm).
-The integer format is epoch/datenum (time.gmtime).</li>
-<li><strong>level</strong> (<em>int,str</em>) &#8211; Required level. 
-Lowest model level is integer 2000.
-Pressure level is integer in hPa, e.g. 850
-Isentropic surface is a string + K, e.g. &#8216;320K&#8217;
-Geometric height is a string + m, e.g. &#8216;4000m&#8217;</li>
+the integer format is epoch/datenum (time.gmtime).</li>
+<li><strong>level</strong> (<em>int,str</em>) &#8211; <p>required level.</p>
+<p>Lowest model level is integer 2000.</p>
+<p>Pressure level is integer in hPa, e.g. 850.</p>
+<p>Isentropic surface is a string + K, e.g. &#8216;320K&#8217;</p>
+<p>Geometric height is a string + m, e.g. &#8216;4000m&#8217;</p>
+</li>
 <li><strong>ncdir</strong> (<em>str</em>) &#8211; directory of netcdf data file</li>
 <li><strong>ncf</strong> (<em>bool,str</em>) &#8211; filename of netcdf data file if ambiguous within ncdir.
 If no wrfout file is explicitly specified, the
 netCDF file in that folder is chosen if unambiguous.</li>
 <li><strong>nct</strong> (<em>bool,str</em>) &#8211; initialisation time of netcdf data file, if
 ambiguous within ncdir.</li>
-<li><strong>f_prefix</strong> (<em>bool,str</em>) &#8211; custom filename prefix for output</li>
+<li><strong>f_prefix</strong> (<em>bool,str</em>) &#8211; custom filename prefix for output. Ignore if False.</li>
 </ul>
 </td>
 </tr>
@@ -542,8 +543,9 @@ ambiguous within ncdir.</li>
 </tr>
 </tbody>
 </table>
-<p>f_suffix    :   custom filename suffix for output
-bounding    :   dictionary of four floats (Nlim, Elim, Slim, Wlim):</p>
+<p>:param f_suffix     custom filename suffix for output. Ignore if False.
+:type f_suffix      bool,str
+:bounding           four floats (Nlim, Elim, Slim, Wlim):</p>
 <blockquote>
 <div>Nlim    :   northern limit
 Elim    :   eastern limit
