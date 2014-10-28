@@ -45,6 +45,8 @@ class WRFEnviron(object):
     """Main environment API.
     """
     def __init__(self):
+        """ This currently only loads default settings.
+        """
         # Set defaults
         self.D = Defaults()
 
@@ -65,28 +67,32 @@ class WRFEnviron(object):
         built into WRF default output or needs computing. It unstaggers
         and slices data from the wrfout file appropriately.
 
-
-        Inputs:
-        vrbl        :   string of variable name as found in WRF, or one of
-                        the computed fields available in WEM
-        utc    :        one date/time.
-                        Can be tuple (YYYY,MM,DD,HH,MM,SS - calendar.timegm)
-                        Can be integer of datenum. (time.gmtime)
-        level       :   one level.
-                        Lowest model level is integer 2000.
-                        Pressure level is integer in hPa, e.g. 850
-                        Isentropic surface is a string + K, e.g. '320K'
-                        Geometric height is a string + m, e.g. '4000m'
-        ncdir       :   directory of netcdf data file
-        outdir      :   directory to save output figures
-
-        Optional
-        ncf         :   filename of netcdf data file if ambiguous within ncdir.
-                        If no wrfout file is explicitly specified, the
-                        netCDF file in that folder is chosen if unambiguous.
-        nct         :   initialisation time of netcdf data file, if
-                        ambiguous within ncdir.
-        f_prefix    :   custom filename prefix for output
+        :param vrbl:        variable name as found in WRF, or one of
+                            the computed fields available in WEM
+        :type vrbl:         str
+        :param utc:         One date/time. The tuple/list format is
+                            YYYY,MM,DD,HH,MM,SS (calendar.timegm).
+                            The integer format is epoch/datenum (time.gmtime).
+        :type utc:          tuple,list,int
+        :param level:       Required level. 
+                            Lowest model level is integer 2000.
+                            Pressure level is integer in hPa, e.g. 850
+                            Isentropic surface is a string + K, e.g. '320K'
+                            Geometric height is a string + m, e.g. '4000m'
+        :type level:        int,str 
+        :param ncdir:       directory of netcdf data file
+        :type ncdir:        str
+        :outdir:            directory to save output figures
+        :type outdir:       str
+        :param ncf:         filename of netcdf data file if ambiguous within ncdir.
+                            If no wrfout file is explicitly specified, the
+                            netCDF file in that folder is chosen if unambiguous.
+        :type ncf:          bool,str
+        :param nct:         initialisation time of netcdf data file, if
+                            ambiguous within ncdir.
+        :type nct:          bool,str
+        :param f_prefix:    custom filename prefix for output
+        :type f_prefix:     bool,str
         f_suffix    :   custom filename suffix for output
         bounding    :   dictionary of four floats (Nlim, Elim, Slim, Wlim):
             Nlim    :   northern limit
