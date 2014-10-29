@@ -75,14 +75,15 @@ class WRFEnviron(object):
                             Integer format is epoch/datenum (ready for
                             time.gmtime).
         :type utc:          tuple,list,int
-        :param level:       required level. Lowest model level is integer 2000.
+        :param level:       required level. 
+                            Lowest model level is integer 2000.
                             Pressure level is integer in hPa, e.g. 850.
                             Isentropic surface is a string + K, e.g. '320K'.
                             Geometric height is a string + m, e.g. '4000m'.
         :type level:        int,str
         :param ncdir:       directory of netcdf data file
         :type ncdir:        str
-        :outdir:            directory to save output figures
+        :param outdir:      directory to save output figures
         :type outdir:       str
         :param ncf:         filename of netcdf data file if ambiguous within ncdir.
                             If no wrfout file is explicitly specified, the
@@ -119,7 +120,14 @@ class WRFEnviron(object):
         :type fig:          bool,matplotlib.figure
         :param ax:          matplotlib.axis object to plot onto
         :type ax:           bool,matplotlib.axis
-
+        :param clvs:        contour levels for plotting.
+                            Generate using numpy.arange.
+                            False is automatic.
+        :type clvs:         bool,numpy.ndarray
+        :param cmap:        matplotlib.cmap name. Pick a nice one from
+                            http://matplotlib.org/examples/color/
+                            colormaps_reference.html
+        :type cmap:         str
         :returns:           None.
 
         """
@@ -330,50 +338,53 @@ class WRFEnviron(object):
         the ensemble mean of a variable (contours). DDKE/DDTE is valid
         halfway between the first and second times specified.
 
-        :param vrbl:    Vertically integrated ('sum_z') or summated over all
-                        dimensions ('sum_xyz').
-        :type vrbl:     str
-        :param utc0:    First date/time. The tuple/list format is
-                        YYYY,MM,DD,HH,MM,SS (ready for calendar.timegm).
-                        Integer format is epoch/datenum (ready for
-                        time.gmtime).
-        :type utc0:     tuple,list,int
-        :param utc1:    as for `utc0`, but for the second time.
-        :type utc1:     tuple,list,int
-        :param energy:  DKE ('kinetic') or DTE ('total').
-        :type energy:   str
-        :param datadir: directory holding computed data
-        :type datadir:  str
-        :param outdir:  root directory for plots
-        :type outdir:   str
-        :param dataf:   file name of data file, if ambiguous
-        :type dataf:    str
-        :param f_prefix: custom filename prefix for output. Ignore if False.
-        :type f_prefix: bool,str
-        :param f_suffix: custom filename suffix for output. Ignore if False.
-        :type f_suffix: bool,str
-        :param clvs:    contour levels for DDKE/DDTE. Generate with
-                        :func:`numpy.arange`.
-        :type clvs:     bool,N.ndarray
+        :param vrbl:        Vertically integrated ('sum_z') or summated over all
+                            dimensions ('sum_xyz').
+        :type vrbl:         str
+        :param utc0:        First date/time. The tuple/list format is
+                            YYYY,MM,DD,HH,MM,SS (ready for calendar.timegm).
+                            Integer format is epoch/datenum (ready for
+                            time.gmtime).
+        :type utc0:         tuple,list,int
+        :param utc1:        as for `utc0`, but for the second time.
+        :type utc1:         tuple,list,int
+        :param energy:      DKE ('kinetic') or DTE ('total').
+        :type energy:       str
+        :param datadir:     directory holding computed data
+        :type datadir:      str
+        :param outdir:      root directory for plots
+        :type outdir:       str
+        :param dataf:       file name of data file, if ambiguous
+        :type dataf:        str
+        :param f_prefix:    custom filename prefix for output. Ignore if False.
+        :type f_prefix:     bool,str
+        :param f_suffix:    custom filename suffix for output. Ignore if False.
+        :type f_suffix:     bool,str
+        :param clvs:        contour levels for DDKE/DDTE. Generate with
+                            :func:`numpy.arange`.
+        :type clvs:         bool,N.ndarray
         :param meanclvs:    contour levels for ensemble mean. Generate with
-                        :func:`numpy.arange`.
+                            :func:`numpy.arange`.
         :type meanclvs:     bool,N.ndarray
-        :param title:   title for output
-        :type title:    bool,str
+        :param title:       title for output
+        :type title:        bool,str
         :param fig:         value of False will create new figure. A value of
                             matplotlib.figure object will plot data onto
                             this figure (similarly for axis, below).
         :type fig:          bool,matplotlib.figure
         :param ax:          matplotlib.axis object to plot onto
         :type ax:           bool,matplotlib.axis
+        :param meanvrbl:    variable of ensemble mean (WRF key or computed vrbl)
+        :type meanvrbl:     str
+        :param meanlevel:   level for the ensemble mean variable. 
+                            Lowest model level is integer 2000.
+                            Pressure level is integer in hPa, e.g. 850.
+                            Isentropic surface is a string + K, e.g. '320K'.
+                            Geometric height is a string + m, e.g. '4000m'.
+        :type meanlevel:    int,str
+        :param ncdata:      if meanvrbl is not False, list of absolute
+                            paths to all netcdf files of ensemble members
 
-        meanvrbl    :   variable of ensemble mean
-        meanlevel   :   level for ensemble mean variable
-        ncdata      :   if meanvrbl is not False, link to all netcdf files of
-                        ensemble members for ensemble
-
-
-        TODO: Interpolate geopotential height to pressure level.
         """
 
         data = self.load_data(folder,fname,format='pickle')
@@ -419,19 +430,32 @@ class WRFEnviron(object):
             F.plot_data(heightmean,'contour',p2p,fname_t,delt,
                        colors='k',levels=N.arange(2700,3930,30))
 
-    def plot_error_growth(self,datadir,outprefix=False,dataf=False,
-                            sensitivity=0,ylim=0,outsuffix=False):
+    def plot_error_growth(self,datadir,dataf=False,ensnames=False,
+                            ylim=0,f_prefix=False,f_suffix=False):
         """Plots line graphs of DKE/DTE error growth
         varying by a sensitivity - e.g. error growth involving
         all members that use a certain parameterisation.
 
-        datadir         :   folder with pickle data
+        Requires data file in pickle format already produced by
+        [method here].
 
-        Optional
-        outprefix       :   output filename prefix
-        dataf           :   pickle filename if ambiguous
-        plotlist        :   list of folder names to loop over
-        ylim            :   tuple of min/max for y axis range
+        :param datadir:     folder with pickle data
+        :type datadir:      str
+        :param dataf:       data (pickle) filename if ambiguous
+        :type dataf:        str
+        :param ensnames:    names of each ensemble member, e.g. the
+                            parameterisation scheme, the initial
+                            conditions used. This is used as the
+                            label for the plot legend.
+        :type ensnames:     list,tuple 
+        :param ylim:        [min,max] for y axis range
+        :type ylim:         list,tuple
+        :param f_prefix:    custom filename prefix for output. Ignore if False.
+        :type f_prefix:     bool,str
+        :param f_suffix     custom filename suffix for output. Ignore if False.
+        :type f_suffix      bool,str
+
+        TODO: is sensitivity/ensnames variable OK to be optional?
         """
         DATA = self.load_data(folder,pfname,format='pickle')
 
@@ -554,39 +578,89 @@ class WRFEnviron(object):
             plt.close()
             print("Saved {0}.".format(fpath))
 
-    def composite_profile(self,va,utc,latlon,enspaths,
-                            dom=0,mean=0,std=0,xlim=0,ylim=0):
-        P = Profile(self.C)
-        P.composite_profile(va,utc,latlon,enspaths,dom,mean,std,xlim,ylim)
+    def composite_profile(self,vrbl,utc,enspaths,latlon=False,
+                            dom=1,mean=True,std=True,xlim=False,
+                            ylim=False):
+        """
+        Plot multiple vertical profiles of atmospheric variables 
+        including optional mean and standard deviation.
 
-    def twopanel_profile(self,va,utc,wrf_sds,out_sd,two_panel=1,dom=1,mean=1,std=1,
-                         xlim=0,ylim=0,latlon=0,locname=0,overlay=0,ml=-2):
+        Superceded by :func:`twopanel_profile`?
+
+        :param vrbl:        WRF variable or computed quantity
+        :type vrbl:         str
+        :param utc:         date/time
+        :type utc:          int,list,tuple
+        :param enspaths:    absolute paths to all netCDF files for each
+                            ensemble member.
+        :type enspaths:     list,tuple
+        :param latlon:      (lat,lon) for plotting. If this is False,
+                            a pop-up window will allow user to choose
+                            location.
+        :type latlon:       bool,tuple,list
+        :param dom:         WRF domain to use
+        :type dom:          int
+        :param mean:        plot ensemble mean of variable
+        :type mean:         bool
+        :param std:         plot ensemble standard deviate of variable
+                            (+/- 1 sigma)
+        :type std:          bool
+        :param xlim:        x-axis limit. False is automatic.
+        :type xlim:         bool,tuple,list
+        :param ylim:        y-axis limit, False is automatic.
+        :type ylim:         bool,tuple,list
+
+        """
+
+        P = Profile(self.C)
+        P.composite_profile(vrbl,utc,latlon,enspaths,dom,mean,std,xlim,ylim)
+
+    def twopanel_profile(self,vrbl,utc,enspaths,outdir,two_panel=1,dom=1,
+                            mean=1,std=1,xlim=False,ylim=False,latlon=False,
+                            locname=False,overlay=False,ml=-2):
         """
         Create two-panel figure with profile location on map,
         with profile of all ensemble members in comparison.
 
-        Inputs:
-        va          :   variable for profile
-        utc        :   time of plot
-        wrf_sds     :   subdirs containing wrf file
-        out_d       :   out directory for plots
-
-        Optional:
-        two_panel   :   add inset for plot location
-        dom         :   WRF domain to use
-        mean        :   overlay mean on profile
-        std         :   overlay +/- std dev on profile
-        xlim        :   three-item list/tuple with limits, spacing interval
-                        for xaxis, in whatever default units
-        ylim        :   similarly for yaxis but in hPa
-                        or dictionary with locations (METAR etc) and two-item tuple
-        latlon      :   two-item list/tuple with lat/lon.
-                        If not specified, use pop-ups to select.
-        locname     :   pass this to the filename of output for saving
-        overlay     :   data from the same time to overlay on inset
-        ml          :   member level. negative number that corresponds to the
-                        folder in absolute string for naming purposes.
-
+        :param vrbl:        WRF variable or computed quantity
+        :type vrbl:         str
+        :param utc:         date/time
+        :type utc:          int,list,tuple
+        :param enspaths:    absolute paths to all netCDF files for each
+                            ensemble member.
+        :type enspaths:     list,tuple
+        :param outdir:      directory for plot output
+        :type outdir:       str
+        :param two_panel:   Add extra panel of location if True.
+        :type two_panel:    bool
+        :param dom:         WRF domain to use
+        :type dom:          int
+        :param mean:        plot ensemble mean of variable
+        :type mean:         bool
+        :param std:         plot ensemble standard deviate of variable
+                            (+/- 1 sigma)
+        :type std:          bool
+        :param xlim:        x-axis limit. False is automatic.
+        :type xlim:         bool,tuple,list
+        :param ylim:        y-axis limit, False is automatic.
+        :type ylim:         bool,tuple,list
+        :param latlon:      (lat,lon) for plotting. If this is False,
+                            a pop-up window will allow user to choose
+                            location.
+        :type latlon:       bool,tuple,list
+        :param locname:     this is passed to the filename of output
+                            figure when saved, to differentiate similar
+                            plots of different locations.
+        :type locname:      str
+        :param overlay:     data from the same time to overlay on inset
+                            basemap. E.g. radar reflectivity.
+                            TODO: this is only cref right now (bool)
+        :type overlay:      str
+        :param ml:          member level. Negative number that corresponds
+                            to the folder in the absolute path string,
+                            for naming purposes. Useful for file naming, 
+                            labelling.
+        :type ml:           int
 
         """
         # Initialise with first wrfout file
@@ -631,8 +705,44 @@ class WRFEnviron(object):
                             locname=locname,ml=ml)
 
 
-    def plot_skewT(self,utc,latlon,out_sd=0,wrf_sd=0,dom=1,save_output=0,composite=0):
+    def plot_skewT(self,utc,ncdir,outdir,ncf=False,nct=False,f_prefix=False,
+                    f_suffix=False, latlon=False,dom=1,save_output=0,
+                    composite=0):
+        """
+        TODO: use Clicker instance if latlon is False.
 
+        :param utc:         one date/time. The tuple/list format is
+                            YYYY,MM,DD,HH,MM,SS (ready for calendar.timegm).
+                            Integer format is epoch/datenum (ready for
+                            time.gmtime).
+        :type utc:          tuple,list,int
+        :param ncdir:       directory of netcdf data file
+        :type ncdir:        str
+        :outdir:            directory to save output figures
+        :type outdir:       str
+        :param ncf:         filename of netcdf data file if ambiguous within ncdir.
+                            If no wrfout file is explicitly specified, the
+                            netCDF file in that folder is chosen if unambiguous.
+        :type ncf:          bool,str
+        :param nct:         initialisation time of netcdf data file, if
+                            ambiguous within ncdir.
+        :type nct:          bool,str
+        :param f_prefix:    custom filename prefix for output. Ignore if False.
+        :type f_prefix:     bool,str
+        :param f_suffix     custom filename suffix for output. Ignore if False.
+        :type f_suffix      bool,str
+        :param latlon:      (lat,lon) for plotting. If False, choose from
+                            pop-up.
+        :type latlon:       bool,list,tuple
+        :param dom:         WRF domain to plot from.
+        :type dom:          int
+        :param save_output: not sure why this here? TODO
+        :type save_output:  bool
+        :param composite:   If not False, plot numerous Skew-Ts on the same graph.
+                            List is absolute paths to netCDF files.
+        :type composite:    list,tuple,bool
+
+        """
         outpath = self.get_outpath(out_sd)
         W = self.get_netcdf(wrf_sd,dom=dom)
 
@@ -650,7 +760,57 @@ class WRFEnviron(object):
                             f_prefix=False,f_suffix=False,dom=1,smooth=1,
                             fig=False,ax=False,bounding=False):
         """
-        Doc me.
+        Plot streamlines of wind at a level.
+
+        :param utc:         one date/time. The tuple/list format is
+                            YYYY,MM,DD,HH,MM,SS (ready for calendar.timegm).
+                            Integer format is epoch/datenum (ready for
+                            time.gmtime).
+        :type utc:          tuple,list,int
+        :param level:       required level. 
+                            Lowest model level is integer 2000.
+                            Pressure level is integer in hPa, e.g. 850.
+                            Isentropic surface is a string + K, e.g. '320K'.
+                            Geometric height is a string + m, e.g. '4000m'.
+        :type level:        int,str
+        :param ncdir:       directory of netcdf data file
+        :type ncdir:        str
+        :outdir:            directory to save output figures
+        :type outdir:       str
+        :param ncf:         filename of netcdf data file if ambiguous within ncdir.
+                            If no wrfout file is explicitly specified, the
+                            netCDF file in that folder is chosen if unambiguous.
+        :type ncf:          bool,str
+        :param nct:         initialisation time of netcdf data file, if
+                            ambiguous within ncdir.
+        :type nct:          bool,str
+        :param f_prefix:    custom filename prefix for output. Ignore if False.
+        :type f_prefix:     bool,str
+        :param f_suffix     custom filename suffix for output. Ignore if False.
+        :type f_suffix      bool,str
+        :param bounding:    bounding box for domain.
+                            Dictionary contains four keys (Nlim, Elim, Slim, Wlim)
+                            with float values (northern latitude limit, eastern
+                            longitude limit, southern latitude limit, western
+                            latitude limit, respectively).
+        :type bounding:     dict
+        :param smooth:      pass data through a Gaussian filter. Value of 1 is
+                            essentially `off'.
+                            Integer greater than zero is the degree of smoothing,
+                            in grid spacing.
+        :type smooth:       int
+        :param dom:         domain for plotting (for WRF data).
+                            If zero, the only netCDF file present will be
+                            plotted.
+        :type dom:          int
+        :param fig:         value of False will create new figure. A value of
+                            matplotlib.figure object will plot data onto
+                            this figure (similarly for axis, below).
+        :type fig:          bool,matplotlib.figure
+        :param ax:          matplotlib.axis object to plot onto
+        :type ax:           bool,matplotlib.axis
+
+        TODO: extra kwargs to account for arrow size, density, etc.
         """
         level = self.get_level_string(level)
         # Data
@@ -671,33 +831,51 @@ class WRFEnviron(object):
         fname = self.create_fname('streamlines',utc,level)
         self.F.plot_streamlines(U,V,outdir,fname)
 
-    def plot_strongest_wind(self,itime,ftime,levels,wrf_sd=0,wrf_nc=0,out_sd=0,f_prefix=0,f_suffix=0,
-                bounding=0,dom=0):
+    def plot_strongest_wind(self,itime,ftime,level,ncdir,outdir,
+                            ncf=False,nct=False,
+                            f_prefix=False,f_suffix=False,bounding=False,
+                            dom=1):
         """
-        Plot strongest wind at level lv between itime and ftime.
+        Plot strongest wind at level between itime and ftime.
 
-        Path to wrfout file is in config file.
-        Path to plot output is also in config
-
-
-        Inputs:
-        levels      :   level(s) for wind
-        wrf_sd      :   string - subdirectory of wrfout file
-        wrf_nc      :   filename of wrf file requested.
+        :param itime:       initial time. The tuple/list format is
+                            YYYY,MM,DD,HH,MM,SS (ready for calendar.timegm).
+                            Integer format is epoch/datenum (ready for
+                            time.gmtime).
+        :type itime:        tuple,list,int
+        :param ftime:       final time. Same format as `itime`.
+        :type ftime:        tuple,list,int
+        :param level:       required level. 
+                            Lowest model level is integer 2000.
+                            Pressure level is integer in hPa, e.g. 850.
+                            Isentropic surface is a string + K, e.g. '320K'.
+                            Geometric height is a string + m, e.g. '4000m'.
+        :type level:        int,str
+        :param ncdir:       directory of netcdf data file
+        :type ncdir:        str
+        :outdir:            directory to save output figures
+        :type outdir:       str
+        :param ncf:         filename of netcdf data file if ambiguous within ncdir.
                             If no wrfout file is explicitly specified, the
                             netCDF file in that folder is chosen if unambiguous.
-        out_sd      :   subdirectory of output .png.
-        f_prefix    :   custom filename prefix
-        f_suffix    :   custom filename suffix
-        bounding    :   list of four floats (Nlim, Elim, Slim, Wlim):
-            Nlim    :   northern limit
-            Elim    :   eastern limit
-            Slim    :   southern limit
-            Wlim    :   western limit
-        smooth      :   smoothing. 0 is off. non-zero integer is the degree
-                        of smoothing, to be specified.
-        dom         :   domain for plotting. If zero, the only netCDF file present
-                        will be plotted. If list of integers, the script will loop over domains.
+        :type ncf:          bool,str
+        :param nct:         initialisation time of netcdf data file, if
+                            ambiguous within ncdir.
+        :type nct:          bool,str
+        :param f_prefix:    custom filename prefix for output. Ignore if False.
+        :type f_prefix:     bool,str
+        :param f_suffix     custom filename suffix for output. Ignore if False.
+        :type f_suffix      bool,str
+        :param bounding:    bounding box for domain.
+                            Dictionary contains four keys (Nlim, Elim, Slim, Wlim)
+                            with float values (northern latitude limit, eastern
+                            longitude limit, southern latitude limit, western
+                            latitude limit, respectively).
+        :type bounding:     dict
+        :param dom:         domain for plotting (for WRF data).
+                            If zero, the only netCDF file present will be
+                            plotted.
+        :type dom:          int
 
 
         """
@@ -717,7 +895,7 @@ class WRFEnviron(object):
             F.plot2D('strongestwind',it+ft,l,d,outpath,bounding=bounding)
 
     def make_1D(self,data,output='list'):
-        """ Make sure data is a time series
+        """ Ensure input data is a time series
         of 1D values, and numpy array.
 
         List of arrays -> Numpy array or list
@@ -758,9 +936,9 @@ class WRFEnviron(object):
         return lst
 
 
-    def plot_xs(self,vrbl,utc,latA=0,lonA=0,latB=0,lonB=0,
-                wrf_sd=0,wrf_nc=0,out_sd=0,f_prefix=0,f_suffix=0,dom=0,
-                clvs=0,ztop=0):
+    def plot_xs(self,vrbl,utc,ncdir,outdir,latA=0,lonA=0,latB=0,lonB=0,
+                ncf=False,nct=False,f_prefix=0,f_suffix=0,dom=1,
+                clvs=False,ylim=False):
         """
         Plot cross-section.
 
@@ -768,22 +946,53 @@ class WRFEnviron(object):
         to pick points. The popup can have an overlaid field such as reflectivity
         to help with the process.
 
-        Inputs:
-        vrbl        :   variable to be plotted
-        utc       :   times to be plotted
-        latA        :   start latitude of transect
-        lonA        :   start longitude of transect
-        latB        :   end lat...
-        lonB        :   end lon...
-        wrf_sd      :   string - subdirectory of wrfout file
-        wrf_nc      :   filename of wrf file requested.
+        :param vrbl:        variable name as found in WRF, or one of
+                            the computed fields available in WEM
+        :type vrbl:         str
+        :param utc:         one date/time. The tuple/list format is
+                            YYYY,MM,DD,HH,MM,SS (ready for calendar.timegm).
+                            Integer format is epoch/datenum (ready for
+                            time.gmtime).
+        :type utc:          tuple,list,int
+        :param ncdir:       directory of netcdf data file
+        :type ncdir:        str
+        :param outdir:      directory to save output figures
+        :type outdir:       str
+        :param latA:        latitude of transect start point. 
+                            False triggers a pop-up box.
+        :type latA:         bool,float
+        :param lonA:        longitude of transect start point.
+                            False triggers a pop-up box.
+        :type lonB:         bool,float                    
+        :param latB:        latitude of transect end point. 
+                            False triggers a pop-up box.
+        :type latB:         bool,float
+        :param lonB:        longitude of transect end point.
+                            False triggers a pop-up box.
+        :type lonB:         bool,float                    
+        :param ncf:         filename of netcdf data file if ambiguous within ncdir.
                             If no wrfout file is explicitly specified, the
                             netCDF file in that folder is chosen if unambiguous.
-        out_sd      :   subdirectory of output .png.
-        f_prefix    :   custom filename prefix
-        f_suffix    :   custom filename suffix
-        clvs        :   custom contour levels
-        ztop        :   highest km to plot.
+        :type ncf:          bool,str
+        :param nct:         initialisation time of netcdf data file, if
+                            ambiguous within ncdir.
+        :type nct:          bool,str
+        :param f_prefix:    custom filename prefix for output. Ignore if False.
+        :type f_prefix:     bool,str
+        :param f_suffix     custom filename suffix for output. Ignore if False.
+        :type f_suffix      bool,str
+        :param dom:         domain for plotting (for WRF data).
+                            If zero, the only netCDF file present will be
+                            plotted.
+        :type dom:          int
+        :param clvs:        contouring for the variable plotted.
+                            False is automatic.
+                            Generate the `numpy.ndarray` with 
+                            :func:`numpy.arange`.
+        :type clvs:         numpy.ndarray,bool
+        :param ylim:        [min,max] (in km) altitude to plot.
+                            False is automatic (all model levels)
+        :type ylim:         list,tuple,bool
 
         """
         self.W = self.get_netcdf(wrf_sd,wrf_nc,dom=dom)
@@ -795,30 +1004,65 @@ class WRFEnviron(object):
         XS.plot_xs(vrbl,utc,outpath,clvs=clvs,ztop=ztop)
 
 
-    def cold_pool_strength(self,utc,wrf_sd=0,wrf_nc=0,out_sd=0,
-                            swath_width=100,dom=1,twoplot=0,fig=0,
-                            axes=0,dz=0):
+    def cold_pool_strength(self,utc,ncdir,outdir,ncf=False,nct=False,
+                            f_prefix=False,f_prefix=False,
+                            swath_width=100,bounding=False,dom=1,
+                            twoplot=0,fig=0,ax=0,dz=0):
         """
         Pick A, B points on sim ref overlay
         This sets the angle between north and line AB
         Also sets the length in along-line direction
         For every gridpt along line AB:
-            Locate gust front via shear
-            Starting at front, do 3-grid-pt-average in line-normal
-            direction
+            * Locate gust front via shear
+            * Starting at front, do 3-grid-pt-average in line-normal
+              direction
 
-        utc    :   time (tuple or datenum) to plot
-        wrf_sd  :   string - subdirectory of wrfout file
-        wrf_nc  :   filename of wrf file requested.
+        :param utc:         one date/time. The tuple/list format is
+                            YYYY,MM,DD,HH,MM,SS (ready for calendar.timegm).
+                            Integer format is epoch/datenum (ready for
+                            time.gmtime).
+        :type utc:          tuple,list,int
+        :param ncdir:       directory of netcdf data file
+        :type ncdir:        str
+        :param outdir:      directory to save output figures
+        :type outdir:       str
+        :param ncf:         filename of netcdf data file if ambiguous within ncdir.
                             If no wrfout file is explicitly specified, the
                             netCDF file in that folder is chosen if unambiguous.
-        out_sd      :   subdirectory of output .png.
-        swath_width :   length in gridpoints in cross-section-normal direction
-        dom     :   domain number
-        return2 :   return two figures. cold pool strength and cref/cross-section.
-        axes    :   if two-length tuple, this is the first and second axes for
-                    cross-section/cref and cold pool strength, respectively
-        dz      :   plot height of cold pool only.
+        :type ncf:          bool,str
+        :param nct:         initialisation time of netcdf data file, if
+                            ambiguous within ncdir.
+        :type nct:          bool,str
+        :param f_prefix:    custom filename prefix for output. Ignore if False.
+        :type f_prefix:     bool,str
+        :param f_suffix:    custom filename suffix for output. Ignore if False.
+        :type f_suffix:     bool,str
+        :param swath_width: length in gridpoint in cross-section-normal
+                            direction.
+        :type swath_width:  int
+        :param bounding:    bounding box for domain.
+                            Dictionary contains four keys (Nlim, Elim, Slim, Wlim)
+                            with float values (northern latitude limit, eastern
+                            longitude limit, southern latitude limit, western
+                            latitude limit, respectively).
+        :type bounding:     dict
+        :param dom:         domain for plotting (for WRF data).
+                            If zero, the only netCDF file present will be
+                            plotted.
+        :type dom:          int
+        :param twoplot:     If true, return two figures: cold pool strength
+                            and the cref/cross-section
+        :type twoplot:      bool
+        :param dz:          plot height of cold pool only.
+        :type dz:           bool
+        :param fig:         value of False will create new figure. A value of
+                            matplotlib.figure object will plot data onto
+                            this figure (similarly for axis, below).
+        :type fig:          bool,matplotlib.figure
+        :param ax:          matplotlib.axis object to plot onto.
+                            If tuple/list of length two, this is the
+                            first and second axis, if twoplot is True.
+        :type ax:           bool,matplotlib.axis
 
         """
         # Initialise
@@ -910,15 +1154,43 @@ class WRFEnviron(object):
         if return_ax:
             return C.cf, cf2
 
-    def spaghetti(self,utc,lv,va,contour,wrf_sds,out_sd,dom=1):
+    def spaghetti(self,vrbl,utc,level,contour,ncdirs,outdir,
+                    bounding=False,dom=1):
         """
-        Do a multi-member spaghetti plot.
+        Do a multi-member spaghetti plot, contouring a value of
+        a given variable.
 
-        utc       :   time for plot
-        va      :   variable in question
-        contour :   value to contour for each member
-        wrf_sds :   list of wrf subdirs to loop over
-        out_sd  :   directory to save image
+        :param vrbl:        variable name as found in WRF, or one of
+                            the computed fields available in WEM
+        :type vrbl:         str
+        :param utc:         one date/time. The tuple/list format is
+                            YYYY,MM,DD,HH,MM,SS (ready for calendar.timegm).
+                            Integer format is epoch/datenum (ready for
+                            time.gmtime).
+        :type utc:          tuple,list,int
+        :param level:       required level. 
+                            Lowest model level is integer 2000.
+                            Pressure level is integer in hPa, e.g. 850.
+                            Isentropic surface is a string + K, e.g. '320K'.
+                            Geometric height is a string + m, e.g. '4000m'.
+        :type level:        int,str
+        :param contour:     contour to draw for data
+        :type contour:      float,int
+        :param ncdirs:      directories of netcdf data file
+        :type ncdirs:       list,tuple
+        :param outdir:      directory to save output figures
+        :type outdir:       str
+        :param bounding:    bounding box for domain.
+                            Dictionary contains four keys (Nlim, Elim, Slim, Wlim)
+                            with float values (northern latitude limit, eastern
+                            longitude limit, southern latitude limit, western
+                            latitude limit, respectively).
+        :type bounding:     dict
+        :param dom:         domain for plotting (for WRF data).
+                            If zero, the only netCDF file present will be
+                            plotted.
+        :type dom:          int
+
         """
         outpath = self.get_outpath(out_sd)
 
@@ -933,22 +1205,79 @@ class WRFEnviron(object):
 
         F.spaghetti(utc,lv,va,contour,ncfiles,outpath)
 
-    def std(self,vrbl,utc,level,outdir,wrfdirs=False,wrfpaths=False,dom=1,
-                clvs=False):
-        """Compute standard deviation of all members
-        for given variable.
+    def std(self,vrbl,utc,level,ncdirs,outdir,ncf=False,nct=False,
+            f_prefix=False,f_suffix=False,bounding=False,
+            smooth=1,dom=1,plottype='contourf',fig=False,ax=False,
+            clvs=False,cmap='jet'):
+        """
+        Plot standard deviation of all members for given variable.
 
-        Inputs:
-        utc     :   time
-        level      :   level
-        va      :   variable
+        :param vrbl:        variable name as found in WRF, or one of
+                            the computed fields available in WEM
+        :type vrbl:         str
+        :param utc:         one date/time. The tuple/list format is
+                            YYYY,MM,DD,HH,MM,SS (ready for calendar.timegm).
+                            Integer format is epoch/datenum (ready for
+                            time.gmtime).
+        :type utc:          tuple,list,int
+        :param level:       required level. 
+                            Lowest model level is integer 2000.
+                            Pressure level is integer in hPa, e.g. 850.
+                            Isentropic surface is a string + K, e.g. '320K'.
+                            Geometric height is a string + m, e.g. '4000m'.
+        :type level:        int,str
+        :param ncdirs:      directories of netcdf data files for all
+                            ensemble members. If not ambiguous, user needs
+                            to specify either ncf (if all data
+                            files have the same name) or nct (they need
+                            to have the same start time).
+        :type ncdir:        list,tuple
+        :param outdir:      directory to save output figures
+        :type outdir:       str
+        :param ncf:         filename of netcdf data file if ambiguous within ncdir.
+                            If no wrfout file is explicitly specified, the
+                            netCDF file in that folder is chosen if unambiguous.
+        :type ncf:          bool,str
+        :param nct:         initialisation time of netcdf data file, if
+                            ambiguous within ncdir.
+        :type nct:          bool,str
+        :param f_prefix:    custom filename prefix for output. Ignore if False.
+        :type f_prefix:     bool,str
+        :param f_suffix     custom filename suffix for output. Ignore if False.
+        :type f_suffix      bool,str
+        :param bounding:    bounding box for domain.
+                            Dictionary contains four keys (Nlim, Elim, Slim, Wlim)
+                            with float values (northern latitude limit, eastern
+                            longitude limit, southern latitude limit, western
+                            latitude limit, respectively).
+        :type bounding:     dict
+        :param smooth:      pass data through a Gaussian filter. Value of 1 is
+                            essentially `off'.
+                            Integer greater than zero is the degree of smoothing,
+                            in grid spacing.
+        :type smooth:       int
+        :param dom:         domain for plotting (for WRF data).
+                            If zero, the only netCDF file present will be
+                            plotted.
+        :type dom:          int
+        :params plottype:   matplotlib command for plotting data
+                            (contour or contourf).
+        :type plottype:     str
+        :param fig:         value of False will create new figure. A value of
+                            matplotlib.figure object will plot data onto
+                            this figure (similarly for axis, below).
+        :type fig:          bool,matplotlib.figure
+        :param ax:          matplotlib.axis object to plot onto
+        :type ax:           bool,matplotlib.axis
+        :param clvs:        contour levels for plotting.
+                            Generate using numpy.arange.
+                            False is automatic.
+        :type clvs:         bool,numpy.ndarray
+        :param cmap:        matplotlib.cmap name. Pick a nice one from
+                            http://matplotlib.org/examples/color/
+                            colormaps_reference.html
+        :type cmap:         str
 
-        Must have one of these two:
-        wrfdirs :   list of wrf dirs to loop over
-
-        Optional
-        out_sd  :   directory in which to save image
-        clvs    :   user-set contour levels
         """
         if wrfdirs is False and wrfpaths is False:
             print("Must have either wrfdirs or wrfpaths.")
@@ -984,14 +1313,72 @@ class WRFEnviron(object):
         F.plot_data(std_data,'contourf',outpath,fname_t,t,**plotkwargs)
         print("Plotting std dev for {0} at time {1}".format(va,t_name))
 
-    def list_ncfiles(self,wrf_sds,dom=1,path_only=1):
+    def list_ncfiles(self,ncdirs,nct=False,ncf=False,dom=0,path_only=1):
+        """
+        Create list of absolute paths or objects* to netCDF files, given the
+        list/tuple of directories they are in. If ambiguous, user
+        needs to specify domain, and either the filename (if
+        all identical) or initialisation time of the run (this
+        needs to be the same for all files).
+
+        Note * that the object will be a WRFOut instance if netCDF is
+        a wrfout file, RUC instance for RUC, or EC instance for ECMWF.
+
+        :param ncdirs:      absolute paths to directories containing
+                            netCDF files.
+        :type ncdirs:       tuple,list
+        :param ncf:         filename of netcdf data file if ambiguous within ncdir.
+                            If no wrfout file is explicitly specified, the
+                            netCDF file in that folder is chosen if unambiguous.
+        :type ncf:          bool,str
+        :param nct:         initialisation time of netcdf data file, if
+                            ambiguous within ncdir.
+        :type nct:          bool,str
+        :param dom:         domain for plotting (for WRF data).
+                            If zero, the only netCDF file present will be
+                            plotted.
+        :type dom:          int
+        :param path_only:   if True, return only strings to the files.
+                            if False, return the instances (RUC,EC,WRFOut).
+        :returns:           either a list of absolute path strings, or 
+                            a list of instances (RUC,EC,WRFOut).
+
+        TODO: Deal with ambiguous selections.    
+        """
         ncfiles = []
         for wrf_sd in wrf_sds:
             ncfile = self.get_netcdf(wrf_sd,dom=dom,path_only=path_only)
             ncfiles.append(ncfile)
         return ncfiles
 
-    def plot_domains(self,wrfouts,labels,latlons,out_sd=0,colour=0):
+    def plot_domains(self,ncdirs,labels,outdir,colours='black',
+                        nct=False,ncf=False,latlons=False):
+        """
+        Plot only the domains for each netCDF file specified.
+
+        :param ncdirs:      Absolute paths to all netCDF directories, 
+                            or one single absolute path if only 
+                            one domain is to be plotted.
+        :type ncdirs:       str,tuple,list
+        :param labels:      labels for each domain. 
+        :type labels:       str,tuple,list
+        :param outdir:      directory to save output figures
+        :type outdir:       str
+        :param colours:     colours for each domain box, in the same order as 
+                            the ncdirs sequence (if more than one)
+        :type colours:      str,list,tuple 
+        :param ncf:         filename of netcdf data file if ambiguous within ncdir.
+                            If no wrfout file is explicitly specified, the
+                            netCDF file in that folder is chosen if unambiguous.
+        :type ncf:          bool,str
+        :param nct:         initialisation time of netcdf data file, if
+                            ambiguous within ncdir.
+        :type nct:          bool,str
+        :param latlons:     (lat,lon) of each label for each domain, in the same
+                            order as the ncdirs sequence (if more than one).
+        :type latlons:      tuple,list
+
+        """
         outpath = self.get_outpath(out_sd)
         maps.plot_domains(wrfouts,labels,latlons,outpath,colour)
 
@@ -999,12 +1386,67 @@ class WRFEnviron(object):
     def frontogenesis(self,utc,level,ncdir,outdir,ncf=False,nct=False,
                         dom=1,smooth=0,clvs=0,title=0):
         """
-        Compute and plot (Miller?) frontogenesis as d/dt of theta gradient.
+        Compute and plot Miller frontogenesis as d/dt of theta gradient.
 
         Use a centred-in-time derivative; hence, if
         time index is start or end of wrfout file, skip the plot.
 
-        smooth      :   gaussian smooth by this many grid points
+        :param utc:         one date/time. The tuple/list format is
+                            YYYY,MM,DD,HH,MM,SS (ready for calendar.timegm).
+                            Integer format is epoch/datenum (ready for
+                            time.gmtime).
+        :type utc:          tuple,list,int
+        :param level:       required level. 
+                            Lowest model level is integer 2000.
+                            Pressure level is integer in hPa, e.g. 850.
+                            Isentropic surface is a string + K, e.g. '320K'.
+                            Geometric height is a string + m, e.g. '4000m'.
+        :type level:        int,str
+        :param ncdir:       directory of netcdf data file
+        :type ncdir:        str
+        :param outdir:      directory to save output figures
+        :type outdir:       str
+        :param ncf:         filename of netcdf data file if ambiguous within ncdir.
+                            If no wrfout file is explicitly specified, the
+                            netCDF file in that folder is chosen if unambiguous.
+        :type ncf:          bool,str
+        :param nct:         initialisation time of netcdf data file, if
+                            ambiguous within ncdir.
+        :type nct:          bool,str
+        :param f_prefix:    custom filename prefix for output. Ignore if False.
+        :type f_prefix:     bool,str
+        :param f_suffix     custom filename suffix for output. Ignore if False.
+        :type f_suffix      bool,str
+        :param bounding:    bounding box for domain.
+                            Dictionary contains four keys (Nlim, Elim, Slim, Wlim)
+                            with float values (northern latitude limit, eastern
+                            longitude limit, southern latitude limit, western
+                            latitude limit, respectively).
+        :type bounding:     dict
+        :param smooth:      pass data through a Gaussian filter. Value of 1 is
+                            essentially `off'.
+                            Integer greater than zero is the degree of smoothing,
+                            in grid spacing.
+        :type smooth:       int
+        :param dom:         domain for plotting (for WRF data).
+                            If zero, the only netCDF file present will be
+                            plotted.
+        :type dom:          int
+        :param fig:         value of False will create new figure. A value of
+                            matplotlib.figure object will plot data onto
+                            this figure (similarly for axis, below).
+        :type fig:          bool,matplotlib.figure
+        :param ax:          matplotlib.axis object to plot onto
+        :type ax:           bool,matplotlib.axis
+        :param clvs:        contour levels for plotting.
+                            Generate using numpy.arange.
+                            False is automatic.
+        :type clvs:         bool,numpy.ndarray
+        :param cmap:        matplotlib.cmap name. Pick a nice one from
+                            http://matplotlib.org/examples/color/
+                            colormaps_reference.html
+        :type cmap:         str
+
         """
         self.W = self.get_netcdf(ncdir,ncf=ncf,nct=nct,dom=dom)
         fname = self.create_fname(vrbl,utc,level)
@@ -1031,6 +1473,10 @@ class WRFEnviron(object):
         """
         Makes sure user's level input is a string.
         Saves typing hPa for the common usage of pressure levels.
+
+        :param level:   desired level.
+        :type level:    str,int
+        :returns:       str
         """
         if isinstance(level,int):
             # Level is in pressure
