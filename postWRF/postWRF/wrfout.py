@@ -21,7 +21,19 @@ import metconstants as mc
 
 class WRFOut(object):
 
+    """
+    An instance of WRFOut contains all the methods that are used to
+    access and process netCDF data.
+    """
     def __init__(self,fpath):
+        """
+        Initialisation fetches and computes basic user-friendly
+        variables that are most oftenly accessed.
+
+        :param fpath:   absolute path to netCDF4 (wrfout) file
+        :type fpath:    str
+
+        """
         self.path = fpath
         self.nc = Dataset(fpath,'r')
 
@@ -80,14 +92,10 @@ class WRFOut(object):
     def get_time_idx(self,utc):
 
         """
-        Input:
+        :param utc:     time
+        :type utc:      tuple,list,int
+        :returns tidx:  int -- closest index to desired time
 
-        utc     :   time, tuple or datenum
-                    can be one or more
-
-        Output:
-
-        time_idx    :   index of time in WRF file
         """
         dn = utils.ensure_datenum(utc)
         tidx = utils.closest(self.wrf_times_epoch,dn)
@@ -97,6 +105,11 @@ class WRFOut(object):
     def check_compute(self,vrbl):
         """This method returns the required variables
         that need to be loaded from the netCDF file.
+
+        :param vrbl:    WRF variable desired
+        :type vrbl:     str
+        :returns:       bool -- True if variable exists in wrfout file.
+                        False if the variable needs computing.
         """
 
         if vrbl in self.fields:
@@ -112,25 +125,26 @@ class WRFOut(object):
         Will interpolate onto pressure, height coordinates if needed.
         Will smooth if needed.
 
-        Will accept the following.
-        Time:
-        indices (<500): integer/N.ndarray of integers
-        time tuple: 6-item tuple or list/tuple of these
-        datenum: integer >500 or list of them
+        :param vrbl:        WRF or computed variable required
+        :type vrbl:         str
+        :param utc:         indices (<500): integer/N.ndarray of integers.
+                            time tuple: 6-item tuple or list/tuple of these.
+                            datenum: integer >500 or list of them.
+
 
         Level:
-        indices: integer or N.ndarray of integers
-        pressure: string ending in 'hPa'
-        height: string ending in 'm' or 'km'
-        isentropic: string ending in 'K'
+        * indices: integer or N.ndarray of integers
+        * pressure: string ending in 'hPa'
+        * height: string ending in 'm' or 'km'
+        * isentropic: string ending in 'K'
 
         Lats:
-        indices: integer or N.ndarray of integers
-        lats: float or N.ndarray of floats
+        * indices: integer or N.ndarray of integers
+        * lats: float or N.ndarray of floats
 
         Lons:
-        indices: integer or N.ndarray of integers
-        lons: float or N.ndarray of floats
+        * indices: integer or N.ndarray of integers
+        * lons: float or N.ndarray of floats
         """
         # import pdb; pdb.set_trace()
         # Time
@@ -208,7 +222,20 @@ class WRFOut(object):
         return data
 
     def load(self,vrbl,tidx,lvidx,lonidx,latidx):
+        """
+        Fetch netCDF data for a given variable, for given time, level,
+        latitude, and longitude indices.
 
+        :param vrbl:        WRF variable
+        :type vrbl:         str
+        :param tidx:        time index. False fetches all.
+        :type tidx:         bool,int,numpy.ndarray
+        :param lvidx:       level index. False fetches all
+        :type lvidx:        boot, int, numpy.ndarray
+
+        TODO: Get rid of integer arguments earlier in the method chain, and
+        make them single-element numpy arrays.
+        """
         # First, check dimension that is staggered (if any)
         destag_dim = self.check_destagger(vrbl)
 
@@ -228,9 +255,7 @@ class WRFOut(object):
     def create_slice(self,vrbl,tidx,lvidx,lonidx,latidx,dim_names):
         """
         Create slices from indices of level, time, lat, lon.
-        Absence of a key means pick all indices.
-
-        If PS is a list, this is to be converted to slices.
+        False mean pick all indices.
         """
         # See which dimensions are present in netCDF file variable
         sl = []
@@ -250,7 +275,7 @@ class WRFOut(object):
                 sl.append(slice(lvidx,lvidx+1))
             elif isinstance(lvidx,N.ndarray):
                 sl.append(lvidx)
-            else: 
+            else:
                 sl.append(slice(None,None))
 
         if any('west' in p for p in dim_names):
@@ -335,6 +360,9 @@ class WRFOut(object):
             return data_unstag
 
     def return_tbl(self):
+        """
+        Returns a dictionary to look up method for computing a variable
+        """
         tbl = {}
         tbl['shear'] = self.compute_shear
         tbl['thetae'] = self.compute_thetae
@@ -367,6 +395,10 @@ class WRFOut(object):
         Keyword arguments include settings for computation
         e.g. top and bottom of shear computation
 
+        :param vrbl:    variable name
+        :type vrbl:     str
+        :param tidx:    time index/indices
+        :type tidx:     int,list,tuple,numpy.ndarray
         lookup      :   enables a check to see if something can be
                         computed. Returns true or false.
         """
@@ -378,6 +410,7 @@ class WRFOut(object):
         return response
 
     def compute_RH(self,tidx,lvidx,lonidx,latidx,other):
+
         T = self.get('temps',tidx,lvidx,lonidx,latidx,other='C')
         Td = self.get('Td',tidx,lvidx,lonidx,latidx)
         RH = N.exp(0.073*(Td-T))
@@ -822,8 +855,8 @@ class WRFOut(object):
                             if slice, return slice only
                             if latlon, return lat/lon values
         """
-        
-        if isinstance(da,dict): 
+
+        if isinstance(da,dict):
             N_idx = self.get_lat_idx(da['Nlim'])
             E_idx = self.get_lon_idx(da['Elim'])
             S_idx = self.get_lat_idx(da['Slim'])
@@ -841,10 +874,10 @@ class WRFOut(object):
             else:
                 lat_sl = slice(None,None,skip)
                 lon_sl = slice(None,None,skip)
-            
+
             if return_array == 'latlon':
                 return self.lats1D[lat_sl], self.lons1D[lon_sl]
-            else: 
+            else:
                 return lat_sl, lon_sl
         elif return_array=='idx':
             return N.arange(S_idx,N_idx,skip), N.arange(W_idx,E_idx,skip)
