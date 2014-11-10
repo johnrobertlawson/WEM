@@ -1,0 +1,79 @@
+WEM package
+===========
+
+Tutorial
+--------
+
+This will lead you through an example for automating WRF runs, 
+creating statistics from an ensemble, and plotting data.
+
+Installation
+------------
+
+Ensure you have `git` installed on your system or server. Then execute ``git
+clone https://github.com/johnrobertlawson/WEM.git``. The example scripts are
+located in ``WEM/postWRF/bin/``. You can copy a `.py` file from there into your
+own personal scripts folder. WEM works best when you don't interact directly
+with the codebase, but only change the top-level script.
+
+Let's look at the bare minimum to get plotting. First, you should have the
+following:
+
+.. code-block:: python
+
+    import sys
+    sys.append('path/to/WEM')
+
+Make sure you change the path to where you have downloaded the WEM codebase
+from GitHub. Next:
+
+.. code-block:: python
+
+    from WEM.postWRF import WRFEnviron
+    p = WRFEnviron()
+
+This creates an instance of the environment. Now you can use postWRF functions
+to generate data and plot figures by calling, for example, ``p.plot2D()``.
+Before this, though, define the location of the netCDF data files you use, and
+the location to which you want figures saving.
+
+.. code-block:: python
+
+    outdir = '/absolute/path/to/figures/'
+    ncdir = '/absolute/path/to/data'
+
+    # If there is more than one netCDF file in the folder,
+    # choose one of the following ways to make the selection
+    # unambiguous:
+
+    # Time of initiation
+    nct = (2006,5,10,12,0,0)
+    # Or filename
+    ncf = 'wrfout_do1...'
+
+You can also generate a sequence of times. This is useful for iterating plots
+over numerous plot times.
+
+.. code-block:: python
+
+    itime = (2006,5,10,18,0,0)
+    ftime = (2006,5,11,6,0,0)
+    hourly = 3
+    times = p.generate_times(itime,ftime,hourly*60*60)
+
+Now here are some example of plots:
+
+.. code-block:: python
+    
+    # This plots simulated composite reflectivity 
+    # Set level = 0 as cref does not have a level.
+    p.plot2D('cref',utc=itime,level=0,outdir=outdir,ncdir=ncdir,ncf=ncf,
+                nct=nct,legend=True)
+
+    p.plotstreamlines()
+
+All that's left is executing the script with ``python script.py``, where
+`script.py` is your file's name.
+
+More information on the various plots and statistics can be found in the API
+section for :class:`WEM.postWRF.postWRF.main`.

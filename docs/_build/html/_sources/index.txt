@@ -10,7 +10,8 @@ Contents:
 
 .. toctree::
    :maxdepth: 4
-
+   
+   tutorial
    WEM
 
 

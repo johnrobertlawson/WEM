@@ -1,0 +1,185 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>WEM package &mdash; WEM 0.9.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.9.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="WEM 0.9.0 documentation" href="index.html" />
+    <link rel="next" title="WEM package" href="WEM.html" />
+    <link rel="prev" title="Welcome to .’s documentation!" href="index.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="WEM.html" title="WEM package"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Welcome to .’s documentation!"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">WEM 0.9.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="wem-package">
+<h1>WEM package<a class="headerlink" href="#wem-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="tutorial">
+<h2>Tutorial<a class="headerlink" href="#tutorial" title="Permalink to this headline">¶</a></h2>
+<p>This will lead you through an example for automating WRF runs,
+creating statistics from an ensemble, and plotting data.</p>
+</div>
+<div class="section" id="installation">
+<h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
+<p>Ensure you have <cite>git</cite> installed on your system or server. Then execute <tt class="docutils literal"><span class="pre">git</span>
+<span class="pre">clone</span> <span class="pre">https://github.com/johnrobertlawson/WEM.git</span></tt>. The example scripts are
+located in <tt class="docutils literal"><span class="pre">WEM/postWRF/bin/</span></tt>. You can copy a <cite>.py</cite> file from there into your
+own personal scripts folder. WEM works best when you don&#8217;t interact directly
+with the codebase, but only change the top-level script.</p>
+<p>Let&#8217;s look at the bare minimum to get plotting. First, you should have the
+following:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">sys</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;path/to/WEM&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Make sure you change the path to where you have downloaded the WEM codebase
+from GitHub. Next:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">WEM.postWRF</span> <span class="kn">import</span> <span class="n">WRFEnviron</span>
+<span class="n">p</span> <span class="o">=</span> <span class="n">WRFEnviron</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>This creates an instance of the environment. Now you can use postWRF functions
+to generate data and plot figures by calling, for example, <tt class="docutils literal"><span class="pre">p.plot2D()</span></tt>.
+Before this, though, define the location of the netCDF data files you use, and
+the location to which you want figures saving.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">outdir</span> <span class="o">=</span> <span class="s">&#39;/absolute/path/to/figures/&#39;</span>
+<span class="n">ncdir</span> <span class="o">=</span> <span class="s">&#39;/absolute/path/to/data&#39;</span>
+
+<span class="c"># If there is more than one netCDF file in the folder,</span>
+<span class="c"># choose one of the following ways to make the selection</span>
+<span class="c"># unambiguous:</span>
+
+<span class="c"># Time of initiation</span>
+<span class="n">nct</span> <span class="o">=</span> <span class="p">(</span><span class="mi">2006</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">10</span><span class="p">,</span><span class="mi">12</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+<span class="c"># Or filename</span>
+<span class="n">ncf</span> <span class="o">=</span> <span class="s">&#39;wrfout_do1...&#39;</span>
+</pre></div>
+</div>
+<p>You can also generate a sequence of times. This is useful for iterating plots
+over numerous plot times.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">itime</span> <span class="o">=</span> <span class="p">(</span><span class="mi">2006</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">10</span><span class="p">,</span><span class="mi">18</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">ftime</span> <span class="o">=</span> <span class="p">(</span><span class="mi">2006</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">11</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">hourly</span> <span class="o">=</span> <span class="mi">3</span>
+<span class="n">times</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">generate_times</span><span class="p">(</span><span class="n">itime</span><span class="p">,</span><span class="n">ftime</span><span class="p">,</span><span class="n">hourly</span><span class="o">*</span><span class="mi">60</span><span class="o">*</span><span class="mi">60</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Now here are some example of plots:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="c"># This plots simulated composite reflectivity</span>
+<span class="c"># Set level = 0 as cref does not have a level.</span>
+<span class="n">p</span><span class="o">.</span><span class="n">plot2D</span><span class="p">(</span><span class="s">&#39;cref&#39;</span><span class="p">,</span><span class="n">utc</span><span class="o">=</span><span class="n">itime</span><span class="p">,</span><span class="n">level</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">outdir</span><span class="o">=</span><span class="n">outdir</span><span class="p">,</span><span class="n">ncdir</span><span class="o">=</span><span class="n">ncdir</span><span class="p">,</span><span class="n">ncf</span><span class="o">=</span><span class="n">ncf</span><span class="p">,</span>
+            <span class="n">nct</span><span class="o">=</span><span class="n">nct</span><span class="p">,</span><span class="n">legend</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+<span class="n">p</span><span class="o">.</span><span class="n">plotstreamlines</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>All that&#8217;s left is executing the script with <tt class="docutils literal"><span class="pre">python</span> <span class="pre">script.py</span></tt>, where
+<cite>script.py</cite> is your file&#8217;s name.</p>
+<p>More information on the various plots and statistics can be found in the API
+section for <tt class="xref py py-class docutils literal"><span class="pre">WEM.postWRF.postWRF.main</span></tt>.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">WEM</a></h1>
+
+
+
+
+
+<p>
+<iframe src="http://ghbtns.com/github-btn.html?user=&repo=&type=watch&count=true&size=large"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="">WEM package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#tutorial">Tutorial</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#installation">Installation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="WEM.html">WEM package</a></li>
+</ul>
+
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2014, John Lawson.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.2.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.6.1</a>
+      
+      |
+      <a href="_sources/tutorial.txt"
+          rel="nofollow">Page source</a></li>
+    </div>
+
+    
+
+    
+  </body>
+</html>
