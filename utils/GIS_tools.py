@@ -952,7 +952,7 @@ def ensure_datenum(times,fmt='list'):
         print("Nonsense format choice.")
         raise Exception
 
-def ensure_timetuple(times,fmt='list'):
+def ensure_timetuple(times,fmt='single'):
     """
     MAke sure time(s) are in six-item tuple format
     (YYYY,MM,DD,HH,MM,SS)

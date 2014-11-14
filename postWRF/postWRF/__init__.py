@@ -4,5 +4,5 @@ of the public API, which hides more complicated
 stuff from the user.
 """
 
-#from main import WRFEnviron
+from main import WRFEnviron
 # import main

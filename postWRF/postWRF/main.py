@@ -38,6 +38,8 @@ from clicker import Clicker
 import maps
 import stats
 from scales import Scales
+from obs import Obs
+from obs import Radar
 
 # TODO: Make this awesome
 
@@ -1005,7 +1007,7 @@ class WRFEnviron(object):
 
 
     def cold_pool_strength(self,utc,ncdir,outdir,ncf=False,nct=False,
-                            f_prefix=False,f_prefix=False,
+                            f_prefix=False,f_suffix=False,
                             swath_width=100,bounding=False,dom=1,
                             twoplot=0,fig=0,ax=0,dz=0):
         """
@@ -1482,3 +1484,4 @@ class WRFEnviron(object):
             # Level is in pressure
             level = '{0}hPa'.format(level)
         return level
+
