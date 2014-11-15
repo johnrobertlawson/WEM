@@ -1376,9 +1376,9 @@ class WRFEnviron(object):
         :param nct:         initialisation time of netcdf data file, if
                             ambiguous within ncdir.
         :type nct:          bool,str
-        :param latlons:     (lat,lon) of each label for each domain, in the same
-                            order as the ncdirs sequence (if more than one).
-        :type latlons:      tuple,list
+        :param latlons:     dictionary of N, E, S, W limits (Nlim, Elim,
+                            Slim, Wlim) to plot outer map
+        :type latlons:      dict
 
         """
         outpath = self.get_outpath(out_sd)
@@ -1484,4 +1484,19 @@ class WRFEnviron(object):
             # Level is in pressure
             level = '{0}hPa'.format(level)
         return level
+
+    def plot_radar(self,utc,datadir,outdir,Nlim=False,Elim=False,
+                    Slim=False,Wlim=False,ncdir=False,nct=False,
+                    ncf=False,dom=1):
+        """
+        pass
+        """
+        R = Radar(utc,datadir)
+
+        if not Nlim and isinstance(ncdir,str):
+            self.W = self.get_netcdf(ncdir,ncf=ncf,nct=nct,dom=dom)
+            Nlim, Elim, Slim, Wlim = self.W.get_limits()
+
+        R.plot_radar(outdir,Nlim=Nlim,Elim=Elim,Slim=Slim,Wlim=Wlim)
+        print("Plotting radar for {0}".format(utc))
 

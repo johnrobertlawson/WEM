@@ -248,7 +248,7 @@ class SPCReports(Obs):
         convert timestamp to datenum format.
         """
         tt = utils.ensure_timetuple(self.utc)
-        itime_dn = calendar.timegm(*tt[:3],12,0,0)
+        itime_dn = calendar.timegm(tt[0],tt[1],tt[2],12,0,0)
 
         hr = int(timestamp[:2])
         mn = int(timestamp[2:])
