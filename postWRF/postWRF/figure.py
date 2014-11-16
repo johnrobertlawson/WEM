@@ -101,7 +101,7 @@ class Figure(object):
         CB.set_label(label)
         self.save(fig,fpath,fname)
 
-    def basemap_setup(self,smooth=1,lats=False,lons=False):
+    def basemap_setup(self,smooth=1,lats=False,lons=False,proj='merc'):
         """
         Needs rewriting to include limited domains based on lats/lons.
         Currently, assuming whole domain is plotted.
@@ -110,14 +110,26 @@ class Figure(object):
         # Fetch settings
         basemap_res = self.D.basemap_res
 
-        width_m = self.W.dx*(self.W.x_dim-1)
-        height_m = self.W.dy*(self.W.y_dim-1)
+        if proj=='lcc':
+            width_m = self.W.dx*(self.W.x_dim-1)
+            height_m = self.W.dy*(self.W.y_dim-1)
 
-        m = Basemap(
-            projection='lcc',width=width_m,height=height_m,
-            lon_0=self.W.cen_lon,lat_0=self.W.cen_lat,lat_1=self.W.truelat1,
-            lat_2=self.W.truelat2,resolution=basemap_res,area_thresh=500,
-            ax=self.ax)
+            m = Basemap(
+                projection=proj,width=width_m,height=height_m,
+                lon_0=self.W.cen_lon,lat_0=self.W.cen_lat,lat_1=self.W.truelat1,
+                lat_2=self.W.truelat2,resolution=basemap_res,area_thresh=500,
+                ax=self.ax)
+        elif proj=='merc':
+            Nlim,Elim,Slim,Wlim = self.W.get_limits()
+            m = Basemap(projection=proj,
+                        llcrnrlat=Slim,
+                        llcrnrlon=Wlim,
+                        urcrnrlat=Nlim,
+                        urcrnrlon=Elim,
+                        lat_ts=(Nlim-Slim)/2.0,
+                        resolution='l',
+                        ax=self.ax)
+
         m.drawcoastlines()
         m.drawstates()
         m.drawcountries()

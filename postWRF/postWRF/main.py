@@ -1496,7 +1496,7 @@ class WRFEnviron(object):
         if not Nlim and isinstance(ncdir,str):
             self.W = self.get_netcdf(ncdir,ncf=ncf,nct=nct,dom=dom)
             Nlim, Elim, Slim, Wlim = self.W.get_limits()
-
+        # import pdb; pdb.set_trace()
         R.plot_radar(outdir,Nlim=Nlim,Elim=Elim,Slim=Slim,Wlim=Wlim)
         print("Plotting radar for {0}".format(utc))
 

@@ -85,7 +85,7 @@ class Radar(Obs):
             self.clvs = N.arange(0,90.0,0.5)
         # import pdb; pdb.set_trace()
 
-        self.lats = N.linspace(self.lry,self.uly,self.xlen)
+        self.lats = N.linspace(self.lry,self.uly,self.xlen)[::-1]
         self.lons = N.linspace(self.ulx,self.lrx,self.ylen)
 
     def get_radar_fname(self):
@@ -139,7 +139,7 @@ class Radar(Obs):
         self.m.drawstates()
         self.m.drawcountries()
 
-    def get_limited_area(self,Nlim,Elim,Slim,Wlim):
+    def get_subdomain(self,Nlim,Elim,Slim,Wlim):
         """
         Return data array between bounds
         """
@@ -149,10 +149,9 @@ class Radar(Obs):
         Widx = utils.closest(self.lons,Wlim)
 
         # data = self.data[Widx:Eidx+1,Sidx:Nidx+1]
-        data = self.data[Sidx:Nidx+1,Widx:Eidx+1]
-        lats = self.lats[Sidx:Nidx+1]
+        data = self.data[Nidx:Sidx+1,Widx:Eidx+1]
+        lats = self.lats[Nidx:Sidx+1]
         lons = self.lons[Widx:Eidx+1]
-        # import pdb; pdb.set_trace()
         return data,lats,lons
 
     def plot_radar(self,outdir,fig=False,ax=False,fname=False,Nlim=False,
@@ -165,15 +164,16 @@ class Radar(Obs):
         self.generate_basemap(fig,ax,Nlim,Elim,Slim,Wlim)
         #lons, lats = self.m.makegrid(self.xlen,self.ylen)
         if isinstance(Nlim,float):
-            data, lats, lons = self.get_limited_area(Nlim,Elim,Slim,Wlim)
+            data, lats, lons = self.get_subdomain(Nlim,Elim,Slim,Wlim)
             # x,y = self.m(lons,lats)
         else:
             data = self.data
-            lats = self.lats
+            lats = self.lats #flip lats upside down?
             lons = self.lons
             # x,y = self.m(*N.meshgrid(lons,lats))
             
-        x,y = self.m(*N.meshgrid(lons,lats[::-1]))
+        x,y = self.m(*N.meshgrid(lons,lats))
+        # x,y = self.m(*N.meshgrid(lons,lats[::-1]))
 
         # Custom colorbar
         import colourtables as ct
@@ -182,7 +182,6 @@ class Radar(Obs):
 
         # Convert pixel levels to dBZ
         dBZ = (data*0.5)-32
-        # import pdb; pdb.set_trace()
         # dBZ[dBZ<0] = 0
 
         im = self.ax.contourf(x,y,dBZ,alpha=0.5,cmap=radarcmap,

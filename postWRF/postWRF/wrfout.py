@@ -994,10 +994,10 @@ class WRFOut(object):
                 break
 
     def get_limits(self):
-        Nlim = self.lats[-1]
-        Elim = self.lons[-1]
-        Slim = self.lats[0]
-        Wlim = self.lons[0]
+        Nlim = float(self.lats1D[-1])
+        Elim = float(self.lons1D[-1])
+        Slim = float(self.lats1D[0])
+        Wlim = float(self.lons1D[0])
         return Nlim, Elim, Slim, Wlim
 
     def cold_pool_strength(self,X,time,swath_width=100,env=0,dz=0):

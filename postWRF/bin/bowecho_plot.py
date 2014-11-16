@@ -8,40 +8,43 @@ import numpy as N
 
 sys.path.append('/home/jrlawson/gitprojects/')
 
-from WEM.postWRF import WRFEnviron
+from WEM.postWRF.postWRF import WRFEnviron
 from settings import Settings
 import WEM.utils as utils
 #from WEM.postWRF.postWRF.rucplot import RUCPlot
 
-config = Settings()
-p = WRFEnviron(config)
+outroot = '/home/jrlawson/public_html/bowecho/'
+ncroot = '/chinook2/jrlawson/bowecho/'
+
+p = WRFEnviron()
 
 skewT = 0
 plot2D = 0
+radarplot = 1
 streamlines = 0
 rucplot = 0
 coldpoolstrength = 0
 spaghetti = 0
 std = 0
 profiles = 0
-frontogenesis = 1
+frontogenesis = 0
 upperlevel = 0
 
 # enstype = 'STCH'
-# enstype = 'ICBC'
-enstype = 'MXMP'
+enstype = 'ICBC'
+# enstype = 'MXMP'
 
-case = '20060526'
+# case = '20060526'
 # case = '2006052612'
 #case = '20090910'
 # case = '20110419'
-# case = '20130815'
+case = '20130815'
 
-# IC = 'GEFSR2'
+IC = 'GEFSR2'
 # IC = 'NAM'
 # IC = 'RUC'
 # IC = 'GFS'
-IC = 'RUC'
+# IC = 'RUC'
 
 #ensnames = ['anl']
 #experiment = 'VERIF'
@@ -80,7 +83,7 @@ elif case[:4] == '2013':
     inittime = (2013,8,15,0,0,0)
     itime = (2013,8,15,6,0,0)
     ftime = (2013,8,16,12,0,0)
-    times = [(2013,8,15,12,0,0),]
+    times = [(2013,8,16,3,0,0),]
 else:
     raise Exception
 
@@ -89,15 +92,19 @@ level = 2000
 
 def get_folders(en,ex):
     if enstype == 'STCH':
-        out_sd = os.path.join(case,IC,en,MP,ex)
-        wrf_sd = os.path.join(case,IC,en,MP,ex)
+        out_sd = os.path.join(outroot,case,IC,en,MP,ex)
+        wrf_sd = os.path.join(ncroot,case,IC,en,MP,ex)
     else:
-        out_sd = os.path.join(case,IC,en,ex)
-        wrf_sd = os.path.join(case,IC,en,ex)
+        out_sd = os.path.join(outroot,case,IC,en,ex)
+        wrf_sd = os.path.join(ncroot,case,IC,en,ex)
     return out_sd, wrf_sd
 
+def get_verif_dirs():
+    outdir = os.path.join(outroot,case,'VERIF')
+    datadir = os.path.join(ncroot,case,'VERIF')
+    return outdir,datadir
 
-times = utils.generate_times(itime,ftime,hourly*60*60)
+# times = utils.generate_times(itime,ftime,hourly*60*60)
 
 #shear_times = utils.generate_times(itime,ftime,3*60*60)
 #sl_times = utils.generate_times(sl_itime,sl_ftime,1*60*60)
@@ -132,14 +139,19 @@ if skewT:
     
     #p.plot_skewT(skewT_time,skewT_latlon,composite=1)
 
-if plot2D:
+if plot2D or radarplot:
     for en in ensnames:
         for ex in experiments:
             for t in times:
                 out_sd, wrf_sd = get_folders(en,ex)
-                # p.plot_strongest_wind(itime,ftime,2000,wrf_sd=wrf_sd,out_sd=out_sd)
-                # p.plot2D('Z',t,500,wrf_sd=wrf_sd,out_sd=out_sd,plottype='contour',smooth=10)
-                p.plot2D('cref',t,2000,wrf_sd=wrf_sd,out_sd=out_sd)
+                if plot2D:
+                    # p.plot_strongest_wind(itime,ftime,2000,wrf_sd=wrf_sd,out_sd=out_sd)
+                    # p.plot2D('Z',t,500,wrf_sd=wrf_sd,out_sd=out_sd,plottype='contour',smooth=10)
+                    p.plot2D('cref',t,2000,ncdir=wrf_sd,outdir=out_sd)
+
+                if radarplot:
+                    outdir,datadir = get_verif_dirs()
+                    p.plot_radar(t,datadir,outdir,ncdir=wrf_sd)
 
 if streamlines:
     for en in ensnames:

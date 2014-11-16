@@ -852,7 +852,7 @@ def vstack_loop(data, obj):
     return stack
 
 
-def generate_times(itime,ftime,interval):
+def generate_times(idate,fdate,interval):
     """
     :param itime:       Start date/time. Format is
                         YYYY,MM,DD,HH,MM,SS (calendar.timegm).
@@ -969,7 +969,7 @@ def ensure_timetuple(times,fmt='single'):
     """
 
     if isinstance(times,int):
-        tttimes = [calendar.timegm(times),] #1
+        tttimes = [list(time.gmtime(times)),] #1
     elif isinstance(times,basestring):
         print("Don't give me strings...")
         raise Exception
@@ -979,7 +979,7 @@ def ensure_timetuple(times,fmt='single'):
         elif times[0]<3000: #4
             tttimes = [times,]
         else: #2,3
-            tttimes = [calendar.timegm(t) for t in times]
+            tttimes = [list(time.gmtime(t)) for t in times]
 
     if (fmt == 'list') or (len(tttimes)>1):
         return tttimes
