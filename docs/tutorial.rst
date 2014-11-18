@@ -67,8 +67,9 @@ Now here are some example of plots:
 .. code-block:: python
     
     # This plots simulated composite reflectivity 
-    # Set level = 0 as cref does not have a level.
-    p.plot2D('cref',utc=itime,level=0,outdir=outdir,ncdir=ncdir,ncf=ncf,
+    # Ignore level argument (it is set to False if not specified)
+    # as cref does not have a level.
+    p.plot2D('cref',utc=itime,outdir=outdir,ncdir=ncdir,ncf=ncf,
                 nct=nct,legend=True)
 
     p.plotstreamlines()
@@ -97,7 +98,7 @@ parameterisation), amassed over a number of hours, try this:
 
 .. code-block:: python
 
-    p.plot_accum_rain(utc,accum_hr,ncdir,outdir)
+    p.plot_accum_rain(utc,accum_hr,ncdir=ncdir,outdir=outdir)
 
 To plot Difference Kinetic Energy, integrated up to 500 hPa, over a domain,
 every six hours, you would first compute the fields (as it is time-consuming,
