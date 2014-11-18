@@ -29,7 +29,10 @@ class Scales(object):
         self.A = self.get_dict_of_levels()
         # Variable and vertical level determine contour scale
 
-        if lv.endswith('hPa'):
+        # if not lv:
+            # lv = 0
+
+        if isinstance(lv,str) and lv.endswith('hPa'):
             lv = int(lv.split('h')[0])
 
         if clvs:

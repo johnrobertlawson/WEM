@@ -19,8 +19,8 @@ ncroot = '/chinook2/jrlawson/bowecho/'
 p = WRFEnviron()
 
 skewT = 0
-plot2D = 0
-radarplot = 1
+plot2D = 1
+radarplot = 0
 streamlines = 0
 rucplot = 0
 coldpoolstrength = 0
@@ -147,7 +147,8 @@ if plot2D or radarplot:
                 if plot2D:
                     # p.plot_strongest_wind(itime,ftime,2000,wrf_sd=wrf_sd,out_sd=out_sd)
                     # p.plot2D('Z',t,500,wrf_sd=wrf_sd,out_sd=out_sd,plottype='contour',smooth=10)
-                    p.plot2D('cref',t,2000,ncdir=wrf_sd,outdir=out_sd)
+                    # p.plot2D('cref',t,2000,ncdir=wrf_sd,outdir=out_sd)
+                    p.plot2D('RAINNC',t,ncdir=wrf_sd,outdir=out_sd)
 
                 if radarplot:
                     outdir,datadir = get_verif_dirs()

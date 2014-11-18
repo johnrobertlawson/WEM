@@ -59,10 +59,10 @@ class WRFEnviron(object):
         #M.rc('font',**self.font_prop)
         #M.rcParams['savefig.dpi'] = self.dpi
 
-    def plot2D(self,vrbl,utc,level,ncdir,outdir,ncf=False,nct=False,
-                f_prefix=0,f_suffix=False,bounding=False,dom=1,
-                plottype='contourf',smooth=1,fig=False,ax=False,
-                clvs=False,cmap=False):
+    def plot2D(self,vrbl,utc,level=False,ncdir=False,outdir=False,
+                ncf=False,nct=False,f_prefix=0,f_suffix=False,
+                bounding=False,dom=1,plottype='contourf',smooth=1,
+                fig=False,ax=False,clvs=False,cmap=False):
         """Basic birds-eye-view plotting.
 
         This script is top-most and decides if the variables is
@@ -77,16 +77,19 @@ class WRFEnviron(object):
                             Integer format is epoch/datenum (ready for
                             time.gmtime).
         :type utc:          tuple,list,int
-        :param level:       required level. 
+        :param level:       required level.
+                            Can be False if variable has no level.
                             Lowest model level is integer 2000.
                             Pressure level is integer in hPa, e.g. 850.
                             Isentropic surface is a string + K, e.g. '320K'.
                             Geometric height is a string + m, e.g. '4000m'.
-        :type level:        int,str
-        :param ncdir:       directory of netcdf data file
-        :type ncdir:        str
+        :type level:        int,str,bool
+        :param ncdir:       directory of netcdf data file.
+                            False uses home directory.
+        :type ncdir:        str,bool
         :param outdir:      directory to save output figures
-        :type outdir:       str
+                            False uses home directory.
+        :type outdir:       str,bool
         :param ncf:         filename of netcdf data file if ambiguous within ncdir.
                             If no wrfout file is explicitly specified, the
                             netCDF file in that folder is chosen if unambiguous.
@@ -136,12 +139,18 @@ class WRFEnviron(object):
         # TODO: lats/lons False when no bounding, and selected with limited
         # domain.
 
-        level = self.get_level_string(level)
+        if ncdir is False:
+            ncdir = os.path.expanduser("~")
+        if outdir is False:
+            outdir = os.path.expanduser("~")
+
+        if level:
+            level = self.get_level_string(level)
 
         # Data
         self.W = self.get_netcdf(ncdir,ncf=ncf,nct=nct,dom=dom)
         # lats, lons = self.W.get_limited_domain(bounding)
-        data = self.W.get(vrbl,utc,level,lons=False,lats=False)
+        data = self.W.get(vrbl,utc,level=level,lons=False,lats=False)
         if smooth>1:
             data = stats.gauss_smooth(data,smooth)
 
