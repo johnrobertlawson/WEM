@@ -1,29 +1,25 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
-
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>WEM.utils package &mdash; WEM 0.9.0 documentation</title>
-    
+    <title>WEM.utils package &mdash; WEM v0.9.0 documentation</title>
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    './',
+        URL_ROOT:    '',
         VERSION:     '0.9.0',
-        COLLAPSE_INDEX: false,
+        COLLAPSE_MODINDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
       };
     </script>
     <script type="text/javascript" src="_static/jquery.js"></script>
-    <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="WEM 0.9.0 documentation" href="index.html" />
+    <link rel="top" title="WEM v0.9.0 documentation" href="index.html" />
     <link rel="up" title="WEM package" href="WEM.html" />
     <link rel="prev" title="WEM.postWRF.postWRF package" href="WEM.postWRF.postWRF.html" />
    
@@ -39,12 +35,12 @@
           <a href="genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
-          <a href="py-modindex.html" title="Python Module Index"
-             >modules</a> |</li>
+          <a href="modindex.html" title="Global Module Index"
+             accesskey="M">modules</a> |</li>
         <li class="right" >
           <a href="WEM.postWRF.postWRF.html" title="WEM.postWRF.postWRF package"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">WEM 0.9.0 documentation</a> &raquo;</li>
+        <li><a href="index.html">WEM v0.9.0 documentation</a> &raquo;</li>
           <li><a href="WEM.html" accesskey="U">WEM package</a> &raquo;</li> 
       </ul>
     </div>  
@@ -59,14 +55,343 @@
 <div class="section" id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
 </div>
-<div class="section" id="wem-utils-gis-tools-module">
-<h2>WEM.utils.GIS_tools module<a class="headerlink" href="#wem-utils-gis-tools-module" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-WEM.utils.GIS_tools">
+<h2>WEM.utils.GIS_tools module<a class="headerlink" href="#module-WEM.utils.GIS_tools" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="WEM.utils.GIS_tools.TimeSfcLatLon">
+<tt class="descclassname">WEM.utils.GIS_tools.</tt><tt class="descname">TimeSfcLatLon</tt><big>(</big><em>nc</em>, <em>varlist</em>, <em>times</em>, <em>latslons='all'</em><big>)</big><a class="headerlink" href="#WEM.utils.GIS_tools.TimeSfcLatLon" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="WEM.utils.GIS_tools.WRFterrain">
+<tt class="descclassname">WEM.utils.GIS_tools.</tt><tt class="descname">WRFterrain</tt><big>(</big><em>fileselection='control'</em>, <em>dom=1</em><big>)</big><a class="headerlink" href="#WEM.utils.GIS_tools.WRFterrain" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="WEM.utils.GIS_tools.WRFterrain_P">
+<tt class="descclassname">WEM.utils.GIS_tools.</tt><tt class="descname">WRFterrain_P</tt><big>(</big><em>fileselection='control'</em>, <em>dom=1</em>, <em>slice=0</em><big>)</big><a class="headerlink" href="#WEM.utils.GIS_tools.WRFterrain_P" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="WEM.utils.GIS_tools.check_vertical_coordinate">
+<tt class="descclassname">WEM.utils.GIS_tools.</tt><tt class="descname">check_vertical_coordinate</tt><big>(</big><em>level</em><big>)</big><a class="headerlink" href="#WEM.utils.GIS_tools.check_vertical_coordinate" title="Permalink to this definition">¶</a></dt>
+<dd>Check to see what type of level is requested by user.</dd></dl>
+
+<dl class="function">
+<dt id="WEM.utils.GIS_tools.closest">
+<tt class="descclassname">WEM.utils.GIS_tools.</tt><tt class="descname">closest</tt><big>(</big><em>arr</em>, <em>val</em><big>)</big><a class="headerlink" href="#WEM.utils.GIS_tools.closest" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find index of closest value.
+Only working on 1D array right now.</p>
+<p>Inputs:
+val     :   required value
+arr     :   array of values</p>
+<p>Output:</p>
+<p>idx     :   index of closest value</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="WEM.utils.GIS_tools.combine_wind_components">
+<tt class="descclassname">WEM.utils.GIS_tools.</tt><tt class="descname">combine_wind_components</tt><big>(</big><em>u</em>, <em>v</em><big>)</big><a class="headerlink" href="#WEM.utils.GIS_tools.combine_wind_components" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="WEM.utils.GIS_tools.convert_kt2ms">
+<tt class="descclassname">WEM.utils.GIS_tools.</tt><tt class="descname">convert_kt2ms</tt><big>(</big><em>wspd</em><big>)</big><a class="headerlink" href="#WEM.utils.GIS_tools.convert_kt2ms" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="WEM.utils.GIS_tools.convert_tuple_to_dntimes">
+<tt class="descclassname">WEM.utils.GIS_tools.</tt><tt class="descname">convert_tuple_to_dntimes</tt><big>(</big><em>times</em><big>)</big><a class="headerlink" href="#WEM.utils.GIS_tools.convert_tuple_to_dntimes" title="Permalink to this definition">¶</a></dt>
+<dd>Convert tuple or tuple of tuples to datenum date format.</dd></dl>
+
+<dl class="function">
+<dt id="WEM.utils.GIS_tools.csvprocess">
+<tt class="descclassname">WEM.utils.GIS_tools.</tt><tt class="descname">csvprocess</tt><big>(</big><em>data</em>, <em>names</em>, <em>convert=0</em><big>)</big><a class="headerlink" href="#WEM.utils.GIS_tools.csvprocess" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="WEM.utils.GIS_tools.decompose_wind">
+<tt class="descclassname">WEM.utils.GIS_tools.</tt><tt class="descname">decompose_wind</tt><big>(</big><em>wspd</em>, <em>wdir</em>, <em>convert=0</em><big>)</big><a class="headerlink" href="#WEM.utils.GIS_tools.decompose_wind" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="WEM.utils.GIS_tools.determine_model">
+<tt class="descclassname">WEM.utils.GIS_tools.</tt><tt class="descname">determine_model</tt><big>(</big><em>fname</em><big>)</big><a class="headerlink" href="#WEM.utils.GIS_tools.determine_model" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return model depending on naming convention.</p>
+<p>If no model exists, return false.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="WEM.utils.GIS_tools.dewpoint">
+<tt class="descclassname">WEM.utils.GIS_tools.</tt><tt class="descname">dewpoint</tt><big>(</big><em>T</em>, <em>RH</em><big>)</big><a class="headerlink" href="#WEM.utils.GIS_tools.dewpoint" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="WEM.utils.GIS_tools.dstack_loop">
+<tt class="descclassname">WEM.utils.GIS_tools.</tt><tt class="descname">dstack_loop</tt><big>(</big><em>data</em>, <em>obj</em><big>)</big><a class="headerlink" href="#WEM.utils.GIS_tools.dstack_loop" title="Permalink to this definition">¶</a></dt>
+<dd>Tries to stack numpy array (data) into &#8216;stack&#8217; object (obj).
+If obj doesn&#8217;t exist, then initialise it
+If obj does exist, stack data.</dd></dl>
+
+<dl class="function">
+<dt id="WEM.utils.GIS_tools.dstack_loop_v2">
+<tt class="descclassname">WEM.utils.GIS_tools.</tt><tt class="descname">dstack_loop_v2</tt><big>(</big><em>data</em>, <em>obj</em><big>)</big><a class="headerlink" href="#WEM.utils.GIS_tools.dstack_loop_v2" title="Permalink to this definition">¶</a></dt>
+<dd><p>Need to set obj = 0 at start of loop in master script</p>
+<p>Tries to stack numpy array (data) into &#8216;stack&#8217; object (obj).
+If obj doesn&#8217;t exist, then initialise it
+If obj does exist, stack data.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="WEM.utils.GIS_tools.ensure_datenum">
+<tt class="descclassname">WEM.utils.GIS_tools.</tt><tt class="descname">ensure_datenum</tt><big>(</big><em>times</em>, <em>fmt='int'</em><big>)</big><a class="headerlink" href="#WEM.utils.GIS_tools.ensure_datenum" title="Permalink to this definition">¶</a></dt>
+<dd><p>Make sure times are in list-of-datenums format.
+If not, convert them.</p>
+<p>Possibilities:
+times = 123456                                      #1
+times = (123456,)                                   #2
+times = (123456,234567)                             #3
+times = (2011,12,1,18,0,0)                          #4
+times = ((2011,12,1,18,0,0),(2011,12,2,6,0,0))      #5</p>
+<dl class="docutils">
+<dt>fmt <span class="classifier-delimiter">:</span> <span class="classifier">whether to return list of integers or an integer</span></dt>
+<dd>&#8216;int&#8217; or &#8216;list&#8217;</dd>
+</dl>
+<p>Output:
+dntimes = (123456,) or (123456,234567)</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="WEM.utils.GIS_tools.ensure_timetuple">
+<tt class="descclassname">WEM.utils.GIS_tools.</tt><tt class="descname">ensure_timetuple</tt><big>(</big><em>times</em>, <em>fmt='single'</em><big>)</big><a class="headerlink" href="#WEM.utils.GIS_tools.ensure_timetuple" title="Permalink to this definition">¶</a></dt>
+<dd><p>MAke sure time(s) are in six-item tuple format
+(YYYY,MM,DD,HH,MM,SS)</p>
+<dl class="docutils">
+<dt>fmt <span class="classifier-delimiter">:</span> <span class="classifier">whether to return a list of tuples or single tuple.</span></dt>
+<dd>&#8216;list&#8217; or &#8216;single&#8217;</dd>
+</dl>
+<p>Possibilities:
+times = 123456                                      #1
+times = (123456,)                                   #2
+times = (123456,234567)                             #3
+times = (2011,12,1,18,0,0)                          #4
+times = ((2011,12,1,18,0,0),(2011,12,2,6,0,0))      #5</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="WEM.utils.GIS_tools.find_time_index">
+<tt class="descclassname">WEM.utils.GIS_tools.</tt><tt class="descname">find_time_index</tt><big>(</big><em>wrftime</em>, <em>reqtimetuple</em>, <em>tupleformat=1</em><big>)</big><a class="headerlink" href="#WEM.utils.GIS_tools.find_time_index" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="WEM.utils.GIS_tools.generate_colours">
+<tt class="descclassname">WEM.utils.GIS_tools.</tt><tt class="descname">generate_colours</tt><big>(</big><em>M</em>, <em>n</em><big>)</big><a class="headerlink" href="#WEM.utils.GIS_tools.generate_colours" title="Permalink to this definition">¶</a></dt>
+<dd><p>M       :   Matplotlib instance
+n       :   number of colours you want</p>
+<p>Returns</p>
+<p>Usage: when cycling over n plots, the colour should
+be colourlist[n].</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="WEM.utils.GIS_tools.generate_times">
+<tt class="descclassname">WEM.utils.GIS_tools.</tt><tt class="descname">generate_times</tt><big>(</big><em>idate</em>, <em>fdate</em>, <em>interval</em><big>)</big><a class="headerlink" href="#WEM.utils.GIS_tools.generate_times" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><em>itime</em> (list,tuple) &#8211; Start date/time. Format is
+YYYY,MM,DD,HH,MM,SS (calendar.timegm).</li>
+<li><em>ftime</em> (list,tuple) &#8211; End date/time. Same format as itime.</li>
+<li><em>interval</em> (int) &#8211; interval between output times, in seconds.</li>
+</ul>
+</td>
+</tr>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">list of times in datenum format.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="WEM.utils.GIS_tools.getXY">
+<tt class="descclassname">WEM.utils.GIS_tools.</tt><tt class="descname">getXY</tt><big>(</big><em>lats</em>, <em>lons</em>, <em>ptlat</em>, <em>ptlon</em><big>)</big><a class="headerlink" href="#WEM.utils.GIS_tools.getXY" title="Permalink to this definition">¶</a></dt>
+<dd>Output is lat, lon so y,x</dd></dl>
+
+<dl class="function">
+<dt id="WEM.utils.GIS_tools.get_cross_section">
+<tt class="descclassname">WEM.utils.GIS_tools.</tt><tt class="descname">get_cross_section</tt><big>(</big><em>Alat</em>, <em>Alon</em>, <em>Blat</em>, <em>Blon</em><big>)</big><a class="headerlink" href="#WEM.utils.GIS_tools.get_cross_section" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="WEM.utils.GIS_tools.get_level_naming">
+<tt class="descclassname">WEM.utils.GIS_tools.</tt><tt class="descname">get_level_naming</tt><big>(</big><em>va</em>, <em>lv</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#WEM.utils.GIS_tools.get_level_naming" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="WEM.utils.GIS_tools.get_map">
+<tt class="descclassname">WEM.utils.GIS_tools.</tt><tt class="descname">get_map</tt><big>(</big><em>Nlim</em>, <em>Elim</em>, <em>Slim</em>, <em>Wlim</em><big>)</big><a class="headerlink" href="#WEM.utils.GIS_tools.get_map" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="WEM.utils.GIS_tools.get_netcdf_naming">
+<tt class="descclassname">WEM.utils.GIS_tools.</tt><tt class="descname">get_netcdf_naming</tt><big>(</big><em>model</em>, <em>t</em>, <em>dom=0</em><big>)</big><a class="headerlink" href="#WEM.utils.GIS_tools.get_netcdf_naming" title="Permalink to this definition">¶</a></dt>
+<dd>By default:
+wrfout files don&#8217;t have an extension
+other files have .nc extension (convert first)</dd></dl>
+
+<dl class="function">
+<dt id="WEM.utils.GIS_tools.get_sequence">
+<tt class="descclassname">WEM.utils.GIS_tools.</tt><tt class="descname">get_sequence</tt><big>(</big><em>x</em>, <em>sos=0</em><big>)</big><a class="headerlink" href="#WEM.utils.GIS_tools.get_sequence" title="Permalink to this definition">¶</a></dt>
+<dd>Returns a sequence (tuple or list) for iteration.
+Avoids an error for strings/integers.
+SoS = 1 enables the check for a sequence of sequences (list of dates)</dd></dl>
+
+<dl class="function">
+<dt id="WEM.utils.GIS_tools.gettopo">
+<tt class="descclassname">WEM.utils.GIS_tools.</tt><tt class="descname">gettopo</tt><big>(</big><big>)</big><a class="headerlink" href="#WEM.utils.GIS_tools.gettopo" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="WEM.utils.GIS_tools.hgt_from_sigma">
+<tt class="descclassname">WEM.utils.GIS_tools.</tt><tt class="descname">hgt_from_sigma</tt><big>(</big><em>nc</em><big>)</big><a class="headerlink" href="#WEM.utils.GIS_tools.hgt_from_sigma" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="WEM.utils.GIS_tools.latlon_1D">
+<tt class="descclassname">WEM.utils.GIS_tools.</tt><tt class="descname">latlon_1D</tt><big>(</big><em>nc</em><big>)</big><a class="headerlink" href="#WEM.utils.GIS_tools.latlon_1D" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="WEM.utils.GIS_tools.load_data">
+<tt class="descclassname">WEM.utils.GIS_tools.</tt><tt class="descname">load_data</tt><big>(</big><em>folder</em>, <em>fname</em>, <em>format='pickle'</em><big>)</big><a class="headerlink" href="#WEM.utils.GIS_tools.load_data" title="Permalink to this definition">¶</a></dt>
+<dd>Load array from file.</dd></dl>
+
+<dl class="function">
+<dt id="WEM.utils.GIS_tools.lookup_time">
+<tt class="descclassname">WEM.utils.GIS_tools.</tt><tt class="descname">lookup_time</tt><big>(</big><em>str</em><big>)</big><a class="headerlink" href="#WEM.utils.GIS_tools.lookup_time" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="WEM.utils.GIS_tools.mkloop">
+<tt class="descclassname">WEM.utils.GIS_tools.</tt><tt class="descname">mkloop</tt><big>(</big><em>dom='d03'</em>, <em>fpath='./'</em><big>)</big><a class="headerlink" href="#WEM.utils.GIS_tools.mkloop" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="WEM.utils.GIS_tools.netcdf_files_in">
+<tt class="descclassname">WEM.utils.GIS_tools.</tt><tt class="descname">netcdf_files_in</tt><big>(</big><em>folder</em>, <em>dom=1</em>, <em>init_time=0</em>, <em>model='auto'</em>, <em>return_model=False</em><big>)</big><a class="headerlink" href="#WEM.utils.GIS_tools.netcdf_files_in" title="Permalink to this definition">¶</a></dt>
+<dd><p>Hunt through given folder to find the right netcdf file for data.</p>
+<p>Inputs:
+folder      :   Absolute path to directory
+dom         :   specify domain. None specified if zero.
+init_time   :   initialisation time. Can be tuple or datenum.</p>
+<blockquote>
+If zero, then folder must contain one unambiguous file.</blockquote>
+<dl class="docutils">
+<dt>model <span class="classifier-delimiter">:</span> <span class="classifier">Default: automatically detect the type of netcdf file</span></dt>
+<dd>(RUC data, wrfout file, etc)</dd>
+</dl>
+<p>Returns:
+ncpath      :   Absolute path to file
+model       :   Model (RUC, WRF) of netcdf file,</p>
+<blockquote>
+if return_model is True and model is &#8216;auto&#8217;.</blockquote>
+</dd></dl>
+
+<dl class="function">
+<dt id="WEM.utils.GIS_tools.p_interpol">
+<tt class="descclassname">WEM.utils.GIS_tools.</tt><tt class="descname">p_interpol</tt><big>(</big><em>dom</em>, <em>var</em>, <em>ncfolder</em>, <em>datestr</em><big>)</big><a class="headerlink" href="#WEM.utils.GIS_tools.p_interpol" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="WEM.utils.GIS_tools.padded_times">
+<tt class="descclassname">WEM.utils.GIS_tools.</tt><tt class="descname">padded_times</tt><big>(</big><em>timeseq</em><big>)</big><a class="headerlink" href="#WEM.utils.GIS_tools.padded_times" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="WEM.utils.GIS_tools.save_data">
+<tt class="descclassname">WEM.utils.GIS_tools.</tt><tt class="descname">save_data</tt><big>(</big><em>data</em>, <em>folder</em>, <em>fname</em>, <em>format='pickle'</em><big>)</big><a class="headerlink" href="#WEM.utils.GIS_tools.save_data" title="Permalink to this definition">¶</a></dt>
+<dd>Save array to file.</dd></dl>
+
+<dl class="function">
+<dt id="WEM.utils.GIS_tools.string_from_time">
+<tt class="descclassname">WEM.utils.GIS_tools.</tt><tt class="descname">string_from_time</tt><big>(</big><em>usage</em>, <em>t</em>, <em>dom=0</em>, <em>strlen=0</em>, <em>conven=0</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#WEM.utils.GIS_tools.string_from_time" title="Permalink to this definition">¶</a></dt>
+<dd>conven  :   convection of MM/DD versus DD/MM</dd></dl>
+
+<dl class="function">
+<dt id="WEM.utils.GIS_tools.thinned_barbs">
+<tt class="descclassname">WEM.utils.GIS_tools.</tt><tt class="descname">thinned_barbs</tt><big>(</big><em>pres</em><big>)</big><a class="headerlink" href="#WEM.utils.GIS_tools.thinned_barbs" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="WEM.utils.GIS_tools.trycreate">
+<tt class="descclassname">WEM.utils.GIS_tools.</tt><tt class="descname">trycreate</tt><big>(</big><em>loc</em><big>)</big><a class="headerlink" href="#WEM.utils.GIS_tools.trycreate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="WEM.utils.GIS_tools.vstack_loop">
+<tt class="descclassname">WEM.utils.GIS_tools.</tt><tt class="descname">vstack_loop</tt><big>(</big><em>data</em>, <em>obj</em><big>)</big><a class="headerlink" href="#WEM.utils.GIS_tools.vstack_loop" title="Permalink to this definition">¶</a></dt>
+<dd><p>Need to set obj = 0 at start of loop in master script</p>
+<p>Tries to stack numpy array (data) into &#8216;stack&#8217; object (obj).
+If obj doesn&#8217;t exist, then initialise it
+If obj does exist, stack data.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="WEM.utils.GIS_tools.wrf_nc_load">
+<tt class="descclassname">WEM.utils.GIS_tools.</tt><tt class="descname">wrf_nc_load</tt><big>(</big><em>dom</em>, <em>var</em>, <em>ncfolder</em>, <em>datestr</em>, <em>thin</em>, <em>Nlim=0</em>, <em>Elim=0</em>, <em>Slim=0</em>, <em>Wlim=0</em><big>)</big><a class="headerlink" href="#WEM.utils.GIS_tools.wrf_nc_load" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="WEM.utils.GIS_tools.wrfout_files_in">
+<tt class="descclassname">WEM.utils.GIS_tools.</tt><tt class="descname">wrfout_files_in</tt><big>(</big><em>folders</em>, <em>dom=0</em>, <em>init_time='notset'</em>, <em>descend=1</em>, <em>avoid=0</em>, <em>unambiguous=0</em><big>)</big><a class="headerlink" href="#WEM.utils.GIS_tools.wrfout_files_in" title="Permalink to this definition">¶</a></dt>
+<dd><p>Hunt through given folder(s) to find all occurrences of wrfout
+files.</p>
+<p>Inputs:
+folders     :   list of absolute paths to directories
+dom         :   specify domain. None specified if zero.
+init_time   :   tuple of initialisation time
+descend     :   boolean: go into subfolders
+avoid       :   string of filenames. if a subfolder contains</p>
+<blockquote>
+the string, do not descend into this one.</blockquote>
+<dl class="docutils">
+<dt>unambiguous <span class="classifier-delimiter">:</span> <span class="classifier">only return a single absolute path, else throw</span></dt>
+<dd>an Exception.</dd>
+</dl>
+<p>Returns:
+wrfouts     :   list of absolute paths to wrfout files</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="WEM.utils.GIS_tools.xs_distance">
+<tt class="descclassname">WEM.utils.GIS_tools.</tt><tt class="descname">xs_distance</tt><big>(</big><em>Alat</em>, <em>Alon</em>, <em>Blat</em>, <em>Blon</em><big>)</big><a class="headerlink" href="#WEM.utils.GIS_tools.xs_distance" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 </div>
-<div class="section" id="wem-utils-unix-tools-module">
-<h2>WEM.utils.unix_tools module<a class="headerlink" href="#wem-utils-unix-tools-module" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-WEM.utils.unix_tools">
+<h2>WEM.utils.unix_tools module<a class="headerlink" href="#module-WEM.utils.unix_tools" title="Permalink to this headline">¶</a></h2>
+<p>Utility scripts to help with directory, file, etc issues</p>
+<dl class="function">
+<dt id="WEM.utils.unix_tools.dir_from_naming">
+<tt class="descclassname">WEM.utils.unix_tools.</tt><tt class="descname">dir_from_naming</tt><big>(</big><em>root</em>, <em>*args</em><big>)</big><a class="headerlink" href="#WEM.utils.unix_tools.dir_from_naming" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate file path from arguments</p>
+<p>Inputs:
+root    :    file path base
+args     :    list of arguments to join as separate folders</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="WEM.utils.unix_tools.ssh_client">
+<tt class="descclassname">WEM.utils.unix_tools.</tt><tt class="descname">ssh_client</tt><big>(</big><em>ky</em>, <em>domain</em>, <em>username</em>, <em>password</em><big>)</big><a class="headerlink" href="#WEM.utils.unix_tools.ssh_client" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 </div>
-<div class="section" id="module-contents">
-<h2>Module contents<a class="headerlink" href="#module-contents" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-WEM.utils">
+<h2>Module contents<a class="headerlink" href="#module-WEM.utils" title="Permalink to this headline">¶</a></h2>
+<p>References these utilities in WEM.utils.</p>
 </div>
 </div>
 
@@ -76,53 +401,38 @@
       </div>
       <div class="sphinxsidebar">
         <div class="sphinxsidebarwrapper">
-<h1 class="logo"><a href="index.html">WEM</a></h1>
-
-
-
-
-
-<p>
-<iframe src="http://ghbtns.com/github-btn.html?user=&repo=&type=watch&count=true&size=large"
-  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
-</p>
-
-
-<h3>Navigation</h3>
-<ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="tutorial.html">WEM package</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="WEM.html">WEM package</a><ul class="current">
-<li class="toctree-l2 current"><a class="reference internal" href="WEM.html#subpackages">Subpackages</a><ul class="current">
-<li class="toctree-l3"><a class="reference internal" href="WEM.lazyWRF.html">WEM.lazyWRF package</a></li>
-<li class="toctree-l3"><a class="reference internal" href="WEM.postWRF.html">WEM.postWRF package</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="">WEM.utils package</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#submodules">Submodules</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#wem-utils-gis-tools-module">WEM.utils.GIS_tools module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#wem-utils-unix-tools-module">WEM.utils.unix_tools module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#module-contents">Module contents</a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="WEM.html#module-WEM">Module contents</a></li>
+            <h3><a href="index.html">Table Of Contents</a></h3>
+            <ul>
+<li><a class="reference external" href="#">WEM.utils package</a><ul>
+<li><a class="reference external" href="#submodules">Submodules</a></li>
+<li><a class="reference external" href="#module-WEM.utils.GIS_tools">WEM.utils.GIS_tools module</a></li>
+<li><a class="reference external" href="#module-WEM.utils.unix_tools">WEM.utils.unix_tools module</a></li>
+<li><a class="reference external" href="#module-WEM.utils">Module contents</a></li>
 </ul>
 </li>
 </ul>
 
-
-<div id="searchbox" style="display: none">
-  <h3>Quick search</h3>
-    <form class="search" action="search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
-    </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
-</div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+            <h4>Previous topic</h4>
+            <p class="topless"><a href="WEM.postWRF.postWRF.html"
+                                  title="previous chapter">WEM.postWRF.postWRF package</a></p>
+            <h3>This Page</h3>
+            <ul class="this-page-menu">
+              <li><a href="_sources/WEM.utils.txt"
+                     rel="nofollow">Show Source</a></li>
+            </ul>
+          <div id="searchbox" style="display: none">
+            <h3>Quick search</h3>
+              <form class="search" action="search.html" method="get">
+                <input type="text" name="q" size="18" />
+                <input type="submit" value="Go" />
+                <input type="hidden" name="check_keywords" value="yes" />
+                <input type="hidden" name="area" value="default" />
+              </form>
+              <p class="searchtip" style="font-size: 90%">
+              Enter search terms or a module, class or function name.
+              </p>
+          </div>
+          <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="clearer"></div>
@@ -131,7 +441,7 @@
       &copy;2014, John Lawson.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.2.2</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 0.6.6</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.6.1</a>
       
       |

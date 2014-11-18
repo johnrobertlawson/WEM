@@ -1,29 +1,25 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
-
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>WEM package &mdash; WEM 0.9.0 documentation</title>
-    
+    <title>WEM package &mdash; WEM v0.9.0 documentation</title>
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    './',
+        URL_ROOT:    '',
         VERSION:     '0.9.0',
-        COLLAPSE_INDEX: false,
+        COLLAPSE_MODINDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
       };
     </script>
     <script type="text/javascript" src="_static/jquery.js"></script>
-    <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="WEM 0.9.0 documentation" href="index.html" />
+    <link rel="top" title="WEM v0.9.0 documentation" href="index.html" />
     <link rel="next" title="WEM package" href="WEM.html" />
     <link rel="prev" title="Welcome to .’s documentation!" href="index.html" />
    
@@ -39,15 +35,15 @@
           <a href="genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
-          <a href="py-modindex.html" title="Python Module Index"
-             >modules</a> |</li>
+          <a href="modindex.html" title="Global Module Index"
+             accesskey="M">modules</a> |</li>
         <li class="right" >
           <a href="WEM.html" title="WEM package"
              accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="index.html" title="Welcome to .’s documentation!"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">WEM 0.9.0 documentation</a> &raquo;</li> 
+        <li><a href="index.html">WEM v0.9.0 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -100,7 +96,8 @@ the location to which you want figures saving.</p>
 </pre></div>
 </div>
 <p>You can also generate a sequence of times. This is useful for iterating plots
-over numerous plot times.</p>
+over numerous plot times. Don&#8217;t forget you can iterate over levels, contour
+level settings, etc., with the basic Python loops.</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">itime</span> <span class="o">=</span> <span class="p">(</span><span class="mi">2006</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">10</span><span class="p">,</span><span class="mi">18</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
 <span class="n">ftime</span> <span class="o">=</span> <span class="p">(</span><span class="mi">2006</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">11</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
 <span class="n">hourly</span> <span class="o">=</span> <span class="mi">3</span>
@@ -109,8 +106,9 @@ over numerous plot times.</p>
 </div>
 <p>Now here are some example of plots:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="c"># This plots simulated composite reflectivity</span>
-<span class="c"># Set level = 0 as cref does not have a level.</span>
-<span class="n">p</span><span class="o">.</span><span class="n">plot2D</span><span class="p">(</span><span class="s">&#39;cref&#39;</span><span class="p">,</span><span class="n">utc</span><span class="o">=</span><span class="n">itime</span><span class="p">,</span><span class="n">level</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">outdir</span><span class="o">=</span><span class="n">outdir</span><span class="p">,</span><span class="n">ncdir</span><span class="o">=</span><span class="n">ncdir</span><span class="p">,</span><span class="n">ncf</span><span class="o">=</span><span class="n">ncf</span><span class="p">,</span>
+<span class="c"># Ignore level argument (it is set to False if not specified)</span>
+<span class="c"># as cref does not have a level.</span>
+<span class="n">p</span><span class="o">.</span><span class="n">plot2D</span><span class="p">(</span><span class="s">&#39;cref&#39;</span><span class="p">,</span><span class="n">utc</span><span class="o">=</span><span class="n">itime</span><span class="p">,</span><span class="n">outdir</span><span class="o">=</span><span class="n">outdir</span><span class="p">,</span><span class="n">ncdir</span><span class="o">=</span><span class="n">ncdir</span><span class="p">,</span><span class="n">ncf</span><span class="o">=</span><span class="n">ncf</span><span class="p">,</span>
             <span class="n">nct</span><span class="o">=</span><span class="n">nct</span><span class="p">,</span><span class="n">legend</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
 
 <span class="n">p</span><span class="o">.</span><span class="n">plotstreamlines</span><span class="p">()</span>
@@ -119,7 +117,7 @@ over numerous plot times.</p>
 <p>All that&#8217;s left is executing the script with <tt class="docutils literal"><span class="pre">python</span> <span class="pre">script.py</span></tt>, where
 <cite>script.py</cite> is your file&#8217;s name.</p>
 <p>More information on the various plots and statistics can be found in the API
-section for <tt class="xref py py-class docutils literal"><span class="pre">WEM.postWRF.postWRF.main</span></tt>.</p>
+section for <tt class="xref docutils literal"><span class="pre">WEM.postWRF.postWRF.main</span></tt>.</p>
 </div>
 <div class="section" id="examples">
 <h2>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h2>
@@ -130,6 +128,29 @@ projection, with the same colourbar, use the following:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">p</span><span class="o">.</span><span class="n">plot_radar</span><span class="p">()</span>
 </pre></div>
 </div>
+<p>To plot accumulated rainfall (combined grid-scale and cumulus
+parameterisation), amassed over a number of hours, try this:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">p</span><span class="o">.</span><span class="n">plot_accum_rain</span><span class="p">(</span><span class="n">utc</span><span class="p">,</span><span class="n">accum_hr</span><span class="p">,</span><span class="n">ncdir</span><span class="o">=</span><span class="n">ncdir</span><span class="p">,</span><span class="n">outdir</span><span class="o">=</span><span class="n">outdir</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>To plot Difference Kinetic Energy, integrated up to 500 hPa, over a domain,
+every six hours, you would first compute the fields (as it is time-consuming,
+and it makes sense to save data to file first, in case of reuse), and next plot
+this data.</p>
+<div class="highlight-python"><pre>p.)
+p.</pre>
+</div>
+<p>Many functions can accept and return matplotlib figure/axis objects, in case
+you want to use WEM&#8217;s processing capability, but use your own plots. Here&#8217;s an
+example where frontogenesis fields form a four-panel plot (suitable for
+publication, for instance):</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>You can pass a dictionary of locations and their latitude/longitude, and have
+these places plotted on the map. It currently works for <tt class="docutils literal"><span class="pre">plot2D()</span></tt> and
+<tt class="docutils literal"><span class="pre">plot_accum_rain()</span></tt>. This is an example usage:</p>
 </div>
 </div>
 
@@ -139,43 +160,40 @@ projection, with the same colourbar, use the following:</p>
       </div>
       <div class="sphinxsidebar">
         <div class="sphinxsidebarwrapper">
-<h1 class="logo"><a href="index.html">WEM</a></h1>
-
-
-
-
-
-<p>
-<iframe src="http://ghbtns.com/github-btn.html?user=&repo=&type=watch&count=true&size=large"
-  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
-</p>
-
-
-<h3>Navigation</h3>
-<ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="">WEM package</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#tutorial">Tutorial</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#installation">Installation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#examples">Examples</a></li>
+            <h3><a href="index.html">Table Of Contents</a></h3>
+            <ul>
+<li><a class="reference external" href="#">WEM package</a><ul>
+<li><a class="reference external" href="#tutorial">Tutorial</a></li>
+<li><a class="reference external" href="#installation">Installation</a></li>
+<li><a class="reference external" href="#examples">Examples</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="WEM.html">WEM package</a></li>
 </ul>
 
-
-<div id="searchbox" style="display: none">
-  <h3>Quick search</h3>
-    <form class="search" action="search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
-    </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
-</div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+            <h4>Previous topic</h4>
+            <p class="topless"><a href="index.html"
+                                  title="previous chapter">Welcome to .&#8217;s documentation!</a></p>
+            <h4>Next topic</h4>
+            <p class="topless"><a href="WEM.html"
+                                  title="next chapter">WEM package</a></p>
+            <h3>This Page</h3>
+            <ul class="this-page-menu">
+              <li><a href="_sources/tutorial.txt"
+                     rel="nofollow">Show Source</a></li>
+            </ul>
+          <div id="searchbox" style="display: none">
+            <h3>Quick search</h3>
+              <form class="search" action="search.html" method="get">
+                <input type="text" name="q" size="18" />
+                <input type="submit" value="Go" />
+                <input type="hidden" name="check_keywords" value="yes" />
+                <input type="hidden" name="area" value="default" />
+              </form>
+              <p class="searchtip" style="font-size: 90%">
+              Enter search terms or a module, class or function name.
+              </p>
+          </div>
+          <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="clearer"></div>
@@ -184,7 +202,7 @@ projection, with the same colourbar, use the following:</p>
       &copy;2014, John Lawson.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.2.2</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 0.6.6</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.6.1</a>
       
       |

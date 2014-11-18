@@ -52,7 +52,8 @@ the location to which you want figures saving.
     ncf = 'wrfout_do1...'
 
 You can also generate a sequence of times. This is useful for iterating plots
-over numerous plot times.
+over numerous plot times. Don't forget you can iterate over levels, contour
+level settings, etc., with the basic Python loops.
 
 .. code-block:: python
 
@@ -66,8 +67,9 @@ Now here are some example of plots:
 .. code-block:: python
     
     # This plots simulated composite reflectivity 
-    # Set level = 0 as cref does not have a level.
-    p.plot2D('cref',utc=itime,level=0,outdir=outdir,ncdir=ncdir,ncf=ncf,
+    # Ignore level argument (it is set to False if not specified)
+    # as cref does not have a level.
+    p.plot2D('cref',utc=itime,outdir=outdir,ncdir=ncdir,ncf=ncf,
                 nct=nct,legend=True)
 
     p.plotstreamlines()
@@ -89,3 +91,41 @@ projection, with the same colourbar, use the following:
 .. code-block:: python
 
     p.plot_radar()
+
+
+To plot accumulated rainfall (combined grid-scale and cumulus
+parameterisation), amassed over a number of hours, try this:    
+
+.. code-block:: python
+
+    p.plot_accum_rain(utc,accum_hr,ncdir=ncdir,outdir=outdir)
+
+To plot Difference Kinetic Energy, integrated up to 500 hPa, over a domain,
+every six hours, you would first compute the fields (as it is time-consuming,
+and it makes sense to save data to file first, in case of reuse), and next plot
+this data.
+
+.. code-block:: python
+
+    p.)
+    p.
+
+Many functions can accept and return matplotlib figure/axis objects, in case
+you want to use WEM's processing capability, but use your own plots. Here's an
+example where frontogenesis fields form a four-panel plot (suitable for
+publication, for instance):
+
+.. code-block:: python
+    
+    import matplotlib.pyplot as plt
+    fig, ax = plt.subplots(2,2)
+
+You can pass a dictionary of locations and their latitude/longitude, and have
+these places plotted on the map. It currently works for ``plot2D()`` and
+``plot_accum_rain()``. This is an example usage:
+
+.. code-block:: python
+    # locs = {'label':(latitude,longitude),etc}
+    locs = {'Norman':(35.22,-97.44),'Topeka':(39.06,-95.69)}
+    p.plot2D('RAINNC',utc,ncdir=wrf_sd,outdir=out_sd,locations=locs,clvs=N.arange(1,100,2))
+
