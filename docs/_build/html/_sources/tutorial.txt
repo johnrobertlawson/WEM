@@ -77,3 +77,15 @@ All that's left is executing the script with ``python script.py``, where
 
 More information on the various plots and statistics can be found in the API
 section for :class:`WEM.postWRF.postWRF.main`.
+
+Examples
+--------
+
+Here are some other useful functions. First, to plot simulated composite
+reflectivity for a given time and domain, and then save a second figure showing
+verification composite reflectivity (over the US CONUS) on the same domain and
+projection, with the same colourbar, use the following:
+
+.. code-block:: python
+
+    p.plot_radar()
