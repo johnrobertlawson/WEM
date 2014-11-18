@@ -52,7 +52,8 @@ the location to which you want figures saving.
     ncf = 'wrfout_do1...'
 
 You can also generate a sequence of times. This is useful for iterating plots
-over numerous plot times.
+over numerous plot times. Don't forget you can iterate over levels, contour
+level settings, etc., with the basic Python loops.
 
 .. code-block:: python
 
@@ -77,3 +78,46 @@ All that's left is executing the script with ``python script.py``, where
 
 More information on the various plots and statistics can be found in the API
 section for :class:`WEM.postWRF.postWRF.main`.
+
+Examples
+--------
+
+Here are some other useful functions. First, to plot simulated composite
+reflectivity for a given time and domain, and then save a second figure showing
+verification composite reflectivity (over the US CONUS) on the same domain and
+projection, with the same colourbar, use the following:
+
+.. code-block:: python
+
+    p.plot_radar()
+
+
+To plot accumulated rainfall (combined grid-scale and cumulus
+parameterisation), amassed over a number of hours, try this:    
+
+.. code-block:: python
+
+    p.plot_accum_rain(utc,accum_hr,ncdir,outdir)
+
+To plot Difference Kinetic Energy, integrated up to 500 hPa, over a domain,
+every six hours, you would first compute the fields (as it is time-consuming,
+and it makes sense to save data to file first, in case of reuse), and next plot
+this data.
+
+.. code-block:: python
+
+    p.)
+    p.
+
+Many functions can accept and return matplotlib figure/axis objects, in case
+you want to use WEM's processing capability, but use your own plots. Here's an
+example where frontogenesis fields form a four-panel plot (suitable for
+publication, for instance):
+
+.. code-block:: python
+    
+    import matplotlib.pyplot as plt
+    fig, ax = plt.subplots(2,2)
+
+
+
