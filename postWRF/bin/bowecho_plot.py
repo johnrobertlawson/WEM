@@ -139,6 +139,7 @@ if skewT:
     
     #p.plot_skewT(skewT_time,skewT_latlon,composite=1)
 
+locs = {'Norman':(35.2,-97.4)}
 if plot2D or radarplot:
     for en in ensnames:
         for ex in experiments:
@@ -148,7 +149,7 @@ if plot2D or radarplot:
                     # p.plot_strongest_wind(itime,ftime,2000,wrf_sd=wrf_sd,out_sd=out_sd)
                     # p.plot2D('Z',t,500,wrf_sd=wrf_sd,out_sd=out_sd,plottype='contour',smooth=10)
                     # p.plot2D('cref',t,2000,ncdir=wrf_sd,outdir=out_sd)
-                    p.plot2D('RAINNC',t,ncdir=wrf_sd,outdir=out_sd)
+                    p.plot2D('RAINNC',t,ncdir=wrf_sd,outdir=out_sd,locations=locs,clvs=N.arange(1,100,2))
 
                 if radarplot:
                     outdir,datadir = get_verif_dirs()

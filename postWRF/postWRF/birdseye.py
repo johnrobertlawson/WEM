@@ -53,7 +53,8 @@ class BirdsEye(Figure):
     # Old plot_data
     def plot2D(self,data,fname,outdir,plottype='contourf',
                     save=1,smooth=1,lats=False,lons=False,
-                    clvs=False,cmap=False,title=False,colorbar=True):
+                    clvs=False,cmap=False,title=False,colorbar=True,
+                    locations=False):
 
         """
         Generic method that plots any matrix of data on a map
@@ -69,6 +70,10 @@ class BirdsEye(Figure):
         clvs        :   scale for contours
         title       :   title on plot
         save        :   whether to save to file
+
+        :param locations:       Locations to plot on the basemap.
+                                Format: locations = {'label':(lat,lon),etc}
+        :type locations:        dict
         """
         # INITIALISE
         self.data = data
@@ -93,6 +98,18 @@ class BirdsEye(Figure):
         else:
             print("Specify correct plot type.")
             raise Exception
+
+        if isinstance(locations,dict):
+            for k,v in locations.iteritems():
+                if isinstance(v,tuple) and len(v) == 2:
+                    xpt, ypt = self.bmap(v[1],v[0])
+                    # bbox_style = {'boxstyle':'square','fc':'white','alpha':0.5}
+                    self.bmap.plot(xpt,ypt,'ko',markersize=3,zorder=100)
+                    self.ax.text(xpt,ypt,k,ha='left',fontsize=7)
+                    # self.ax.text(xpt-15000,ypt,k,bbox=bbox_style,ha='left',fontsize=7)
+                else:
+                    print("Not a valid location argument.")
+                    raise Exception
 
         if isinstance(title,basestring):
             plt.title(title)

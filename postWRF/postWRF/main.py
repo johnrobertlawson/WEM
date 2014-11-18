@@ -62,7 +62,8 @@ class WRFEnviron(object):
     def plot2D(self,vrbl,utc,level=False,ncdir=False,outdir=False,
                 ncf=False,nct=False,f_prefix=0,f_suffix=False,
                 bounding=False,dom=1,plottype='contourf',smooth=1,
-                fig=False,ax=False,clvs=False,cmap=False):
+                fig=False,ax=False,clvs=False,cmap=False,
+                locations=False,colorbar=False):
         """Basic birds-eye-view plotting.
 
         This script is top-most and decides if the variables is
@@ -133,6 +134,11 @@ class WRFEnviron(object):
                             http://matplotlib.org/examples/color/
                             colormaps_reference.html
         :type cmap:         str
+        :param locations:   Locations to plot on the basemap.
+                            Format: locations = {'label':(lat,lon),etc}
+        :type locations:    dict
+        :param colorbar:    plot a colorbar.
+        :type colorbar:     bool
         :returns:           None.
 
         """
@@ -172,7 +178,7 @@ class WRFEnviron(object):
         # import pdb; pdb.set_trace()
         F.plot2D(data,fname,outdir,lats=False,lons=False,
                     plottype=plottype,smooth=smooth,
-                    clvs=clvs,cmap=cmap)
+                    clvs=clvs,cmap=cmap,locations=locations)
 
     def create_fname(self,vrbl,utc,level=False,f_prefix=False,f_suffix=False):
         """
