@@ -1278,3 +1278,19 @@ class WRFOut(object):
             # Full equation
             Front = dgraddt[1,1,:,:] + U[1,1,:,:]*dgraddx[1,1,:,:] + V[1,1,:,:]*dgraddy[1,1,:,:] # + omega[1,1,:,:]*dgraddz[1,1,:,:]
         return Front
+
+    def compute_accum_rain(self,utc,accum_hr):
+        """
+        Needs to be expanded to include other precip
+        """
+        dn = utils.ensure_datenum(utc)
+        idx0 = self.get_time_idx(dn-(3600*accum_hr))
+        idx1 = self.get_time_idx(dn)
+        # range_idx = range(start_idx,end_idx+1)
+        total0 = (self.get('RAINNC',utc=idx0) +
+                    self.get('RAINC',utc=idx0))
+        total1 = (self.get('RAINNC',utc=idx1) +
+                    self.get('RAINC',utc=idx1))
+        accum = total1 - total0
+        return accum
+        

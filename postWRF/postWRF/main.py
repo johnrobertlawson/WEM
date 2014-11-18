@@ -165,7 +165,7 @@ class WRFEnviron(object):
                     plottype=plottype,smooth=smooth,
                     clvs=clvs,cmap=cmap)
 
-    def create_fname(self,vrbl,utc,level,f_prefix=False,f_suffix=False):
+    def create_fname(self,vrbl,utc,level=False,f_prefix=False,f_suffix=False):
         """
         Generate a filename (without extension) for saving a figure.
         Differentiate between similar plots for e.g. different domains by
@@ -189,7 +189,10 @@ class WRFEnviron(object):
         """
         time_str = utils.string_from_time('output',utc)
 
-        fname = '_'.join((vrbl,time_str,level))
+        strs = [vrbl,time_str]
+        if level:
+            strs.append(level)
+        fname = '_'.join(strs)
 
         if isinstance(f_prefix,basestring):
             fname = f_prefix + fname
@@ -1500,3 +1503,21 @@ class WRFEnviron(object):
         R.plot_radar(outdir,Nlim=Nlim,Elim=Elim,Slim=Slim,Wlim=Wlim)
         print("Plotting radar for {0}".format(utc))
 
+    def plot_accum_rain(self,utc,accum_hr,ncdir,outdir,ncf=False,nct=False,
+                            f_prefix=0,f_suffix=False,bounding=False,dom=1,
+                            plottype='contourf',smooth=1,fig=False,ax=False,
+                            clvs=False,cmap=False):
+        """
+        Needs to be expanded to include other forms of precip.
+        Plot accumulated precip (RAIN!) valid at time utc for accum_hr hours.
+
+        """
+
+        self.W = self.get_netcdf(ncdir,ncf=ncf,nct=nct,dom=dom)
+        data = self.W.compute_accum_rain(utc,accum_hr)[0,:,:]
+        fname = self.create_fname('accum_precip',utc)
+        F = BirdsEye(self.W)
+        F.plot2D(data,fname,outdir,lats=False,lons=False,
+                    plottype=plottype,smooth=smooth,
+                    clvs=clvs,cmap=cmap)
+        

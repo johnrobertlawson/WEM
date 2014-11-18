@@ -913,7 +913,7 @@ def convert_tuple_to_dntimes(times):
 
     return dntimes
 
-def ensure_datenum(times,fmt='list'):
+def ensure_datenum(times,fmt='int'):
     """
     Make sure times are in list-of-datenums format.
     If not, convert them.
