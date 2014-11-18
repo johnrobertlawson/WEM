@@ -1521,7 +1521,7 @@ class WRFEnviron(object):
     def plot_accum_rain(self,utc,accum_hr,ncdir,outdir,ncf=False,nct=False,
                             f_prefix=0,f_suffix=False,bounding=False,dom=1,
                             plottype='contourf',smooth=1,fig=False,ax=False,
-                            clvs=False,cmap=False):
+                            clvs=False,cmap=False,locations=False):
         """
         Needs to be expanded to include other forms of precip.
         Plot accumulated precip (RAIN!) valid at time utc for accum_hr hours.
@@ -1534,5 +1534,5 @@ class WRFEnviron(object):
         F = BirdsEye(self.W)
         F.plot2D(data,fname,outdir,lats=False,lons=False,
                     plottype=plottype,smooth=smooth,
-                    clvs=clvs,cmap=cmap)
+                    clvs=clvs,cmap=cmap,locations=locations,)
         

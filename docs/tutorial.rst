@@ -120,5 +120,12 @@ publication, for instance):
     import matplotlib.pyplot as plt
     fig, ax = plt.subplots(2,2)
 
+You can pass a dictionary of locations and their latitude/longitude, and have
+these places plotted on the map. It currently works for ``plot2D()`` and
+``plot_accum_rain()``. This is an example usage:
 
+.. code-block:: python
+    # locs = {'label':(latitude,longitude),etc}
+    locs = {'Norman':(35.22,-97.44),'Topeka':(39.06,-95.69)}
+    p.plot2D('RAINNC',utc,ncdir=wrf_sd,outdir=out_sd,locations=locs,clvs=N.arange(1,100,2))
 
