@@ -117,6 +117,17 @@ class WRFOut(object):
         else:
             return False
 
+    def return_idx_range(self,utc0,utc1):
+        """
+        Give a start and end time. Returns an array of
+        all indices. Useful for self.get() to return an
+        array of data with all times between utc0 and utc1.
+        """
+        idx0 = self.get_time_idx(utc0)
+        idx1 = self.get_time_idx(utc1)
+        return N.arange(idx0,idx1)
+        
+
     def get(self,vrbl,utc=False,level=False,lats=False,lons=False,
                 smooth=1,other=False):
         """
@@ -815,6 +826,10 @@ class WRFOut(object):
         vc = self.check_vcs(z1,z2)
 
     def compute_strongest_wind(self,tidx,lvidx,lonidx,latidx,other):
+        """
+        Pass the array of time indices and it will find the max
+        along that axis.
+        """
         wind = self.get('wind10',tidx,lvidx,lonidx,latidx)
         wind_max = N.amax(wind,axis=0)
         # wind_max_smooth = self.test_smooth(wind_max)

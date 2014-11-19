@@ -859,10 +859,10 @@ class WRFEnviron(object):
         fname = self.create_fname('streamlines',utc,level)
         self.F.plot_streamlines(U,V,outdir,fname)
 
-    def plot_strongest_wind(self,itime,ftime,level,ncdir,outdir,
-                            ncf=False,nct=False,
+    def plot_strongest_wind(self,itime,ftime,level,ncdir=False,
+                            outdir=False,ncf=False,nct=False,
                             f_prefix=False,f_suffix=False,bounding=False,
-                            dom=1):
+                            dom=1,clvs=False):
         """
         Plot strongest wind at level between itime and ftime.
 
@@ -907,20 +907,28 @@ class WRFEnviron(object):
 
 
         """
-        self.W = self.get_netcdf(wrf_sd,wrf_nc,dom=dom)
+        if ncdir is False:
+            ncdir = os.path.expanduser("~")
+        if outdir is False:
+            outdir = os.path.expanduser("~")
 
-        outpath = self.get_outpath(out_sd)
+        if level:
+            level = self.get_level_string(level)
+
+        # Data
+        self.W = self.get_netcdf(ncdir,ncf=ncf,nct=nct,dom=dom)
 
         # Make sure times are in datenum format and sequence.
-        it = utils.ensure_sequence_datenum(itime)
-        ft = utils.ensure_sequence_datenum(ftime)
+        it = utils.ensure_datenum(itime)
+        ft = utils.ensure_datenum(ftime)
+        trange = self.W.return_idx_range(it,ft)
+        deltahr = str(int((ft-it)/3600.0))
 
-        d_list = utils.get_sequence(dom)
-        lv_list = utils.get_sequence(levels)
-
-        for l, d in itertools.product(lv_list,d_list):
-            F = BirdsEye(self.C,self.W)
-            F.plot2D('strongestwind',it+ft,l,d,outpath,bounding=bounding)
+        data = self.W.get('strongestwind',utc=trange,level=level)
+        
+        F = BirdsEye(self.W)
+        fname = self.create_fname('strongestwind',ftime,level,f_suffix='_'+deltahr)
+        F.plot2D(data,fname,outdir,clvs=clvs)
 
     def make_1D(self,data,output='list'):
         """ Ensure input data is a time series

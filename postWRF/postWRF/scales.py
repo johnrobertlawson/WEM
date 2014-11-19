@@ -115,7 +115,7 @@ class Scales(object):
         
         # Simulated reflectivity
         A['cref'] = {'cmap':ct.reflect_ncdc}
-        A['cref'][2000] = (5,90,5)
+        A['cref'][0] = (5,90,5)
         
         # Precipitation
         A['precip'] = {'cmap':ct.precip1}

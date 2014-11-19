@@ -19,7 +19,7 @@ ncroot = '/chinook2/jrlawson/bowecho/'
 p = WRFEnviron()
 
 skewT = 0
-plot2D = 1
+plot2D = 0
 radarplot = 0
 streamlines = 0
 rucplot = 0
@@ -29,38 +29,46 @@ std = 0
 profiles = 0
 frontogenesis = 0
 upperlevel = 0
+strongestwind = 1
 
-# enstype = 'STCH'
-enstype = 'ICBC'
+enstype = 'STCH'
+# enstype = 'ICBC'
 # enstype = 'MXMP'
+# enstype = 'STMX'
 
-# case = '20060526'
+case = '20060526'
 # case = '2006052612'
 #case = '20090910'
 # case = '20110419'
-case = '20130815'
+# case = '20130815'
 
-IC = 'GEFSR2'
-# IC = 'NAM'
+# IC = 'GEFSR2'
+IC = 'NAM'
 # IC = 'RUC'
 # IC = 'GFS'
 # IC = 'RUC'
 
-#ensnames = ['anl']
-#experiment = 'VERIF'
+ensnames = ['anl']
+# experiment = 'VERIF'
 
 
 if enstype == 'STCH':
     experiments = ['s'+"%02d" %n for n in range(1,11)]
-    ensnames = ['c00',]
-    MP = 'ICBC'
+    # ensnames = ['c00',]
+    MP = 'WDM6_Grau'
+elif enstype == 'STMX':
+    # experiments = ['WSM6_Hail','Kessler','Ferrier',
+    experiments = ['WSM6_Grau_STCH','WSM6_Hail_STCH','Kessler_STCH',
+                    'Ferrier_STCH', 'WSM5_STCH','WDM5_STCH','Lin_STCH',
+                    'WDM6_Grau_STCH','WDM6_Hail_STCH',
+                    'Morrison_Grau_STCH','Morrison_Hail_STCH',]
+                    # 'ICBC_STCH']
+    # ensnames = ['anl',]
 elif enstype == 'MXMP':
     # experiments = ['WSM6_Hail','Kessler','Ferrier',
     experiments = ['WSM6_Grau','WSM6_Hail','Kessler','Ferrier',
                     'WSM5','WDM5','Lin','WDM6_Grau','WDM6_Hail',
                     'Morrison_Grau','Morrison_Hail','ICBC']
-    experiments = ['ICBC',]
-    experiments = ['VERIF',]
     ensnames = ['anl',]
 elif enstype == 'ICBC':
     ensnames =  ['c00'] + ['p'+"%02d" %n for n in range(1,11)]
@@ -68,8 +76,10 @@ elif enstype == 'ICBC':
 
 if case[:4] == '2006':
     inittime = (2006,5,26,0,0,0)
-    itime = (2006,5,26,3,0,0)
+    itime = (2006,5,26,0,0,0)
     ftime = (2006,5,27,12,0,0)
+    iwind = (2006,5,26,18,0,0)
+    fwind = (2006,5,27,12,0,0)
     # times = [(2006,5,26,12,0,0),]
 elif case[:4] == '2009':
     inittime = (2009,9,10,23,0,0)
@@ -87,7 +97,7 @@ elif case[:4] == '2013':
 else:
     raise Exception
 
-hourly = 3
+hourly = 1
 level = 2000
 
 def get_folders(en,ex):
@@ -104,7 +114,7 @@ def get_verif_dirs():
     datadir = os.path.join(ncroot,case,'VERIF')
     return outdir,datadir
 
-# times = utils.generate_times(itime,ftime,hourly*60*60)
+times = utils.generate_times(itime,ftime,hourly*60*60)
 
 #shear_times = utils.generate_times(itime,ftime,3*60*60)
 #sl_times = utils.generate_times(sl_itime,sl_ftime,1*60*60)
@@ -148,8 +158,9 @@ if plot2D or radarplot:
                 if plot2D:
                     # p.plot_strongest_wind(itime,ftime,2000,wrf_sd=wrf_sd,out_sd=out_sd)
                     # p.plot2D('Z',t,500,wrf_sd=wrf_sd,out_sd=out_sd,plottype='contour',smooth=10)
-                    # p.plot2D('cref',t,2000,ncdir=wrf_sd,outdir=out_sd)
-                    p.plot2D('RAINNC',t,ncdir=wrf_sd,outdir=out_sd,locations=locs,clvs=N.arange(1,100,2))
+                    # import pdb; pdb.set_trace()
+                    p.plot2D('cref',t,ncdir=wrf_sd,outdir=out_sd)
+                    # p.plot2D('RAINNC',t,ncdir=wrf_sd,outdir=out_sd,locations=locs,clvs=N.arange(1,100,2))
 
                 if radarplot:
                     outdir,datadir = get_verif_dirs()
@@ -265,4 +276,11 @@ if upperlevel:
                 p.upperlevel_W(time,850,wrf_sd=wrf_sd,out_sd=out_sd,
                                 clvs = N.arange(0,1.0,0.01)
                                 )
+
+windlvs = N.arange(10,31,1)
+if strongestwind:
+    for en in ensnames:
+        for ex in experiments:
+            outdir, ncdir = get_folders(en,ex)
+            p.plot_strongest_wind(iwind,fwind,2000,ncdir,outdir,clvs=windlvs)
 
