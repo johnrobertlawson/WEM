@@ -6,7 +6,15 @@ importing matplotlib etc!
 Useful/utility scripts are in WEM.utils.
 
 TODO: move all DKE stuff to stats and figure/birdseye.
+
 TODO: move more utilities to utils.
+
+TODO: generalise plotting so the mountain of arguments can be easily changed
+and documented. Right now a small change to general plotting API takes a lot
+of time, and the documentation is a bit crazy.
+
+TODO: make boring methods private, e.g. _create_fname(). Then hide it from
+documentation if it is revealed to the user at the top level.
 """
 from netCDF4 import Dataset
 import calendar
@@ -396,7 +404,7 @@ class WRFEnviron(object):
         :type ax:           bool,matplotlib.axis
         :param meanvrbl:    variable of ensemble mean (WRF key or computed vrbl)
         :type meanvrbl:     str
-        :param meanlevel:   level for the ensemble mean variable. 
+        :param meanlevel:   level for the ensemble mean variable.
                             Lowest model level is integer 2000.
                             Pressure level is integer in hPa, e.g. 850.
                             Isentropic surface is a string + K, e.g. '320K'.
@@ -467,7 +475,7 @@ class WRFEnviron(object):
                             parameterisation scheme, the initial
                             conditions used. This is used as the
                             label for the plot legend.
-        :type ensnames:     list,tuple 
+        :type ensnames:     list,tuple
         :param ylim:        [min,max] for y axis range
         :type ylim:         list,tuple
         :param f_prefix:    custom filename prefix for output. Ignore if False.
@@ -602,7 +610,7 @@ class WRFEnviron(object):
                             dom=1,mean=True,std=True,xlim=False,
                             ylim=False):
         """
-        Plot multiple vertical profiles of atmospheric variables 
+        Plot multiple vertical profiles of atmospheric variables
         including optional mean and standard deviation.
 
         Superceded by :func:`twopanel_profile`?
@@ -678,7 +686,7 @@ class WRFEnviron(object):
         :type overlay:      str
         :param ml:          member level. Negative number that corresponds
                             to the folder in the absolute path string,
-                            for naming purposes. Useful for file naming, 
+                            for naming purposes. Useful for file naming,
                             labelling.
         :type ml:           int
 
@@ -787,7 +795,7 @@ class WRFEnviron(object):
                             Integer format is epoch/datenum (ready for
                             time.gmtime).
         :type utc:          tuple,list,int
-        :param level:       required level. 
+        :param level:       required level.
                             Lowest model level is integer 2000.
                             Pressure level is integer in hPa, e.g. 850.
                             Isentropic surface is a string + K, e.g. '320K'.
@@ -865,7 +873,7 @@ class WRFEnviron(object):
         :type itime:        tuple,list,int
         :param ftime:       final time. Same format as `itime`.
         :type ftime:        tuple,list,int
-        :param level:       required level. 
+        :param level:       required level.
                             Lowest model level is integer 2000.
                             Pressure level is integer in hPa, e.g. 850.
                             Isentropic surface is a string + K, e.g. '320K'.
@@ -978,18 +986,18 @@ class WRFEnviron(object):
         :type ncdir:        str
         :param outdir:      directory to save output figures
         :type outdir:       str
-        :param latA:        latitude of transect start point. 
+        :param latA:        latitude of transect start point.
                             False triggers a pop-up box.
         :type latA:         bool,float
         :param lonA:        longitude of transect start point.
                             False triggers a pop-up box.
-        :type lonB:         bool,float                    
-        :param latB:        latitude of transect end point. 
+        :type lonB:         bool,float
+        :param latB:        latitude of transect end point.
                             False triggers a pop-up box.
         :type latB:         bool,float
         :param lonB:        longitude of transect end point.
                             False triggers a pop-up box.
-        :type lonB:         bool,float                    
+        :type lonB:         bool,float
         :param ncf:         filename of netcdf data file if ambiguous within ncdir.
                             If no wrfout file is explicitly specified, the
                             netCDF file in that folder is chosen if unambiguous.
@@ -1007,7 +1015,7 @@ class WRFEnviron(object):
         :type dom:          int
         :param clvs:        contouring for the variable plotted.
                             False is automatic.
-                            Generate the `numpy.ndarray` with 
+                            Generate the `numpy.ndarray` with
                             :func:`numpy.arange`.
         :type clvs:         numpy.ndarray,bool
         :param ylim:        [min,max] (in km) altitude to plot.
@@ -1188,7 +1196,7 @@ class WRFEnviron(object):
                             Integer format is epoch/datenum (ready for
                             time.gmtime).
         :type utc:          tuple,list,int
-        :param level:       required level. 
+        :param level:       required level.
                             Lowest model level is integer 2000.
                             Pressure level is integer in hPa, e.g. 850.
                             Isentropic surface is a string + K, e.g. '320K'.
@@ -1240,7 +1248,7 @@ class WRFEnviron(object):
                             Integer format is epoch/datenum (ready for
                             time.gmtime).
         :type utc:          tuple,list,int
-        :param level:       required level. 
+        :param level:       required level.
                             Lowest model level is integer 2000.
                             Pressure level is integer in hPa, e.g. 850.
                             Isentropic surface is a string + K, e.g. '320K'.
@@ -1360,10 +1368,10 @@ class WRFEnviron(object):
         :type dom:          int
         :param path_only:   if True, return only strings to the files.
                             if False, return the instances (RUC,EC,WRFOut).
-        :returns:           either a list of absolute path strings, or 
+        :returns:           either a list of absolute path strings, or
                             a list of instances (RUC,EC,WRFOut).
 
-        TODO: Deal with ambiguous selections.    
+        TODO: Deal with ambiguous selections.
         """
         ncfiles = []
         for wrf_sd in wrf_sds:
@@ -1376,17 +1384,17 @@ class WRFEnviron(object):
         """
         Plot only the domains for each netCDF file specified.
 
-        :param ncdirs:      Absolute paths to all netCDF directories, 
-                            or one single absolute path if only 
+        :param ncdirs:      Absolute paths to all netCDF directories,
+                            or one single absolute path if only
                             one domain is to be plotted.
         :type ncdirs:       str,tuple,list
-        :param labels:      labels for each domain. 
+        :param labels:      labels for each domain.
         :type labels:       str,tuple,list
         :param outdir:      directory to save output figures
         :type outdir:       str
-        :param colours:     colours for each domain box, in the same order as 
+        :param colours:     colours for each domain box, in the same order as
                             the ncdirs sequence (if more than one)
-        :type colours:      str,list,tuple 
+        :type colours:      str,list,tuple
         :param ncf:         filename of netcdf data file if ambiguous within ncdir.
                             If no wrfout file is explicitly specified, the
                             netCDF file in that folder is chosen if unambiguous.
@@ -1416,7 +1424,7 @@ class WRFEnviron(object):
                             Integer format is epoch/datenum (ready for
                             time.gmtime).
         :type utc:          tuple,list,int
-        :param level:       required level. 
+        :param level:       required level.
                             Lowest model level is integer 2000.
                             Pressure level is integer in hPa, e.g. 850.
                             Isentropic surface is a string + K, e.g. '320K'.
@@ -1507,7 +1515,7 @@ class WRFEnviron(object):
                     Slim=False,Wlim=False,ncdir=False,nct=False,
                     ncf=False,dom=1):
         """
-        pass
+        Plot verification radar.
         """
         R = Radar(utc,datadir)
 
@@ -1526,6 +1534,7 @@ class WRFEnviron(object):
         Needs to be expanded to include other forms of precip.
         Plot accumulated precip (RAIN!) valid at time utc for accum_hr hours.
 
+
         """
 
         self.W = self.get_netcdf(ncdir,ncf=ncf,nct=nct,dom=dom)
@@ -1535,4 +1544,3 @@ class WRFEnviron(object):
         F.plot2D(data,fname,outdir,lats=False,lons=False,
                     plottype=plottype,smooth=smooth,
                     clvs=clvs,cmap=cmap,locations=locations,)
-        
