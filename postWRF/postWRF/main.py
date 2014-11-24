@@ -69,9 +69,10 @@ class WRFEnviron(object):
 
     def plot2D(self,vrbl,utc,level=False,ncdir=False,outdir=False,
                 ncf=False,nct=False,f_prefix=0,f_suffix=False,
-                bounding=False,dom=1,plottype='contourf',smooth=1,
+                dom=1,plottype='contourf',smooth=1,
                 fig=False,ax=False,clvs=False,cmap=False,
-                locations=False,colorbar=False):
+                locations=False,colorbar=False,
+                Nlim=False,Elim=False,Slim=False,Wlim=False):
         """Basic birds-eye-view plotting.
 
         This script is top-most and decides if the variables is
@@ -108,14 +109,8 @@ class WRFEnviron(object):
         :type nct:          bool,str
         :param f_prefix:    custom filename prefix for output. Ignore if False.
         :type f_prefix:     bool,str
-        :param f_suffix     custom filename suffix for output. Ignore if False.
-        :type f_suffix      bool,str
-        :param bounding:    bounding box for domain.
-                            Dictionary contains four keys (Nlim, Elim, Slim, Wlim)
-                            with float values (northern latitude limit, eastern
-                            longitude limit, southern latitude limit, western
-                            latitude limit, respectively).
-        :type bounding:     dict
+        :param f_suffix:    custom filename suffix for output. Ignore if False.
+        :type f_suffix:     bool,str
         :param smooth:      pass data through a Gaussian filter. Value of 1 is
                             essentially `off'.
                             Integer greater than zero is the degree of smoothing,
@@ -147,6 +142,14 @@ class WRFEnviron(object):
         :type locations:    dict
         :param colorbar:    plot a colorbar.
         :type colorbar:     bool
+        :param Nlim:        north limit (latitude) for plot
+        :type Nlim:         float
+        :param Elim:        east limit (longitude) for plot
+        :type Elim:         float
+        :param Slim:        south limit (latitude) for plot
+        :type Slim:         float
+        :param Wlim:        west limit (longitude) for plot
+        :type Wlim:         float
         :returns:           None.
 
         """
@@ -1388,8 +1391,9 @@ class WRFEnviron(object):
             ncfiles.append(ncfile)
         return ncfiles
 
-    def plot_domains(self,ncdirs,labels,outdir,colours='black',
-                        nct=False,ncf=False,latlons=False):
+    def plot_domains(self,ncdirs,labels,outdir,Nlim,Elim,
+                        Slim,Wlim,colours='black',
+                        nct=False,ncf=False):
         """
         Plot only the domains for each netCDF file specified.
 
@@ -1401,6 +1405,14 @@ class WRFEnviron(object):
         :type labels:       str,tuple,list
         :param outdir:      directory to save output figures
         :type outdir:       str
+        :param Nlim:        north limit (latitude) for plot
+        :type Nlim:         float
+        :param Elim:        east limit (longitude) for plot
+        :type Elim:         float
+        :param Slim:        south limit (latitude) for plot
+        :type Slim:         float
+        :param Wlim:        west limit (longitude) for plot
+        :type Wlim:         float
         :param colours:     colours for each domain box, in the same order as
                             the ncdirs sequence (if more than one)
         :type colours:      str,list,tuple
@@ -1411,13 +1423,10 @@ class WRFEnviron(object):
         :param nct:         initialisation time of netcdf data file, if
                             ambiguous within ncdir.
         :type nct:          bool,str
-        :param latlons:     dictionary of N, E, S, W limits (Nlim, Elim,
-                            Slim, Wlim) to plot outer map
-        :type latlons:      dict
 
         """
-        outpath = self.get_outpath(out_sd)
-        maps.plot_domains(wrfouts,labels,latlons,outpath,colour)
+        maps.plot_domains(ncdirs,labels,outdir,Nlim,Elim,
+                            Slim,Wlim,colours=colours)
 
 
     def frontogenesis(self,utc,level,ncdir,outdir,ncf=False,nct=False,
@@ -1560,9 +1569,10 @@ class WRFEnviron(object):
         # print("Plotting radar for {0}".format(utc))
 
     def plot_accum_rain(self,utc,accum_hr,ncdir,outdir,ncf=False,nct=False,
-                            f_prefix=0,f_suffix=False,bounding=False,dom=1,
+                            f_prefix=0,f_suffix=False,dom=1,
                             plottype='contourf',smooth=1,fig=False,ax=False,
-                            clvs=False,cmap=False,locations=False):
+                            clvs=False,cmap=False,locations=False,
+                            Nlim=False,Elim=False,Slim=False,Wlim=False):
         """
         Needs to be expanded to include other forms of precip.
         Plot accumulated precip (RAIN!) valid at time utc for accum_hr hours.
@@ -1576,4 +1586,5 @@ class WRFEnviron(object):
         F = BirdsEye(self.W)
         F.plot2D(data,fname,outdir,lats=False,lons=False,
                     plottype=plottype,smooth=smooth,
-                    clvs=clvs,cmap=cmap,locations=locations,)
+                    clvs=clvs,cmap=cmap,locations=locations,
+                    Nlim=Nlim,Elim=Elim,Slim=Slim,Wlim=Wlim)

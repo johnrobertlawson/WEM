@@ -21,7 +21,7 @@ p = WRFEnviron()
 skewT = 0
 plot2D = 0
 radarplot = 0
-radarcomp = 1
+radarcomp = 0
 streamlines = 0
 rucplot = 0
 coldpoolstrength = 0
@@ -31,6 +31,7 @@ profiles = 0
 frontogenesis = 0
 upperlevel = 0
 strongestwind = 0
+accum_rain = 1
 
 # enstype = 'STCH'
 enstype = 'ICBC'
@@ -296,4 +297,13 @@ if strongestwind:
         for ex in experiments:
             outdir, ncdir = get_folders(en,ex)
             p.plot_strongest_wind(iwind,fwind,2000,ncdir,outdir,clvs=windlvs)
+
+if accum_rain:
+    for en in ensnames:
+        for ex in experiments:
+            for t in times:
+                outdir, ncdir = get_folders(en,ex)
+                p.plot_accum_rain(t,6,ncdir,outdir,
+                        Nlim=42.7,Elim=-94.9,Slim=37.0,Wlim=-101.8
+                        )
 

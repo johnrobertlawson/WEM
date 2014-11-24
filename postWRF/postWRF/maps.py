@@ -5,27 +5,24 @@ import collections
 from wrfout import WRFOut
 import os
 
-def plot_domains(wrfouts,labels,latlons,outpath,colour=0):
+def plot_domains(wrfouts,labels,latlons,outpath,Nlim,Elim,
+                    Slim,Wlim,colour='k'):
     """
     wrfouts     :   list of wrfout file paths
-    latlons     :   dictionary of Nlim,Elim,Slim,Wlim
-                    for plot
     """
 
     fig, ax = plt.subplots(1)
 
     # Create basemap first of all
     #basemap_res = getattr(self.C,'basemap_res',self.D.basemap_res)
-    basemap_res = 'h'
-
-    m = Basemap(
-        projection='merc',
-        llcrnrlon=latlons['Wlim'],llcrnrlat=latlons['Slim'],
-        urcrnrlon=latlons['Elim'],urcrnrlat=latlons['Nlim'],
-        lat_0=latlons['lat0'],lon_0=latlons['lon0'],
-        resolution=basemap_res,area_thresh=500,
-        ax=ax)
-
+    m = Basemap(projection='merc',
+                llcrnrlat=Slim,
+                llcrnrlon=Wlim,
+                urcrnrlat=Nlim,
+                urcrnrlon=Elim,
+                lat_ts=(Nlim-Slim)/2.0,
+                resolution='l',
+                ax=self.ax)
     m.drawcoastlines()
     m.drawstates()
     m.drawcountries()

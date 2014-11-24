@@ -16,12 +16,12 @@ import WEM.utils as utils
 from defaults import Defaults
 
 class Figure(object):
-    def __init__(self,wrfout=False,ax=0,fig=0,plotn=(1,1),layout='normal'):
+    def __init__(self,nc=False,ax=0,fig=0,plotn=(1,1),layout='normal'):
         """
         C   :   configuration settings
         W   :   data
         """
-        self.W = wrfout
+        self.W = nc
         self.D = Defaults()
 
         # Create main figure
@@ -101,7 +101,8 @@ class Figure(object):
         CB.set_label(label)
         self.save(fig,fpath,fname)
 
-    def basemap_setup(self,smooth=1,lats=False,lons=False,proj='merc'):
+    def basemap_setup(self,smooth=1,lats=False,lons=False,proj='merc',
+                        Nlim=False,Elim=False,Slim=False,Wlim=False):
         """
         Needs rewriting to include limited domains based on lats/lons.
         Currently, assuming whole domain is plotted.
@@ -120,13 +121,14 @@ class Figure(object):
                 lat_2=self.W.truelat2,resolution=basemap_res,area_thresh=500,
                 ax=self.ax)
         elif proj=='merc':
-            if self.W:
+            if self.W and not Nlim:
                 Nlim,Elim,Slim,Wlim = self.W.get_limits()
-            else:
+            elif not Nlim:
                 Nlim = lats.max()
                 Slim = lats.min()
                 Elim = lons.max()
                 Wlim = lons.min()
+            
             m = Basemap(projection=proj,
                         llcrnrlat=Slim,
                         llcrnrlon=Wlim,

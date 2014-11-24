@@ -23,8 +23,8 @@ from scales import Scales
 import stats
 
 class BirdsEye(Figure):
-    def __init__(self,wrfout=False,ax=0,fig=0):
-        super(BirdsEye,self).__init__(wrfout=False,ax=ax,fig=fig)
+    def __init__(self,nc=False,ax=0,fig=0):
+        super(BirdsEye,self).__init__(nc=nc,ax=ax,fig=fig)
 
     def get_plot_arguments(self,cmap=False,clvs=False):
         """
@@ -54,7 +54,8 @@ class BirdsEye(Figure):
     def plot2D(self,data,fname,outdir,plottype='contourf',
                     save=1,smooth=1,lats=False,lons=False,
                     clvs=False,cmap=False,title=False,colorbar=True,
-                    locations=False,m=False,x=False,y=False):
+                    locations=False,m=False,x=False,y=False,
+                    Nlim=False,Elim=False,Slim=False,Wlim=False):
 
         """
         Generic method that plots any matrix of data on a map
@@ -78,8 +79,14 @@ class BirdsEye(Figure):
         # INITIALISE
         self.data = data
         if x is False and y is False and m is False:
-            self.bmap,self.x,self.y = self.basemap_setup(smooth=smooth,lats=lats,
+            if not Nlim:
+                self.bmap,self.x,self.y = self.basemap_setup(smooth=smooth,lats=lats,
                                                     lons=lons,)#ax=self.ax)
+            else:
+                self.bmap,self.x,self.y = self.basemap_setup(smooth=smooth,lats=lats,
+                                                    lons=lons,Nlim=Nlim,Elim=Elim,
+                                                    Slim=Slim,Wlim=Wlim)
+
         else:
             self.bmap = m
             self.x = x

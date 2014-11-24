@@ -80,7 +80,7 @@ that they get their own file here.</p>
 <p>Subclass of Figure.</p>
 <dl class="class">
 <dt id="WEM.postWRF.postWRF.birdseye.BirdsEye">
-<em class="property">class </em><tt class="descclassname">WEM.postWRF.postWRF.birdseye.</tt><tt class="descname">BirdsEye</tt><big>(</big><em>wrfout=False</em>, <em>ax=0</em>, <em>fig=0</em><big>)</big><a class="headerlink" href="#WEM.postWRF.postWRF.birdseye.BirdsEye" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">WEM.postWRF.postWRF.birdseye.</tt><tt class="descname">BirdsEye</tt><big>(</big><em>nc=False</em>, <em>ax=0</em>, <em>fig=0</em><big>)</big><a class="headerlink" href="#WEM.postWRF.postWRF.birdseye.BirdsEye" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a title="WEM.postWRF.postWRF.figure.Figure" class="reference internal" href="#WEM.postWRF.postWRF.figure.Figure"><tt class="xref docutils literal"><span class="pre">WEM.postWRF.postWRF.figure.Figure</span></tt></a></p>
 <dl class="method">
 <dt id="WEM.postWRF.postWRF.birdseye.BirdsEye.get_plot_arguments">
@@ -92,7 +92,7 @@ clvs    :   manually override contour levels</p>
 
 <dl class="method">
 <dt id="WEM.postWRF.postWRF.birdseye.BirdsEye.plot2D">
-<tt class="descname">plot2D</tt><big>(</big><em>data</em>, <em>fname</em>, <em>outdir</em>, <em>plottype='contourf'</em>, <em>save=1</em>, <em>smooth=1</em>, <em>lats=False</em>, <em>lons=False</em>, <em>clvs=False</em>, <em>cmap=False</em>, <em>title=False</em>, <em>colorbar=True</em>, <em>locations=False</em>, <em>m=False</em>, <em>x=False</em>, <em>y=False</em><big>)</big><a class="headerlink" href="#WEM.postWRF.postWRF.birdseye.BirdsEye.plot2D" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">plot2D</tt><big>(</big><em>data</em>, <em>fname</em>, <em>outdir</em>, <em>plottype='contourf'</em>, <em>save=1</em>, <em>smooth=1</em>, <em>lats=False</em>, <em>lons=False</em>, <em>clvs=False</em>, <em>cmap=False</em>, <em>title=False</em>, <em>colorbar=True</em>, <em>locations=False</em>, <em>m=False</em>, <em>x=False</em>, <em>y=False</em>, <em>Nlim=False</em>, <em>Elim=False</em>, <em>Slim=False</em>, <em>Wlim=False</em><big>)</big><a class="headerlink" href="#WEM.postWRF.postWRF.birdseye.BirdsEye.plot2D" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generic method that plots any matrix of data on a map</p>
 <p>Inputs:
 data        :   2D matrix of data
@@ -318,13 +318,13 @@ If the user is not happy, they can try again.</dd></dl>
 <p>All matplotlib figures are subclasses of Figure.</p>
 <dl class="class">
 <dt id="WEM.postWRF.postWRF.figure.Figure">
-<em class="property">class </em><tt class="descclassname">WEM.postWRF.postWRF.figure.</tt><tt class="descname">Figure</tt><big>(</big><em>wrfout=False</em>, <em>ax=0</em>, <em>fig=0</em>, <em>plotn=(1</em>, <em>1)</em>, <em>layout='normal'</em><big>)</big><a class="headerlink" href="#WEM.postWRF.postWRF.figure.Figure" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">WEM.postWRF.postWRF.figure.</tt><tt class="descname">Figure</tt><big>(</big><em>nc=False</em>, <em>ax=0</em>, <em>fig=0</em>, <em>plotn=(1</em>, <em>1)</em>, <em>layout='normal'</em><big>)</big><a class="headerlink" href="#WEM.postWRF.postWRF.figure.Figure" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <tt class="xref docutils literal"><span class="pre">object</span></tt></p>
 <p>C   :   configuration settings
 W   :   data</p>
 <dl class="method">
 <dt id="WEM.postWRF.postWRF.figure.Figure.basemap_setup">
-<tt class="descname">basemap_setup</tt><big>(</big><em>smooth=1</em>, <em>lats=False</em>, <em>lons=False</em>, <em>proj='merc'</em><big>)</big><a class="headerlink" href="#WEM.postWRF.postWRF.figure.Figure.basemap_setup" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">basemap_setup</tt><big>(</big><em>smooth=1</em>, <em>lats=False</em>, <em>lons=False</em>, <em>proj='merc'</em>, <em>Nlim=False</em>, <em>Elim=False</em>, <em>Slim=False</em>, <em>Wlim=False</em><big>)</big><a class="headerlink" href="#WEM.postWRF.postWRF.figure.Figure.basemap_setup" title="Permalink to this definition">¶</a></dt>
 <dd>Needs rewriting to include limited domains based on lats/lons.
 Currently, assuming whole domain is plotted.</dd></dl>
 
@@ -748,7 +748,7 @@ of 1D values, and numpy array.</p>
 
 <dl class="method">
 <dt id="WEM.postWRF.postWRF.main.WRFEnviron.plot2D">
-<tt class="descname">plot2D</tt><big>(</big><em>vrbl</em>, <em>utc</em>, <em>level=False</em>, <em>ncdir=False</em>, <em>outdir=False</em>, <em>ncf=False</em>, <em>nct=False</em>, <em>f_prefix=0</em>, <em>f_suffix=False</em>, <em>bounding=False</em>, <em>dom=1</em>, <em>plottype='contourf'</em>, <em>smooth=1</em>, <em>fig=False</em>, <em>ax=False</em>, <em>clvs=False</em>, <em>cmap=False</em>, <em>locations=False</em>, <em>colorbar=False</em><big>)</big><a class="headerlink" href="#WEM.postWRF.postWRF.main.WRFEnviron.plot2D" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">plot2D</tt><big>(</big><em>vrbl</em>, <em>utc</em>, <em>level=False</em>, <em>ncdir=False</em>, <em>outdir=False</em>, <em>ncf=False</em>, <em>nct=False</em>, <em>f_prefix=0</em>, <em>f_suffix=False</em>, <em>dom=1</em>, <em>plottype='contourf'</em>, <em>smooth=1</em>, <em>fig=False</em>, <em>ax=False</em>, <em>clvs=False</em>, <em>cmap=False</em>, <em>locations=False</em>, <em>colorbar=False</em>, <em>Nlim=False</em>, <em>Elim=False</em>, <em>Slim=False</em>, <em>Wlim=False</em><big>)</big><a class="headerlink" href="#WEM.postWRF.postWRF.main.WRFEnviron.plot2D" title="Permalink to this definition">¶</a></dt>
 <dd><p>Basic birds-eye-view plotting.</p>
 <p>This script is top-most and decides if the variables is
 built into WRF default output or needs computing. It unstaggers
@@ -757,7 +757,7 @@ and slices data from the wrfout file appropriately.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><em>vrbl</em> (str) &#8211; variable name as found in WRF, or one of
 the computed fields available in WEM</li>
 <li><em>utc</em> (tuple,list,int) &#8211; one date/time. The tuple/list format is
@@ -780,24 +780,7 @@ netCDF file in that folder is chosen if unambiguous.</li>
 <li><em>nct</em> (bool,str) &#8211; initialisation time of netcdf data file, if
 ambiguous within ncdir.</li>
 <li><em>f_prefix</em> (bool,str) &#8211; custom filename prefix for output. Ignore if False.</li>
-</ul>
-</td>
-</tr>
-</tbody>
-</table>
-<p>:param f_suffix     custom filename suffix for output. Ignore if False.
-:type f_suffix      bool,str
-:param bounding:    bounding box for domain.</p>
-<blockquote>
-Dictionary contains four keys (Nlim, Elim, Slim, Wlim)
-with float values (northern latitude limit, eastern
-longitude limit, southern latitude limit, western
-latitude limit, respectively).</blockquote>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><em>f_suffix</em> (bool,str) &#8211; custom filename suffix for output. Ignore if False.</li>
 <li><em>smooth</em> (int) &#8211; pass data through a Gaussian filter. Value of 1 is
 essentially <a href="#id3"><span class="problematic" id="id4">`</span></a>off&#8217;.
 Integer greater than zero is the degree of smoothing,
@@ -818,6 +801,10 @@ colormaps_reference.html</li>
 <li><em>locations</em> (dict) &#8211; Locations to plot on the basemap.
 Format: locations = {&#8216;label&#8217;:(lat,lon),etc}</li>
 <li><em>colorbar</em> (bool) &#8211; plot a colorbar.</li>
+<li><em>Nlim</em> (float) &#8211; north limit (latitude) for plot</li>
+<li><em>Elim</em> (float) &#8211; east limit (longitude) for plot</li>
+<li><em>Slim</em> (float) &#8211; south limit (latitude) for plot</li>
+<li><em>Wlim</em> (float) &#8211; west limit (longitude) for plot</li>
 </ul>
 </td>
 </tr>
@@ -835,7 +822,7 @@ Format: locations = {&#8216;label&#8217;:(lat,lon),etc}</li>
 
 <dl class="method">
 <dt id="WEM.postWRF.postWRF.main.WRFEnviron.plot_accum_rain">
-<tt class="descname">plot_accum_rain</tt><big>(</big><em>utc</em>, <em>accum_hr</em>, <em>ncdir</em>, <em>outdir</em>, <em>ncf=False</em>, <em>nct=False</em>, <em>f_prefix=0</em>, <em>f_suffix=False</em>, <em>bounding=False</em>, <em>dom=1</em>, <em>plottype='contourf'</em>, <em>smooth=1</em>, <em>fig=False</em>, <em>ax=False</em>, <em>clvs=False</em>, <em>cmap=False</em>, <em>locations=False</em><big>)</big><a class="headerlink" href="#WEM.postWRF.postWRF.main.WRFEnviron.plot_accum_rain" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">plot_accum_rain</tt><big>(</big><em>utc</em>, <em>accum_hr</em>, <em>ncdir</em>, <em>outdir</em>, <em>ncf=False</em>, <em>nct=False</em>, <em>f_prefix=0</em>, <em>f_suffix=False</em>, <em>dom=1</em>, <em>plottype='contourf'</em>, <em>smooth=1</em>, <em>fig=False</em>, <em>ax=False</em>, <em>clvs=False</em>, <em>cmap=False</em>, <em>locations=False</em>, <em>Nlim=False</em>, <em>Elim=False</em>, <em>Slim=False</em>, <em>Wlim=False</em><big>)</big><a class="headerlink" href="#WEM.postWRF.postWRF.main.WRFEnviron.plot_accum_rain" title="Permalink to this definition">¶</a></dt>
 <dd>Needs to be expanded to include other forms of precip.
 Plot accumulated precip (RAIN!) valid at time utc for accum_hr hours.</dd></dl>
 
@@ -877,7 +864,7 @@ this figure (similarly for axis, below).</li>
 
 <dl class="method">
 <dt id="WEM.postWRF.postWRF.main.WRFEnviron.plot_domains">
-<tt class="descname">plot_domains</tt><big>(</big><em>ncdirs</em>, <em>labels</em>, <em>outdir</em>, <em>colours='black'</em>, <em>nct=False</em>, <em>ncf=False</em>, <em>latlons=False</em><big>)</big><a class="headerlink" href="#WEM.postWRF.postWRF.main.WRFEnviron.plot_domains" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">plot_domains</tt><big>(</big><em>ncdirs</em>, <em>labels</em>, <em>outdir</em>, <em>Nlim</em>, <em>Elim</em>, <em>Slim</em>, <em>Wlim</em>, <em>colours='black'</em>, <em>nct=False</em>, <em>ncf=False</em><big>)</big><a class="headerlink" href="#WEM.postWRF.postWRF.main.WRFEnviron.plot_domains" title="Permalink to this definition">¶</a></dt>
 <dd><p>Plot only the domains for each netCDF file specified.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -889,6 +876,10 @@ or one single absolute path if only
 one domain is to be plotted.</li>
 <li><em>labels</em> (str,tuple,list) &#8211; labels for each domain.</li>
 <li><em>outdir</em> (str) &#8211; directory to save output figures</li>
+<li><em>Nlim</em> (float) &#8211; north limit (latitude) for plot</li>
+<li><em>Elim</em> (float) &#8211; east limit (longitude) for plot</li>
+<li><em>Slim</em> (float) &#8211; south limit (latitude) for plot</li>
+<li><em>Wlim</em> (float) &#8211; west limit (longitude) for plot</li>
 <li><em>colours</em> (str,list,tuple) &#8211; colours for each domain box, in the same order as
 the ncdirs sequence (if more than one)</li>
 <li><em>ncf</em> (bool,str) &#8211; filename of netcdf data file if ambiguous within ncdir.
@@ -896,8 +887,6 @@ If no wrfout file is explicitly specified, the
 netCDF file in that folder is chosen if unambiguous.</li>
 <li><em>nct</em> (bool,str) &#8211; initialisation time of netcdf data file, if
 ambiguous within ncdir.</li>
-<li><em>latlons</em> (dict) &#8211; dictionary of N, E, S, W limits (Nlim, Elim,
-Slim, Wlim) to plot outer map</li>
 </ul>
 </td>
 </tr>
@@ -1344,7 +1333,7 @@ labelling.</li>
 <h2>WEM.postWRF.postWRF.map module<a class="headerlink" href="#module-WEM.postWRF.postWRF.map" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="WEM.postWRF.postWRF.map.Map">
-<em class="property">class </em><tt class="descclassname">WEM.postWRF.postWRF.map.</tt><tt class="descname">Map</tt><big>(</big><em>wrfout=False</em>, <em>ax=0</em>, <em>fig=0</em>, <em>plotn=(1</em>, <em>1)</em>, <em>layout='normal'</em><big>)</big><a class="headerlink" href="#WEM.postWRF.postWRF.map.Map" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">WEM.postWRF.postWRF.map.</tt><tt class="descname">Map</tt><big>(</big><em>nc=False</em>, <em>ax=0</em>, <em>fig=0</em>, <em>plotn=(1</em>, <em>1)</em>, <em>layout='normal'</em><big>)</big><a class="headerlink" href="#WEM.postWRF.postWRF.map.Map" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a title="WEM.postWRF.postWRF.figure.Figure" class="reference internal" href="#WEM.postWRF.postWRF.figure.Figure"><tt class="xref docutils literal"><span class="pre">WEM.postWRF.postWRF.figure.Figure</span></tt></a></p>
 <p>C   :   configuration settings
 W   :   data</p>
@@ -1364,12 +1353,8 @@ for plot</blockquote>
 <h2>WEM.postWRF.postWRF.maps module<a class="headerlink" href="#module-WEM.postWRF.postWRF.maps" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
 <dt id="WEM.postWRF.postWRF.maps.plot_domains">
-<tt class="descclassname">WEM.postWRF.postWRF.maps.</tt><tt class="descname">plot_domains</tt><big>(</big><em>wrfouts</em>, <em>labels</em>, <em>latlons</em>, <em>outpath</em>, <em>colour=0</em><big>)</big><a class="headerlink" href="#WEM.postWRF.postWRF.maps.plot_domains" title="Permalink to this definition">¶</a></dt>
-<dd><p>wrfouts     :   list of wrfout file paths
-latlons     :   dictionary of Nlim,Elim,Slim,Wlim</p>
-<blockquote>
-for plot</blockquote>
-</dd></dl>
+<tt class="descclassname">WEM.postWRF.postWRF.maps.</tt><tt class="descname">plot_domains</tt><big>(</big><em>wrfouts</em>, <em>labels</em>, <em>latlons</em>, <em>outpath</em>, <em>Nlim</em>, <em>Elim</em>, <em>Slim</em>, <em>Wlim</em>, <em>colour='k'</em><big>)</big><a class="headerlink" href="#WEM.postWRF.postWRF.maps.plot_domains" title="Permalink to this definition">¶</a></dt>
+<dd>wrfouts     :   list of wrfout file paths</dd></dl>
 
 </div>
 <div class="section" id="module-WEM.postWRF.postWRF.metconstants">
