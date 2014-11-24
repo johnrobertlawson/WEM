@@ -80,7 +80,7 @@ that they get their own file here.</p>
 <p>Subclass of Figure.</p>
 <dl class="class">
 <dt id="WEM.postWRF.postWRF.birdseye.BirdsEye">
-<em class="property">class </em><tt class="descclassname">WEM.postWRF.postWRF.birdseye.</tt><tt class="descname">BirdsEye</tt><big>(</big><em>wrfout</em>, <em>ax=0</em>, <em>fig=0</em><big>)</big><a class="headerlink" href="#WEM.postWRF.postWRF.birdseye.BirdsEye" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">WEM.postWRF.postWRF.birdseye.</tt><tt class="descname">BirdsEye</tt><big>(</big><em>wrfout=False</em>, <em>ax=0</em>, <em>fig=0</em><big>)</big><a class="headerlink" href="#WEM.postWRF.postWRF.birdseye.BirdsEye" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a title="WEM.postWRF.postWRF.figure.Figure" class="reference internal" href="#WEM.postWRF.postWRF.figure.Figure"><tt class="xref docutils literal"><span class="pre">WEM.postWRF.postWRF.figure.Figure</span></tt></a></p>
 <dl class="method">
 <dt id="WEM.postWRF.postWRF.birdseye.BirdsEye.get_plot_arguments">
@@ -92,7 +92,7 @@ clvs    :   manually override contour levels</p>
 
 <dl class="method">
 <dt id="WEM.postWRF.postWRF.birdseye.BirdsEye.plot2D">
-<tt class="descname">plot2D</tt><big>(</big><em>data</em>, <em>fname</em>, <em>outdir</em>, <em>plottype='contourf'</em>, <em>save=1</em>, <em>smooth=1</em>, <em>lats=False</em>, <em>lons=False</em>, <em>clvs=False</em>, <em>cmap=False</em>, <em>title=False</em>, <em>colorbar=True</em>, <em>locations=False</em><big>)</big><a class="headerlink" href="#WEM.postWRF.postWRF.birdseye.BirdsEye.plot2D" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">plot2D</tt><big>(</big><em>data</em>, <em>fname</em>, <em>outdir</em>, <em>plottype='contourf'</em>, <em>save=1</em>, <em>smooth=1</em>, <em>lats=False</em>, <em>lons=False</em>, <em>clvs=False</em>, <em>cmap=False</em>, <em>title=False</em>, <em>colorbar=True</em>, <em>locations=False</em>, <em>m=False</em>, <em>x=False</em>, <em>y=False</em><big>)</big><a class="headerlink" href="#WEM.postWRF.postWRF.birdseye.BirdsEye.plot2D" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generic method that plots any matrix of data on a map</p>
 <p>Inputs:
 data        :   2D matrix of data
@@ -318,7 +318,7 @@ If the user is not happy, they can try again.</dd></dl>
 <p>All matplotlib figures are subclasses of Figure.</p>
 <dl class="class">
 <dt id="WEM.postWRF.postWRF.figure.Figure">
-<em class="property">class </em><tt class="descclassname">WEM.postWRF.postWRF.figure.</tt><tt class="descname">Figure</tt><big>(</big><em>wrfout</em>, <em>ax=0</em>, <em>fig=0</em>, <em>plotn=(1</em>, <em>1)</em>, <em>layout='normal'</em><big>)</big><a class="headerlink" href="#WEM.postWRF.postWRF.figure.Figure" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">WEM.postWRF.postWRF.figure.</tt><tt class="descname">Figure</tt><big>(</big><em>wrfout=False</em>, <em>ax=0</em>, <em>fig=0</em>, <em>plotn=(1</em>, <em>1)</em>, <em>layout='normal'</em><big>)</big><a class="headerlink" href="#WEM.postWRF.postWRF.figure.Figure" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <tt class="xref docutils literal"><span class="pre">object</span></tt></p>
 <p>C   :   configuration settings
 W   :   data</p>
@@ -382,8 +382,13 @@ Variable + time + level</dd></dl>
 <p>This script is API and should not be doing any hard work of
 importing matplotlib etc!</p>
 <p>Useful/utility scripts are in WEM.utils.</p>
-<p>TODO: move all DKE stuff to stats and figure/birdseye.
-TODO: move more utilities to utils.</p>
+<p>TODO: move all DKE stuff to stats and figure/birdseye.</p>
+<p>TODO: move more utilities to utils.</p>
+<p>TODO: generalise plotting so the mountain of arguments can be easily changed
+and documented. Right now a small change to general plotting API takes a lot
+of time, and the documentation is a bit crazy.</p>
+<p>TODO: make boring methods private, e.g. _create_fname(). Then hide it from
+documentation if it is revealed to the user at the top level.</p>
 <dl class="class">
 <dt id="WEM.postWRF.postWRF.main.WRFEnviron">
 <em class="property">class </em><tt class="descclassname">WEM.postWRF.postWRF.main.</tt><tt class="descname">WRFEnviron</tt><a class="headerlink" href="#WEM.postWRF.postWRF.main.WRFEnviron" title="Permalink to this definition">¶</a></dt>
@@ -451,7 +456,7 @@ first and second axis, if twoplot is True.</li>
 <dl class="method">
 <dt id="WEM.postWRF.postWRF.main.WRFEnviron.composite_profile">
 <tt class="descname">composite_profile</tt><big>(</big><em>vrbl</em>, <em>utc</em>, <em>enspaths</em>, <em>latlon=False</em>, <em>dom=1</em>, <em>mean=True</em>, <em>std=True</em>, <em>xlim=False</em>, <em>ylim=False</em><big>)</big><a class="headerlink" href="#WEM.postWRF.postWRF.main.WRFEnviron.composite_profile" title="Permalink to this definition">¶</a></dt>
-<dd><p>Plot multiple vertical profiles of atmospheric variables 
+<dd><p>Plot multiple vertical profiles of atmospheric variables
 including optional mean and standard deviation.</p>
 <p>Superceded by <a title="WEM.postWRF.postWRF.main.WRFEnviron.twopanel_profile" class="reference internal" href="#WEM.postWRF.postWRF.main.WRFEnviron.twopanel_profile"><tt class="xref docutils literal"><span class="pre">twopanel_profile()</span></tt></a>?</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -549,7 +554,7 @@ matplotlib.figure object will plot data onto
 this figure (similarly for axis, below).</li>
 <li><em>ax</em> (bool,matplotlib.axis) &#8211; matplotlib.axis object to plot onto</li>
 <li><em>meanvrbl</em> (str) &#8211; variable of ensemble mean (WRF key or computed vrbl)</li>
-<li><em>meanlevel</em> (int,str) &#8211; level for the ensemble mean variable. 
+<li><em>meanlevel</em> (int,str) &#8211; level for the ensemble mean variable.
 Lowest model level is integer 2000.
 Pressure level is integer in hPa, e.g. 850.
 Isentropic surface is a string + K, e.g. &#8216;320K&#8217;.
@@ -578,7 +583,7 @@ time index is start or end of wrfout file, skip the plot.</p>
 YYYY,MM,DD,HH,MM,SS (ready for calendar.timegm).
 Integer format is epoch/datenum (ready for
 time.gmtime).</li>
-<li><em>level</em> (int,str) &#8211; required level. 
+<li><em>level</em> (int,str) &#8211; required level.
 Lowest model level is integer 2000.
 Pressure level is integer in hPa, e.g. 850.
 Isentropic surface is a string + K, e.g. &#8216;320K&#8217;.
@@ -724,7 +729,7 @@ if False, return the instances (RUC,EC,WRFOut).</li>
 </ul>
 </td>
 </tr>
-<tr class="field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">either a list of absolute path strings, or 
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">either a list of absolute path strings, or
 a list of instances (RUC,EC,WRFOut).</p>
 </td>
 </tr>
@@ -879,12 +884,12 @@ this figure (similarly for axis, below).</li>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><em>ncdirs</em> (str,tuple,list) &#8211; Absolute paths to all netCDF directories, 
-or one single absolute path if only 
+<li><em>ncdirs</em> (str,tuple,list) &#8211; Absolute paths to all netCDF directories,
+or one single absolute path if only
 one domain is to be plotted.</li>
 <li><em>labels</em> (str,tuple,list) &#8211; labels for each domain.</li>
 <li><em>outdir</em> (str) &#8211; directory to save output figures</li>
-<li><em>colours</em> (str,list,tuple) &#8211; colours for each domain box, in the same order as 
+<li><em>colours</em> (str,list,tuple) &#8211; colours for each domain box, in the same order as
 the ncdirs sequence (if more than one)</li>
 <li><em>ncf</em> (bool,str) &#8211; filename of netcdf data file if ambiguous within ncdir.
 If no wrfout file is explicitly specified, the
@@ -933,8 +938,13 @@ label for the plot legend.</li>
 
 <dl class="method">
 <dt id="WEM.postWRF.postWRF.main.WRFEnviron.plot_radar">
-<tt class="descname">plot_radar</tt><big>(</big><em>utc</em>, <em>datadir</em>, <em>outdir</em>, <em>Nlim=False</em>, <em>Elim=False</em>, <em>Slim=False</em>, <em>Wlim=False</em>, <em>ncdir=False</em>, <em>nct=False</em>, <em>ncf=False</em>, <em>dom=1</em><big>)</big><a class="headerlink" href="#WEM.postWRF.postWRF.main.WRFEnviron.plot_radar" title="Permalink to this definition">¶</a></dt>
-<dd>pass</dd></dl>
+<tt class="descname">plot_radar</tt><big>(</big><em>utc</em>, <em>datadir</em>, <em>outdir</em>, <em>Nlim=False</em>, <em>Elim=False</em>, <em>Slim=False</em>, <em>Wlim=False</em>, <em>ncdir=False</em>, <em>nct=False</em>, <em>ncf=False</em>, <em>dom=1</em>, <em>composite=False</em>, <em>locations=False</em><big>)</big><a class="headerlink" href="#WEM.postWRF.postWRF.main.WRFEnviron.plot_radar" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot verification radar.</p>
+<p>composite allows plotting max reflectivity for a number of times
+over a given domain.
+This can show the evolution of a system.</p>
+<p>Need to rewrite so plotting is done in birdseye.</p>
+</dd></dl>
 
 <dl class="method">
 <dt id="WEM.postWRF.postWRF.main.WRFEnviron.plot_skewT">
@@ -998,7 +1008,7 @@ List is absolute paths to netCDF files.</li>
 YYYY,MM,DD,HH,MM,SS (ready for calendar.timegm).
 Integer format is epoch/datenum (ready for
 time.gmtime).</li>
-<li><em>level</em> (int,str) &#8211; required level. 
+<li><em>level</em> (int,str) &#8211; required level.
 Lowest model level is integer 2000.
 Pressure level is integer in hPa, e.g. 850.
 Isentropic surface is a string + K, e.g. &#8216;320K&#8217;.
@@ -1052,7 +1062,7 @@ this figure (similarly for axis, below).</li>
 
 <dl class="method">
 <dt id="WEM.postWRF.postWRF.main.WRFEnviron.plot_strongest_wind">
-<tt class="descname">plot_strongest_wind</tt><big>(</big><em>itime</em>, <em>ftime</em>, <em>level</em>, <em>ncdir</em>, <em>outdir</em>, <em>ncf=False</em>, <em>nct=False</em>, <em>f_prefix=False</em>, <em>f_suffix=False</em>, <em>bounding=False</em>, <em>dom=1</em><big>)</big><a class="headerlink" href="#WEM.postWRF.postWRF.main.WRFEnviron.plot_strongest_wind" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">plot_strongest_wind</tt><big>(</big><em>itime</em>, <em>ftime</em>, <em>level</em>, <em>ncdir=False</em>, <em>outdir=False</em>, <em>ncf=False</em>, <em>nct=False</em>, <em>f_prefix=False</em>, <em>f_suffix=False</em>, <em>bounding=False</em>, <em>dom=1</em>, <em>clvs=False</em><big>)</big><a class="headerlink" href="#WEM.postWRF.postWRF.main.WRFEnviron.plot_strongest_wind" title="Permalink to this definition">¶</a></dt>
 <dd><p>Plot strongest wind at level between itime and ftime.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -1064,7 +1074,7 @@ YYYY,MM,DD,HH,MM,SS (ready for calendar.timegm).
 Integer format is epoch/datenum (ready for
 time.gmtime).</li>
 <li><em>ftime</em> (tuple,list,int) &#8211; final time. Same format as <cite>itime</cite>.</li>
-<li><em>level</em> (int,str) &#8211; required level. 
+<li><em>level</em> (int,str) &#8211; required level.
 Lowest model level is integer 2000.
 Pressure level is integer in hPa, e.g. 850.
 Isentropic surface is a string + K, e.g. &#8216;320K&#8217;.
@@ -1124,11 +1134,11 @@ Integer format is epoch/datenum (ready for
 time.gmtime).</li>
 <li><em>ncdir</em> (str) &#8211; directory of netcdf data file</li>
 <li><em>outdir</em> (str) &#8211; directory to save output figures</li>
-<li><em>latA</em> (bool,float) &#8211; latitude of transect start point. 
+<li><em>latA</em> (bool,float) &#8211; latitude of transect start point.
 False triggers a pop-up box.</li>
 <li><em>lonA</em> &#8211; longitude of transect start point.
 False triggers a pop-up box.</li>
-<li><em>latB</em> (bool,float) &#8211; latitude of transect end point. 
+<li><em>latB</em> (bool,float) &#8211; latitude of transect end point.
 False triggers a pop-up box.</li>
 <li><em>lonB</em> (bool,float) &#8211; longitude of transect end point.
 False triggers a pop-up box.</li>
@@ -1156,7 +1166,7 @@ plotted.</blockquote>
 <tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><em>clvs</em> (numpy.ndarray,bool) &#8211; contouring for the variable plotted.
 False is automatic.
-Generate the <cite>numpy.ndarray</cite> with 
+Generate the <cite>numpy.ndarray</cite> with
 <tt class="xref docutils literal"><span class="pre">numpy.arange()</span></tt>.</li>
 <li><em>ylim</em> (list,tuple,bool) &#8211; [min,max] (in km) altitude to plot.
 False is automatic (all model levels)</li>
@@ -1183,7 +1193,7 @@ the computed fields available in WEM</li>
 YYYY,MM,DD,HH,MM,SS (ready for calendar.timegm).
 Integer format is epoch/datenum (ready for
 time.gmtime).</li>
-<li><em>level</em> (int,str) &#8211; required level. 
+<li><em>level</em> (int,str) &#8211; required level.
 Lowest model level is integer 2000.
 Pressure level is integer in hPa, e.g. 850.
 Isentropic surface is a string + K, e.g. &#8216;320K&#8217;.
@@ -1221,7 +1231,7 @@ the computed fields available in WEM</li>
 YYYY,MM,DD,HH,MM,SS (ready for calendar.timegm).
 Integer format is epoch/datenum (ready for
 time.gmtime).</li>
-<li><em>level</em> (int,str) &#8211; required level. 
+<li><em>level</em> (int,str) &#8211; required level.
 Lowest model level is integer 2000.
 Pressure level is integer in hPa, e.g. 850.
 Isentropic surface is a string + K, e.g. &#8216;320K&#8217;.
@@ -1318,7 +1328,7 @@ basemap. E.g. radar reflectivity.
 TODO: this is only cref right now (bool)</li>
 <li><em>ml</em> (int) &#8211; member level. Negative number that corresponds
 to the folder in the absolute path string,
-for naming purposes. Useful for file naming, 
+for naming purposes. Useful for file naming,
 labelling.</li>
 </ul>
 </td>
@@ -1334,7 +1344,7 @@ labelling.</li>
 <h2>WEM.postWRF.postWRF.map module<a class="headerlink" href="#module-WEM.postWRF.postWRF.map" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="WEM.postWRF.postWRF.map.Map">
-<em class="property">class </em><tt class="descclassname">WEM.postWRF.postWRF.map.</tt><tt class="descname">Map</tt><big>(</big><em>wrfout</em>, <em>ax=0</em>, <em>fig=0</em>, <em>plotn=(1</em>, <em>1)</em>, <em>layout='normal'</em><big>)</big><a class="headerlink" href="#WEM.postWRF.postWRF.map.Map" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">WEM.postWRF.postWRF.map.</tt><tt class="descname">Map</tt><big>(</big><em>wrfout=False</em>, <em>ax=0</em>, <em>fig=0</em>, <em>plotn=(1</em>, <em>1)</em>, <em>layout='normal'</em><big>)</big><a class="headerlink" href="#WEM.postWRF.postWRF.map.Map" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a title="WEM.postWRF.postWRF.figure.Figure" class="reference internal" href="#WEM.postWRF.postWRF.figure.Figure"><tt class="xref docutils literal"><span class="pre">WEM.postWRF.postWRF.figure.Figure</span></tt></a></p>
 <p>C   :   configuration settings
 W   :   data</p>
@@ -2016,7 +2026,8 @@ kwargs[&#8216;bottom&#8217;]</p>
 <dl class="method">
 <dt id="WEM.postWRF.postWRF.wrfout.WRFOut.compute_strongest_wind">
 <tt class="descname">compute_strongest_wind</tt><big>(</big><em>tidx</em>, <em>lvidx</em>, <em>lonidx</em>, <em>latidx</em>, <em>other</em><big>)</big><a class="headerlink" href="#WEM.postWRF.postWRF.wrfout.WRFOut.compute_strongest_wind" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd>Pass the array of time indices and it will find the max
+along that axis.</dd></dl>
 
 <dl class="method">
 <dt id="WEM.postWRF.postWRF.wrfout.WRFOut.compute_temps">
@@ -2206,6 +2217,13 @@ latitude, and longitude indices.</p>
 <p>TODO: Get rid of integer arguments earlier in the method chain, and
 make them single-element numpy arrays.</p>
 </dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.wrfout.WRFOut.return_idx_range">
+<tt class="descname">return_idx_range</tt><big>(</big><em>utc0</em>, <em>utc1</em><big>)</big><a class="headerlink" href="#WEM.postWRF.postWRF.wrfout.WRFOut.return_idx_range" title="Permalink to this definition">¶</a></dt>
+<dd>Give a start and end time. Returns an array of
+all indices. Useful for self.get() to return an
+array of data with all times between utc0 and utc1.</dd></dl>
 
 <dl class="method">
 <dt id="WEM.postWRF.postWRF.wrfout.WRFOut.return_tbl">

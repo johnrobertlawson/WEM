@@ -37,11 +37,11 @@ enstype = 'ICBC'
 # enstype = 'MXMP'
 # enstype = 'STMX'
 
-# case = '20060526'
+case = '20060526'
 # case = '2006052612'
 #case = '20090910'
 # case = '20110419'
-case = '20130815'
+# case = '20130815'
 
 IC = 'GEFSR2'
 # IC = 'NAM'
@@ -175,8 +175,9 @@ if radarcomp:
     out_sd, wrf_sd = get_folders(en,ex)
     outdir, datadir = get_verif_dirs()
     # p.plot_radar(compt,datadir,outdir,ncdir=wrf_sd,composite=True)
-    p.plot_radar(compt,datadir,outdir,composite=True,Nlim=40.1,
-                    Elim=-94.9,Slim=34.3,Wlim=-100.8)
+    p.plot_radar(compt,datadir,outdir,composite=True,
+                    # Nlim=40.1,Elim=-94.9,Slim=34.3,Wlim=-100.8)
+                    Nlim=42.7,Elim=-94.9,Slim=37.0,Wlim=-101.8)
 
 if streamlines:
     for en in ensnames:
