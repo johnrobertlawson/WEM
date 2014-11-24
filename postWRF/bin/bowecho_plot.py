@@ -21,6 +21,7 @@ p = WRFEnviron()
 skewT = 0
 plot2D = 0
 radarplot = 0
+radarcomp = 1
 streamlines = 0
 rucplot = 0
 coldpoolstrength = 0
@@ -29,21 +30,21 @@ std = 0
 profiles = 0
 frontogenesis = 0
 upperlevel = 0
-strongestwind = 1
+strongestwind = 0
 
-enstype = 'STCH'
-# enstype = 'ICBC'
+# enstype = 'STCH'
+enstype = 'ICBC'
 # enstype = 'MXMP'
 # enstype = 'STMX'
 
-case = '20060526'
+# case = '20060526'
 # case = '2006052612'
 #case = '20090910'
 # case = '20110419'
-# case = '20130815'
+case = '20130815'
 
-# IC = 'GEFSR2'
-IC = 'NAM'
+IC = 'GEFSR2'
+# IC = 'NAM'
 # IC = 'RUC'
 # IC = 'GFS'
 # IC = 'RUC'
@@ -80,6 +81,7 @@ if case[:4] == '2006':
     ftime = (2006,5,27,12,0,0)
     iwind = (2006,5,26,18,0,0)
     fwind = (2006,5,27,12,0,0)
+    compt = [(2006,5,d,h,0,0) for d,h in zip((26,27,27),(23,3,6))]
     # times = [(2006,5,26,12,0,0),]
 elif case[:4] == '2009':
     inittime = (2009,9,10,23,0,0)
@@ -94,6 +96,7 @@ elif case[:4] == '2013':
     itime = (2013,8,15,6,0,0)
     ftime = (2013,8,16,12,0,0)
     times = [(2013,8,16,3,0,0),]
+    compt = [(2013,8,d,h,0,0) for d,h in zip((15,16,16),(22,2,6))]
 else:
     raise Exception
 
@@ -165,6 +168,15 @@ if plot2D or radarplot:
                 if radarplot:
                     outdir,datadir = get_verif_dirs()
                     p.plot_radar(t,datadir,outdir,ncdir=wrf_sd)
+
+if radarcomp:
+    en = ensnames[0]
+    ex = experiments[0]
+    out_sd, wrf_sd = get_folders(en,ex)
+    outdir, datadir = get_verif_dirs()
+    # p.plot_radar(compt,datadir,outdir,ncdir=wrf_sd,composite=True)
+    p.plot_radar(compt,datadir,outdir,composite=True,Nlim=40.1,
+                    Elim=-94.9,Slim=34.3,Wlim=-100.8)
 
 if streamlines:
     for en in ensnames:

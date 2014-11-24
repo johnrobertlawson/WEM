@@ -180,6 +180,7 @@ class WRFEnviron(object):
             S = Scales(vrbl,level)
             cmap = S.cm
 
+
         # Figure
         fname = self.create_fname(vrbl,utc,level)
         F = BirdsEye(self.W,fig=fig,ax=ax)
@@ -1521,18 +1522,42 @@ class WRFEnviron(object):
 
     def plot_radar(self,utc,datadir,outdir,Nlim=False,Elim=False,
                     Slim=False,Wlim=False,ncdir=False,nct=False,
-                    ncf=False,dom=1):
+                    ncf=False,dom=1,composite=False,locations=False):
         """
         Plot verification radar.
-        """
-        R = Radar(utc,datadir)
 
+        composite allows plotting max reflectivity for a number of times
+        over a given domain.
+        This can show the evolution of a system.
+        
+        Need to rewrite so plotting is done in birdseye.
+        """
+        # Get limits of domain
         if not Nlim and isinstance(ncdir,str):
             self.W = self.get_netcdf(ncdir,ncf=ncf,nct=nct,dom=dom)
             Nlim, Elim, Slim, Wlim = self.W.get_limits()
+
+        if composite:
+            radars = {}
+            for n,t in enumerate(utc):
+                radars[n] = Radar(t,datadir)
+                if n == 0:
+                    stack = radars[0].data
+                else:
+                    stack = N.dstack((stack,radars[n].data))
+
+            max_pixel = N.max(stack,axis=2)
+            # Create new instance for the methods
+            # Overwrite the data to become composite
+            R = Radar(utc[-1],datadir)
+            R.data = max_pixel
+
+        else:  
+            R = Radar(t,datadir)
+
         # import pdb; pdb.set_trace()
         R.plot_radar(outdir,Nlim=Nlim,Elim=Elim,Slim=Slim,Wlim=Wlim)
-        print("Plotting radar for {0}".format(utc))
+        # print("Plotting radar for {0}".format(utc))
 
     def plot_accum_rain(self,utc,accum_hr,ncdir,outdir,ncf=False,nct=False,
                             f_prefix=0,f_suffix=False,bounding=False,dom=1,

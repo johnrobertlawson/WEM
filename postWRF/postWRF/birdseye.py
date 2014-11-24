@@ -23,8 +23,8 @@ from scales import Scales
 import stats
 
 class BirdsEye(Figure):
-    def __init__(self,wrfout,ax=0,fig=0):
-        super(BirdsEye,self).__init__(wrfout,ax=ax,fig=fig)
+    def __init__(self,wrfout=False,ax=0,fig=0):
+        super(BirdsEye,self).__init__(wrfout=False,ax=ax,fig=fig)
 
     def get_plot_arguments(self,cmap=False,clvs=False):
         """
@@ -54,7 +54,7 @@ class BirdsEye(Figure):
     def plot2D(self,data,fname,outdir,plottype='contourf',
                     save=1,smooth=1,lats=False,lons=False,
                     clvs=False,cmap=False,title=False,colorbar=True,
-                    locations=False):
+                    locations=False,m=False,x=False,y=False):
 
         """
         Generic method that plots any matrix of data on a map
@@ -77,8 +77,14 @@ class BirdsEye(Figure):
         """
         # INITIALISE
         self.data = data
-        self.bmap,self.x,self.y = self.basemap_setup(smooth=smooth,lats=lats,
+        if x is False and y is False and m is False:
+            self.bmap,self.x,self.y = self.basemap_setup(smooth=smooth,lats=lats,
                                                     lons=lons,)#ax=self.ax)
+        else:
+            self.bmap = m
+            self.x = x
+            self.y = y
+
         self.la_n = self.data.shape[-2]
         self.lo_n = self.data.shape[-1]
 
@@ -199,3 +205,4 @@ class BirdsEye(Figure):
             naming.append(dom)
         fname = self.create_fname(*naming)
         self.save(outpath,fname)
+

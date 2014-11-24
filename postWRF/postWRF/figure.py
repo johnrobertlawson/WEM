@@ -16,7 +16,7 @@ import WEM.utils as utils
 from defaults import Defaults
 
 class Figure(object):
-    def __init__(self,wrfout,ax=0,fig=0,plotn=(1,1),layout='normal'):
+    def __init__(self,wrfout=False,ax=0,fig=0,plotn=(1,1),layout='normal'):
         """
         C   :   configuration settings
         W   :   data
@@ -120,7 +120,13 @@ class Figure(object):
                 lat_2=self.W.truelat2,resolution=basemap_res,area_thresh=500,
                 ax=self.ax)
         elif proj=='merc':
-            Nlim,Elim,Slim,Wlim = self.W.get_limits()
+            if self.W:
+                Nlim,Elim,Slim,Wlim = self.W.get_limits()
+            else:
+                Nlim = lats.max()
+                Slim = lats.min()
+                Elim = lons.max()
+                Wlim = lons.min()
             m = Basemap(projection=proj,
                         llcrnrlat=Slim,
                         llcrnrlon=Wlim,
@@ -133,10 +139,13 @@ class Figure(object):
         m.drawcoastlines()
         m.drawstates()
         m.drawcountries()
-
+        # import pdb; pdb.set_trace()
         # Draw meridians etc with wrff.lat/lon spacing
         # Default should be a tenth of width of plot, rounded to sig fig
 
-        s = slice(None,None,smooth)
-        x,y = m(self.W.lons[s,s],self.W.lats[s,s])
+        # s = slice(None,None,smooth)
+        if self.W:
+            x,y = m(self.W.lons,self.W.lats)
+        else:
+            x,y = m(*N.meshgrid(lons,lats))
         return m, x, y

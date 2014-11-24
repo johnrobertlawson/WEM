@@ -12,6 +12,7 @@ import WEM.utils as utils
 import matplotlib.pyplot as plt
 import calendar
 import glob
+from birdseye import BirdsEye
 
 class Obs(object):
     """
@@ -157,11 +158,11 @@ class Radar(Obs):
     def plot_radar(self,outdir,fig=False,ax=False,fname=False,Nlim=False,
                     Elim=False, Slim=False,Wlim=False):
         """
-        This needs moving to Figure or Birdseye
+        Plot radar data.
         """
-        if not fig:
-            fig, ax = plt.subplots()
-        self.generate_basemap(fig,ax,Nlim,Elim,Slim,Wlim)
+        # if not fig:
+            # fig, ax = plt.subplots()
+        # self.generate_basemap(fig,ax,Nlim,Elim,Slim,Wlim)
         #lons, lats = self.m.makegrid(self.xlen,self.ylen)
         if isinstance(Nlim,float):
             data, lats, lons = self.get_subdomain(Nlim,Elim,Slim,Wlim)
@@ -172,7 +173,7 @@ class Radar(Obs):
             lons = self.lons
             # x,y = self.m(*N.meshgrid(lons,lats))
             
-        x,y = self.m(*N.meshgrid(lons,lats))
+        # x,y = self.m(*N.meshgrid(lons,lats))
         # x,y = self.m(*N.meshgrid(lons,lats[::-1]))
 
         # Custom colorbar
@@ -181,17 +182,28 @@ class Radar(Obs):
         # radarcmap = ct.ncdc_modified_ISU(self.clvs)
 
         # Convert pixel levels to dBZ
-        dBZ = (data*0.5)-32
+        if self.fmt == 'n0q':
+            dBZ = (data*0.5)-32
+        elif self.fmt == 'n0r':
+            dBZ = (data*5.0)-30 
+           
         # dBZ[dBZ<0] = 0
-
-        im = self.ax.contourf(x,y,dBZ,alpha=0.5,cmap=radarcmap,
-                                levels=N.arange(5.0,90.5,0.5))
+        
+        # def plot2D(self,data,fname,outdir,plottype='contourf',
+                    # save=1,smooth=1,lats=False,lons=False,
+                    # clvs=False,cmap=False,title=False,colorbar=True,
+                    # locations=False):
         if not fname:
             tstr = utils.string_from_time('output',self.utc)
             fname = 'verif_radar_{0}.png'.format(tstr)
-        outpath = os.path.join(outdir,fname)
-        self.fig.colorbar(im,ax=self.ax)
-        self.fig.savefig(outpath)
+        F = BirdsEye()
+        F.plot2D(dBZ,fname,outdir,lats=lats,lons=lons,
+                    cmap=radarcmap,clvs=N.arange(5.0,90.5,0.5))
+        # im = self.ax.contourf(x,y,dBZ,alpha=0.5,cmap=radarcmap,
+                                # levels=N.arange(5.0,90.5,0.5))
+        # outpath = os.path.join(outdir,fname)
+        # self.fig.colorbar(im,ax=self.ax)
+        # self.fig.savefig(outpath)
 
 class SPCReports(Obs):
     def __init__(self,utc,datadir,wind=True,hail=True,torn=True):
