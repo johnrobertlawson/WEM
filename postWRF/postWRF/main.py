@@ -192,7 +192,9 @@ class WRFEnviron(object):
                     plottype=plottype,smooth=smooth,
                     clvs=clvs,cmap=cmap,locations=locations)
 
-    def create_fname(self,vrbl,utc,level=False,f_prefix=False,f_suffix=False):
+    def create_fname(self,vrbl,utc=False,level=False,
+                        f_prefix=False,f_suffix=False,
+                        extension=False):
         """
         Generate a filename (without extension) for saving a figure.
         Differentiate between similar plots for e.g. different domains by
@@ -214,17 +216,25 @@ class WRFEnviron(object):
 
         :returns:           str -- filename with extension.
         """
-        time_str = utils.string_from_time('output',utc)
+        strs = [vrbl,]
 
-        strs = [vrbl,time_str]
         if level:
-            strs.append(level)
+            strs.append('{0}'.format(level))
+
+        if utc:
+            time_str = utils.string_from_time('output',utc)
+            strs.append(time_str)
+
         fname = '_'.join(strs)
 
         if isinstance(f_prefix,basestring):
             fname = f_prefix + fname
         if isinstance(f_suffix,basestring):
             fname = fname + f_suffix
+
+        if extension:
+            fname = ','.join((fname,extension))
+
         return fname
 
     def get_netcdf(self,ncdir,ncf=False,nct=False,dom=1,path_only=False):
@@ -1430,7 +1440,7 @@ class WRFEnviron(object):
 
 
     def frontogenesis(self,utc,level,ncdir,outdir,ncf=False,nct=False,
-                        dom=1,smooth=0,clvs=0,title=0):
+                        dom=1,smooth=0,clvs=0,title=0,cmap='bwr'):
         """
         Compute and plot Miller frontogenesis as d/dt of theta gradient.
 
@@ -1461,8 +1471,8 @@ class WRFEnviron(object):
         :type nct:          bool,str
         :param f_prefix:    custom filename prefix for output. Ignore if False.
         :type f_prefix:     bool,str
-        :param f_suffix     custom filename suffix for output. Ignore if False.
-        :type f_suffix      bool,str
+        :param f_suffix:    custom filename suffix for output. Ignore if False.
+        :type f_suffix:     bool,str
         :param bounding:    bounding box for domain.
                             Dictionary contains four keys (Nlim, Elim, Slim, Wlim)
                             with float values (northern latitude limit, eastern
@@ -1495,7 +1505,6 @@ class WRFEnviron(object):
 
         """
         self.W = self.get_netcdf(ncdir,ncf=ncf,nct=nct,dom=dom)
-        fname = self.create_fname(vrbl,utc,level)
 
         Front = self.W.compute_frontogenesis(utc,level)
         if isinstance(Front,N.ndarray):
@@ -1508,10 +1517,11 @@ class WRFEnviron(object):
             else:
                 lv_str = str(level)
 
-                F = BirdsEye(self.C,self.W)
-                fname = 'frontogen_{0}_{1}.png'.format(lv_str,tstr)
-                F.plot_data(Front,'contourf',outpath,fname,time,clvs=clvs,
-                            no_title=no_title,**kwargs)
+            F = BirdsEye(self.W)
+            fname = self.create_fname('frontogen',utc,lv_str)
+            # fname = 'frontogen_{0}_{1}.png'.format(lv_str,tstr)
+            F.plot2D(Front,fname,outdir,clvs=clvs,
+                        cmap=cmap)
         else:
             print("Skipping this time; at start or end of run.")
 
@@ -1562,7 +1572,7 @@ class WRFEnviron(object):
             R.data = max_pixel
 
         else:  
-            R = Radar(t,datadir)
+            R = Radar(utc,datadir)
 
         # import pdb; pdb.set_trace()
         R.plot_radar(outdir,Nlim=Nlim,Elim=Elim,Slim=Slim,Wlim=Wlim)

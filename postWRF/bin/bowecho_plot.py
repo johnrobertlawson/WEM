@@ -28,31 +28,29 @@ coldpoolstrength = 0
 spaghetti = 0
 std = 0
 profiles = 0
-frontogenesis = 0
+frontogenesis = 1
 upperlevel = 0
 strongestwind = 0
-accum_rain = 1
+accum_rain = 0
 
+# enstype = False
 # enstype = 'STCH'
-enstype = 'ICBC'
-# enstype = 'MXMP'
+# enstype = 'ICBC'
+enstype = 'MXMP'
 # enstype = 'STMX'
 
+# case = '2006052512'
 case = '20060526'
 # case = '2006052612'
 #case = '20090910'
 # case = '20110419'
 # case = '20130815'
 
-IC = 'GEFSR2'
-# IC = 'NAM'
+# IC = 'GEFSR2'
+IC = 'NAM'
 # IC = 'RUC'
 # IC = 'GFS'
 # IC = 'RUC'
-
-ensnames = ['anl']
-# experiment = 'VERIF'
-
 
 if enstype == 'STCH':
     experiments = ['s'+"%02d" %n for n in range(1,11)]
@@ -74,6 +72,9 @@ elif enstype == 'MXMP':
     ensnames = ['anl',]
 elif enstype == 'ICBC':
     ensnames =  ['c00'] + ['p'+"%02d" %n for n in range(1,11)]
+    experiments = ['ICBC',]
+else:
+    ensnames = ['anl']
     experiments = ['ICBC',]
 
 if case[:4] == '2006':
@@ -101,7 +102,12 @@ elif case[:4] == '2013':
 else:
     raise Exception
 
-hourly = 1
+# experiments = ['Morrison_Hail_STCH',]
+# ensnames = ['anl',]
+# itime = (2006,5,25,12,0,0)
+# ftime = (2006,5,27,12,0,0)
+
+hourly = 3
 level = 2000
 
 def get_folders(en,ex):
@@ -274,12 +280,13 @@ if profiles:
 if frontogenesis:
     for en in ensnames:
         for ex in experiments:
-            out_sd, wrf_sd = get_folders(en,ex)
-            for time in times: 
-                p.frontogenesis(time,925,nc_sd=wrf_sd,nc_init=inittime,out_sd=out_sd,
+            outdir, ncdir = get_folders(en,ex)
+            for t in times:
+                lv = 2000
+                p.frontogenesis(t,lv,ncdir=ncdir,outdir=outdir,
                                 clvs=N.arange(-2.0,2.125,0.125)*10**-7,
                                 # clvs = N.arange(-500,510,10)
-                                blurn=3, cmap='bwr'
+                                smooth=3, cmap='bwr'
                                 )
 
 if upperlevel:

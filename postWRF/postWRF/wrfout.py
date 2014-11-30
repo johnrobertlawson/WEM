@@ -908,7 +908,7 @@ class WRFOut(object):
         lon_idx = N.where(abs(self.lons-lon) == abs(self.lons-lon).min())[0][0]
         return lon_idx
 
-    def get_p(self,vrbl,tidx,level,lonidx,latidx):
+    def get_p(self,vrbl,tidx=False,level=False,lonidx=False,latidx=False):
         """
         Return an pressure level isosurface of given variable.
         Interpolation is linear so watch out.
@@ -1217,67 +1217,46 @@ class WRFOut(object):
         #dx = ds
         #dy = ds
         #dz = 1 # Normal for vertical
-        dp = 15 # hPa to compute vertical gradients
         tidx = self.get_time_idx(time)
+        tidxs = (tidx-1,tidx,tidx+1)
+        
         if (tidx == 0) or (tidx == self.wrf_times.shape[0]-1):
-            return None
-        elif level == 2000:
-            tidxs = (tidx-1,tidx,tidx+1)
-            T = {}
-            TH2 = {}
-            Z = {}
-            dTdx = {}
-            dTdy = {}
-            dTdz = {}
-            U = {}
-            V = {}
-            W = {}
-            for n, tidx in enumerate(tidxs):
-                # Just assume surface
-                lvidx = 0
-                U[n] = self.get('U10',{'t':tidx})[0,:,:]
-                V[n] = self.get('V10',{'t':tidx})[0,:,:]
-                W[n] = self.get('W',{'t':tidx, 'lv':0})[0,0,:,:]
-                T[n] = self.get('T',{'t':tidx, 'lv':[0,1]})[0,:,:,:]
-                TH2[n] = self.get('TH2',{'t':tidx})[0,:,:]
-                # Z[n] = self.get('Z',{'t':tidx, 'lv' :[0,1]})[0,:,:,:]
-                # We want gap between levels so not destaggered:
-                Z[n] = (self.nc.variables['PH'][tidx,0:2,:,:] +
-                        self.nc.variables['PHB'][tidx,0:2,:,:])/mc.g
-                # Each grid point is DX km apart:
-                dTdx[n], dTdy[n] = N.gradient(TH2[n])/self.dx
-
-                # import pdb; pdb.set_trace()
-                levelgap = Z[n][1,:,:] - Z[n][0,:,:]
-                _, __, dTdz[n] = N.gradient(T[n])/levelgap
-                # _, __, dTdz_2 = N.gradient(T[n])/levelgap
-                # N.gradient needs interpolating to one level here?
-                # dTdz[n] = (dTdz_2[1,...]-dTdz_2[0,...])/2.0
-
-        elif isinstance(level,int):
-            tidxs = (tidx-1,tidx,tidx+1)
-
-            # Get sizes of array
-            ny,nx = self.get_p('U',tidx,level).shape
-
-            # Initialise them
+            Front = None
+        else:
+            nt,nl,ny,nx = self.get('U',utc=tidx,level=1).shape
             U = N.zeros([3,3,ny,nx])
             V = N.zeros_like(U)
             W = N.zeros_like(U)
             T = N.zeros_like(U)
-            # omega = N.zeros_like(U)
+            if level == 2000:
+                # Use the bottom three model levels
+                P = N.zeros_like(U)
+                for n, t in enumerate(tidxs):
+                    U[n,...] = self.get('U',utc=t,level=1)
+                    V[n,...] = self.get('V',utc=t,level=1)
+                    W[n,...] = self.get('W',utc=t,level=1)
+                    T[n,...] = self.get('T',utc=t,level=N.arange(3))
+                    P[n,...] = self.get('pressure',utc=t,level=N.arange(3))
+                    # Average different in pressure between model levels
+                    # This field is passed into the gradient
+                    # THIS IS NOT USED RIGHT NOW
+                    dp = N.average(abs(0.5*(0.5*(P[2,2,:,:]-P[2,0,:,:]) + 
+                                0.5*(P[0,2,:,:]-P[0,0,:,:]))))
 
-            for n, t in enumerate(tidxs):
-                U[n,...] = self.get_p('U',t,level)
-                V[n,...] = self.get_p('V',t,level)
-                W[n,...] = self.get_p('W',t,level)
+            elif isinstance(level,int):
+                dp = 15 # hPa to compute vertical gradients
 
-                # 3D array has dimensions (vertical, horz, horz)
-                T[n,...] = self.get_p('T',t,(level-dp,level,level+dp))
+                for n, t in enumerate(tidxs):
+                    U[n,...] = self.get_p('U',t,level)
+                    V[n,...] = self.get_p('V',t,level)
+                    W[n,...] = self.get_p('W',t,level)
 
-                # Compute omega
-                # P = rho* R* drybulb
-                # drybulb = T/((P0/P)^(R/cp)
+                    # 3D array has dimensions (vertical, horz, horz)
+                    T[n,...] = self.get_p('T',t,(level-dp,level,level+dp))
+
+                    # Compute omega
+                    # P = rho* R* drybulb
+                    # drybulb = T/((P0/P)^(R/cp)
 
             drybulb = 273.15 + (T/((100000.0/(level*100.0))**(mc.R/mc.cp)))
             rho = (level*100.0)/(mc.R*drybulb)
