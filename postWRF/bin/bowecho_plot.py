@@ -19,7 +19,7 @@ ncroot = '/chinook2/jrlawson/bowecho/'
 p = WRFEnviron()
 
 skewT = 0
-plot2D = 0
+plot2D = 1
 radarplot = 0
 radarcomp = 0
 streamlines = 0
@@ -28,15 +28,15 @@ coldpoolstrength = 0
 spaghetti = 0
 std = 0
 profiles = 0
-frontogenesis = 1
+frontogenesis = 0
 upperlevel = 0
 strongestwind = 0
 accum_rain = 0
 
-# enstype = False
+enstype = False
 # enstype = 'STCH'
 # enstype = 'ICBC'
-enstype = 'MXMP'
+# enstype = 'MXMP'
 # enstype = 'STMX'
 
 # case = '2006052512'
@@ -107,7 +107,7 @@ else:
 # itime = (2006,5,25,12,0,0)
 # ftime = (2006,5,27,12,0,0)
 
-hourly = 3
+hourly = 1
 level = 2000
 
 def get_folders(en,ex):
@@ -149,32 +149,25 @@ skewT_latlon = (36.73,-102.51) # Boise City, OK
 if skewT:
     for en in ensnames:
         for ex in experiments:
-            # Reload settings
-            p.C = Settings()
-    
-            # Change paths to new location
-            out_sd, wrf_sd = get_folders(en,ex)
-    
-            p.plot_skewT(skewT_time,skewT_latlon,out_sd=out_sd,wrf_sd=wrf_sd,save_output=0)
-    
-    #p.plot_skewT(skewT_time,skewT_latlon,composite=1)
+            outdir, ncdir = get_folders(en,ex)
+            p.plot_skewT(skewT_time,latlon=skewT_latlon,outdir=outdir,ncdir=ncdir)
 
 locs = {'Norman':(35.2,-97.4)}
 if plot2D or radarplot:
     for en in ensnames:
         for ex in experiments:
             for t in times:
-                out_sd, wrf_sd = get_folders(en,ex)
+                outdir, ncdir = get_folders(en,ex)
                 if plot2D:
                     # p.plot_strongest_wind(itime,ftime,2000,wrf_sd=wrf_sd,out_sd=out_sd)
                     # p.plot2D('Z',t,500,wrf_sd=wrf_sd,out_sd=out_sd,plottype='contour',smooth=10)
                     # import pdb; pdb.set_trace()
-                    p.plot2D('cref',t,ncdir=wrf_sd,outdir=out_sd)
+                    p.plot2D('cref',t,ncdir=ncdir,outdir=outdir)
                     # p.plot2D('RAINNC',t,ncdir=wrf_sd,outdir=out_sd,locations=locs,clvs=N.arange(1,100,2))
 
                 if radarplot:
                     outdir,datadir = get_verif_dirs()
-                    p.plot_radar(t,datadir,outdir,ncdir=wrf_sd)
+                    p.plot_radar(t,datadir,outdir=outdir,ncdir=ncdir)
 
 if radarcomp:
     en = ensnames[0]

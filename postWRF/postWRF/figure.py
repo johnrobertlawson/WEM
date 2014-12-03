@@ -23,11 +23,13 @@ class Figure(object):
         """
         self.W = nc
         self.D = Defaults()
-
+        self.save_figure = True
+        
         # Create main figure
         if ax and fig:
             self.ax = ax
             self.fig = fig
+            self.save_figure = False
         elif layout == 'insetv':
             self.fig = plt.figure(figsize=(8,6))
             self.gs = M.gridspec.GridSpec(1,2,width_ratios=[1,3])
@@ -61,20 +63,22 @@ class Figure(object):
         fig.set_size_inches(width,height)
         return fig
 
-    def save(self,outpath,fname):
-        # fig.tight_layout()
-        if fname[-4:] == '.png':
-            pass
-        else:
-            fname = fname + '.png'
+    def save(self,outpath,fname,tight=True):
+        if self.save_figure:
+            # fig.tight_layout()
+            if fname[-4:] == '.png':
+                pass
+            else:
+                fname = fname + '.png'
 
-        utils.trycreate(outpath)
-        fpath = os.path.join(outpath,fname)
-        #self.fig.savefig(fpath)
-        self.fig.savefig(fpath,bbox_inches='tight')
-        print("Saving figure {0}".format(fpath))
-        plt.close(self.fig)
-
+            utils.trycreate(outpath)
+            fpath = os.path.join(outpath,fname)
+            #self.fig.savefig(fpath)
+            if tight:
+                self.fig.tight_layout()
+            self.fig.savefig(fpath,bbox_inches='tight')
+            print("Saving figure {0}".format(fpath))
+            plt.close(self.fig)
 
     def just_one_colorbar(self,fpath):
         """

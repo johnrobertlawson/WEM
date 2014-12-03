@@ -53,7 +53,7 @@ class BirdsEye(Figure):
     # Old plot_data
     def plot2D(self,data,fname,outdir,plottype='contourf',
                     save=1,smooth=1,lats=False,lons=False,
-                    clvs=False,cmap=False,title=False,colorbar=True,
+                    clvs=False,cmap=False,title=False,cb=True,
                     locations=False,m=False,x=False,y=False,
                     Nlim=False,Elim=False,Slim=False,Wlim=False):
 
@@ -126,12 +126,11 @@ class BirdsEye(Figure):
 
         if isinstance(title,basestring):
             plt.title(title)
-        if colorbar:
+        if cb:
             self.fig.colorbar(f1,orientation='vertical')
         if save:
             self.save(outdir,fname)
-
-        plt.close(self.fig)
+            plt.close(self.fig)
 
     def plot_streamlines(self,U,V,outdir,fname,lats=False,lons=False,smooth=1,
                             title=False,lw_speed=False):

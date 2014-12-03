@@ -156,7 +156,7 @@ class Radar(Obs):
         return data,lats,lons
 
     def plot_radar(self,outdir,fig=False,ax=False,fname=False,Nlim=False,
-                    Elim=False, Slim=False,Wlim=False):
+                    Elim=False, Slim=False,Wlim=False,cb=True):
         """
         Plot radar data.
         """
@@ -196,9 +196,10 @@ class Radar(Obs):
         if not fname:
             tstr = utils.string_from_time('output',self.utc)
             fname = 'verif_radar_{0}.png'.format(tstr)
-        F = BirdsEye()
+        F = BirdsEye(fig=fig,ax=ax)
         F.plot2D(dBZ,fname,outdir,lats=lats,lons=lons,
-                    cmap=radarcmap,clvs=N.arange(5.0,90.5,0.5))
+                    cmap=radarcmap,clvs=N.arange(5.0,90.5,0.5),
+                    cb=cb)
         # im = self.ax.contourf(x,y,dBZ,alpha=0.5,cmap=radarcmap,
                                 # levels=N.arange(5.0,90.5,0.5))
         # outpath = os.path.join(outdir,fname)

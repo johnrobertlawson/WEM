@@ -22,17 +22,12 @@ import WEM.utils as utils
 import metconstants as mc
 
 class Profile(Figure):
-    def __init__(self,config,wrfout=0):
-        # self.C = config
-        # self.path_to_WRF = self.C.wrfout_root
-        # self.path_to_output = self.C.output_root
-        # if wrfout:
-            # self.W = wrfout
-        super(Profile,self).__init__(config,wrfout,ax=0,fig=0)
+    def __init__(self,nc=0):
+        super(Profile,self).__init__(nc=nc,ax=False,fig=False)
 
     def composite_profile(self,va,plot_time,plot_latlon,wrfouts,outpath,
-                            dom=1,mean=1,std=1,xlim=0,ylim=0,fig=0,ax=0,
-                            locname=0,ml=-2):
+                            dom=1,mean=True,std=True,xlim=False,ylim=False,
+                            fig=False,ax=False,locname=0,ml=-2):
         """
         Loop over wrfout files.
         Get profile of variable
@@ -173,13 +168,13 @@ class Profile(Figure):
         plt.close(self.fig)
 
 class SkewT(Figure):
-    def __init__(self,config,wrfout=0):
+    def __init__(self,nc=False):
         # self.C = config
         # self.path_to_WRF = self.C.wrfout_root
         # self.path_to_output = self.C.output_root
         # if wrfout:
             # self.W = wrfout
-        super(SkewT,self).__init__(config,wrfout,ax=0,fig=0)
+        super(SkewT,self).__init__(nc=nc,ax=False,fig=False)
 
         #self.plevs = self.W.z_dim-1
 
@@ -213,12 +208,12 @@ class SkewT(Figure):
             self.moist_adiabats()
 
 
-            P_slices = {'t': t_idx, 'la': y, 'lo': x}
-            H_slices = {'t':t_idx, 'lv':0, 'la':y, 'lo':x}
+            # P_slices = {'t': t_idx, 'la': y, 'lo': x}
+            # H_slices = {'t':t_idx, 'lv':0, 'la':y, 'lo':x}
             # pdb.set_trace()
-            P = self.W.get('pressure',P_slices)[0,:,0,0]
+            P = self.W.get('pressure',utc=t_idx,lats=y,lons=x)[0,:,0,0]
 
-            elev = self.W.get('HGT',H_slices)
+            elev = self.W.get('HGT',utc=t_idx,level=0,lats=y,lons=x)
 
             thin_locs = utils.thinned_barbs(P)
 

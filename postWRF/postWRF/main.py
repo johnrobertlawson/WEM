@@ -71,7 +71,7 @@ class WRFEnviron(object):
                 ncf=False,nct=False,f_prefix=0,f_suffix=False,
                 dom=1,plottype='contourf',smooth=1,
                 fig=False,ax=False,clvs=False,cmap=False,
-                locations=False,colorbar=False,
+                locations=False,cb=False,
                 Nlim=False,Elim=False,Slim=False,Wlim=False):
         """Basic birds-eye-view plotting.
 
@@ -190,11 +190,12 @@ class WRFEnviron(object):
         # import pdb; pdb.set_trace()
         F.plot2D(data,fname,outdir,lats=False,lons=False,
                     plottype=plottype,smooth=smooth,
-                    clvs=clvs,cmap=cmap,locations=locations)
+                    clvs=clvs,cmap=cmap,locations=locations,
+                    cb=cb)
 
     def create_fname(self,vrbl,utc=False,level=False,
                         f_prefix=False,f_suffix=False,
-                        extension=False):
+                        extension='png'):
         """
         Generate a filename (without extension) for saving a figure.
         Differentiate between similar plots for e.g. different domains by
@@ -228,12 +229,12 @@ class WRFEnviron(object):
         fname = '_'.join(strs)
 
         if isinstance(f_prefix,basestring):
-            fname = f_prefix + fname
+            fname = '_'.join((f_prefix,fname))
         if isinstance(f_suffix,basestring):
-            fname = fname + f_suffix
+            fname = '_'.join((fname,f_suffix))
 
-        if extension:
-            fname = ','.join((fname,extension))
+        if isinstance(extension,basestring):
+            fname = '.'.join((fname,extension))
 
         return fname
 
@@ -747,9 +748,9 @@ class WRFEnviron(object):
                             locname=locname,ml=ml)
 
 
-    def plot_skewT(self,utc,ncdir,outdir,ncf=False,nct=False,f_prefix=False,
-                    f_suffix=False, latlon=False,dom=1,save_output=0,
-                    composite=0):
+    def plot_skewT(self,utc,ncdir=False,outdir=False,ncf=False,nct=False,f_prefix=False,
+                    f_suffix=False, latlon=False,dom=1,save_output=False,
+                    composite=0,ax=False,fig=False):
         """
         TODO: use Clicker instance if latlon is False.
 
@@ -785,15 +786,14 @@ class WRFEnviron(object):
         :type composite:    list,tuple,bool
 
         """
-        outpath = self.get_outpath(out_sd)
-        W = self.get_netcdf(wrf_sd,dom=dom)
+        W = self.get_netcdf(ncdir,dom=dom)
 
         if not composite:
-            ST = SkewT(self.C,W)
-            ST.plot_skewT(utc,plot_latlon,dom,outpath,save_output=save_output)
+            ST = SkewT(W)
+            ST.plot_skewT(utc,latlon,dom,outdir,save_output=save_output)
             nice_time = utils.string_from_time('title',utc)
             print("Plotted Skew-T for time {0} at {1}".format(
-                        nice_time,plot_latlon))
+                        nice_time,latlon))
         else:
             #ST = SkewT(self.C)
             pass
@@ -1440,7 +1440,8 @@ class WRFEnviron(object):
 
 
     def frontogenesis(self,utc,level,ncdir,outdir,ncf=False,nct=False,
-                        dom=1,smooth=0,clvs=0,title=0,cmap='bwr'):
+                        dom=1,smooth=0,clvs=0,title=0,cmap='bwr',
+                        fig=False,ax=False,cb=True):
         """
         Compute and plot Miller frontogenesis as d/dt of theta gradient.
 
@@ -1517,11 +1518,11 @@ class WRFEnviron(object):
             else:
                 lv_str = str(level)
 
-            F = BirdsEye(self.W)
+            F = BirdsEye(self.W,fig=fig,ax=ax)
             fname = self.create_fname('frontogen',utc,lv_str)
             # fname = 'frontogen_{0}_{1}.png'.format(lv_str,tstr)
             F.plot2D(Front,fname,outdir,clvs=clvs,
-                        cmap=cmap)
+                        cmap=cmap,cb=cb)
         else:
             print("Skipping this time; at start or end of run.")
 
@@ -1541,7 +1542,8 @@ class WRFEnviron(object):
 
     def plot_radar(self,utc,datadir,outdir,Nlim=False,Elim=False,
                     Slim=False,Wlim=False,ncdir=False,nct=False,
-                    ncf=False,dom=1,composite=False,locations=False):
+                    ncf=False,dom=1,composite=False,locations=False,
+                    fig=False,ax=False,cb=True):
         """
         Plot verification radar.
 
@@ -1552,6 +1554,7 @@ class WRFEnviron(object):
         Need to rewrite so plotting is done in birdseye.
         """
         # Get limits of domain
+        # import pdb; pdb.set_trace()
         if not Nlim and isinstance(ncdir,str):
             self.W = self.get_netcdf(ncdir,ncf=ncf,nct=nct,dom=dom)
             Nlim, Elim, Slim, Wlim = self.W.get_limits()
@@ -1574,8 +1577,8 @@ class WRFEnviron(object):
         else:  
             R = Radar(utc,datadir)
 
-        # import pdb; pdb.set_trace()
-        R.plot_radar(outdir,Nlim=Nlim,Elim=Elim,Slim=Slim,Wlim=Wlim)
+        R.plot_radar(outdir,Nlim=Nlim,Elim=Elim,Slim=Slim,Wlim=Wlim,
+                fig=fig,ax=ax,cb=cb)
         # print("Plotting radar for {0}".format(utc))
 
     def plot_accum_rain(self,utc,accum_hr,ncdir,outdir,ncf=False,nct=False,
