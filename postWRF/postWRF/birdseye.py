@@ -33,6 +33,7 @@ class BirdsEye(Figure):
         Options keyword arguments:
         clvs    :   manually override contour levels
         """
+        # import pdb; pdb.set_trace()
         data = self.data.reshape((self.la_n,self.lo_n))
 
         # List of args and dictionary of kwargs
@@ -47,7 +48,6 @@ class BirdsEye(Figure):
         if cmap is not False:
             # cmap = eval('M.cm.{0}'.format(cmap))
             plotkwargs['cmap'] = cmap
-        # import pdb; pdb.set_trace()
         return plotargs, plotkwargs
 
     # Old plot_data
@@ -126,11 +126,13 @@ class BirdsEye(Figure):
 
         if isinstance(title,basestring):
             plt.title(title)
-        if cb:
-            self.fig.colorbar(f1,orientation='vertical')
         if save:
             self.save(outdir,fname)
             plt.close(self.fig)
+        if cb:
+            self.fig.colorbar(f1,orientation='vertical')
+        else:
+            return f1
 
     def plot_streamlines(self,U,V,outdir,fname,lats=False,lons=False,smooth=1,
                             title=False,lw_speed=False):

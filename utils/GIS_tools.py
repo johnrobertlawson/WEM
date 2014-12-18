@@ -1071,3 +1071,59 @@ def load_data(folder,fname,format='pickle'):
 
     print("Loaded file {0} from {1}.".format(fname,folder))
     return data
+
+
+def return_subdomain(data,lats,lons,Nlim,Elim,Slim,Wlim,
+                        fmt='latlon'):
+    """
+    Returns smaller domain of data and lats/lons based
+    on specified limits.
+    """
+    # import pdb; pdb.set_trace()
+    Nidx = closest(lats,Nlim) 
+    Eidx = closest(lons,Elim)
+    Sidx = closest(lats,Slim)
+    Widx = closest(lons,Wlim)
+
+    # Assuming [lats,lons]
+    if fmt=='latlon':
+        if Nidx<Sidx:
+            xmin,xmax = Nidx,Sidx
+        else:
+            xmin,xmax = Sidx,Nidx
+
+        if Widx<Eidx:
+            ymin,ymax = Widx,Eidx
+        else:
+            ymin,ymax = Eidx,Widx
+    elif fmt=='lonlat':
+        if Nidx<Sidx:
+            ymin,ymax = Nidx,Sidx
+        else:
+            ymin,ymax = Sidx,Nidx
+
+        if Widx<Eidx:
+            xmin,xmax = Widx,Eidx
+        else:
+            xmin,xmax = Eidx,Widx
+    else:
+        print("Need right format")
+        raise Exception
+    # Radar data: latlon, N<S, W<E
+    # data = data[Nidx:Sidx+1,Widx:Eidx+1]
+
+    data = data[xmin:xmax+1,ymin:ymax+1]
+
+    if Nidx<Sidx:
+        lats = lats[Nidx:Sidx+1]
+    else:
+        # flipud for RUC data - does this break WRF?
+        lats = lats[Sidx:Nidx+1]
+        # lats = N.flipud(lats[Sidx:Nidx+1])
+    if Widx<Eidx: 
+        lons = lons[Widx:Eidx+1]
+    else:
+        lons = lons[Eidx:Widx+1]
+
+    # pdb.set_trace()
+    return data,lats,lons

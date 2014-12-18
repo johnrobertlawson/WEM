@@ -125,9 +125,9 @@ class Figure(object):
                 lat_2=self.W.truelat2,resolution=basemap_res,area_thresh=500,
                 ax=self.ax)
         elif proj=='merc':
-            if self.W and not Nlim:
+            if self.W and not Nlim and not isinstance(lats,N.ndarray):
                 Nlim,Elim,Slim,Wlim = self.W.get_limits()
-            elif not Nlim:
+            elif Nlim==False:
                 Nlim = lats.max()
                 Slim = lats.min()
                 Elim = lons.max()
@@ -150,8 +150,9 @@ class Figure(object):
         # Default should be a tenth of width of plot, rounded to sig fig
 
         # s = slice(None,None,smooth)
-        if self.W:
+        if self.W and not isinstance(lats,N.ndarray):
             x,y = m(self.W.lons,self.W.lats)
         else:
             x,y = m(*N.meshgrid(lons,lats))
+        # pdb.set_trace()
         return m, x, y

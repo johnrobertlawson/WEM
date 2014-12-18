@@ -47,8 +47,8 @@ case = '20060526'
 # case = '20130815'
 
 # IC = 'GEFSR2'
-IC = 'NAM'
-# IC = 'RUC'
+# IC = 'NAM'
+IC = 'RUC'
 # IC = 'GFS'
 # IC = 'RUC'
 
@@ -75,16 +75,21 @@ elif enstype == 'ICBC':
     experiments = ['ICBC',]
 else:
     ensnames = ['anl']
-    experiments = ['ICBC',]
+    if IC == 'RUC':
+        experiments = ['VERIF',]
+    else:
+        experiments = ['ICBC',]
 
 if case[:4] == '2006':
-    inittime = (2006,5,26,0,0,0)
+    nct = (2006,5,26,0,0,0)
     itime = (2006,5,26,0,0,0)
     ftime = (2006,5,27,12,0,0)
     iwind = (2006,5,26,18,0,0)
     fwind = (2006,5,27,12,0,0)
     compt = [(2006,5,d,h,0,0) for d,h in zip((26,27,27),(23,3,6))]
     # times = [(2006,5,26,12,0,0),]
+    matchnc = '/chinook2/jrlawson/bowecho/20060526/GFS/anl/ICBC/wrfout_d01_2006-05-26_00:00:00'
+
 elif case[:4] == '2009':
     inittime = (2009,9,10,23,0,0)
     itime = (2009,9,10,23,0,0)
@@ -162,7 +167,8 @@ if plot2D or radarplot:
                     # p.plot_strongest_wind(itime,ftime,2000,wrf_sd=wrf_sd,out_sd=out_sd)
                     # p.plot2D('Z',t,500,wrf_sd=wrf_sd,out_sd=out_sd,plottype='contour',smooth=10)
                     # import pdb; pdb.set_trace()
-                    p.plot2D('cref',t,ncdir=ncdir,outdir=outdir)
+                    # p.plot2D('Td2',t,ncdir=ncdir,outdir=outdir,nct=t,match_nc=matchnc,clvs=N.arange(260,291,1))
+                    p.plot2D('Q2',t,ncdir=ncdir,outdir=outdir,nct=t,match_nc=matchnc,clvs=N.arange(1,20.5,0.5)*10**-3)
                     # p.plot2D('RAINNC',t,ncdir=wrf_sd,outdir=out_sd,locations=locs,clvs=N.arange(1,100,2))
 
                 if radarplot:

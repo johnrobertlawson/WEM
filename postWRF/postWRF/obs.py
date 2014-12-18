@@ -144,15 +144,8 @@ class Radar(Obs):
         """
         Return data array between bounds
         """
-        Nidx = utils.closest(self.lats,Nlim) 
-        Eidx = utils.closest(self.lons,Elim)
-        Sidx = utils.closest(self.lats,Slim)
-        Widx = utils.closest(self.lons,Wlim)
-
-        # data = self.data[Widx:Eidx+1,Sidx:Nidx+1]
-        data = self.data[Nidx:Sidx+1,Widx:Eidx+1]
-        lats = self.lats[Nidx:Sidx+1]
-        lons = self.lons[Widx:Eidx+1]
+        data,lats,lons = utils.return_subdomain(self.data,self.lats,
+                                self.lons,Nlim,Elim,Slim,Wlim)
         return data,lats,lons
 
     def plot_radar(self,outdir,fig=False,ax=False,fname=False,Nlim=False,

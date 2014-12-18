@@ -63,8 +63,8 @@ class WRFOut(object):
         self.available_vrbls = self.fields + self.computed_fields
 
         # Get times in nicer format
-        self.wrf_times_epoch = self.wrftime_to_datenum()
-
+        self.utc = self.wrftime_to_datenum()
+        # import pdb; pdb.set_trace()
 
     def wrftime_to_datenum(self):
         """
@@ -97,8 +97,9 @@ class WRFOut(object):
         :returns tidx:  int -- closest index to desired time
 
         """
+        # import pdb; pdb.set_trace()
         dn = utils.ensure_datenum(utc)
-        tidx = utils.closest(self.wrf_times_epoch,dn)
+        tidx = utils.closest(self.utc,dn)
         return tidx
 
 
@@ -219,7 +220,7 @@ class WRFOut(object):
         if self.check_compute(vrbl):
             if lvidx is 'isobaric':
                 data = self.get_p(vrbl,tidx,level,lonidx,
-                            latidx)[N.newaxis,N.newaxis,:,:]
+                            latidx)
             elif isinstance(lvidx,(tuple,list,N.ndarray,int)):
                 data = self.load(vrbl,tidx,lvidx,lonidx,latidx)
             else:
@@ -230,6 +231,11 @@ class WRFOut(object):
                             latidx)[N.newaxis,N.newaxis,:,:]
             else:
                 data = self.compute(vrbl,tidx,lvidx,lonidx,latidx,other)
+
+        if len(data.shape) == 2:
+            data = data[N.newaxis,N.newaxis,:,:]
+        elif len(data.shape) == 3:
+            data = data[N.newaxis,:,:,:]
         return data
 
     def load(self,vrbl,tidx,lvidx,lonidx,latidx):
@@ -383,7 +389,7 @@ class WRFOut(object):
         tbl['CAPE'] = self.compute_CAPE
         tbl['Td'] = self.compute_Td
         tbl['pressure'] = self.compute_pressure
-        tbl['temps'] = self.compute_temps
+        tbl['drybulb'] = self.compute_drybulb
         tbl['theta'] = self.compute_theta
         tbl['geopot'] = self.compute_geopotential
         tbl['Z'] = self.compute_geopotential_height
@@ -395,7 +401,10 @@ class WRFOut(object):
         tbl['RH'] = self.compute_RH
         tbl['dryairmass'] = self.compute_dryairmass
         tbl['QTOTAL'] = self.compute_qtotal
-        tbl['olr'] =self.compute_olr
+        tbl['olr'] = self.compute_olr
+        tbl['es'] = self.compute_satvappres
+        tbl['e'] = self.compute_vappres
+        tbl['q'] = self.compute_spechum
 
         return tbl
 
@@ -422,7 +431,7 @@ class WRFOut(object):
 
     def compute_RH(self,tidx,lvidx,lonidx,latidx,other):
 
-        T = self.get('temps',tidx,lvidx,lonidx,latidx,other='C')
+        T = self.get('drybulb',tidx,lvidx,lonidx,latidx,other='C')
         Td = self.get('Td',tidx,lvidx,lonidx,latidx)
         RH = N.exp(0.073*(Td-T))
         # pdb.set_trace()
@@ -531,14 +540,14 @@ class WRFOut(object):
         pressure = PP + PB
         return pressure
 
-    def compute_temps(self,tidx,lvidx,lonidx,latidx,other='K'):
+    def compute_drybulb(self,tidx,lvidx,lonidx,latidx,other='K'):
         theta = self.get('theta',tidx,lvidx,lonidx,latidx)
         P = self.get('pressure',tidx,lvidx,lonidx,latidx)
-        temps = theta*((P/100000.0)**(287.04/1004.0))
+        drybulb = theta*((P/100000.0)**(287.04/1004.0))
         if other=='K':
-            return temps
+            return drybulb
         elif other=='C':
-            return temps-273.15
+            return drybulb-273.15
 
     def compute_theta(self,tidx,lvidx,lonidx,latidx,other):
         theta = self.get('T',tidx,lvidx,lonidx,latidx)
@@ -553,28 +562,32 @@ class WRFOut(object):
         data = N.sqrt(u**2 + v**2)
         return data
 
-    def compute_shear(self,tidx,lvidx,lonidx,latidx,other):
+    def compute_shear(self,tidx,lvidx,lonidx,latidx,other=False):
         """
-        top and bottom in km.
-        kwargs['top']
-        kwargs['bottom']
+        :params other:      dictionary of 'top' and 'bottom' levels, km
+        :type other:        dict
 
         Could make this faster with numpy.digitize()?
         """
-        topm = kwargs['top']*1000
-        botm = kwargs['bottom']*1000
+        if not other:
+            print("Choose top and bottom for shear calc.")
+            raise Exception
+        else:
+            topm = other['top']*1000
+            botm = other['bottom']*1000
 
         u = self.get('U',tidx,lvidx,lonidx,latidx)
         v = self.get('V',tidx,lvidx,lonidx,latidx)
         Z = self.get('Z',tidx,lvidx,lonidx,latidx)
 
-        topidx = N.zeros((450,450))
-        botidx = N.zeros((450,450))
-        ushear = N.zeros((450,450))
-        vshear = N.zeros((450,450))
+        topidx = N.zeros((self.y_dim,self.x_dim))
+        botidx = N.zeros((self.y_dim,self.x_dim))
+        ushear = N.zeros((self.y_dim,self.x_dim))
+        vshear = N.zeros((self.y_dim,self.x_dim))
 
-        for i in range(self.x_dim):
-            for j in range(self.y_dim):
+        for j in range(self.x_dim):
+            for i in range(self.y_dim):
+                # import pdb; pdb.set_trace()
                 topidx[i,j] = round(N.interp(
                                 topm,Z[0,:,i,j],range(self.z_dim)))
                 botidx[i,j] = round(N.interp(
@@ -687,7 +700,7 @@ class WRFOut(object):
 
     def compute_thetae(self,tidx,lvidx,lonidx,latidx,other):
         P = self.get('pressure',tidx,lvidx,lonidx,latidx)
-        T = self.get('temps',tidx,lvidx,lonidx,latidx,units='K')
+        T = self.get('drybulb',tidx,lvidx,lonidx,latidx,units='K')
         Td = self.get('Td',tidx,lvidx,lonidx,latidx)
         p2, t2 = thermo.drylift(P,T,Td)
         x = thermo.wetlift(p2,t2,100.0)
@@ -936,7 +949,8 @@ class WRFOut(object):
 
         datain = self.get(vrbl,utc=tidx,lons=lonidx,lats=latidx)[0,...]
         P = self.get('pressure',utc=tidx,lons=lonidx,lats=latidx)[0,...]
-        # import pdb; pdb.set_trace()
+        import pdb; pdb.set_trace()
+        # What about RUC, pressure coords
         dataout = N.zeros([nlv,P.shape[-2],P.shape[-1]])
         # pdb.set_trace()
         for (i,j), p in N.ndenumerate(dataout[0,:,:]):
@@ -1263,7 +1277,7 @@ class WRFOut(object):
             omega = -rho * mc.g * W
 
             # Time difference in sec
-            dt = self.wrf_times_epoch[tidx+1]-self.wrf_times_epoch[tidx]
+            dt = self.utc[tidx+1]-self.utc[tidx]
             dTdt, dTdz, dTdy, dTdx = N.gradient(T,dt,dp*100.0,self.dy, self.dx)
             # Gradient part
             grad = (dTdx**2 + dTdy**2)**0.5
@@ -1288,3 +1302,30 @@ class WRFOut(object):
         accum = total1 - total0
         return accum
         
+    def compute_satvappres(self,tidx,lvidx,lonidx,latidx,other):
+        t = self.get('drybulb',utc=tidx,level=lvidx,lons=lonidx,lats=latidx,other='C')
+        es = 6.1*N.exp(0.073*t) 
+        return es
+
+    def compute_vappres(self,tidx,lvidx,lonidx,latidx,other):
+        RH = self.get('RH',utc=tidx,level=lvidx,lons=lonidx,lats=latidx)
+        es = self.get('es',utc=tidx,level=lvidx,lons=lonidx,lats=latidx)
+        e = RH*es
+        return e
+
+    def compute_spechum(self,tidx,lvidx,lonidx,latidx,other):
+        es = self.get('es',utc=tidx,level=lvidx,lons=lonidx,lats=latidx)
+        p = self.get('pressure',utc=tidx,level=lvidx,lons=lonidx,lats=latidx)
+        q = 0.622*(es/p)
+        return q
+
+    def compute_Td_2(self,tidx,lvidx,lonidx,latidx,other='C'):
+        """
+        Another version of Td
+        From p70 Djuric Weather Analysis
+        """
+        e = self.get('e',utc=tidx,level=lvidx,lons=lonidx,lats=latidx)
+        Td = 273*((N.log(e) - N.log(6.1))/(19.8 - (N.log(e) - N.log(6.1))))
+        if other == 'K':
+            Td =+ 273.15
+        return Td

@@ -71,8 +71,9 @@ class WRFEnviron(object):
                 ncf=False,nct=False,f_prefix=0,f_suffix=False,
                 dom=1,plottype='contourf',smooth=1,
                 fig=False,ax=False,clvs=False,cmap=False,
-                locations=False,cb=False,
-                Nlim=False,Elim=False,Slim=False,Wlim=False):
+                locations=False,cb=True,match_nc=False,
+                Nlim=False,Elim=False,Slim=False,Wlim=False,
+                other=False):
         """Basic birds-eye-view plotting.
 
         This script is top-most and decides if the variables is
@@ -140,8 +141,11 @@ class WRFEnviron(object):
         :param locations:   Locations to plot on the basemap.
                             Format: locations = {'label':(lat,lon),etc}
         :type locations:    dict
-        :param colorbar:    plot a colorbar.
-        :type colorbar:     bool
+        :param cb:          plot a colorbar.
+        :type cb:           bool
+        :param match_nc:    Use domain from other netCDF file. 
+                            Absolute path to this netCDF file.
+        :type match_nc:     str
         :param Nlim:        north limit (latitude) for plot
         :type Nlim:         float
         :param Elim:        east limit (longitude) for plot
@@ -164,12 +168,27 @@ class WRFEnviron(object):
         if level:
             level = self.get_level_string(level)
 
+        # Match domain
+        if not Nlim and isinstance(match_nc,str):
+            MATCH = WRFOut(match_nc)
+            Nlim, Elim, Slim, Wlim = MATCH.get_limits()
+
+            
         # Data
         self.W = self.get_netcdf(ncdir,ncf=ncf,nct=nct,dom=dom)
         # lats, lons = self.W.get_limited_domain(bounding)
-        data = self.W.get(vrbl,utc,level=level,lons=False,lats=False)
+        data = self.W.get(vrbl,utc=utc,level=level,lons=False,lats=False,other=other)
+        # Needs to be shape [1,1,nlats,nlons].
+        import pdb; pdb.set_trace()
         if smooth>1:
             data = stats.gauss_smooth(data,smooth)
+
+        if Nlim:
+            data,lats,lons = utils.return_subdomain(data,self.W.lats1D,self.W.lons1D,
+                                Nlim,Elim,Slim,Wlim,fmt='latlon')
+        else:
+            lats = False
+            lons = False
 
         # Scales
         if clvs is False and cmap is False:
@@ -185,15 +204,17 @@ class WRFEnviron(object):
 
 
         # Figure
-        fname = self.create_fname(vrbl,utc,level)
+        fname = self.create_fname(vrbl,utc,level,other=other)
         F = BirdsEye(self.W,fig=fig,ax=ax)
         # import pdb; pdb.set_trace()
-        F.plot2D(data,fname,outdir,lats=False,lons=False,
+        cbax = F.plot2D(data,fname,outdir,lats=lats,lons=lons,
                     plottype=plottype,smooth=smooth,
                     clvs=clvs,cmap=cmap,locations=locations,
                     cb=cb)
+        if not cb:
+            return cbax
 
-    def create_fname(self,vrbl,utc=False,level=False,
+    def create_fname(self,vrbl,utc=False,level=False,other=False,
                         f_prefix=False,f_suffix=False,
                         extension='png'):
         """
@@ -225,6 +246,12 @@ class WRFEnviron(object):
         if utc:
             time_str = utils.string_from_time('output',utc)
             strs.append(time_str)
+
+        if isinstance(other,dict):
+            for k,v in other.iteritems():
+                strs.append(str(v))
+
+        # import pdb; pdb.set_trace()
 
         fname = '_'.join(strs)
 
@@ -268,7 +295,6 @@ class WRFEnviron(object):
             fpath, model = utils.netcdf_files_in(ncdir,init_time=nct,
                                                     dom=dom,return_model=True)
 
-        # import pdb; pdb.set_trace()
         if path_only:
             return fpath
         else:
@@ -1438,10 +1464,10 @@ class WRFEnviron(object):
         maps.plot_domains(ncdirs,labels,outdir,Nlim,Elim,
                             Slim,Wlim,colours=colours)
 
-
     def frontogenesis(self,utc,level,ncdir,outdir,ncf=False,nct=False,
                         dom=1,smooth=0,clvs=0,title=0,cmap='bwr',
-                        fig=False,ax=False,cb=True):
+                        fig=False,ax=False,cb=True,match_nc=False,
+                        Nlim=False,Elim=False,Slim=False,Wlim=False):
         """
         Compute and plot Miller frontogenesis as d/dt of theta gradient.
 
@@ -1507,8 +1533,19 @@ class WRFEnviron(object):
         """
         self.W = self.get_netcdf(ncdir,ncf=ncf,nct=nct,dom=dom)
 
+        # Match domain
+        if not Nlim and isinstance(match_nc,str):
+            MATCH = WRFOut(match_nc)
+            Nlim, Elim, Slim, Wlim = MATCH.get_limits()
+            
         Front = self.W.compute_frontogenesis(utc,level)
         if isinstance(Front,N.ndarray):
+            if Nlim:
+                data,lats,lons = utils.return_subdomain(Front,self.W.lats1D,self.W.lons1D,
+                                    Nlim,Elim,Slim,Wlim,fmt='latlon')
+            else:
+                lats= False
+                lons = False
 
             if smooth:
                 Front = stats.gauss_smooth(Front,smooth)
@@ -1521,7 +1558,7 @@ class WRFEnviron(object):
             F = BirdsEye(self.W,fig=fig,ax=ax)
             fname = self.create_fname('frontogen',utc,lv_str)
             # fname = 'frontogen_{0}_{1}.png'.format(lv_str,tstr)
-            F.plot2D(Front,fname,outdir,clvs=clvs,
+            F.plot2D(Front,fname,outdir,clvs=clvs,lons=lons,lats=lats,
                         cmap=cmap,cb=cb)
         else:
             print("Skipping this time; at start or end of run.")
@@ -1590,9 +1627,7 @@ class WRFEnviron(object):
         Needs to be expanded to include other forms of precip.
         Plot accumulated precip (RAIN!) valid at time utc for accum_hr hours.
 
-
         """
-
         self.W = self.get_netcdf(ncdir,ncf=ncf,nct=nct,dom=dom)
         data = self.W.compute_accum_rain(utc,accum_hr)[0,:,:]
         fname = self.create_fname('accum_precip',utc)

@@ -8,6 +8,7 @@ import pdb
 from mpl_toolkits.basemap import Basemap
 import time
 import glob
+import calendar 
 
 import sys
 #sys.path.append('/home/jrlawson/gitprojects/')
@@ -23,9 +24,8 @@ it is compared to.
 This script should inherit WRFOut and override the 'get' command.
 """
 
-
 class RUC(WRFOut):
-    def __init__(self,fpath,**kwargs):
+    def __init__(self,fpath,wrfdir=False):
         """
         config  :   configuration settings
         t       :   time, datenum format
@@ -34,31 +34,39 @@ class RUC(WRFOut):
         wrfdir  :   if picked, domain is cut down
         """
         self.fpath = fpath
-        # self.C = config
-        # self.D = Defaults()
+        self.nc = Dataset(self.fpath)
+        self.fields = [v for v in self.nc.variables]
 
-        # self.path_to_data = self.C.path_to_RUC
-        # self.output_root = self.C.output_root
+        raw_time = self.nc.variables[self.fields[0]].initial_time
+        self.utc = self.get_utc_time(raw_time)
+        self.version = self.get_version()
 
-        # self.t = t
-        # Convert the datenum into time sequence
-        # self.ts = self.get_time_seq()
-
-        # self.version = self.get_version()
         # self.fname = self.get_fname()
         # self.fpath = os.path.join(self.path_to_data,self.fname+'.nc')
-
-        self.nc = Dataset(self.fpath)
 
         # Original lat and lon grids
         self.lats, self.lons = self.get_latlon()
         # Original lat/lon 1D arrays
         self.lats1D = self.lats[:,self.lats.shape[1]/2]
         self.lons1D = self.lons[self.lons.shape[0]/2,:]
+        self.levels = self.get('pressure')
 
-        if 'wrfdir' in kwargs:
+        # Set dimension names, lengths.
+        if self.version == 0:
+            self.dimensions = [d for d in self.nc.dimensions]
+        else: 
+            print("Test this for other RUC versions.")
+            raise Exception
+            
+        x,y,z,_z = self.dimensions
+        self.x_dim = len(self.nc.dimensions[x])
+        self.y_dim = len(self.nc.dimensions[y])
+        self.z_dim = len(self.nc.dimensions[z])
+        del x,y,z,_z
+
+        if wrfdir:
             # It means all data should be cut to this size
-            self.limits = self.colocate_WRF_map(kwargs['wrfdir'])
+            self.limits = self.colocate_WRF_map(wrfdir)
             self.lats2D = self.cut_2D_array(self.lats)
             self.lons2D = self.cut_2D_array(self.lons)
             self.lats, self.lons = self.cut_lat_lon()
@@ -73,8 +81,93 @@ class RUC(WRFOut):
             self.y_dim = self.lats.shape[0]
             self.x_dim = self.lats.shape[1]
 
-
+        # import pdb; pdb.set_trace()
         print('RUC file loaded from {0}'.format(self.fpath))
+
+    def get_utc_time(self,rawtime,fmt='datenum'):
+        utc = time.strptime(rawtime,'%m/%d/%Y (%H:%M)')
+        if fmt == 'datenum':
+            utc = calendar.timegm(utc)
+        return utc
+
+    def check_compute(self,vrbl):
+        """
+        OVERRIDE WRFOUT VERSION
+        """
+
+        # try:
+            # vrbl = self.get_key(vrbl)
+        # except:
+            # return False
+        # else:
+            # if vrbl in self.fields:
+                # return True
+            # else:
+                # return False
+        return self.get_key(vrbl)
+
+    def load(self,vrbl,tidx,lvidx,lonidx,latidx):
+        """
+        OVERRIDE WRFOUT VERSION
+        """
+        # Don't have to de-stagger RUC?
+        # destag_dim = self.check_destagger(vrbl)
+
+        # Do we need the dim names?
+        # dim_names = self.get_dims(vrbl)
+
+        # Next, correct the variable key
+        vrbl = self.get_key(vrbl)
+
+        # New axis for time (length = 1)
+        # Way to account for 2D, 3D, 4D variables in RUC
+        vrbldata = self.nc.variables[vrbl]
+        # import pdb; pdb.set_trace()
+        if len(vrbldata.shape) == 3:
+            vrbldata = N.expand_dims(vrbldata,axis=0)
+        # elif len(vrbldata.shape) == 3:
+            # vrbldata = vrbldata[N.newaxis,:,:,:]
+
+        # Top/bottom is different to WRF?
+
+        # Don't need to destagger, again?
+        # sl = self.create_slice(vrbl,tidx,lvidx,lonidx,latidx,dim_names)
+        # if destag_dim and isinstance(sl[destag_dim],N.ndarray):
+            # destag_dim = None
+        # data = self.destagger(vrbldata[sl],destag_dim)
+        # return data
+
+        # Flip vertical to match WRF
+        if len(vrbldata.shape) == 4:
+            return vrbldata[:,::-1,:,:]
+        else:
+            return vrbldata
+
+    def get_MAYBE(self,vrbl,utc=False,level=False,lats=False,lons=False,
+                smooth=1,other=False):
+        """
+        Overwrite WRFOut method here.
+        """
+
+        RUCvrbl = self.get_key(vrbl)
+        
+        coords = utils.check_vertical_coordinate(level)
+        if level is False:
+            lvidx = False
+        elif coords == 'index':
+            lvidx = level
+        elif isinstance(coords,basestring):
+            if coords == 'surface':
+                lvidx = 0
+            elif coords == 'isobaric':
+                if level in self.levels:
+                    lvidx = N.where(self.levels==level)
+            else:
+                lvidx = coords
+        else:
+            print("Invalid level selection.")
+            raise Exception
+
 
     def cut_lat_lon(self):
         """ Return a smaller array of data
@@ -82,8 +175,8 @@ class RUC(WRFOut):
         """
         lats = self.lats1D
         lons = self.lons1D
-        lat_idx_max,lon_idx_min,a,b = gridded_data.getXY(lats,lons,self.limits['Nlim'],self.limits['Wlim'])
-        lat_idx_min,lon_idx_max,c,d = gridded_data.getXY(lats,lons,self.limits['Slim'],self.limits['Elim'])
+        lat_idx_max,lon_idx_min,a,b = utils.gridded_data.getXY(lats,lons,self.limits['Nlim'],self.limits['Wlim'])
+        lat_idx_min,lon_idx_max,c,d = utils.gridded_data.getXY(lats,lons,self.limits['Slim'],self.limits['Elim'])
 
         # Dummy variables for exact lat/lons returned
         del a,b,c,d
@@ -109,9 +202,12 @@ class RUC(WRFOut):
 
     def get_version(self):
         """Returns the version of RUC or RUC file
+
+        Needs time as time.struct_time object.
         """
-        yr = self.ts[0]
-        mth = self.ts[1]
+         
+        yr = time.gmtime(self.utc).tm_year
+        mth = time.gmtime(self.utc).tm_mon
 
         if (yr > 2012) and (mth > 3): # With a massive gap for RAP
             version = 3
@@ -121,6 +217,8 @@ class RUC(WRFOut):
             version = 1
         elif (yr>2004):
             version = 0
+
+        print("This RUC file is Version {0}.".format(version))
         return version
 
 
@@ -216,7 +314,7 @@ class RUC(WRFOut):
         self.save(self.fig,self.output_root,self.fname)
         plt.close()
 
-    def get(self,va,**kwargs):
+    def get_OLD(self,va,**kwargs):
         if va == 'wind10':
             data = self.compute_wind10(self.nc)
         elif va == 'shear':
@@ -230,8 +328,8 @@ class RUC(WRFOut):
         lat_key = self.get_key('lats')
         lon_key = self.get_key('lons')
 
-        lats = self.nc.variables[lat_key]
-        lons = self.nc.variables[lon_key]
+        lats = self.nc.variables[lat_key][...]
+        lons = self.nc.variables[lon_key][...]
 
         return lats,lons
 
@@ -333,7 +431,7 @@ class RUC(WRFOut):
 
         return limits
 
-    def compute_shear(self,nc,**kwargs):
+    def compute_shear_old(self,nc,**kwargs):
         """
         top and bottom in km.
         kwargs['top']
@@ -379,7 +477,7 @@ class RUC(WRFOut):
         v = self.get('V')[-1,...]
         return N.sqrt(u**2 + v**2)
 
-    def get_key(self,va):
+    def get_key(self,vrbl):
         """
         Returns the netcdf key for the desired variable
         """
@@ -390,70 +488,24 @@ class RUC(WRFOut):
         KEYS['lats'] = {0:'gridlat_252',3:'gridlat_0'}
         KEYS['lons'] = {0:'gridlon_252',3:'gridlon_0'}
         KEYS['Z'] = {0:'HGT_252_ISBL'}
-
+        KEYS['Td2'] = {0:'DPT_252_HTGL'}
         KEYS['U10'] = {3:'UGRD_P0_L103_GLC0'}
         KEYS['V10'] = {3:'VGRD_P0_L103_GLC0'}
-
-        KEYS['Td'] = {0:'DPT_252_HTGL'}
+        KEYS['T2'] = {0:'TMP_252_SFC'}
+        # This is specific humidity, not mixing ratio of water tut tut
+        KEYS['Q2'] = {0:'SPF_H_252_HTGL'}
+        # KEYS['Q2'] = 
+        KEYS['pressure'] = {0:'lv_ISBL2'}
+        KEYS['T'] = {0:'TMP_252_ISBL'}
+        KEYS['W'] = {0:'V_VEL_252_ISBL'}
 
         try:
-            key = KEYS[va][self.version]
+            key = KEYS[vrbl][self.version]
         except KeyError:
-            print("Choose variable")
-            raise Exception
+            print("Can't find variable {0}".format(vrbl))
+            # raise Exception
+            return False
         else:
             return key
 
-    def compute_frontogenesis_NOTNEEDED():
-        """
-        Override WRFOut frontogenesis?
-        """
 
-        dp = 15 # hPa to compute vertical gradients
-        tidx = self.get_time_idx(time)
-        if (tidx == 0) or (tidx == self.wrf_times.shape[0]-1):
-            return None
-        elif level == 2000:
-            pass
-        elif isinstance(level,int):
-            tidxs = (tidx-1,tidx,tidx+1)
-
-            # Get sizes of array
-            ny,nx = self.get_p('U',tidx,level).shape
-
-            # Initialise them
-            U = N.zeros([3,3,ny,nx])
-            V = N.zeros_like(U)
-            W = N.zeros_like(U)
-            T = N.zeros_like(U)
-            # omega = N.zeros_like(U)
-
-            for n, t in enumerate(tidxs):
-                U[n,...] = self.get_p('U',t,level)
-                V[n,...] = self.get_p('V',t,level)
-                W[n,...] = self.get_p('W',t,level)
-
-                # 3D array has dimensions (vertical, horz, horz)
-                T[n,...] = self.get_p('T',t,(level-dp,level,level+dp))
-
-                # Compute omega
-                # P = rho* R* drybulb
-                # drybulb = T/((P0/P)^(R/cp)
-
-            drybulb = 273.15 + (T/((100000.0/(level*100.0))**(mc.R/mc.cp)))
-            rho = (level*100.0)/(mc.R*drybulb)
-            omega = -rho * mc.g * W
-
-            # Time difference in sec
-            dt = self.wrf_times_epoch[tidx+1]-self.wrf_times_epoch[tidx]
-            dTdt, dTdz, dTdy, dTdx = N.gradient(T,dt,dp*100.0,self.dy, self.dx)
-            # Gradient part
-            grad = (dTdx**2 + dTdy**2)**0.5
-            # Full derivative - value wrong for dgraddz here
-            dgraddt, dgraddz, dgraddy, dgraddx = N.gradient(grad,dt,dp*100.0,
-                                                            self.dy, self.dx)
-            # Full equation
-            Front = (dgraddt[1,1,:,:] + U[1,1,:,:]*dgraddx[1,1,:,:] +
-                        V[1,1,:,:]*dgraddy[1,1,:,:])
-                        # + omega[1,1,:,:]*dgraddz[1,1,:,:]
-        return Front
