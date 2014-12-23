@@ -9,8 +9,7 @@ import numpy as N
 sys.path.append('/home/jrlawson/gitprojects/')
 
 from WEM.postWRF.postWRF import WRFEnviron
-from settings import Settings
-import WEM.utils as utils
+import WEM.utils.utils as utils
 #from WEM.postWRF.postWRF.rucplot import RUCPlot
 
 outroot = '/home/jrlawson/public_html/bowecho/'
@@ -19,7 +18,7 @@ ncroot = '/chinook2/jrlawson/bowecho/'
 p = WRFEnviron()
 
 skewT = 0
-plot2D = 1
+plot2D = 0
 radarplot = 0
 radarcomp = 0
 streamlines = 0
@@ -32,11 +31,14 @@ frontogenesis = 0
 upperlevel = 0
 strongestwind = 0
 accum_rain = 0
+compute_dte = 1
+plot_2D_dte = 1
+plot_1D_dte = 1
 
 enstype = False
 # enstype = 'STCH'
 # enstype = 'ICBC'
-# enstype = 'MXMP'
+enstype = 'MXMP'
 # enstype = 'STMX'
 
 # case = '2006052512'
@@ -47,8 +49,8 @@ case = '20060526'
 # case = '20130815'
 
 # IC = 'GEFSR2'
-# IC = 'NAM'
-IC = 'RUC'
+IC = 'NAM'
+# IC = 'RUC'
 # IC = 'GFS'
 # IC = 'RUC'
 
@@ -129,7 +131,21 @@ def get_verif_dirs():
     datadir = os.path.join(ncroot,case,'VERIF')
     return outdir,datadir
 
+def get_pickle_dirs(en):
+    if enstype=='STCH':
+        picklefolder = os.path.join(ncroot,case,IC,en,MP)
+        outfolder = os.path.join(outroot,case,IC,en,MP)
+    elif enstype == 'ICBC':
+        picklefolder = os.path.join(ncroot,case,IC)
+        outfolder = os.path.join(outroot,case,IC)
+    else:
+        picklefolder = os.path.join(ncroot,case,IC,en)
+        outfolder = os.path.join(outroot,case,IC,en)
+
+    return picklefolder,outfolder
+
 times = utils.generate_times(itime,ftime,hourly*60*60)
+dtetimes = utils.generate_times(itime,ftime,3*60*60)
 
 #shear_times = utils.generate_times(itime,ftime,3*60*60)
 #sl_times = utils.generate_times(sl_itime,sl_ftime,1*60*60)
@@ -313,3 +329,27 @@ if accum_rain:
                         Nlim=42.7,Elim=-94.9,Slim=37.0,Wlim=-101.8
                         )
 
+if compute_dte or plot_2D_dte or plot_1D_dte:
+    pfname = 'DTE_' + enstype
+    pickledir,outdir = get_pickle_dirs(ensnames[0])
+    path_to_wrfouts = []
+    for en,ex in zip(ensnames,experiments):
+        od,fpath = get_folders(en,ex)
+        path_to_wrfouts.append(utils.netcdf_files_in(fpath))
+    import pdb; pdb.set_trace()
+    if compute_dte:
+        p.compute_diff_energy('sum_z','total',path_to_wrfouts,dtetimes,
+                              d_save=pickledir, d_return=0,d_fname=pfname)
+
+    if plot_2D_dte:
+        # Contour fixed at these values
+        V = range(250,5250,250)
+        VV = [100,] + V
+        ofname = pfname + '_2D'
+        p.plot_diff_energy('sum_z','total',pickledir,outdir,dataf=pfname,outprefix=ofname,clvs=VV,utc=False)
+
+    if plot_1D_dte:
+        SENS = {'ICBC':ensnames,'MXMP':experiments,'STCH':0,'STMX':experiments}
+        ylimits = [0,2e8]
+        ofname = pfname
+        p.plot_error_growth(ofname,pickledir,pfname,sensitivity=SENS[enstype],ylimits=ylimits)

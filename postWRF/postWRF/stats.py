@@ -6,6 +6,11 @@ import numpy as N
 import pdb
 import scipy
 import scipy.signal
+import itertools
+import time
+import os
+
+import WEM.utils.utils as utils
 
 from wrfout import WRFOut
 
@@ -58,6 +63,7 @@ def gauss_smooth(data, n, ny=None, pad=1, pad_values=0) :
 
     """
     # Create list from fill values
+    # import pdb; pdb.set_trace()
     if pad_values == 'nan':
         constant_values = [0,]
     else:
@@ -107,7 +113,7 @@ def compute_diff_energy(ptype,energy,files,times,upper=None,lower=None,
 
     print("Saving pickle file to {0}".format(d_save))
     # Look up the method to use depending on type of plot
-    PLOTS = {'sum_z':self.DE_z, 'sum_xyz':self.DE_xyz}
+    PLOTS = {'sum_z':DE_z, 'sum_xyz':DE_xyz}
 
     print('Get sequence of time')
     # Creates sequence of times
@@ -152,19 +158,19 @@ def compute_diff_energy(ptype,energy,files,times,upper=None,lower=None,
                                             energy,lower,upper))
         DATA[str(n)]['file1'] = f1
         DATA[str(n)]['file2'] = f2
-
-        print "Calculation #{0} took {1:2.2f} seconds.".format(n,time.time()-perm_start)
+        import pdb; pdb.set_trace()
+        print "Calculation #{0} took {1:2.1f} seconds.".format(n,time.time()-perm_start)
 
     if d_return and not d_save:
         return DATA
     elif d_save and not d_return:
         #self.save_data(DATA,d_save,d_fname)
-        self.save_data(DATA,d_save,d_fname)
+        utils.save_data(DATA,d_save,d_fname)
         #self.json_data(DATA,d_save,d_fname)
         return
     elif d_return and d_save:
         #self.save_data(DATA,d_save,d_fname)
-        self.save_data(DATA,d_save,d_fname)
+        utils.save_data(DATA,d_save,d_fname)
         #self.json_data(DATA,d_save,d_fname)
         return DATA
 

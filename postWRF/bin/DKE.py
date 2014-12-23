@@ -10,7 +10,7 @@ import time
 sys.path.append('/home/jrlawson/gitprojects/')
 
 from DKE_settings import Settings
-from WEM.postWRF import WRFEnviron
+from WEM.postWRF.postWRF import WRFEnviron
 import WEM.utils as utils
 
 compute = 0
@@ -36,8 +36,7 @@ MPs = ['ICBC','WSM6_Grau','WSM6_Hail','Kessler','Ferrier','WSM5',
 		'Morrison_Grau','Morrison_Hail']
 
 # Initialise settings and environment
-config = Settings()
-p = WRFEnviron(config)
+p = WRFEnviron()
 
 if case[:4] == '2006':
     itime = (2006,5,26,0,0,0)

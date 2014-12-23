@@ -232,10 +232,13 @@ class WRFOut(object):
             else:
                 data = self.compute(vrbl,tidx,lvidx,lonidx,latidx,other)
 
-        if len(data.shape) == 2:
-            data = data[N.newaxis,N.newaxis,:,:]
-        elif len(data.shape) == 3:
-            data = data[N.newaxis,:,:,:]
+        # if len(data.shape) == 2:
+            # data = data[N.newaxis,N.newaxis,:,:]
+        # elif len(data.shape) == 3:
+            # data = data[N.newaxis,:,:,:]
+        # if len(data.shape) == 3:
+            # data = N.expand_dims(data,axis=0)
+        data = self.make_4D(data,vrbl=vrbl)
         return data
 
     def load(self,vrbl,tidx,lvidx,lonidx,latidx):
@@ -847,7 +850,39 @@ class WRFOut(object):
         wind_max = N.amax(wind,axis=0)
         # wind_max_smooth = self.test_smooth(wind_max)
         # return wind_max_smooth
+        
         return wind_max
+
+    def make_4D(self,datain,vrbl=False,missing_axis=False):
+        """
+        If vrbl, look up the wrfout file's variable dimensions and
+        adjust accordingly to get into 4D structure. If not vrbl,
+        for instance a computed variable, the user needs to specify
+        which axes are missing in a tuple.
+        """
+        dataout = datain
+        if len(datain.shape)<4:
+            if vrbl in self.fields:
+                dims = self.nc.variables[vrbl].dimensions
+                missing = self.get_missing_axes(dims)
+                for ax in missing:
+                    dataout = N.expand_dims(dataout,axis=ax)
+            else:
+                while len(dataout.shape)<4:
+                    dataout = N.expand_dims(dataout,axis=0)
+        # import pdb; pdb.set_trace()
+        return dataout
+
+    def get_missing_axes(self,dims):
+        axes = {0:"Time",1:"bottom",2:"south",3:"west"}
+        missing = []
+
+        for ax, axname in axes.iteritems():
+            present = bool([True for d in dims if axname in d])
+            if not present:
+                missing.append(ax)
+
+        return missing
 
     def check_vcs(self,z1,z2,exception=1):
         """
@@ -949,7 +984,7 @@ class WRFOut(object):
 
         datain = self.get(vrbl,utc=tidx,lons=lonidx,lats=latidx)[0,...]
         P = self.get('pressure',utc=tidx,lons=lonidx,lats=latidx)[0,...]
-        import pdb; pdb.set_trace()
+        # import pdb; pdb.set_trace()
         # What about RUC, pressure coords
         dataout = N.zeros([nlv,P.shape[-2],P.shape[-1]])
         # pdb.set_trace()

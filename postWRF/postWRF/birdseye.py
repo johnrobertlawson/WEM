@@ -99,6 +99,7 @@ class BirdsEye(Figure):
 
         # import pdb; pdb.set_trace()
         if plottype == 'contour':
+            plotkwargs['colors'] = 'k'
             f1 = self.bmap.contour(*plotargs,**plotkwargs)
         elif plottype == 'contourf':
             f1 = self.bmap.contourf(*plotargs,**plotkwargs)
@@ -129,8 +130,11 @@ class BirdsEye(Figure):
         if save:
             self.save(outdir,fname)
             plt.close(self.fig)
-        if cb:
-            self.fig.colorbar(f1,orientation='vertical')
+        if cb != False:
+            if cb==True:
+                self.fig.colorbar(f1,orientation='vertical')
+            else:
+                plt.colorbar(f1,orientation='vertical',cax=cb)
         else:
             return f1
 

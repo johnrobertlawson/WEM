@@ -49,7 +49,7 @@ class RUC(WRFOut):
         # Original lat/lon 1D arrays
         self.lats1D = self.lats[:,self.lats.shape[1]/2]
         self.lons1D = self.lons[self.lons.shape[0]/2,:]
-        self.levels = self.get('pressure')
+        self.levels = self.get('pressure')[:]
 
         # Set dimension names, lengths.
         if self.version == 0:
@@ -123,6 +123,10 @@ class RUC(WRFOut):
         # Way to account for 2D, 3D, 4D variables in RUC
         vrbldata = self.nc.variables[vrbl]
         # import pdb; pdb.set_trace()
+        if len(vrbldata.shape) == 2:
+            # Ugly!
+            vrbldata = N.expand_dims(vrbldata,axis=0)
+            vrbldata = N.expand_dims(vrbldata,axis=0)
         if len(vrbldata.shape) == 3:
             vrbldata = N.expand_dims(vrbldata,axis=0)
         # elif len(vrbldata.shape) == 3:
@@ -139,6 +143,7 @@ class RUC(WRFOut):
 
         # Flip vertical to match WRF
         if len(vrbldata.shape) == 4:
+            # Should always be the case!
             return vrbldata[:,::-1,:,:]
         else:
             return vrbldata
@@ -477,6 +482,35 @@ class RUC(WRFOut):
         v = self.get('V')[-1,...]
         return N.sqrt(u**2 + v**2)
 
+    def get_p(self,vrbl,tidx,level,lonidx,latidx):
+        if isinstance(level,basestring) and level.endswith('hPa'):
+            hPa = 100.0*int(level.split('h')[0])
+            nlv = 1
+        elif isinstance(level,(float,int)):
+            hPa = level*100.0
+            nlv = 1
+        elif isinstance(level,(tuple,list)):
+            hPa = [l*100.0 for l in level]
+            nlv = len(hPa)
+        else:
+            print("Use XXXhPa, an integer, or list of integers for level.")
+            raise Exception
+
+        # If this breaks, user is requesting non-4D data
+        # Duck-typing for the win
+
+        levels = self.levels*100
+        datain = self.get(vrbl,utc=tidx,lons=lonidx,lats=latidx)[0,:,:,:]
+        dataout = N.zeros([nlv,datain.shape[-2],datain.shape[-1]])
+        for (i,j), p in N.ndenumerate(dataout[0,:,:]):
+            dataout[:,i,j] = N.interp(hPa,levels,datain[:,i,j][::-1])
+        # pdb.set_trace()
+        data = N.expand_dims(dataout,axis=0)
+        data = N.expand_dims(dataout,axis=0)
+        return dataout
+        
+        
+
     def get_key(self,vrbl):
         """
         Returns the netcdf key for the desired variable
@@ -498,6 +532,10 @@ class RUC(WRFOut):
         KEYS['pressure'] = {0:'lv_ISBL2'}
         KEYS['T'] = {0:'TMP_252_ISBL'}
         KEYS['W'] = {0:'V_VEL_252_ISBL'}
+        KEYS['PSFC'] = {0:'PRES_252_SFC'}
+        KEYS['HGT'] = {0:'HGT_252_SFC'}
+        KEYS['PMSL'] = {0:'MSLMA_252_MSL'}
+        KEYS['RH'] = {0:'R_H_252_ISBL'}
 
         try:
             key = KEYS[vrbl][self.version]
