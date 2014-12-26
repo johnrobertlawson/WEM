@@ -617,7 +617,7 @@ class WRFEnviron(object):
                 plt.ylim(ylim)
             plt.gca().set_xticks(times[::2])
             plt.gca().set_xticklabels(time_str[::2])
-            vrbl_long = '{0}_{1}'.format(ofname,sens)
+            vrbl_long = '{0}_{1}'.format(ofname,'Averages')
             fname = self.create_fname(vrbl_long,f_prefix=f_prefix,f_suffix=f_suffix)
             fig.savefig(fpath)
 
