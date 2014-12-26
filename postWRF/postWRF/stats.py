@@ -10,7 +10,7 @@ import itertools
 import time
 import os
 
-import WEM.utils.utils as utils
+import WEM.utils as utils
 
 from wrfout import WRFOut
 
@@ -85,12 +85,12 @@ def compute_diff_energy(ptype,energy,files,times,upper=None,lower=None,
     between WRFout files for a given depth of the
     atmosphere, at given time intervals
 
-    :param ptype:   'sum_z' or 'sum_xyz'.
-                    'sum_z' integrates vertically between lower and
+    :param ptype:   '2D' or '3D'.
+                    '2D' integrates vertically between lower and
                     upper hPa and creates a time series.
-                    'sum_xyz' integrates over the 3D space (again between
+                    '3D' integrates over the 3D space (again between
                     the upper and lower bounds) and creates 2D arrays.
-    :param energy:   'kinetic' or 'total'
+    :param energy:   'DKE' or 'DTE'
     :param upper:   upper limit of vertical integration
     :param lower:   lower limit of vertical integration
     :param files:   abs paths to all wrfout files
@@ -113,7 +113,7 @@ def compute_diff_energy(ptype,energy,files,times,upper=None,lower=None,
 
     print("Saving pickle file to {0}".format(d_save))
     # Look up the method to use depending on type of plot
-    PLOTS = {'sum_z':DE_z, 'sum_xyz':DE_xyz}
+    PLOTS = {'2D':DE_z, '3D':DE_xyz}
 
     print('Get sequence of time')
     # Creates sequence of times
@@ -158,7 +158,7 @@ def compute_diff_energy(ptype,energy,files,times,upper=None,lower=None,
                                             energy,lower,upper))
         DATA[str(n)]['file1'] = f1
         DATA[str(n)]['file2'] = f2
-        import pdb; pdb.set_trace()
+        # import pdb; pdb.set_trace()
         print "Calculation #{0} took {1:2.1f} seconds.".format(n,time.time()-perm_start)
 
     if d_return and not d_save:
@@ -174,7 +174,7 @@ def compute_diff_energy(ptype,energy,files,times,upper=None,lower=None,
         #self.json_data(DATA,d_save,d_fname)
         return DATA
 
-def DE_xyz(self,nc0,nc1,t_idx,energy,*args):
+def DE_xyz(nc0,nc1,t_idx,energy,*args):
     """
     Computation for difference kinetic energy (DKE).
     Sums DKE over the 3D space, returns a time series.
@@ -201,7 +201,7 @@ def DE_xyz(self,nc0,nc1,t_idx,energy,*args):
     U1 = nc1.variables['U']
     V1 = nc1.variables['V']
 
-    if energy=='total':
+    if energy=='DTE':
         T0 = nc0.variables['T']
         T1 = nc1.variables['T']
         R = 287.0 # Universal gas constant (J / deg K * kg)
@@ -226,7 +226,7 @@ def DE_xyz(self,nc0,nc1,t_idx,energy,*args):
         DKE.append(DKE_hr)
     return DKE
 
-def DE_z(self,nc0,nc1,t,energy,lower,upper):
+def DE_z(nc0,nc1,t,energy,lower,upper):
     """
     Computation for difference kinetic energy (DKE).
     Sums DKE over all levels between lower and upper,
@@ -276,7 +276,7 @@ def DE_z(self,nc0,nc1,t,energy,lower,upper):
         # Here we assume pressure columns are
         # roughly the same between the two...
 
-    if energy=='total':
+    if energy=='DTE':
         T0 = nc0.variables['T'][t,...]
         T1 = nc1.variables['T'][t,...]
         Td = T0 - T1
@@ -317,10 +317,10 @@ def DE_z(self,nc0,nc1,t,energy,lower,upper):
 
         zidx = slice(low_idx,upp_idx)
 
-        if energy=='kinetic':
+        if energy=='DKE':
             DKE2D[j,i] = N.sum(0.5*((Ud[zidx,j,i])**2 +
                                 (Vd[zidx,j,i])**2))
-        elif energy=='total':
+        elif energy=='DTE':
             DKE2D[j,i] = N.sum(0.5*((Ud[zidx,j,i])**2 +
                                 (Vd[zidx,j,i])**2 +
                                 kappa*(Td[zidx,j,i])**2))

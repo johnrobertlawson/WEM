@@ -9,7 +9,7 @@ import numpy as N
 sys.path.append('/home/jrlawson/gitprojects/')
 
 from WEM.postWRF.postWRF import WRFEnviron
-import WEM.utils.utils as utils
+import WEM.utils as utils
 #from WEM.postWRF.postWRF.rucplot import RUCPlot
 
 outroot = '/home/jrlawson/public_html/bowecho/'
@@ -31,15 +31,15 @@ frontogenesis = 0
 upperlevel = 0
 strongestwind = 0
 accum_rain = 0
-compute_dte = 1
+compute_dte = 0
 plot_2D_dte = 1
 plot_1D_dte = 1
 
-enstype = False
+# enstype = False
 # enstype = 'STCH'
 # enstype = 'ICBC'
-enstype = 'MXMP'
-# enstype = 'STMX'
+# enstype = 'MXMP'
+enstype = 'STMX'
 
 # case = '2006052512'
 case = '20060526'
@@ -56,7 +56,7 @@ IC = 'NAM'
 
 if enstype == 'STCH':
     experiments = ['s'+"%02d" %n for n in range(1,11)]
-    # ensnames = ['c00',]
+    ensnames = ['anl',]
     MP = 'WDM6_Grau'
 elif enstype == 'STMX':
     # experiments = ['WSM6_Hail','Kessler','Ferrier',
@@ -65,7 +65,7 @@ elif enstype == 'STMX':
                     'WDM6_Grau_STCH','WDM6_Hail_STCH',
                     'Morrison_Grau_STCH','Morrison_Hail_STCH',]
                     # 'ICBC_STCH']
-    # ensnames = ['anl',]
+    ensnames = ['anl',]
 elif enstype == 'MXMP':
     # experiments = ['WSM6_Hail','Kessler','Ferrier',
     experiments = ['WSM6_Grau','WSM6_Hail','Kessler','Ferrier',
@@ -331,25 +331,27 @@ if accum_rain:
 
 if compute_dte or plot_2D_dte or plot_1D_dte:
     pfname = 'DTE_' + enstype
+    ofname = enstype
     pickledir,outdir = get_pickle_dirs(ensnames[0])
     path_to_wrfouts = []
-    for en,ex in zip(ensnames,experiments):
-        od,fpath = get_folders(en,ex)
-        path_to_wrfouts.append(utils.netcdf_files_in(fpath))
-    import pdb; pdb.set_trace()
+    for en in ensnames:
+        for ex in experiments:
+            od,fpath = get_folders(en,ex)
+            path_to_wrfouts.append(utils.netcdf_files_in(fpath))
+
     if compute_dte:
-        p.compute_diff_energy('sum_z','total',path_to_wrfouts,dtetimes,
+        p.compute_diff_energy('2D','DTE',path_to_wrfouts,dtetimes,
                               d_save=pickledir, d_return=0,d_fname=pfname)
 
     if plot_2D_dte:
         # Contour fixed at these values
         V = range(250,5250,250)
         VV = [100,] + V
-        ofname = pfname + '_2D'
-        p.plot_diff_energy('sum_z','total',pickledir,outdir,dataf=pfname,outprefix=ofname,clvs=VV,utc=False)
+        ofname = pfname
+        p.plot_diff_energy('2D','DTE',pickledir,outdir,dataf=pfname,outprefix=ofname,clvs=VV,utc=False)
 
     if plot_1D_dte:
         SENS = {'ICBC':ensnames,'MXMP':experiments,'STCH':0,'STMX':experiments}
         ylimits = [0,2e8]
         ofname = pfname
-        p.plot_error_growth(ofname,pickledir,pfname,sensitivity=SENS[enstype],ylimits=ylimits)
+        p.plot_error_growth(outdir,pickledir,dataf=pfname,sensitivity=SENS[enstype],ylim=ylimits,f_prefix=enstype)
