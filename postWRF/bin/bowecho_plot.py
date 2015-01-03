@@ -32,18 +32,19 @@ upperlevel = 0
 strongestwind = 0
 accum_rain = 0
 compute_dte = 0
-plot_2D_dte = 1
-plot_1D_dte = 1
+plot_1D_dte = 1 # To produce top-down maps
+plot_3D_dte = 0 # To produce line graphs
+all_3D_dte = 0 # To produce line graphs for all averages
+delta_plot = 0
 
 # enstype = False
-# enstype = 'STCH'
+enstype = 'STCH'
+# enstype = 'STCH5'
 # enstype = 'ICBC'
 # enstype = 'MXMP'
-enstype = 'STMX'
+# enstype = 'STMX'
 
-# case = '2006052512'
 case = '20060526'
-# case = '2006052612'
 #case = '20090910'
 # case = '20110419'
 # case = '20130815'
@@ -53,9 +54,15 @@ IC = 'NAM'
 # IC = 'RUC'
 # IC = 'GFS'
 # IC = 'RUC'
+# IC = False
 
 if enstype == 'STCH':
     experiments = ['s'+"%02d" %n for n in range(1,11)]
+    ensnames = ['anl',]
+    # MP = 'ICBC'
+    MP = 'WDM6_Grau'
+elif enstype == 'STCH5':
+    experiments = ['ss'+"%02d" %n for n in range(1,11)]
     ensnames = ['anl',]
     MP = 'WDM6_Grau'
 elif enstype == 'STMX':
@@ -65,12 +72,13 @@ elif enstype == 'STMX':
                     'WDM6_Grau_STCH','WDM6_Hail_STCH',
                     'Morrison_Grau_STCH','Morrison_Hail_STCH',]
                     # 'ICBC_STCH']
+    experiments = ['Ferrier_STCH',]
     ensnames = ['anl',]
 elif enstype == 'MXMP':
-    # experiments = ['WSM6_Hail','Kessler','Ferrier',
     experiments = ['WSM6_Grau','WSM6_Hail','Kessler','Ferrier',
                     'WSM5','WDM5','Lin','WDM6_Grau','WDM6_Hail',
                     'Morrison_Grau','Morrison_Hail','ICBC']
+    experiments = ['WDM6_Grau',]
     ensnames = ['anl',]
 elif enstype == 'ICBC':
     ensnames =  ['c00'] + ['p'+"%02d" %n for n in range(1,11)]
@@ -89,7 +97,7 @@ if case[:4] == '2006':
     iwind = (2006,5,26,18,0,0)
     fwind = (2006,5,27,12,0,0)
     compt = [(2006,5,d,h,0,0) for d,h in zip((26,27,27),(23,3,6))]
-    # times = [(2006,5,26,12,0,0),]
+    # times = [(2006,5,27,6,0,0),]
     matchnc = '/chinook2/jrlawson/bowecho/20060526/GFS/anl/ICBC/wrfout_d01_2006-05-26_00:00:00'
 
 elif case[:4] == '2009':
@@ -114,11 +122,13 @@ else:
 # itime = (2006,5,25,12,0,0)
 # ftime = (2006,5,27,12,0,0)
 
-hourly = 1
+hourly = 3
 level = 2000
+times = utils.generate_times(itime,ftime,hourly*60*60)
+dtetimes = utils.generate_times(itime,ftime,3*60*60)
 
 def get_folders(en,ex):
-    if enstype == 'STCH':
+    if enstype[:4] == 'STCH':
         out_sd = os.path.join(outroot,case,IC,en,MP,ex)
         wrf_sd = os.path.join(ncroot,case,IC,en,MP,ex)
     else:
@@ -132,7 +142,7 @@ def get_verif_dirs():
     return outdir,datadir
 
 def get_pickle_dirs(en):
-    if enstype=='STCH':
+    if enstype[:4]=='STCH':
         picklefolder = os.path.join(ncroot,case,IC,en,MP)
         outfolder = os.path.join(outroot,case,IC,en,MP)
     elif enstype == 'ICBC':
@@ -144,8 +154,6 @@ def get_pickle_dirs(en):
 
     return picklefolder,outfolder
 
-times = utils.generate_times(itime,ftime,hourly*60*60)
-dtetimes = utils.generate_times(itime,ftime,3*60*60)
 
 #shear_times = utils.generate_times(itime,ftime,3*60*60)
 #sl_times = utils.generate_times(sl_itime,sl_ftime,1*60*60)
@@ -180,12 +188,12 @@ if plot2D or radarplot:
             for t in times:
                 outdir, ncdir = get_folders(en,ex)
                 if plot2D:
-                    # p.plot_strongest_wind(itime,ftime,2000,wrf_sd=wrf_sd,out_sd=out_sd)
                     # p.plot2D('Z',t,500,wrf_sd=wrf_sd,out_sd=out_sd,plottype='contour',smooth=10)
-                    # import pdb; pdb.set_trace()
                     # p.plot2D('Td2',t,ncdir=ncdir,outdir=outdir,nct=t,match_nc=matchnc,clvs=N.arange(260,291,1))
-                    p.plot2D('Q2',t,ncdir=ncdir,outdir=outdir,nct=t,match_nc=matchnc,clvs=N.arange(1,20.5,0.5)*10**-3)
+                    # p.plot2D('Q2',t,ncdir=ncdir,outdir=outdir,nct=t,match_nc=matchnc,clvs=N.arange(1,20.5,0.5)*10**-3)
                     # p.plot2D('RAINNC',t,ncdir=wrf_sd,outdir=out_sd,locations=locs,clvs=N.arange(1,100,2))
+                    p.plot2D('cref',t,ncdir=ncdir,outdir=outdir,cb='only')
+                    # p.plot2D('wind10',t,ncdir=ncdir,outdir=outdir,locations=locs,cb=True,clvs=N.arange(5,32,2))
 
                 if radarplot:
                     outdir,datadir = get_verif_dirs()
@@ -301,7 +309,7 @@ if frontogenesis:
                 p.frontogenesis(t,lv,ncdir=ncdir,outdir=outdir,
                                 clvs=N.arange(-2.0,2.125,0.125)*10**-7,
                                 # clvs = N.arange(-500,510,10)
-                                smooth=3, cmap='bwr'
+                                smooth=3, cmap='bwr',cb='only'
                                 )
 
 if upperlevel:
@@ -329,7 +337,7 @@ if accum_rain:
                         Nlim=42.7,Elim=-94.9,Slim=37.0,Wlim=-101.8
                         )
 
-if compute_dte or plot_2D_dte or plot_1D_dte:
+if compute_dte or plot_3D_dte or plot_1D_dte:
     pfname = 'DTE_' + enstype
     ofname = enstype
     pickledir,outdir = get_pickle_dirs(ensnames[0])
@@ -340,18 +348,78 @@ if compute_dte or plot_2D_dte or plot_1D_dte:
             path_to_wrfouts.append(utils.netcdf_files_in(fpath))
 
     if compute_dte:
-        p.compute_diff_energy('2D','DTE',path_to_wrfouts,dtetimes,
+        p.compute_diff_energy('1D','DTE',path_to_wrfouts,dtetimes,
                               d_save=pickledir, d_return=0,d_fname=pfname)
 
-    if plot_2D_dte:
+    if plot_1D_dte:
         # Contour fixed at these values
         V = range(250,5250,250)
         VV = [100,] + V
         ofname = pfname
-        p.plot_diff_energy('2D','DTE',pickledir,outdir,dataf=pfname,outprefix=ofname,clvs=VV,utc=False)
+        p.plot_diff_energy('1D','DTE',pickledir,outdir,dataf=pfname,outprefix=ofname,clvs=VV,utc=False)
 
-    if plot_1D_dte:
-        SENS = {'ICBC':ensnames,'MXMP':experiments,'STCH':0,'STMX':experiments}
+    if plot_3D_dte:
+        SENS = {'ICBC':ensnames,'MXMP':experiments,'STCH':0,'STCH5':0,'STMX':experiments}
         ylimits = [0,2e8]
         ofname = pfname
         p.plot_error_growth(outdir,pickledir,dataf=pfname,sensitivity=SENS[enstype],ylim=ylimits,f_prefix=enstype)
+
+if all_3D_dte:
+    if case[:4] == '2006':
+        EXS = {'GEFS-ICBC':{},'NAM-MXMP':{},'NAM-STMX':{},'NAM-STCH5':{},'GEFS-STCH':{},'NAM-STCH':{}}
+        IC = 'NAM';ensnames = 'anl'; MP = 'WDM6_Grau'
+        # IC = 'NAM';ensnames = 'anl'; MP = 'WDM6_Grau'
+    else:
+        EXS = {'ICBC':{},'MXMP':{},'STCH':{}}
+        IC = 'GEFSR2';ensnames = 'p09'
+        MP = 'ICBC'
+        
+
+    for exper in EXS:
+        exs = exper.split('-')
+        IC, enstype = exs
+
+        if IC=='GEFS':
+            IC = 'GEFSR2'
+            ensnames = 'c00'
+            MP = 'ICBC'
+        elif IC=='NAM':
+            ensnames = 'anl'
+            MP = 'WDM6_Grau'
+
+        if 'STCH' in enstype:
+            pass
+        elif 'STMX' in enstype:
+            pass
+        elif 'MXMP' in enstype:
+            pass
+        elif 'ICBC' in enstype:
+            pass
+
+        pickledir,dummy = get_pickle_dirs(ensnames)
+        print exper, pickledir
+        EXS[exper] = {'datadir':pickledir,'dataf':'DTE_'+enstype}
+
+    ylimits = [0,2e8]
+    outdir = os.path.join(outroot,case)
+    p.all_error_growth(outdir,EXS,f_prefix='DTE',ylim=ylimits)
+
+if delta_plot:
+    for t in times:
+        # nc1
+        IC = 'GEFSR2'
+        en = 'c00'
+        enstype = 'STCH'
+        ex = 's01'
+        MP = 'ICBC'
+        outdir, ncdir1 = get_folders(en,ex)
+        # nc2
+        IC = 'GEFSR2'
+        en = 'c00'
+        ex = 'ICBC'
+        enstype = 'ICBC'
+        MP = 'ICBC'
+        outdir, ncdir2 = get_folders(en,ex)
+
+        clvs = N.arange(-9,10,1)
+        p.plot_delta('wind10',t,ncdir1=ncdir1,ncdir2=ncdir2,outdir=outdir,cb=True,clvs=clvs)

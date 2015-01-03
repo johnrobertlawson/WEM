@@ -127,14 +127,19 @@ class BirdsEye(Figure):
 
         if isinstance(title,basestring):
             plt.title(title)
+        if cb != False:
+            if cb==True:
+                plt.colorbar(f1,orientation='vertical',ax=self.ax)
+            elif cb == 'only':
+                save = False
+                self.fig,self.ax = plt.subplots(figsize=(4,0.8))
+                plt.colorbar(f1,cax=self.ax,orientation='horizontal')
+                self.save(outdir,fname+'_cb')
+            else:
+                plt.colorbar(f1,orientation='vertical',cax=cb)
         if save:
             self.save(outdir,fname)
             plt.close(self.fig)
-        if cb != False:
-            if cb==True:
-                self.fig.colorbar(f1,orientation='vertical')
-            else:
-                plt.colorbar(f1,orientation='vertical',cax=cb)
         else:
             return f1
 

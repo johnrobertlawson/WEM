@@ -113,7 +113,7 @@ def compute_diff_energy(ptype,energy,files,times,upper=None,lower=None,
 
     print("Saving pickle file to {0}".format(d_save))
     # Look up the method to use depending on type of plot
-    PLOTS = {'2D':DE_z, '3D':DE_xyz}
+    PLOTS = {'1D':DE_z, '3D':DE_xyz}
 
     print('Get sequence of time')
     # Creates sequence of times

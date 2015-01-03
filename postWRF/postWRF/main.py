@@ -596,7 +596,7 @@ class WRFEnviron(object):
                 fig.savefig(fpath)
 
                 plt.close()
-                print("Saved {0}.".format(fpath))
+                print("Saved type #1 {0}.".format(fpath))
 
             # Averages for each sensitivity
             labels = []
@@ -617,12 +617,13 @@ class WRFEnviron(object):
                 plt.ylim(ylim)
             plt.gca().set_xticks(times[::2])
             plt.gca().set_xticklabels(time_str[::2])
-            vrbl_long = '{0}_{1}'.format(ofname,'Averages')
+            vrbl_long = '{0}_Averages'.format(ofname,)
             fname = self.create_fname(vrbl_long,f_prefix=f_prefix,f_suffix=f_suffix)
+            fpath = os.path.join(outdir,fname)
             fig.savefig(fpath)
 
             plt.close()
-            print("Saved {0}.".format(fpath))
+            print("Saved type #2 {0}.".format(fpath))
             #pdb.set_trace()
 
 
@@ -649,7 +650,7 @@ class WRFEnviron(object):
             fig.savefig(fpath)
 
             plt.close()
-            print("Saved {0}.".format(fpath))
+            print("Saved type #3 {0}.".format(fpath))
 
     def composite_profile(self,vrbl,utc,enspaths,latlon=False,
                             dom=1,mean=True,std=True,xlim=False,
@@ -1641,3 +1642,109 @@ class WRFEnviron(object):
                     plottype=plottype,smooth=smooth,
                     clvs=clvs,cmap=cmap,locations=locations,
                     Nlim=Nlim,Elim=Elim,Slim=Slim,Wlim=Wlim)
+
+    def all_error_growth(self,outdir,infodict,ylim=False,f_prefix=False,
+                            f_suffix=False):
+        """
+        Compare many ensembles' DKE and DTE spreads on one plot.
+        The times don't need to be identical.
+        """
+        fig = plt.figure()
+        n_ens = len(infodict)
+        cols = utils.generate_colours(M,n_ens)
+        M.rcParams['axes.color_cycle'] = cols
+        labels = []
+
+        for ex in infodict:
+            times = False
+            data = utils.load_data(infodict[ex]['datadir'],infodict[ex]['dataf'],
+                                    format='pickle')
+            labels.append(ex)
+            ave_stack = False
+            for perm in data:
+                if not times:
+                    times = data[perm]['times']
+                permdata = self.make_1D(data[perm]['values'])
+                ave_stack = utils.vstack_loop(N.asarray(permdata),ave_stack)
+
+            total_ave = N.average(ave_stack,axis=0)
+            plt.plot(times,total_ave)
+
+        plt.legend(labels,loc=2,fontsize=9)
+        if ylim:
+            plt.ylim(ylim)
+        times_tup = [time.gmtime(t) for t in times]
+        time_str = ["{2:02d}/{3:02d}".format(*t) for t in times_tup]
+        plt.gca().set_xticks(times[::2])
+        plt.gca().set_xticklabels(time_str[::2])
+        fname = self.create_fname('allensembles',f_prefix=f_prefix,f_suffix=f_suffix)
+        fpath = os.path.join(outdir,fname)
+        fig.savefig(fpath)
+
+        plt.close()
+        print("Saved plot to {0}.".format(fpath))
+        
+    def plot_delta(self,vrbl,utc,level=False,ncdir1=False,ncdir2=False,
+                            outdir=False,ncf1=False,ncf2=False,nct=False,
+                            f_prefix=0,f_suffix=False,
+                            dom=1,plottype='contourf',smooth=1,
+                            fig=False,ax=False,clvs=False,cmap=False,
+                            locations=False,cb=True,match_nc=False,
+                            Nlim=False,Elim=False,Slim=False,Wlim=False,
+                            other=False):
+        
+        if ncdir1 is False or ncdir2 is False:
+            raise Exception
+        if outdir is False:
+            outdir = os.path.expanduser("~")
+
+        if level:
+            level = self.get_level_string(level)
+
+        # Match domain
+        if not Nlim and isinstance(match_nc,str):
+            MATCH = WRFOut(match_nc)
+            Nlim, Elim, Slim, Wlim = MATCH.get_limits()
+
+        # import pdb; pdb.set_trace()
+        # Data
+        self.W1 = self.get_netcdf(ncdir1,ncf=ncf1,nct=nct,dom=dom)
+        self.W2 = self.get_netcdf(ncdir2,ncf=ncf2,nct=nct,dom=dom)
+        # lats, lons = self.W.get_limited_domain(bounding)
+        data1 = self.W1.get(vrbl,utc=utc,level=level,lons=False,lats=False,other=other)[0,0,:,:]
+        data2 = self.W2.get(vrbl,utc=utc,level=level,lons=False,lats=False,other=other)[0,0,:,:]
+        data = data1-data2
+        # import pdb; pdb.set_trace()
+        # Needs to be shape [1,1,nlats,nlons].
+        if smooth>1:
+            data = stats.gauss_smooth(data,smooth)
+
+        if Nlim:
+            data,lats,lons = utils.return_subdomain(data,self.W1.lats1D,self.W1.lons1D,
+                                Nlim,Elim,Slim,Wlim,fmt='latlon')
+        else:
+            lats = False
+            lons = False
+
+        # Scales
+        if clvs is False and cmap is False:
+            S = Scales(vrbl,level)
+            clvs = S.clvs
+            cmap = S.cm
+        elif clvs is False:
+            S = Scales(vrbl,level)
+            # clvs = S.clvs
+            # Auto plot differences, this is a delta.
+        elif cmap is False:
+            S = Scales(vrbl,level)
+            cmap = S.cm
+
+
+        # Figure
+        fname = self.create_fname(vrbl,utc,level,other=other,f_prefix='delta')
+        F = BirdsEye(self.W1,fig=fig,ax=ax)
+        # import pdb; pdb.set_trace()
+        F.plot2D(data,fname,outdir,lats=lats,lons=lons,
+                    plottype=plottype,smooth=smooth,
+                    clvs=clvs,cmap=cmap,locations=locations,
+                    cb=cb)
