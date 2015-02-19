@@ -299,7 +299,7 @@ def DE_z(nc0,nc1,t,energy,lower,upper):
     DKE = []
     DKE2D = N.zeros((xlen,ylen))
     print_time = ''.join((nc0.variables['Times'][t]))
-    print("Calculating 2D grid for time {0}...".format(print_time))
+    print("Calculating 3D grid for time {0}...".format(print_time))
     gridpts = latlon(xlen,ylen)
     for gridpt in gridpts:
         i,j = gridpt
@@ -328,3 +328,12 @@ def DE_z(nc0,nc1,t,energy,lower,upper):
     DKE.append(DKE2D)
 
     return DKE
+
+def DKE_power_spectrum(data,dx):
+    """
+    Return power spectrum of DKE/DTE at time(s) for wavelengths. 
+    """
+
+    powspec = N.abs(N.fft.fft2(data))**2
+    # step = 1/dx
+    import pdb; pdb.set_trace()

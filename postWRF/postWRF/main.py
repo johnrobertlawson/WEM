@@ -48,6 +48,7 @@ import stats
 from scales import Scales
 from obs import Obs
 from obs import Radar
+from ts import TimeSeries
 
 # TODO: Make this awesome
 
@@ -73,7 +74,7 @@ class WRFEnviron(object):
                 fig=False,ax=False,clvs=False,cmap=False,
                 locations=False,cb=True,match_nc=False,
                 Nlim=False,Elim=False,Slim=False,Wlim=False,
-                other=False):
+                other=False,color='k',inline=False):
         """Basic birds-eye-view plotting.
 
         This script is top-most and decides if the variables is
@@ -204,13 +205,13 @@ class WRFEnviron(object):
 
 
         # Figure
-        fname = self.create_fname(vrbl,utc,level,other=other)
+        fname = self.create_fname(vrbl,utc,level,f_suffix=f_suffix, f_prefix=f_prefix,other=other)
         F = BirdsEye(self.W,fig=fig,ax=ax)
         # import pdb; pdb.set_trace()
         F.plot2D(data,fname,outdir,lats=lats,lons=lons,
                     plottype=plottype,smooth=smooth,
                     clvs=clvs,cmap=cmap,locations=locations,
-                    cb=cb)
+                    cb=cb,color=color,inline=inline)
 
     def create_fname(self,vrbl,utc=False,level=False,other=False,
                         f_prefix=False,f_suffix=False,
@@ -300,6 +301,7 @@ class WRFEnviron(object):
             # nc = Dataset(wrfpath)
             # if 'ruc' in nc.grib_source[:3]:
             if model=='ruc':
+                # import pdb; pdb.set_trace()
                 return RUC(fpath)
             elif model=='wrfout':
                 return WRFOut(fpath)
@@ -369,17 +371,25 @@ class WRFEnviron(object):
         if utc==False:
             for perm in DATA:
                 looptimes = DATA[perm]['times']
+                f1 = DATA[perm]['file1']
+                try:
+                    W1 = WRFOut(f1)
+                except:
+                    # From a bug that added an erroneous dir
+                    # for STCH members in 2013, maybe fixed?
+                    ff = f1.split('/')
+                    del ff[-2]
+                    W1 = WRFOut('/'.join(ff))
                 break
-            else:
-                looptimes = (utc,)
+        else:
+            looptimes = (utc,)
 
         for t in looptimes:
             for pn,perm in enumerate(DATA):
-                f1 = DATA[perm]['file1']
-                f2 = DATA[perm]['file2']
+                # f2 = DATA[perm]['file2']
                 # Get times and info about nc files
                 # First time to save power
-                W1 = WRFOut(f1)
+                
                 permtimes = DATA[perm]['times']
 
                 # Find array for required time
@@ -1748,3 +1758,85 @@ class WRFEnviron(object):
                     plottype=plottype,smooth=smooth,
                     clvs=clvs,cmap=cmap,locations=locations,
                     cb=cb)
+        
+
+
+    def plot_axes_of_dilatation(self,utc,level=False,ncdir=False,outdir=False,
+                ncf=False,nct=False,f_prefix=0,f_suffix=False,
+                dom=1,plottype='contourf',smooth=1,
+                fig=False,ax=False,clvs=False,cmap=False,
+                locations=False,cb=True,match_nc=False,
+                Nlim=False,Elim=False,Slim=False,Wlim=False,
+                other=False):
+
+        if ncdir is False:
+            ncdir = os.path.expanduser("~")
+        if outdir is False:
+            outdir = os.path.expanduser("~")
+
+        # Test at surface
+        level = 2000
+        if level:
+            level = self.get_level_string(level)
+
+        # Match domain
+        if not Nlim and isinstance(match_nc,str):
+            MATCH = WRFOut(match_nc)
+            Nlim, Elim, Slim, Wlim = MATCH.get_limits()
+
+            
+        # Data
+        self.W = self.get_netcdf(ncdir,ncf=ncf,nct=nct,dom=dom)
+        # lats, lons = self.W.get_limited_domain(bounding)
+        # U = self.W.get('U10',utc=utc,level=level,lons=False,lats=False,other=other)[0,0,:,:]
+        # V = self.W.get('V10',utc=utc,level=level,lons=False,lats=False,other=other)[0,0,:,:]
+        # import pdb; pdb.set_trace()
+        # Needs to be shape [1,1,nlats,nlons].
+        # if smooth>1:
+            # data = stats.gauss_smooth(data,smooth)
+
+        # data = 
+        xdata, ydata = self.W.return_axis_of_dilatation_components(utc)
+
+        # if Nlim:
+            # data,lats,lons = utils.return_subdomain(data,self.W.lats1D,self.W.lons1D,
+                                # Nlim,Elim,Slim,Wlim,fmt='latlon')
+        # else:
+        lats = False
+        lons = False
+
+        # Figure
+        fname = self.create_fname('axofdil',utc,level,other=other)
+        F = BirdsEye(self.W,fig=fig,ax=ax)
+        # import pdb; pdb.set_trace()
+        F.axes_of_dilatation(xdata,ydata,fname,outdir,
+                    lats=lats,lons=lons, locations=locations)
+
+
+    def plot_diff_energy_spectrum(self,energy,ncfiles,utc=False,outdir=False):
+        """
+        Compute total KE/TE and the power spectrum of DKE/DTE for a time.
+        """
+
+        diff_data = stats.compute_diff_energy('2D',energy,files,utc,upper=None,lower=None,
+                        d_save=False,d_return=True)
+
+        mean_energy = {}
+        for nc in ncfiles:
+            NC = WRFOut(nc)
+            U = NC.get('U',utc=utc,level=False,lons=False,lats=False)[0,0,:,:]
+            V = NC.get('V',utc=utc,level=False,lons=False,lats=False)[0,0,:,:]
+            T = NC.get('T',utc=utc,level=False,lons=False,lats=False)[0,0,:,:]
+            R = 287.0 # Universal gas constant (J / deg K * kg)
+            Cp = 1004.0 # Specific heat of dry air at constant pressure (J / deg K * kg)
+            kappa = (R/Cp)
+            mean_energy[nc] = 0.5*(U**2 + V**2 + kappa*(T**2))
+        # mean_energy
+        
+    def meteogram(self,vrbl,loc,ncfiles,outdir=False,ncf=False,nct=False,dom=1):
+        NCs = []
+        for enspath in ncfiles:
+            NCs.append(self.get_netcdf(enspath,ncf=ncf,nct=nct,dom=dom))
+       
+        TS = TimeSeries(NCs,loc.values()[0],loc.keys()[0])
+        TS.meteogram(vrbl,outdir=outdir)

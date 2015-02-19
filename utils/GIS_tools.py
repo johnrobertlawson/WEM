@@ -444,7 +444,7 @@ def netcdf_files_in(folder,dom=1,init_time=0,model='auto',return_model=False):
     if model=='wrfout':
         pfx = 'wrfout' # Assume the prefix
     elif model=='ruc':
-        pfx = 'ruc'
+        pfx = ruc_naming_prefix(t)
         # TODO: logic that considers the four versions of RUC
     else:
         raise Exception
@@ -481,6 +481,31 @@ def netcdf_files_in(folder,dom=1,init_time=0,model='auto',return_model=False):
             print("Ambiguous netCDF4 selection.")
             raise Exception
 
+def ruc_naming_prefix(t):
+    utc = ensure_datenum(t)
+    yr = time.gmtime(utc).tm_year
+    mth = time.gmtime(utc).tm_mon
+    if (yr > 2012) and (mth > 3): # With a massive gap for RAP
+        version = 3
+    elif (yr > 2007) and (mth > 10): # Massive gap after 2012/05 (transition to RAP).
+        version = 2
+    elif (yr>2006):
+        version = 1
+    elif (yr>2004):
+        version = 0
+
+    if version==0:
+        prefix = 'ruc2_252_'
+    elif version==1:
+        prefix = 'ruc2anl_252_'
+    elif version==2:
+        prefix = 'ruc2anl_130_'
+    elif version==3:
+        prefix = 'rap_130_'
+    else:
+        raise Exception
+
+    return prefix
 
 def wrfout_files_in(folders,dom=0,init_time='notset',descend=1,avoid=0,
                     unambiguous=0):
@@ -995,6 +1020,8 @@ def get_netcdf_naming(model,t,dom=0):
     wrfout files don't have an extension
     other files have .nc extension (convert first)
     """
+    
+    # import pdb; pdb.set_trace()
     if model=='wrfout':
         if not dom:
             print("No domain specified; using domain #1.")
@@ -1002,7 +1029,12 @@ def get_netcdf_naming(model,t,dom=0):
         fname = ('wrfout_d{0:02d}_{1:04d}-{2:02d}-{3:02d}_{4:02d}:{5:02d}:{6:02d}'.format(dom,*t))
     elif model == 'ruc':
         # This depends on the RUC version? Will break?
-        fname = ('ruc2_252_{0:04d}{1:02d}{2:02d}_{3:02d}{4:02d}_{5:02d}0.nc'.format(*t))
+
+
+        prefix = ruc_naming_prefix(t)
+
+        fname = (prefix+'{0:04d}{1:02d}{2:02d}_{3:02d}{4:02d}_{5:02d}0.nc'.format(*t))
+        # import pdb; pdb.set_trace()
     else:
         print("Model format not supported yet.")
         raise Exception
@@ -1015,7 +1047,7 @@ def determine_model(fname):
     If no model exists, return false.
     """
 
-    models = {'wrfout_d':'wrfout','ruc2':'ruc'}
+    models = {'wrfout_d':'wrfout','ruc':'ruc','rap':'ruc'}
 
     for k,v in models.iteritems():
         if k in fname[:10]:

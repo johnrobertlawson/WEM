@@ -117,6 +117,14 @@ class Scales(object):
         A['cref'] = {'cmap':ct.reflect_ncdc}
         A['cref'][0] = (5,90,5)
         
+        # Simulated reflectivity
+        A['REFL_10CM'] = {'cmap':ct.reflect_ncdc}
+        A['REFL_10CM'][0] = (5,90,5)
+
+        # Simulated reflectivity
+        A['REFL_comp'] = {'cmap':ct.reflect_ncdc}
+        A['REFL_comp'][0] = (5,90,5)
+
         # Precipitation
         A['precip'] = {'cmap':ct.precip1}
         A['precip'][2000] = [0.01,0.03,0.05,0.10,0.15,0.20,0.25,0.30,0.40,0.50,0.60,
@@ -150,7 +158,7 @@ class Scales(object):
         A['RH'][2000] = (0,110,5)
         
         A['olr'] = {'cmap':ct.irsat}
-        A['olr'][2000] = [-100,-90,-85,-80,-75,-70,-65,-60,-55,-50,
+        A['olr'][0] = [-100,-90,-85,-80,-75,-70,-65,-60,-55,-50,
                             -46,-42,-38,-36,-34,-32,-30,-28,-26,-24,
                             -22,-20,-18,-16,-14,-12,-10,-8,-6,-4,-2,
                              0,2,4,6,8,10,12,14,16,18,20,22,24,26,28,

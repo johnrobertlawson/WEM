@@ -50,12 +50,44 @@ class BirdsEye(Figure):
             plotkwargs['cmap'] = cmap
         return plotargs, plotkwargs
 
+    def axes_of_dilatation(self,xdata,ydata,fname,outdir,
+                    lats=False,lons=False,smooth=False, locations=False,
+                    x=False,y=False,m=False,
+                    Nlim=False,Elim=False,Slim=False,Wlim=False):
+
+        if x is False and y is False and m is False:
+            if not Nlim:
+                self.bmap,self.x,self.y = self.basemap_setup(smooth=smooth,lats=lats,
+                                                    lons=lons,)#ax=self.ax)
+            else:
+                self.bmap,self.x,self.y = self.basemap_setup(smooth=smooth,lats=lats,
+                                                    lons=lons,Nlim=Nlim,Elim=Elim,
+                                                    Slim=Slim,Wlim=Wlim)
+
+        else:
+            self.bmap = m
+            self.x = x
+            self.y = y
+
+        # self.la_n = self.data.shape[-2]
+        # self.lo_n = self.data.shape[-1]
+        # import pdb; pdb.set_trace()
+        # b = 10
+        # self.bmap.quiver(self.x[::b],self.y[::b],xdata[::b,::b],ydata[::b,::b],headwidth=0, units='xy',scale=10)
+        self.bmap.streamplot(self.x,self.y,xdata,ydata)
+        # m.streamplot(x[self.W.x_dim/2,:],y[:,self.W.y_dim/2],U,V,
+                        # density=1.8,linewidth=lw,color='k',arrowsize=3)
+    
+        self.save(outdir,fname)
+        plt.close(self.fig)
+
     # Old plot_data
     def plot2D(self,data,fname,outdir,plottype='contourf',
                     save=1,smooth=1,lats=False,lons=False,
                     clvs=False,cmap=False,title=False,cb=True,
                     locations=False,m=False,x=False,y=False,
-                    Nlim=False,Elim=False,Slim=False,Wlim=False):
+                    Nlim=False,Elim=False,Slim=False,Wlim=False,
+                    color='k',inline=False):
 
         """
         Generic method that plots any matrix of data on a map
@@ -99,8 +131,11 @@ class BirdsEye(Figure):
 
         # import pdb; pdb.set_trace()
         if plottype == 'contour':
-            plotkwargs['colors'] = 'k'
+            plotkwargs['colors'] = color
+            plotkwargs['inline'] = inline
             f1 = self.bmap.contour(*plotargs,**plotkwargs)
+            if inline:
+                plt.clabel(f1,inline=True)
         elif plottype == 'contourf':
             f1 = self.bmap.contourf(*plotargs,**plotkwargs)
         elif plottype == 'pcolor':

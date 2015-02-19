@@ -49,20 +49,30 @@ class RUC(WRFOut):
         # Original lat/lon 1D arrays
         self.lats1D = self.lats[:,self.lats.shape[1]/2]
         self.lons1D = self.lons[self.lons.shape[0]/2,:]
-        self.levels = self.get('pressure')[:]
+        self.levels = self.get('pressure')[:].flatten()
+       
+        self.DX, self.DY = self.get_grid_spacing()
+ 
+        if self.nc.variables[self.get_key('pressure')].units == 'Pa':
+            self.levels = self.levels/100.0
 
         # Set dimension names, lengths.
         if self.version == 0:
             self.dimensions = [d for d in self.nc.dimensions]
+            x,y,z = self.dimensions[:3]
         else: 
-            print("Test this for other RUC versions.")
-            raise Exception
+            self.dimensions = [d for d in self.nc.dimensions]
+            x,y,z = self.dimensions[:3]
+            # import pdb; pdb.set_trace()
+            # print("Test this for other RUC versions.")
+            # raise Exception
             
-        x,y,z,_z = self.dimensions
+        # x,y,z,_z = self.dimensions
         self.x_dim = len(self.nc.dimensions[x])
         self.y_dim = len(self.nc.dimensions[y])
         self.z_dim = len(self.nc.dimensions[z])
-        del x,y,z,_z
+        del x,y,z
+        # del x,y,z,_z
 
         if wrfdir:
             # It means all data should be cut to this size
@@ -83,6 +93,7 @@ class RUC(WRFOut):
 
         # import pdb; pdb.set_trace()
         print('RUC file loaded from {0}'.format(self.fpath))
+        # import pdb; pdb.set_trace()
 
     def get_utc_time(self,rawtime,fmt='datenum'):
         utc = time.strptime(rawtime,'%m/%d/%Y (%H:%M)')
@@ -104,6 +115,7 @@ class RUC(WRFOut):
                 # return True
             # else:
                 # return False
+        # if self.get_key(vrbl):
         return self.get_key(vrbl)
 
     def load(self,vrbl,tidx,lvidx,lonidx,latidx):
@@ -499,14 +511,15 @@ class RUC(WRFOut):
         # If this breaks, user is requesting non-4D data
         # Duck-typing for the win
 
-        levels = self.levels*100
+        levels = 100*self.levels.flatten()
         datain = self.get(vrbl,utc=tidx,lons=lonidx,lats=latidx)[0,:,:,:]
         dataout = N.zeros([nlv,datain.shape[-2],datain.shape[-1]])
         for (i,j), p in N.ndenumerate(dataout[0,:,:]):
+            # dataout[:,i,j] = N.interp(hPa,levels,datain[:,i,j])
             dataout[:,i,j] = N.interp(hPa,levels,datain[:,i,j][::-1])
         # pdb.set_trace()
         data = N.expand_dims(dataout,axis=0)
-        data = N.expand_dims(dataout,axis=0)
+        # import pdb; pdb.set_trace()
         return dataout
         
         
@@ -521,7 +534,7 @@ class RUC(WRFOut):
         KEYS['V'] = {0:'V_GRD_252_ISBL',1:'',2:'',3:'VGRD_P0_L100_GLC0'}
         KEYS['lats'] = {0:'gridlat_252',3:'gridlat_0'}
         KEYS['lons'] = {0:'gridlon_252',3:'gridlon_0'}
-        KEYS['Z'] = {0:'HGT_252_ISBL'}
+        KEYS['Z'] = {0:'HGT_252_ISBL',3:'HGT_P0_L100_GLC0'}
         KEYS['Td2'] = {0:'DPT_252_HTGL'}
         KEYS['U10'] = {3:'UGRD_P0_L103_GLC0'}
         KEYS['V10'] = {3:'VGRD_P0_L103_GLC0'}
@@ -529,8 +542,9 @@ class RUC(WRFOut):
         # This is specific humidity, not mixing ratio of water tut tut
         KEYS['Q2'] = {0:'SPF_H_252_HTGL'}
         # KEYS['Q2'] = 
-        KEYS['pressure'] = {0:'lv_ISBL2'}
-        KEYS['T'] = {0:'TMP_252_ISBL'}
+        KEYS['pressure'] = {0:'lv_ISBL2',3:'lv_ISBL0'}
+        # KEYS['T'] = {0:'TMP_252_ISBL'} I THINK TMP = DRYBULB
+        KEYS['drybulb'] = {0: 'TMP_252_ISBL' ,3:'TMP_P0_L100_GLC0'}
         KEYS['W'] = {0:'V_VEL_252_ISBL'}
         KEYS['PSFC'] = {0:'PRES_252_SFC'}
         KEYS['HGT'] = {0:'HGT_252_SFC'}
@@ -546,4 +560,18 @@ class RUC(WRFOut):
         else:
             return key
 
+    def get_grid_spacing(self):
 
+        yr = time.gmtime(self.utc).tm_year
+        mth = time.gmtime(self.utc).tm_mon
+        day = time.gmtime(self.utc).tm_mday
+
+        if (yr < 1998) and (mth < 4) and (day < 6):
+            n = 60e3
+        elif (yr < 2002) and (mth < 4) and (day < 17):
+            n = 40e3
+        elif (yr < 2005) and (mth < 6) and (day < 28):
+            n = 20e3
+        else:
+            n = 13e3
+        return n, n

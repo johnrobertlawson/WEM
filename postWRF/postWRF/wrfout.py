@@ -209,15 +209,17 @@ class WRFOut(object):
             latidx = lats
         elif isinstance(lons,float):
             # Interpolate to lat/lon
-            lonidx = False
-            latidx = False
+            lonidx = utils.closest(self.lons1D,lons)
+            latidx = utils.closest(self.lats1D,lats)
         else:
             print("Invalid lat/lon selection.")
             raise Exception
-        # import pdb; pdb.set_trace()
         # Check if computing required
         # When data is loaded from nc, it is destaggered
+        # pdb.set_trace()
+        print("Computing {0} for level {1} of index {2}".format(vrbl,level,lvidx))
         if self.check_compute(vrbl):
+            print("Variable {0} exists in dataset.".format(vrbl))
             if lvidx is 'isobaric':
                 data = self.get_p(vrbl,tidx,level,lonidx,
                             latidx)
@@ -226,9 +228,10 @@ class WRFOut(object):
             else:
                 raise Exception
         else:
+            print("Variable {0} needs to be computed.".format(vrbl))
             if lvidx is 'isobaric':
-                data = self.get_p(vrbl,tidx,level,lonidx,
-                            latidx)[N.newaxis,N.newaxis,:,:]
+                # data = self.get_p(vrbl,tidx,level,lonidx, latidx)[N.newaxis,N.newaxis,:,:]
+                data = self.compute(vrbl,tidx,level,lonidx,latidx,other)
             else:
                 data = self.compute(vrbl,tidx,lvidx,lonidx,latidx,other)
 
@@ -239,6 +242,8 @@ class WRFOut(object):
         # if len(data.shape) == 3:
             # data = N.expand_dims(data,axis=0)
         data = self.make_4D(data,vrbl=vrbl)
+        
+        # import pdb; pdb.set_trace()
         return data
 
     def load(self,vrbl,tidx,lvidx,lonidx,latidx):
@@ -408,6 +413,10 @@ class WRFOut(object):
         tbl['es'] = self.compute_satvappres
         tbl['e'] = self.compute_vappres
         tbl['q'] = self.compute_spechum
+        tbl['fluidtrapping'] = self.compute_fluid_trapping_diagnostic
+        tbl['lyapunov'] = self.compute_instantaneous_local_Lyapunov
+        tbl['REFL_comp'] = self.compute_REFL_comp
+        tbl['temp_advection'] = self.compute_temp_advection
 
         return tbl
 
@@ -439,6 +448,15 @@ class WRFOut(object):
         RH = N.exp(0.073*(Td-T))
         # pdb.set_trace()
         return RH*100.0
+
+    def compute_temp_advection(self,tidx,lvidx,lonidx,latidx,other):
+        U = self.get('U',tidx,lvidx,lonidx,latidx)[0,0,:,:]
+        V = self.get('V',tidx,lvidx,lonidx,latidx)[0,0,:,:]
+        T = self.get('drybulb',tidx,lvidx,lonidx,latidx)[0,0,:,:]
+        dTdx, dTdy = N.gradient(T,self.DX,self.DY)
+        field = -U*dTdx - V*dTdy
+        # pdb.set_trace()
+        return field
 
     def compute_dryairmass(self,tidx,lvidx,lonidx,latidx,other):
         MU = self.get('MU',tidx,lvidx,lonidx,latidx)
@@ -622,6 +640,12 @@ class WRFOut(object):
         sbc = 0.000000056704
         ir = ((OLR/sbc)**0.25) - 273.15
         return ir
+
+    def compute_REFL_comp(self,tidx,lvidx,lonidx,latidx,other):
+        lvidx = False
+        refl = self.get('REFL_10CM',tidx,lvidx,lonidx,latidx,other)[0,:,:,:]
+        refl_comp = N.max(refl,axis=0)
+        return refl_comp
 
     def compute_comp_ref(self,tidx,lvidx,lonidx,latidx,other):
         """Amend this so variables obtain at start fetch only correct date, lats, lons
@@ -1364,3 +1388,67 @@ class WRFOut(object):
         if other == 'K':
             Td =+ 273.15
         return Td
+
+    def compute_derivatives(self,U,V):
+        # import pdb; pdb.set_trace()
+        dudx, dudy = N.gradient(U,self.dx,self.dx)
+        dvdx, dvdy = N.gradient(V,self.dx,self.dx)
+        return dudx, dudy, dvdx, dvdy
+
+    def compute_stretch_deformation(self,U,V):
+        dudx, dudy, dvdx, dvdy = self.compute_derivatives(U,V)
+        Est = dudx - dvdy
+        return Est
+
+    def compute_shear_deformation(self,U,V):
+        dudx, dudy, dvdx, dvdy = self.compute_derivatives(U,V)
+        Esh = dudy + dvdx
+        return Esh
+
+    def compute_total_deformation(self,U,V):
+        Esh = self.compute_shear_deformation(U,V)
+        Est = self.compute_stretch_deformation(U,V)
+        E = (Est**2 + Esh**2)**0.5
+        return E
+
+    def compute_vorticity(self,U,V):
+        dudx, dudy, dvdx, dvdy = self.compute_derivatives(U,V)
+        zeta = dvdx - dudy
+        return zeta
+
+    def compute_fluid_trapping_diagnostic(self,tidx,lvidx,lonidx,latidx,other):
+        U = self.get('U10',tidx,lvidx,lonidx,latidx)[0,0,:,:]
+        V = self.get('V10',tidx,lvidx,lonidx,latidx)[0,0,:,:]
+        E = self.compute_total_deformation(U,V)
+        zeta = self.compute_vorticity(U,V)
+        omega2 = 0.25*(E**2 - zeta**2)
+        return omega2
+
+    def compute_divergence(self,U,V):
+        dudx, dudy, dvdx, dvdy = self.compute_derivatives(U,V)
+        div = dudx + dvdy
+        return div
+
+    def compute_instantaneous_local_Lyapunov(self,tidx,lvidx,lonidx,latidx,other):
+        U = self.get('U10',tidx,lvidx,lonidx,latidx)[0,0,:,:]
+        V = self.get('V10',tidx,lvidx,lonidx,latidx)[0,0,:,:]
+        E = self.compute_total_deformation(U,V)
+        zeta = self.compute_vorticity(U,V)
+        div = self.compute_divergence(U,V)
+        D =  0.5*(div + (E**2  - zeta**2)**0.5)
+        return D
+
+    def return_axis_of_dilatation_components(self,tidx,lvidx=False,lonidx=False,
+                                                latidx=False,other=False):
+        U = self.get('U10',tidx,lvidx,lonidx,latidx)[0,0,:,:]
+        V = self.get('V10',tidx,lvidx,lonidx,latidx)[0,0,:,:]
+        Esh = self.compute_shear_deformation(U,V)
+        Est = self.compute_stretch_deformation(U,V)
+        E = self.compute_total_deformation(U,V)
+        zeta = self.compute_vorticity(U,V)
+
+        psi1 = 0.5 * N.arctan2(Esh,Est)
+        # chi1 = psi1 + 0.5*N.nan_to_num(N.arcsin(zeta/E))
+        chi1 = psi1 + 0.5*(N.arcsin(zeta/E))
+
+        return N.cos(chi1), N.sin(chi1)
