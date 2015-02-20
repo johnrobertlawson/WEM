@@ -3,6 +3,7 @@ Scripts related to plotting of observed data, such as surface observations,
 radar reflectivity, severe weather reports.
 """
 
+
 import scipy.ndimage
 import pdb
 from mpl_toolkits.basemap import Basemap

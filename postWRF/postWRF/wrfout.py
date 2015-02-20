@@ -417,6 +417,8 @@ class WRFOut(object):
         tbl['lyapunov'] = self.compute_instantaneous_local_Lyapunov
         tbl['REFL_comp'] = self.compute_REFL_comp
         tbl['temp_advection'] = self.compute_temp_advection
+        tbl['omega'] = self.compute_omega
+        tbl['density'] = self.compute_density
 
         return tbl
 
@@ -1452,3 +1454,18 @@ class WRFOut(object):
         chi1 = psi1 + 0.5*(N.arcsin(zeta/E))
 
         return N.cos(chi1), N.sin(chi1)
+    
+    def compute_omega(self,tidx,lvidx,lonidx,latidx,other):
+        # Rising motion in Pa/s
+        # dp/dt of air parcel
+        W = self.get('W',tidx,lvidx,lonidx,latidx)[0,:,:,:]
+        rho = self.get('density',tidx,lvidx,lonidx,latidx)[0,:,:,:]
+        omega = -rho * mc.g * W
+        return omega
+
+    def compute_density(self,tidx,lvidx,lonidx,latidx,other):
+        drybulb = self.get('drybulb',tidx,lvidx,lonidx,latidx,other='K')
+        P = self.get('pressure',tidx,lvidx,lonidx,latidx)
+        rho = P/(mc.R*drybulb)
+        # drybulb = 273.15 + (T/((100000.0/(level*100.0))**(mc.R/mc.cp)))
+        return rho
