@@ -1,3 +1,9 @@
+"""
+Load/download RUC data.
+Loop through dates in case study climo.
+Plot certain fields with WEM.postWRF
+"""
+
 import os
 import pdb
 import sys
@@ -15,19 +21,21 @@ import WEM.utils as utils
 outdir = '/home/jrlawson/public_html/bowecho/'
 RUCdir = '/chinook2/jrlawson/bowecho/RUCclimo/'
 
-p = WRFEnviron()
+p = WRFEnviron(download_data=True)
 
 cases = {}
 cases['20091109'] = {'utc':(2009,11,10,0,0,0), 'datadir':os.path.join(RUCdir,'20060526/RUC/anl/VERIF/') }
 cases['2013'] = {'utc':(2013,8,16,0,0,0), 'datadir':os.path.join(RUCdir,'20130815/RUC/anl/VERIF/') }
 
 cases = (20091109,
-Zplot = 0
-Tplot = 1
+plot_Z = 0
+plot_T_adv = 0
+plot_omega = 0
 
+# TODO: edit WEM so a switch will automatically download the RUC data.
 
 for case in cases:
-    if Zplot:
+    if plot_Z:
         fig, ax = plt.subplots()
         cb = False
         clvs = False
@@ -49,7 +57,7 @@ for case in cases:
         fig.savefig(fpath)
         plt.close(fig)
 
-    if Tplot:
+    if plot_T_adv:
         levels = {}
         levels[700] = {'clvs':N.arange(-10,11,1)*0.0001}
         levels[850] = {'clvs':N.arange(-10,11,1)*0.0001}
@@ -76,3 +84,6 @@ for case in cases:
             fpath = os.path.join(outdir,case+'_tempadvection_{0}hPa.png'.format(lv))
             fig.savefig(fpath)
             plt.close(fig)
+
+    if plot_omega:
+        levels = {}
