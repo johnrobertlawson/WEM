@@ -34,6 +34,7 @@ class WRFOut(object):
         :type fpath:    str
 
         """
+
         self.path = fpath
         self.nc = Dataset(fpath,'r')
 
@@ -127,7 +128,7 @@ class WRFOut(object):
         idx0 = self.get_time_idx(utc0)
         idx1 = self.get_time_idx(utc1)
         return N.arange(idx0,idx1)
-        
+
 
     def get(self,vrbl,utc=False,level=False,lats=False,lons=False,
                 smooth=1,other=False):
@@ -242,7 +243,7 @@ class WRFOut(object):
         # if len(data.shape) == 3:
             # data = N.expand_dims(data,axis=0)
         data = self.make_4D(data,vrbl=vrbl)
-        
+
         # import pdb; pdb.set_trace()
         return data
 
@@ -876,7 +877,7 @@ class WRFOut(object):
         wind_max = N.amax(wind,axis=0)
         # wind_max_smooth = self.test_smooth(wind_max)
         # return wind_max_smooth
-        
+
         return wind_max
 
     def make_4D(self,datain,vrbl=False,missing_axis=False):
@@ -1294,7 +1295,7 @@ class WRFOut(object):
         #dz = 1 # Normal for vertical
         tidx = self.get_time_idx(time)
         tidxs = (tidx-1,tidx,tidx+1)
-        
+
         if (tidx == 0) or (tidx == self.wrf_times.shape[0]-1):
             Front = None
         else:
@@ -1315,7 +1316,7 @@ class WRFOut(object):
                     # Average different in pressure between model levels
                     # This field is passed into the gradient
                     # THIS IS NOT USED RIGHT NOW
-                    dp = N.average(abs(0.5*(0.5*(P[2,2,:,:]-P[2,0,:,:]) + 
+                    dp = N.average(abs(0.5*(0.5*(P[2,2,:,:]-P[2,0,:,:]) +
                                 0.5*(P[0,2,:,:]-P[0,0,:,:]))))
 
             elif isinstance(level,int):
@@ -1362,10 +1363,10 @@ class WRFOut(object):
                     self.get('RAINC',utc=idx1))
         accum = total1 - total0
         return accum
-        
+
     def compute_satvappres(self,tidx,lvidx,lonidx,latidx,other):
         t = self.get('drybulb',utc=tidx,level=lvidx,lons=lonidx,lats=latidx,other='C')
-        es = 6.1*N.exp(0.073*t) 
+        es = 6.1*N.exp(0.073*t)
         return es
 
     def compute_vappres(self,tidx,lvidx,lonidx,latidx,other):
@@ -1454,7 +1455,7 @@ class WRFOut(object):
         chi1 = psi1 + 0.5*(N.arcsin(zeta/E))
 
         return N.cos(chi1), N.sin(chi1)
-    
+
     def compute_omega(self,tidx,lvidx,lonidx,latidx,other):
         # Rising motion in Pa/s
         # dp/dt of air parcel
