@@ -992,6 +992,8 @@ class WRFOut(object):
         Or is it (height,lon, lat!?)
 
         TODO: Need to include limited domain functionality
+
+        if vrbl=='pressure',create constant grid.
         """
         if isinstance(level,basestring) and level.endswith('hPa'):
             hPa = 100.0*int(level.split('h')[0])
@@ -1008,16 +1010,20 @@ class WRFOut(object):
 
         # If this breaks, user is requesting non-4D data
         # Duck-typing for the win
-
-        datain = self.get(vrbl,utc=tidx,lons=lonidx,lats=latidx)[0,...]
+        
         P = self.get('pressure',utc=tidx,lons=lonidx,lats=latidx)[0,...]
-        # import pdb; pdb.set_trace()
-        # What about RUC, pressure coords
-        dataout = N.zeros([nlv,P.shape[-2],P.shape[-1]])
-        # pdb.set_trace()
-        for (i,j), p in N.ndenumerate(dataout[0,:,:]):
-            dataout[:,i,j] = N.interp(hPa,P[:,i,j][::-1],datain[:,i,j][::-1])
-        # dataout = scipy.interpolate.griddata(P.flatten(),datain.flatten(),hPa)
+
+        if vrbl=='pressure':
+            dataout = N.ones([nlv,P.shape[-2],P.shape[-1]])*hPa
+        else:
+            datain = self.get(vrbl,utc=tidx,lons=lonidx,lats=latidx)[0,...]
+            # import pdb; pdb.set_trace()
+            # What about RUC, pressure coords
+            dataout = N.zeros([nlv,P.shape[-2],P.shape[-1]])
+            # pdb.set_trace()
+            for (i,j), p in N.ndenumerate(dataout[0,:,:]):
+                dataout[:,i,j] = N.interp(hPa,P[:,i,j][::-1],datain[:,i,j][::-1])
+            # dataout = scipy.interpolate.griddata(P.flatten(),datain.flatten(),hPa)
         if nlv == 1:
             # Return 2D if only one level requested
             return dataout[0,:,:]
@@ -1433,8 +1439,8 @@ class WRFOut(object):
         return div
 
     def compute_instantaneous_local_Lyapunov(self,tidx,lvidx,lonidx,latidx,other):
-        U = self.get('U10',tidx,lvidx,lonidx,latidx)[0,0,:,:]
-        V = self.get('V10',tidx,lvidx,lonidx,latidx)[0,0,:,:]
+        U = self.get('U',tidx,lvidx,lonidx,latidx)[0,0,:,:]
+        V = self.get('V',tidx,lvidx,lonidx,latidx)[0,0,:,:]
         E = self.compute_total_deformation(U,V)
         zeta = self.compute_vorticity(U,V)
         div = self.compute_divergence(U,V)

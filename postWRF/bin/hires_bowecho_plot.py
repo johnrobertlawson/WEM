@@ -40,7 +40,7 @@ delta_plot = 0
 
 dom = 1
 case = '20130815'
-ens = 's23'
+ens = 's24'
 # ens = False
 
 if case[:4] == '2006':

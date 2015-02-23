@@ -48,31 +48,27 @@ class RUC(WRFOut):
         self.lats, self.lons = self.get_latlon()
         # Original lat/lon 1D arrays
         self.lats1D = self.lats[:,self.lats.shape[1]/2]
+        # if self.version != 1:
         self.lons1D = self.lons[self.lons.shape[0]/2,:]
+        # else:
+            # self.lons1D = self.lons[:,self.lons.shape[0]/2]
         self.levels = self.get('pressure')[:].flatten()
        
         self.DX, self.DY = self.get_grid_spacing()
+        self.dx = self.DX
+        self.dy = self.DY
  
         if self.nc.variables[self.get_key('pressure')].units == 'Pa':
             self.levels = self.levels/100.0
 
         # Set dimension names, lengths.
-        if self.version == 0:
-            self.dimensions = [d for d in self.nc.dimensions]
-            x,y,z = self.dimensions[:3]
-        else: 
-            self.dimensions = [d for d in self.nc.dimensions]
-            x,y,z = self.dimensions[:3]
-            # import pdb; pdb.set_trace()
-            # print("Test this for other RUC versions.")
-            # raise Exception
+        self.dimensions = [d for d in self.nc.dimensions]
+        x,y,z = self.dimensions[:3]
             
-        # x,y,z,_z = self.dimensions
         self.x_dim = len(self.nc.dimensions[x])
         self.y_dim = len(self.nc.dimensions[y])
         self.z_dim = len(self.nc.dimensions[z])
         del x,y,z
-        # del x,y,z,_z
 
         if wrfdir:
             # It means all data should be cut to this size
@@ -226,9 +222,9 @@ class RUC(WRFOut):
         yr = time.gmtime(self.utc).tm_year
         mth = time.gmtime(self.utc).tm_mon
 
-        if (yr > 2012) and (mth > 3): # With a massive gap for RAP
+        if (yr > 2012) or ((mth > 3) and (yr == 2013)): # With a massive gap for RAP
             version = 3
-        elif (yr > 2007) and (mth > 10): # Massive gap after 2012/05 (transition to RAP).
+        elif (yr > 2007) or ((mth > 10) and (yr == 2008)): # Massive gap after 2012/05 (transition to RAP).
             version = 2
         elif (yr>2006):
             version = 1
@@ -511,14 +507,18 @@ class RUC(WRFOut):
         # If this breaks, user is requesting non-4D data
         # Duck-typing for the win
 
-        levels = 100*self.levels.flatten()
-        datain = self.get(vrbl,utc=tidx,lons=lonidx,lats=latidx)[0,:,:,:]
-        dataout = N.zeros([nlv,datain.shape[-2],datain.shape[-1]])
-        for (i,j), p in N.ndenumerate(dataout[0,:,:]):
-            # dataout[:,i,j] = N.interp(hPa,levels,datain[:,i,j])
-            dataout[:,i,j] = N.interp(hPa,levels,datain[:,i,j][::-1])
+        if vrbl=='pressure':
+            dshape = self.get('U',utc=tidx,lons=lonidx,lats=latidx)[0,:,:,:].shape
+            dataout = N.ones([nlv,dshape[-2],dshape[-1]])*hPa
+        else:
+            levels = 100*self.levels.flatten()
+            datain = self.get(vrbl,utc=tidx,lons=lonidx,lats=latidx)[0,:,:,:]
+            dataout = N.zeros([nlv,datain.shape[-2],datain.shape[-1]])
+            for (i,j), p in N.ndenumerate(dataout[0,:,:]):
+                # dataout[:,i,j] = N.interp(hPa,levels,datain[:,i,j])
+                dataout[:,i,j] = N.interp(hPa,levels,datain[:,i,j][::-1])
         # pdb.set_trace()
-        data = N.expand_dims(dataout,axis=0)
+        # data = N.expand_dims(dataout,axis=0)
         # import pdb; pdb.set_trace()
         return dataout
         
@@ -530,11 +530,11 @@ class RUC(WRFOut):
         """
 
         KEYS = {}
-        KEYS['U'] = {0:'U_GRD_252_ISBL',1:'',2:'',3:'UGRD_P0_L100_GLC0'}
-        KEYS['V'] = {0:'V_GRD_252_ISBL',1:'',2:'',3:'VGRD_P0_L100_GLC0'}
-        KEYS['lats'] = {0:'gridlat_252',3:'gridlat_0'}
-        KEYS['lons'] = {0:'gridlon_252',3:'gridlon_0'}
-        KEYS['Z'] = {0:'HGT_252_ISBL',3:'HGT_P0_L100_GLC0'}
+        KEYS['U'] = {0:'U_GRD_252_ISBL',1:'UGRD_P0_L100_GLC0',2:'UGRD_P0_L100_GLC0',3:'UGRD_P0_L100_GLC0'}
+        KEYS['V'] = {0:'V_GRD_252_ISBL',1:'VGRD_P0_L100_GLC0',2:'VGRD_P0_L100_GLC0',3:'VGRD_P0_L100_GLC0'}
+        KEYS['lats'] = {0:'gridlat_252',1:'gridlat_0',2:'gridlat_0',3:'gridlat_0'}
+        KEYS['lons'] = {1:'gridlon_252',1:'gridlon_0',2:'gridlon_0',3:'gridlon_0'}
+        KEYS['Z'] = {0:'HGT_252_ISBL',1:'HGT_P0_L100_GLC0',2:'HGT_P0_L100_GLC0',3:'HGT_P0_L100_GLC0'}
         KEYS['Td2'] = {0:'DPT_252_HTGL'}
         KEYS['U10'] = {3:'UGRD_P0_L103_GLC0'}
         KEYS['V10'] = {3:'VGRD_P0_L103_GLC0'}
@@ -542,10 +542,10 @@ class RUC(WRFOut):
         # This is specific humidity, not mixing ratio of water tut tut
         KEYS['Q2'] = {0:'SPF_H_252_HTGL'}
         # KEYS['Q2'] = 
-        KEYS['pressure'] = {0:'lv_ISBL2',3:'lv_ISBL0'}
+        KEYS['pressure'] = {0:'lv_ISBL2',1:'lv_ISBL0',2:'lv_ISBL0',3:'lv_ISBL0'}
         # KEYS['T'] = {0:'TMP_252_ISBL'} I THINK TMP = DRYBULB
-        KEYS['drybulb'] = {0: 'TMP_252_ISBL' ,3:'TMP_P0_L100_GLC0'}
-        KEYS['W'] = {0:'V_VEL_252_ISBL'}
+        KEYS['drybulb'] = {0: 'TMP_252_ISBL',1: 'TMP_P0_L100_GLC0',2:'TMP_P0_L100_GLC0',3:'TMP_P0_L100_GLC0'}
+        KEYS['W'] = {0:'V_VEL_252_ISBL',1:'VVEL_P0_L100_GLC0',2:'VVEL_P0_L100_GLC0',3:'VVEL_P0_L100_GLC0'}
         KEYS['PSFC'] = {0:'PRES_252_SFC'}
         KEYS['HGT'] = {0:'HGT_252_SFC'}
         KEYS['PMSL'] = {0:'MSLMA_252_MSL'}
