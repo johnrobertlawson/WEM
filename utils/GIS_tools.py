@@ -14,6 +14,8 @@ import glob
 import cPickle as pickle
 import unix_tools as utils
 
+import getdata
+
 def decompose_wind(wspd,wdir,convert=0):
     # Split wind speed/wind direction into u,v
     if (type(wspd) == N.array) & (type(wdir) == N.array):
@@ -444,7 +446,7 @@ def netcdf_files_in(folder,dom=1,init_time=0,model='auto',return_model=False):
     if model=='wrfout':
         pfx = 'wrfout' # Assume the prefix
     elif model=='ruc':
-        pfx = ruc_naming_prefix(t)
+        pfx = getdata.RUC_fname(t,filetype='netcdf')[:7]
         # TODO: logic that considers the four versions of RUC
     else:
         raise Exception
@@ -481,51 +483,6 @@ def netcdf_files_in(folder,dom=1,init_time=0,model='auto',return_model=False):
         else:
             print("Ambiguous netCDF4 selection.")
             raise Exception
-
-def ruc_naming_prefix(t):
-    utc = ensure_datenum(t)
-    yr = time.gmtime(utc).tm_year
-    mth = time.gmtime(utc).tm_mon
-
-
-    if (yr > 2013) or ((yr==2013) and (mth > 3)): # With a massive gap for RAP
-        version = 3
-    elif (yr > 2008) or ((yr==2008) and (mth > 10)): # Massive gap after 2012/05 (transition to RAP).
-        version = 2
-    elif (yr>2006):
-        version = 1
-    elif (yr>2004):
-        version = 0
-
-    if version==0:
-        prefix = 'ruc2_252_'
-    elif version==1:
-        prefix = 'ruc2anl_252_'
-    elif version==2:
-        prefix = 'ruc2anl_130_'
-    elif version==3:
-        prefix = 'rap_130_'
-    else:
-        raise Exception
-
-    return prefix
-
-def ruc_file_naming(utc):
-    utc_tt = ensure_timetuple(utc)
-    yr,mth,d,h,d3,d4 = ['{0:02d}'.format(u) for u in utc_tt]
-    YR,MTH,D,H,D3,D4 = utc_tt
-
-    # import pdb; pdb.set_trace()
-    if (YR > 2013) or ((MTH > 3) and YR==2013): # With a massive gap for RAP
-        fname = 'rap_130_'+yr+mth+d+'_'+h+'00_000.nc'
-    elif (YR > 2008) or ((MTH > 10) and (YR==2008)):
-        fname = 'ruc2anl_130_'+yr+mth+d+'_'+h+'00_000.nc'
-    elif (YR>2006):
-        fname = 'ruc2anl_252_'+yr+mth+d+'_'+h+'00_000.nc'
-    elif (YR>2004):
-        fname = 'ruc2_252_'+yr+mth+d+'_'+h+'00_000.nc'
-
-    return fname
 
 
 def wrfout_files_in(folders,dom=0,init_time='notset',descend=1,avoid=0,
@@ -1055,7 +1012,7 @@ def get_netcdf_naming(model,t,dom=0):
         # prefix = ruc_naming_prefix(t)
 
         # fname = (prefix+'{0:04d}{1:r2d}{2:02d}_{3:02d}{4:02d}_{5:02d}0.nc'.format(*t))
-        fname = ruc_file_naming(t)
+        fname = getdata.RUC_fname(t,filetype='netcdf')
         # import pdb; pdb.set_trace()
     else:
         print("Model format not supported yet.")

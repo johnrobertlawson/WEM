@@ -7,6 +7,7 @@ import glob
 
 # sys.path.append('/home/jrlawson/gitprojects/')
 import GIS_tools as utils
+import GIS_tools
 
 # date format: YYYYMMDD (string)
 
@@ -141,54 +142,90 @@ def getnam(dates,hours,datatype,**kwargs):
 
 def getruc(utc,ncpath='./',convert2nc=False,duplicate=False):
 
-    def ruc_grib_name(utc):
-        yr,mth,d,h,d3,d4 = ['{0:02d}'.format(u) for u in utc]
-        YR,MTH,D,H,D3,D4 = utc
-
-        # import pdb; pdb.set_trace()
-        if (YR > 2013) or ((MTH > 3) and YR==2013): # With a massive gap for RAP
-            fname = 'rap_130_'+yr+mth+d+'_'+h+'00_000.grb2'
-        elif (YR > 2008) or ((MTH > 10) and (YR==2008)):
-            fname = 'ruc2anl_130_'+yr+mth+d+'_'+h+'00_000.grb2'
-        elif (YR>2006):
-            fname = 'ruc2anl_252_'+yr+mth+d+'_'+h+'00_000.grb'
-        elif (YR>2004):
-            fname = 'ruc2_252_'+yr+mth+d+'_'+h+'00_000.grb'
-
-        return fname
-
-    def right_url(utc):
-        """To work out what URL to use for RUC/RAP data.
-        """
-        yr,mth,d,h,d3,d4 = ['{0:02d}'.format(u) for u in utc]
-        YR,MTH,D,H,D3,D4 = utc
-
-        # import pdb; pdb.set_trace()
-        # URL_base = "http://nomads.ncdc.noaa.gov/data/rap130"
-        URL_base = "http://nomads.ncdc.noaa.gov/data/rucanl"
-        if (YR > 2013) or ((MTH > 3) and YR==2013): # With a massive gap for RAP
-            URL = '/'.join((URL_base,yr+mth,yr+mth+d,'rap_130_'+yr+mth+d+'_'+h+'00_000.grb2'))
-        elif (YR > 2008) or ((MTH > 10) and (YR==2008)):
-            URL = '/'.join((URL_base,yr+mth,yr+mth+d,'ruc2anl_130_'+yr+mth+d+'_'+h+'00_000.grb2'))
-        elif (YR>2006):
-            URL = '/'.join((URL_base,yr+mth,yr+mth+d,'ruc2anl_252_'+yr+mth+d+'_'+h+'00_000.grb'))
-        elif (YR>2004):
-            URL = '/'.join((URL_base,yr+mth,yr+mth+d,'ruc2_252_'+yr+mth+d+'_'+h+'00_000.grb'))
-
-        return URL
-
-    utc_tt = utils.ensure_timetuple(utc)
-    URL = right_url(utc_tt)
-    fname = ruc_grib_name(utc)
+    URL = RUC_URL(utc)
+    fname = RUC_fname(utc)
+    URLpath = os.path.join(URL,fname)
     fpath = os.path.join(ncpath,fname)
     if not duplicate:
         fexist = glob.glob(fpath)
 
     # import pdb; pdb.set_trace()
     if not len(fexist):
-        command = 'wget {0} -P {1}'.format(URL,ncpath)
+        command = 'wget {0} -P {1}'.format(URLpath,ncpath)
         os.system(command)
         if convert2nc:
             command2 = 'ncl_convert2nc {0} -o {1}'.format(fpath,ncpath)
             os.system(command2)
     return
+
+def RUC_fname(utc,filetype='grib'):
+    """
+    Returns RUC filename for date.
+    """
+    version = RUC_version(utc)
+
+    t = GIS_tools.ensure_datenum(utc)
+    yr = time.gmtime(t).tm_year
+    mth = time.gmtime(t).tm_mon
+    day = time.gmtime(t).tm_mday
+    hr = time.gmtime(t).tm_hour
+
+    if version == 3:
+        prefix = 'rap_130'
+        suffix = 'grb2'
+    elif version == 2:
+        prefix = 'ruc2anl_130'
+        suffix = 'grb2'
+    elif version == 1:
+        prefix = 'ruc2anl_252'
+        suffix = 'grb'
+    else:
+        prefix = 'ruc2_252'
+        suffix = 'grb'
+
+    if filetype=='netcdf':
+        suffix = 'nc'
+    fname = '{0}_{1:04d}{2:02d}{3:02d}_{4:02d}00_000.{5}'.format(prefix,yr,mth,day,hr,suffix)
+    return fname
+
+def RUC_URL(utc):
+    """
+    Returns URL to download RUC file from nomads.
+    """
+    t = GIS_tools.ensure_datenum(utc)
+    yr = time.gmtime(t).tm_year
+    mth = time.gmtime(t).tm_mon
+    day = time.gmtime(t).tm_mday
+
+    URL_base = "http://nomads.ncdc.noaa.gov/data/rucanl"
+    URL = '{0}/{1:04d}{2:02d}/{1:02d}{2:02d}{3:02d}/'.format(URL_base,yr,mth,day)
+
+    return URL
+
+def RUC_version(utc,fname=False,URL=False):
+    """Returns the version/fname of RUC file
+    """
+    t = GIS_tools.ensure_datenum(utc)
+    date0 = utils.ensure_datenum((2004,1,1,0,0,0))
+    date1 = utils.ensure_datenum((2007,1,1,0,0,0))
+    date2 = utils.ensure_datenum((2008,1,1,0,0,0))
+    date3 = utils.ensure_datenum((2009,1,1,0,0,0))
+    date4 = utils.ensure_datenum((2012,5,9,0,0,0))
+
+    if t >= date4:
+        version = 3
+    elif t >= date3:
+        version = 2
+    elif t >= date2:
+        version = 0
+    elif t >= date1:
+        version = 1
+    elif t >= date0:
+        version = 0
+    else:
+        print("No RUC data for this date exists.")
+        raise Exception
+
+    # print("This RUC file is Version {0}.".format(version))
+    return version
+

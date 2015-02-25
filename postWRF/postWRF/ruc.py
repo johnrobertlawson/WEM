@@ -34,6 +34,7 @@ class RUC(WRFOut):
         wrfdir  :   if picked, domain is cut down
         """
         self.fpath = fpath
+        # import pdb; pdb.set_trace()
         self.nc = Dataset(self.fpath)
         self.fields = [v for v in self.nc.variables]
 
@@ -214,26 +215,8 @@ class RUC(WRFOut):
         return data_out
 
     def get_version(self):
-        """Returns the version of RUC or RUC file
-
-        Needs time as time.struct_time object.
-        """
-         
-        yr = time.gmtime(self.utc).tm_year
-        mth = time.gmtime(self.utc).tm_mon
-
-        if (yr > 2012) or ((mth > 3) and (yr == 2013)): # With a massive gap for RAP
-            version = 3
-        elif (yr > 2007) or ((mth > 10) and (yr == 2008)): # Massive gap after 2012/05 (transition to RAP).
-            version = 2
-        elif (yr>2006):
-            version = 1
-        elif (yr>2004):
-            version = 0
-
-        print("This RUC file is Version {0}.".format(version))
+        version = utils.RUC_version(self.utc)
         return version
-
 
     def plot(self,variables,lv,**kwargs):
         for va in variables:
@@ -521,19 +504,19 @@ class RUC(WRFOut):
         # data = N.expand_dims(dataout,axis=0)
         # import pdb; pdb.set_trace()
         return dataout
-        
-        
 
     def get_key(self,vrbl):
         """
         Returns the netcdf key for the desired variable
         """
+        # Version 0/1 same and 2/3 same.
+        key_no = {0:0,1:0,2:3,3:3}
 
         KEYS = {}
         KEYS['U'] = {0:'U_GRD_252_ISBL',1:'UGRD_P0_L100_GLC0',2:'UGRD_P0_L100_GLC0',3:'UGRD_P0_L100_GLC0'}
         KEYS['V'] = {0:'V_GRD_252_ISBL',1:'VGRD_P0_L100_GLC0',2:'VGRD_P0_L100_GLC0',3:'VGRD_P0_L100_GLC0'}
-        KEYS['lats'] = {0:'gridlat_252',1:'gridlat_0',2:'gridlat_0',3:'gridlat_0'}
-        KEYS['lons'] = {1:'gridlon_252',1:'gridlon_0',2:'gridlon_0',3:'gridlon_0'}
+        KEYS['lats'] = {0:'gridlat_252',1:'gridlat_252',2:'gridlat_0',3:'gridlat_0'}
+        KEYS['lons'] = {0:'gridlon_252',1:'gridlon_252',2:'gridlon_0',3:'gridlon_0'}
         KEYS['Z'] = {0:'HGT_252_ISBL',1:'HGT_P0_L100_GLC0',2:'HGT_P0_L100_GLC0',3:'HGT_P0_L100_GLC0'}
         KEYS['Td2'] = {0:'DPT_252_HTGL'}
         KEYS['U10'] = {3:'UGRD_P0_L103_GLC0'}
@@ -542,7 +525,7 @@ class RUC(WRFOut):
         # This is specific humidity, not mixing ratio of water tut tut
         KEYS['Q2'] = {0:'SPF_H_252_HTGL'}
         # KEYS['Q2'] = 
-        KEYS['pressure'] = {0:'lv_ISBL2',1:'lv_ISBL0',2:'lv_ISBL0',3:'lv_ISBL0'}
+        KEYS['pressure'] = {0:'lv_ISBL2',1:'lv_ISBL2',2:'lv_ISBL0',3:'lv_ISBL0'}
         # KEYS['T'] = {0:'TMP_252_ISBL'} I THINK TMP = DRYBULB
         KEYS['drybulb'] = {0: 'TMP_252_ISBL',1: 'TMP_P0_L100_GLC0',2:'TMP_P0_L100_GLC0',3:'TMP_P0_L100_GLC0'}
         KEYS['W'] = {0:'V_VEL_252_ISBL',1:'VVEL_P0_L100_GLC0',2:'VVEL_P0_L100_GLC0',3:'VVEL_P0_L100_GLC0'}
@@ -552,7 +535,7 @@ class RUC(WRFOut):
         KEYS['RH'] = {0:'R_H_252_ISBL'}
 
         try:
-            key = KEYS[vrbl][self.version]
+            key = KEYS[vrbl][key_no[self.version]]
         except KeyError:
             print("Can't find variable {0}".format(vrbl))
             # raise Exception
