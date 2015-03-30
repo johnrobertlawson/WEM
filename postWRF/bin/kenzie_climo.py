@@ -8,7 +8,7 @@ import os
 import pdb
 import sys
 import matplotlib as M
-M.use('gtkagg')
+M.use('agg')
 import matplotlib.pyplot as plt
 import numpy as N
 
@@ -28,17 +28,17 @@ p = WRFEnviron()
 # cases['20091109'] = {'utc':(2009,11,10,0,0,0), 'datadir':os.path.join(RUCdir,'20060526/RUC/anl/VERIF/') }
 # cases['2013'] = {'utc':(2013,8,16,0,0,0), 'datadir':os.path.join(RUCdir,'20130815/RUC/anl/VERIF/') }
 
-download_data = 1
+download_data = 0
 skipcase = 0
 
 def download_RUC(utc,fpath):
     print('Downloading {0} RUC file.'.format(utc))
     utils.getruc(utc,ncpath=fpath,convert2nc=True,duplicate=False)
 
-plot_Z = 1
-plot_T_adv = 1
+plot_Z =0
+plot_T_adv = 0
 plot_omega = 1
-plot_lyapunov = 1
+plot_lyapunov = 0
 
 # TODO: edit WEM so a switch will automatically download the RUC data.
 
@@ -96,7 +96,7 @@ for n, case in enumerate(cases):
             fig, ax = plt.subplots()
 
             im = p.plot2D('temp_advection',utc=utc,level=lv,ncdir=RUCdir,outdir=outdir,
-                        fig=fig,ax=ax,cb=False, clvs=levels[lv]['clvs'], nct=utc,)
+                        fig=fig,ax=ax,cb=True, clvs=levels[lv]['clvs'], nct=utc,)
             fpath = os.path.join(outdir,case['casedate']+'_tempadvection_{0}hPa.png'.format(lv))
             fig.savefig(fpath)
             plt.close(fig)
@@ -108,7 +108,7 @@ for n, case in enumerate(cases):
         for lv in levels:
             fig, ax = plt.subplots()
             im = p.plot2D('omega',utc=utc,level=lv,ncdir=RUCdir,outdir=outdir,
-                        fig=fig,ax=ax,cb=False, 
+                        fig=fig,ax=ax,cb=True, 
                         #clvs=levels[lv]['clvs'],
                         nct=utc,)
             fpath = os.path.join(outdir,case['casedate']+'_omega_{0}hPa.png'.format(lv))
@@ -122,7 +122,7 @@ for n, case in enumerate(cases):
         for lv in levels:
             fig, ax = plt.subplots()
             im = p.plot2D('lyapunov',utc=utc,level=lv,ncdir=RUCdir,outdir=outdir,
-                        fig=fig,ax=ax,cb=False,
+                        fig=fig,ax=ax,cb=True,
                         #clvs=levels[lv]['clvs'], 
                         nct=utc,
                         #cmap='bwr'

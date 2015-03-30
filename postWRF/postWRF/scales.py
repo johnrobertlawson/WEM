@@ -65,7 +65,7 @@ class Scales(object):
             pass
         else:
             self.cm = self.A[vrbl]['cmap'](clvs)    # This is for user
-        
+        # import pdb; pdb.set_trace()
 
     def get_multiplier(self,vrbl,lv):
         m = self.A[vrbl].get('multiplier',1)

@@ -14,9 +14,8 @@ from defaults import Defaults
 
 class Clicker(Figure):
     # def __init__(self,config,wrfout,ax=0):
-    def __init__(self,config,wrfout,data=0,fig=0,ax=0):
+    def __init__(self,wrfout,data=0,fig=0,ax=0,clvs=False,cmap=False):
         # import pdb; pdb.set_trace()
-        self.C = config
         self.D = Defaults()
         self.W = wrfout
 
@@ -24,13 +23,12 @@ class Clicker(Figure):
             self.fig = fig
             self.ax = ax
         else:
-            super(Clicker,self).__init__(config,wrfout,fig=fig,ax=ax)
+            super(Clicker,self).__init__(wrfout,fig=fig,ax=ax)
         
         self.bmap,self.x,self.y = self.basemap_setup()
+
         if isinstance(data,N.ndarray):
-            # Lazily assuming it's reflectivity
-            S = Scales('cref',2000)
-            self.overlay_data(data,V=S.clvs,cmap=S.cm)
+            self.overlay_data(data,clvs=clvs,cmap=cmap)
         
     def click_x_y(self,plotpoint=0):
         """
@@ -95,13 +93,13 @@ class Clicker(Figure):
         self.x = mouseevent.xdata
         self.y = mouseevent.ydata
         
-    def overlay_data(self,data,V=0,cmap=0):
+    def overlay_data(self,data,clvs=False,cmap=False):
         xlen = data.shape[1]
         ylen = data.shape[0]
         kwargs = {}
         
-        if isinstance(V,N.ndarray):
-            kwargs['levels'] = V
+        if isinstance(clvs,N.ndarray):
+            kwargs['levels'] = clvs
             
         kwargs['cmap'] = cmap
         kwargs['extent'] = (0,xlen,0,ylen)

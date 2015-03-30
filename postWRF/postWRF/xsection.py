@@ -25,8 +25,8 @@ from birdseye import BirdsEye
 
 class CrossSection(Figure):
 
-    def __init__(self,config,wrfout,latA=0,lonA=0,latB=0,lonB=0):
-        super(CrossSection,self).__init__(config,wrfout)
+    def __init__(self,wrfout,latA=0,lonA=0,latB=0,lonB=0):
+        super(CrossSection,self).__init__(wrfout)
 
         if latA and lonA and latB and lonB:
             print("Using user-defined lat/lon transects.")
@@ -341,7 +341,7 @@ class CrossSection(Figure):
 
     
     def draw_transect(self,outpath,fname):
-        B = BirdsEye(self.C,self.W)
+        B = BirdsEye(self.W)
         m,x,y = B.basemap_setup()
         m.drawgreatcircle(self.lonA,self.latA,self.lonB,self.latB)
         self.save(B.fig,outpath,fname)

@@ -192,6 +192,20 @@ class WRFEnviron(object):
             lons = False
 
         # Scales
+        cmap, clvs = self.get_cmap_clvs(vrbl,level,cmap=cmap,clvs=clvs)
+
+        # Figure
+        fname = self.create_fname(vrbl,utc,level,f_suffix=f_suffix, f_prefix=f_prefix,other=other)
+        F = BirdsEye(self.W,fig=fig,ax=ax)
+        # import pdb; pdb.set_trace()
+        F.plot2D(data,fname,outdir,lats=lats,lons=lons,
+                    plottype=plottype,smooth=smooth,
+                    clvs=clvs,cmap=cmap,locations=locations,
+                    cb=cb,color=color,inline=inline)
+
+
+    def get_cmap_clvs(self,vrbl,level,clvs=False,cmap=False):
+       
         if clvs is False and cmap is False:
             S = Scales(vrbl,level)
             clvs = S.clvs
@@ -202,16 +216,7 @@ class WRFEnviron(object):
         elif cmap is False:
             S = Scales(vrbl,level)
             cmap = S.cm
-
-
-        # Figure
-        fname = self.create_fname(vrbl,utc,level,f_suffix=f_suffix, f_prefix=f_prefix,other=other)
-        F = BirdsEye(self.W,fig=fig,ax=ax)
-        # import pdb; pdb.set_trace()
-        F.plot2D(data,fname,outdir,lats=lats,lons=lons,
-                    plottype=plottype,smooth=smooth,
-                    clvs=clvs,cmap=cmap,locations=locations,
-                    cb=cb,color=color,inline=inline)
+        return cmap,clvs
 
     def create_fname(self,vrbl,utc=False,level=False,other=False,
                         f_prefix=False,f_suffix=False,
@@ -1096,10 +1101,10 @@ class WRFEnviron(object):
         XS.plot_xs(vrbl,utc,outpath,clvs=clvs,ztop=ztop)
 
 
-    def cold_pool_strength(self,utc,ncdir,outdir,ncf=False,nct=False,
+    def cold_pool_strength(self,utc,ncdir=False,outdir=False,ncf=False,nct=False,
                             f_prefix=False,f_suffix=False,
                             swath_width=100,bounding=False,dom=1,
-                            twoplot=0,fig=0,ax=0,dz=0):
+                            twoplot=False,fig=0,axes=0,dz=0):
         """
         Pick A, B points on sim ref overlay
         This sets the angle between north and line AB
@@ -1109,26 +1114,6 @@ class WRFEnviron(object):
             * Starting at front, do 3-grid-pt-average in line-normal
               direction
 
-        :param utc:         one date/time. The tuple/list format is
-                            YYYY,MM,DD,HH,MM,SS (ready for calendar.timegm).
-                            Integer format is epoch/datenum (ready for
-                            time.gmtime).
-        :type utc:          tuple,list,int
-        :param ncdir:       directory of netcdf data file
-        :type ncdir:        str
-        :param outdir:      directory to save output figures
-        :type outdir:       str
-        :param ncf:         filename of netcdf data file if ambiguous within ncdir.
-                            If no wrfout file is explicitly specified, the
-                            netCDF file in that folder is chosen if unambiguous.
-        :type ncf:          bool,str
-        :param nct:         initialisation time of netcdf data file, if
-                            ambiguous within ncdir.
-        :type nct:          bool,str
-        :param f_prefix:    custom filename prefix for output. Ignore if False.
-        :type f_prefix:     bool,str
-        :param f_suffix:    custom filename suffix for output. Ignore if False.
-        :type f_suffix:     bool,str
         :param swath_width: length in gridpoint in cross-section-normal
                             direction.
         :type swath_width:  int
@@ -1158,15 +1143,15 @@ class WRFEnviron(object):
 
         """
         # Initialise
-        self.W = self.get_netcdf(wrf_sd,wrf_nc,dom=dom)
-        outpath = self.get_outpath(out_sd)
+        self.W = self.get_netcdf(ncdir,ncf=ncf,nct=nct,dom=dom)
 
         # keyword arguments for plots
         line_kwargs = {}
         cps_kwargs = {}
+        
         # Create two-panel figure
         if twoplot:
-            P2 = Figure(self.C,self.W,plotn=(1,2))
+            P2 = Figure(self.W,plotn=(1,2))
             line_kwargs['ax'] = P2.ax.flat[0]
             line_kwargs['fig'] = P2.fig
             P2.ax.flat[0].set_size_inches(3,3)
@@ -1185,10 +1170,13 @@ class WRFEnviron(object):
             return_ax = 1
 
         # Plot sim ref, send basemap axis to clicker function
-        F = BirdsEye(self.C,self.W)
-        self.data = F.plot2D('cref',utc,2000,dom,outpath,save=0,return_data=1)
+        # F = BirdsEye(self.W)
 
-        C = Clicker(self.C,self.W,data=self.data,**line_kwargs)
+        cref_data = self.W.get('cref',utc=utc,level=False,lons=False,lats=False)[0,0,:,:]
+        # self.data = F.plot2D('cref',utc,2000,dom,outpath,save=False,return_data=1)
+        cmap, clvs = self.get_cmap_clvs('cref',level=False)
+        # import pdb; pdb.set_trace()
+        C = Clicker(self.W,data=cref_data,cmap=cmap,clvs=clvs,**line_kwargs)
         # C.fig.tight_layout()
 
         # Line from front to back of system
@@ -1203,7 +1191,7 @@ class WRFEnviron(object):
         lon_env, lat_env = C.bmap(C.x1, C.y1, inverse=True)
         y_env,x_env,exactlat,exactlon = utils.getXY(self.W.lats1D,self.W.lons1D,lat_env,lon_env)
         # Create the cross-section object
-        X = CrossSection(self.C,self.W,lat0,lon0,lat1,lon1)
+        X = CrossSection(self.W,lat0,lon0,lat1,lon1)
 
         # Ask user the line-normal box width (self.km)
         #C.set_box_width(X)
@@ -1213,7 +1201,7 @@ class WRFEnviron(object):
         # import pdb; pdb.set_trace()
 
         # Plot this array
-        CPfig = BirdsEye(self.C,self.W,**cps_kwargs)
+        CPfig = BirdsEye(self.W,**cps_kwargs)
         tstr = utils.string_from_time('output',utc)
         if dz:
             fprefix = 'ColdPoolDepth_'
@@ -1221,27 +1209,30 @@ class WRFEnviron(object):
             fprefix = 'ColdPoolStrength_'
         fname = fprefix + tstr
 
-        pdb.set_trace()
+        # pdb.set_trace()
         # imfig,imax = plt.subplots(1)
         # imax.imshow(cps)
         # plt.show(imfig)
         # CPfig.plot_data(cps,'contourf',outpath,fname,time,V=N.arange(5,105,5))
-        mplcommand = 'contour'
-        plotkwargs = {}
+        mplcommand = 'contourf'
+        plotkwargs = {'cb':False}
         if dz:
             clvs = N.arange(100,5100,100)
         else:
             clvs = N.arange(10,85,2.5)
         if mplcommand[:7] == 'contour':
-            plotkwargs['levels'] = clvs
-            plotkwargs['cmap'] = plt.cm.ocean_r
-        cf2 = CPfig.plot_data(cps,mplcommand,outpath,fname,utc,**plotkwargs)
+            plotkwargs['clvs'] = clvs
+            # plotkwargs['cmap'] = 'ocean_r'
+            plotkwargs['cmap'] = 'jet'
+            plotkwargs['color'] = None
+
+        cf2 = CPfig.plot2D(cps,fname,outdir,plottype=mplcommand,**plotkwargs)
         # CPfig.fig.tight_layout()
 
         plt.close(fig)
 
         if twoplot:
-            P2.save(outpath,fname+"_twopanel")
+            P2.save(outdir,fname+"_twopanel")
 
         if return_ax:
             return C.cf, cf2

@@ -18,7 +18,7 @@ ncroot = '/chinook2/jrlawson/bowecho/'
 p = WRFEnviron()
 
 skewT = 0
-plot2D = 0
+plot2D = 1
 radarplot = 0
 radarcomp = 0
 streamlines = 0
@@ -32,7 +32,7 @@ upperlevel = 0
 strongestwind = 0
 accum_rain = 0
 compute_dte = 0
-plot_1D_dte = 1 # To produce top-down maps
+plot_1D_dte = 0 # To produce top-down maps
 plot_3D_dte = 0 # To produce line graphs
 all_3D_dte = 0 # To produce line graphs for all averages
 delta_plot = 0
@@ -45,13 +45,13 @@ enstype = 'STCH'
 # enstype = 'MXMP'
 # enstype = 'STMX'
 
-case = '20060526'
+# case = '20060526'
 #case = '20090910'
 # case = '20110419'
-# case = '20130815'
+case = '20130815'
 
-# IC = 'GEFSR2'
-IC = 'NAM'
+IC = 'GEFSR2'
+# IC = 'NAM'
 # IC = 'RUC'
 # IC = 'GFS'
 # IC = 'RUC'
@@ -59,9 +59,9 @@ IC = 'NAM'
 
 if enstype == 'STCH':
     experiments = ['s'+"%02d" %n for n in range(1,11)]
-    ensnames = ['anl',]
+    ensnames = ['p09',]
     # MP = 'ICBC'
-    MP = 'WDM6_Grau'
+    MP = 'ICBC'
 elif enstype == 'STCH5':
     experiments = ['ss'+"%02d" %n for n in range(1,11)]
     ensnames = ['anl',]
@@ -114,10 +114,11 @@ elif case[:4] == '2013':
     inittime = (2013,8,15,0,0,0)
     itime = (2013,8,15,0,0,0)
     ftime = (2013,8,16,12,0,0)
-    times = [(2013,8,15,21,0,0),]
+    times = [(2013,8,16,3,0,0),]
     dtetime = [(2013,8,16,0,0,0),]
     compt = [(2013,8,d,h,0,0) for d,h in zip((15,16,16),(22,2,6))]
     powertime = (2013,8,16,3,0,0)
+    matchnc = '/chinook2/jrlawson/bowecho/20130815_hires/wrfout_d02_2013-08-15_00:00:00'
 else:
     raise Exception
 
@@ -196,7 +197,7 @@ if plot2D or radarplot:
                     # p.plot2D('Td2',t,ncdir=ncdir,outdir=outdir,nct=t,match_nc=matchnc,clvs=N.arange(260,291,1))
                     # p.plot2D('Q2',t,ncdir=ncdir,outdir=outdir,nct=t,match_nc=matchnc,clvs=N.arange(1,20.5,0.5)*10**-3)
                     # p.plot2D('RAINNC',t,ncdir=wrf_sd,outdir=out_sd,locations=locs,clvs=N.arange(1,100,2))
-                    p.plot2D('cref',t,ncdir=ncdir,outdir=outdir,cb='only')
+                    p.plot2D('REFL_comp',t,ncdir=ncdir,outdir=outdir,cb=True,match_nc=matchnc)
                     # p.plot2D('wind10',t,ncdir=ncdir,outdir=outdir,locations=locs,cb=True,clvs=N.arange(5,32,2))
 
                 if radarplot:

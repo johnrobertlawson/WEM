@@ -26,7 +26,7 @@ class BirdsEye(Figure):
     def __init__(self,nc=False,ax=0,fig=0):
         super(BirdsEye,self).__init__(nc=nc,ax=ax,fig=fig)
 
-    def get_plot_arguments(self,cmap=False,clvs=False):
+    def get_plot_arguments(self,cmap=False,clvs=False,color=False):
         """
         Returns colourmap and contouring levels
 
@@ -83,7 +83,7 @@ class BirdsEye(Figure):
 
     # Old plot_data
     def plot2D(self,data,fname,outdir,plottype='contourf',
-                    save=1,smooth=1,lats=False,lons=False,
+                    save=True,smooth=1,lats=False,lons=False,
                     clvs=False,cmap=False,title=False,cb=True,
                     locations=False,m=False,x=False,y=False,
                     Nlim=False,Elim=False,Slim=False,Wlim=False,
@@ -127,7 +127,7 @@ class BirdsEye(Figure):
         self.la_n = self.data.shape[-2]
         self.lo_n = self.data.shape[-1]
 
-        plotargs, plotkwargs = self.get_plot_arguments(clvs=clvs,cmap=cmap)
+        plotargs, plotkwargs = self.get_plot_arguments(clvs=clvs,cmap=cmap,color=color)
 
         # import pdb; pdb.set_trace()
         if plottype == 'contour':

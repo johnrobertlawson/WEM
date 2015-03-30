@@ -479,7 +479,7 @@ class WRFOut(object):
         #return data
         return pmsl
 
-    def compute_buoyancy(self,tidx,lvidx,lonidx,latidx,other):
+    def compute_buoyancy(self,tidx,lvidx,lonidx,latidx,other=False):
         """
         Method from Adams-Selin et al., 2013, WAF
         """
@@ -491,7 +491,7 @@ class WRFOut(object):
         B = cc.g * ((theta-thetabar)/thetabar + 0.61*(qv - qvbar))
         return B
 
-    def compute_mixing_ratios(self,tidx,lvidx,lonidx,latidx,other):
+    def compute_mixing_ratios(self,tidx,lvidx,lonidx,latidx,other=False):
         qv = self.get('QVAPOR',tidx,lvidx,lonidx,latidx)
         qc = self.get('QCLOUD',tidx,lvidx,lonidx,latidx)
         qr = self.get('QRAIN',tidx,lvidx,lonidx,latidx)
@@ -1108,23 +1108,22 @@ class WRFOut(object):
         """
 
         # Set up slices
-        time_idx = self.get_time_idx(time)
-        # lv_idx = 0
-
-        # slices = {'t': time_idx, 'lv': lv_idx, 'la': lat_sl, 'lo': lon_sl}
-        tidx,lvidx,lonidx,latidx = {'t':time_idx}
+        tidx = self.get_time_idx(time)
+        lvidx = False
+        lonidx = False
+        latidx = False
 
         # Get wind data
-        wind10 = self.get('wind10',tidx,lvidx,lonidx,latidx)[0,...]
-        T2 = self.get('T2',tidx,lvidx,lonidx,latidx)[0,...]
+        wind10 = self.get('wind10',tidx,lvidx,lonidx,latidx)[0,0,:,:]
+        T2 = self.get('T2',tidx,lvidx,lonidx,latidx)[0,0,:,:]
 
         # This is the 2D plane for calculation data
         coldpooldata = N.zeros(wind10.shape)
 
         # Compute required C2 fields to save time
-        dpt = self.get('dpt',tidx,lvidx,lonidx,latidx)[0,...]
-        Z = self.get('Z',tidx,lvidx,lonidx,latidx)[0,...]
-        HGT = self.get('HGT',tidx,lvidx,lonidx,latidx)[0,...]
+        dpt = self.get('dpt',tidx,lvidx,lonidx,latidx)[0,:,:,:]
+        Z = self.get('Z',tidx,lvidx,lonidx,latidx)[0,:,:,:]
+        HGT = self.get('HGT',tidx,lvidx,lonidx,latidx)[0,0,:,:]
         heights = Z-HGT
         # pdb.set_trace()
 
@@ -1467,7 +1466,8 @@ class WRFOut(object):
         # dp/dt of air parcel
         W = self.get('W',tidx,lvidx,lonidx,latidx)[0,:,:,:]
         rho = self.get('density',tidx,lvidx,lonidx,latidx)[0,:,:,:]
-        omega = -rho * mc.g * W
+        omega = -rho * -mc.g * W # I think it's meant to be minus g?
+        # import pdb; pdb.set_trace()
         return omega
 
     def compute_density(self,tidx,lvidx,lonidx,latidx,other):
