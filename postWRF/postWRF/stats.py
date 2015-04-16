@@ -77,6 +77,23 @@ def gauss_smooth(data, n, ny=None, pad=1, pad_values=0) :
             dataproc[dataproc==0] = N.nan
     return(dataproc)
 
+def max_filter(data,size=11,shape='circle'):
+    """
+    blah
+    """
+    if shape=='circle':
+        cr = size/2.0
+        circ = N.zeros((size,size))
+        x,y = N.meshgrid(N.arange(size),N.arange(size))
+        dist = N.sqrt((5-x)**2 + (5-y)**2)
+        circ[N.where(dist<cr)] = 1
+        footprint = circ
+        # pdb.set_trace()
+    else:
+        footprint = N.ones((size,size))
+    output = scipy.ndimage.filters.maximum_filter(data,footprint=footprint)
+    return output
+
 def compute_diff_energy(ptype,energy,files,times,upper=None,lower=None,
                         d_save=True,d_return=True,d_fname='diff_energy_data'):
     """

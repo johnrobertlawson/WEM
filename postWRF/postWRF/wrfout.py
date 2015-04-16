@@ -119,7 +119,7 @@ class WRFOut(object):
         else:
             return False
 
-    def return_idx_range(self,utc0,utc1):
+    def return_tidx_range(self,utc0,utc1):
         """
         Give a start and end time. Returns an array of
         all indices. Useful for self.get() to return an

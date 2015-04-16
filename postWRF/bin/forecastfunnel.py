@@ -2,7 +2,7 @@ import os
 import pdb
 import sys
 import matplotlib as M
-M.use('gtkagg')
+M.use('agg')
 import matplotlib.pyplot as plt
 import numpy as N
 
@@ -18,12 +18,13 @@ RUCdir = '/chinook2/jrlawson/bowecho/'
 p = WRFEnviron()
 
 cases = {}
-cases['2006'] = {'utc':(2006,5,27,0,0,0), 'datadir':os.path.join(RUCdir,'20060526/RUC/anl/VERIF/') }
-cases['2013'] = {'utc':(2013,8,16,0,0,0), 'datadir':os.path.join(RUCdir,'20130815/RUC/anl/VERIF/') }
+cases['20060526'] = {'utc':(2006,5,26,12,0,0), 'datadir':os.path.join(RUCdir,'20060526/RUC/anl/VERIF/')}
+cases['20130815'] = {'utc':(2013,8,15,12,0,0), 'datadir':os.path.join(RUCdir,'20130815/RUC/anl/VERIF/') }
 
-Zplot = 0
-Tplot = 1
+Nlim, Elim, Slim, Wlim = [52.0,-78.0,25.0,-128.0]
 
+Zplot = 1
+Tplot = 0
 
 for case in cases:
     if Zplot:
@@ -37,14 +38,19 @@ for case in cases:
 
         levels = {}
         # levels[300] = {'color':'blue','clvs':N.arange(8400,9600,120)}
-        levels[500] = {'color':'black','clvs':N.arange(4800,6000,60)}
-        levels[850] = {'color':'red','clvs':N.arange(900,2100,30)}
+        levels[500] = {'color':'black','clvs':N.arange(5460,6000,60),'z':10}
+        # levels[850] = {'color':'green','clvs':N.arange(900,2100,30)}
+        levels[925] = {'color':'#9966FF','clvs':N.arange(660,2100,30),'z':1}
 
-        for lv in levels:
+        for lv in sorted(levels,reverse=True):
             im = p.plot2D('Z',utc=cases[case]['utc'],level=lv,ncdir=cases[case]['datadir'],outdir=outdir,
                         fig=fig,ax=ax,cb=cb,clvs=levels[lv]['clvs'],nct=cases[case]['utc'],match_nc=mnc,
-                        other=other,smooth=sm,plottype=pt,color=levels[lv]['color'])
-        fpath = os.path.join(outdir,case+'_overview.png')
+                        other=other,smooth=sm,plottype=pt,color=levels[lv]['color'],inline=True,
+                        Nlim=Nlim,Elim=Elim,Slim=Slim,Wlim=Wlim)
+
+        datestr = '_'.join(['{0:02d}'.format(n) for n in cases[case]['utc'][2:4]])
+        fpath = os.path.join(outdir,case,datestr+'_forecastfunnel.png')
+        fig.tight_layout()
         fig.savefig(fpath)
         plt.close(fig)
 

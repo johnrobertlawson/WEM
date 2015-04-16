@@ -19,19 +19,19 @@ p = WRFEnviron()
 
 # enstype = 'STCH5'
 # enstype = 'STCH'
-# enstype = 'ICBC'
-enstype = 'MXMP'
+enstype = 'ICBC'
+# enstype = 'MXMP'
 # enstype = 'STMX'
 
 # case = '2006052512'
-case = '20060526'
+# case = '20060526'
 # case = '2006052612'
 #case = '20090910'
-# case = '20110419'
+case = '20110419'
 # case = '20130815'
 
-# IC = 'GEFSR2'; ens = 'p09'
-IC = 'NAM'; ens = 'anl'
+IC = 'GEFSR2'; ens = 'p04'
+# IC = 'NAM'; ens = 'anl'
 # IC = 'RUC'
 # IC = 'GFS'; ens = 'anl'
 # IC = 'RUC'
@@ -39,7 +39,7 @@ IC = 'NAM'; ens = 'anl'
 if enstype == 'STCH':
     experiments = ['ICBC',]+['s'+"%02d" %n for n in range(1,11)]
     ensnames = [ens,]
-    MP = 'Morrison_Hail'
+    MP = 'ICBC'
 elif enstype == 'STCH5':
     experiments = ['ICBC',]+['ss'+"%02d" %n for n in range(1,11)]
     ensnames = [ens,]
@@ -72,12 +72,15 @@ if case[:4] == '2006':
     # times = [(2006,5,26,12,0,0),]
 elif case[:4] == '2009':
     inittime = (2009,9,10,23,0,0)
-    itime = (2009,9,10,23,0,0)
-    ftime = (2009,9,11,14,0,0)
+    itime = (2009,9,10,18,0,0)
+    ftime = (2009,9,11,12,0,0)
 elif case[:4] == '2011':
     inittime = (2011,4,19,0,0,0)
-    itime = (2011,4,19,18,0,0)
-    ftime = (2011,4,20,10,30,0)
+    itime = (2011,4,20,1,0,0)
+    ftime = (2011,4,20,9,0,0)
+    iwind = (2011,4,19,21,0,0)
+    fwind = (2011,4,20,9,0,0)
+    matchnc = '/chinook2/jrlawson/bowecho/20110419/GEFSR2/c00/ICBC/wrfout_d01_2011-04-19_00:00:00'
 elif case[:4] == '2013':
     inittime = (2013,8,15,0,0,0)
     itime = (2013,8,15,0,0,0)
@@ -86,11 +89,10 @@ elif case[:4] == '2013':
     fwind = (2013,8,16,11,0,0)
     # times = [(2013,8,16,3,0,0),]
     compt = [(2013,8,d,h,0,0) for d,h in zip((15,16,16),(22,2,6))]
-    matchnc = '/chinook2/jrlawson/bowecho/20130815/GEFSR2/c00/ICBC/wrfout_d01_2013-08-15_00:00:00'
 else:
     raise Exception
 
-hourly = 3
+hourly = 1
 level = 2000
 
 def get_folders(en,ex,ic=IC):
@@ -181,10 +183,10 @@ for t in times:
             other = False
             pt = 'contourf'
             # vrbl = 'PMSL';lv = False;clvs=N.arange(900,1100,4)*10**2;pt='contour';sm=sm*5
-            # vrbl = 'strongestwind';lv=False;clvs = N.arange(10,31,1); tstr=False
+            vrbl = 'strongestwind';lv=False;clvs = N.arange(10,31,1); tstr=False
             # vrbl = 'RH';lv = 700;clvs=N.arange(0,105,5)
             # vrbl = 'Q2';lv = False;clvs=N.arange(1,20.5,0.5)*10**-3
-            vrbl = 'Z';lv = 300;clvs=N.arange(8400,9600,30); pt='contour';sm=sm*3
+            # vrbl = 'Z';lv = 300;clvs=N.arange(8400,9600,30); pt='contour';sm=sm*3
             # vrbl = 'Z';lv = 700;clvs=N.arange(2800,3430,30); pt='contour';sm=sm*3
             # vrbl='Z';lv=500;clvs=N.arange(5000,6000,50);pt='contour';sm=sm*3
             # vrbl = 'T2';lv = False;clvs=N.arange(280,316,1)
@@ -193,9 +195,9 @@ for t in times:
             # vrbl = 'cref';lv = False;clvs=False;sm=False
             ######### COMMAND HERE #########
             # if plot!='RUC': cb = p.plot2D(vrbl,utc=t,level=lv,ncdir=ncdir,outdir=outdir,fig=fig,ax=ax,cb=cb,clvs=clvs,nct=nct,match_nc=mnc,other=other,smooth=sm,plottype=pt)
-            cb = p.plot2D(vrbl,utc=t,level=lv,ncdir=ncdir,outdir=outdir,fig=fig,ax=ax,cb=cb,clvs=clvs,nct=nct,match_nc=mnc,other=other,smooth=sm,plottype=pt)
+            # cb = p.plot2D(vrbl,utc=t,level=lv,ncdir=ncdir,outdir=outdir,fig=fig,ax=ax,cb=cb,clvs=clvs,nct=nct,match_nc=mnc,other=other,smooth=sm,plottype=pt)
             # p.frontogenesis(utc=t,level=lv,ncdir=ncdir,outdir=outdir,clvs=clvs,smooth=5,fig=fig,ax=ax,cb=False,match_nc=mnc,nct=nct)
-            # if plot!='RUC': cb = p.plot_strongest_wind(iwind,fwind,ncdir=ncdir,outdir=outdir,clvs=clvs,fig=fig,ax=ax,cb=cb)
+            if plot!='RUC': cb = p.plot_strongest_wind(iwind,fwind,ncdir=ncdir,outdir=outdir,clvs=clvs,fig=fig,ax=ax,cb=cb)
             ################################
         print("Plotting {0} panel".format(plot))
         ax.set_title(plot)

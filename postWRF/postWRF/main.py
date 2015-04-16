@@ -981,7 +981,7 @@ class WRFEnviron(object):
         # Make sure times are in datenum format and sequence.
         it = utils.ensure_datenum(itime)
         ft = utils.ensure_datenum(ftime)
-        trange = self.W.return_idx_range(it,ft)
+        trange = self.W.return_tidx_range(it,ft)
         deltahr = str(int((ft-it)/3600.0))
 
         # import pdb; pdb.set_trace()
@@ -990,6 +990,75 @@ class WRFEnviron(object):
         F = BirdsEye(self.W,fig=fig,ax=ax)
         fname = self.create_fname('strongestwind',ftime,level=level,f_suffix='_'+deltahr)
         F.plot2D(data,fname,outdir,clvs=clvs,cb=cb)
+
+    def probability_threshold(self,ensemble,vrbl,overunder,threshold,itime,ftime,smooth=False,
+                            level=2000, outdir=False,f_prefix=False,f_suffix=False,bounding=False,
+                            dom=1,clvs=False,fig=False,ax=False,cb=True):
+        """
+        Create threshold contour plots.
+        """
+        enssize = len(ensemble)
+        self.ensemble = ensemble # Dictionary
+        nens = 0
+        for ens in self.ensemble:
+            print("Computing for ensemble member {0}.".format(ens))
+            # pdb.set_trace()
+            if self.ensemble[ens]['control']:
+                continue
+
+            nens += 1.0
+
+            self.ensemble[ens]['data'] = WRFOut(self.ensemble[ens]['path'])
+            if nens==1:
+                examplewrf = self.ensemble[ens]['data']
+            tidx = self.ensemble[ens]['data'].return_tidx_range(itime,ftime)
+            ens_data = self.ensemble[ens]['data'].get(vrbl,utc=tidx,level=level,
+                                                lons=False,lats=False)
+            for n in range(ens_data.shape[0]):
+                if isinstance(smooth,str):
+                    if smooth == 'maxfilter':
+                        ens_data[n,0,:,:] = stats.max_filter(ens_data[n,0,:,:],size=11)
+            if nens == 1:
+                w,x,y,z = ens_data.shape
+                all_ens_data = N.zeros((enssize,w,x,y,z))
+                del w,x,y,z
+            all_ens_data[nens-1,...] = ens_data
+
+        if overunder == 'over':
+            # True/False if member meets condition
+            bool_arr = N.where(all_ens_data > threshold,1,0)
+            # Find maximum for all times
+            max_arr = N.amax(bool_arr,axis=1)
+            # Count members that exceed the threshold
+            # And convert to percentage
+            count_arr = N.sum(max_arr,axis=0)
+            percent_arr = 100*(count_arr/nens)
+
+        elif overunder == 'under':
+            # True/False if member meets condition
+            bool_arr = N.where(all_ens_data < threshold,1,0)
+            # Find maximum for all times
+            max_arr = N.amin(bool_arr,axis=1)
+            # Count members that exceed the threshold
+            # And convert to percentage
+            count_arr = N.sum(max_arr,axis=0)
+            percent_arr = 100*(count_arr/nens)
+
+        else:
+            raise Exception("Pick over or under for threshold comparison.")
+            
+        output = percent_arr[0,:,:] 
+      
+        # fname = self.create_fname(vrbl,utc,level,f_suffix=f_suffix, f_prefix=f_prefix,other=other)
+        F = BirdsEye(examplewrf,fig=fig,ax=ax)
+        plottype = 'contourf'
+        clvs = N.arange(10,110,10)
+        color = 'k'
+        inline = False
+        fname = 'probability_{0}_{1}.png'.format(vrbl,threshold)
+        F.plot2D(output,fname,outdir,plottype=plottype,smooth=smooth,
+                    clvs=clvs,color=color,inline=inline)
+        # import pdb; pdb.set_trace()
 
     def make_1D(self,data,output='list'):
         """ Ensure input data is a time series

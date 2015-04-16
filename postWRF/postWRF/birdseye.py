@@ -135,7 +135,7 @@ class BirdsEye(Figure):
             plotkwargs['inline'] = inline
             f1 = self.bmap.contour(*plotargs,**plotkwargs)
             if inline:
-                plt.clabel(f1,inline=True)
+                plt.clabel(f1,inline=True,fmt='%d',color='black',fontsize=9)
         elif plottype == 'contourf':
             f1 = self.bmap.contourf(*plotargs,**plotkwargs)
         elif plottype == 'pcolor':

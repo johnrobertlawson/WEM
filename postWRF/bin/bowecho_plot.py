@@ -5,6 +5,7 @@ import matplotlib as M
 M.use('gtkagg')
 import matplotlib.pyplot as plt
 import numpy as N
+import glob
 
 sys.path.append('/home/jrlawson/gitprojects/')
 
@@ -18,7 +19,7 @@ ncroot = '/chinook2/jrlawson/bowecho/'
 p = WRFEnviron()
 
 skewT = 0
-plot2D = 1
+plot2D = 0
 radarplot = 0
 radarcomp = 0
 streamlines = 0
@@ -37,21 +38,22 @@ plot_3D_dte = 0 # To produce line graphs
 all_3D_dte = 0 # To produce line graphs for all averages
 delta_plot = 0
 powerspectrum = 0
+probability = 1
 
 # enstype = False
-enstype = 'STCH'
+# enstype = 'STCH'
 # enstype = 'STCH5'
 # enstype = 'ICBC'
 # enstype = 'MXMP'
-# enstype = 'STMX'
+enstype = 'STMX'
 
-# case = '20060526'
+case = '20060526'
 #case = '20090910'
 # case = '20110419'
-case = '20130815'
+# case = '20130815'
 
-IC = 'GEFSR2'
-# IC = 'NAM'
+# IC = 'GEFSR2'
+IC = 'NAM'
 # IC = 'RUC'
 # IC = 'GFS'
 # IC = 'RUC'
@@ -59,9 +61,10 @@ IC = 'GEFSR2'
 
 if enstype == 'STCH':
     experiments = ['s'+"%02d" %n for n in range(1,11)]
-    ensnames = ['p09',]
-    # MP = 'ICBC'
+    ensnames = ['c00',]
     MP = 'ICBC'
+    # MP = 'WDM6_Grau'
+    # MP = 'Morrison_Hail'
 elif enstype == 'STCH5':
     experiments = ['ss'+"%02d" %n for n in range(1,11)]
     ensnames = ['anl',]
@@ -75,13 +78,13 @@ elif enstype == 'STMX':
                     'Morrison_Grau_STCH','Morrison_Hail_STCH',]
                     # 'ICBC_STCH']
     # experiments = ['Ferrier_STCH',]
-    ensnames = ['p09',]
+    ensnames = ['anl',]
 elif enstype == 'MXMP':
     experiments = ['WSM6_Grau','WSM6_Hail','Kessler','Ferrier',
                     'WSM5','WDM5','Lin','WDM6_Grau','WDM6_Hail',
                     'Morrison_Grau','Morrison_Hail','ICBC']
     # experiments = ['WDM6_Grau',]
-    ensnames = ['p09',]
+    ensnames = ['anl',]
 elif enstype == 'ICBC':
     ensnames =  ['c00'] + ['p'+"%02d" %n for n in range(1,11)]
     experiments = ['ICBC',]
@@ -118,6 +121,8 @@ elif case[:4] == '2013':
     dtetime = [(2013,8,16,0,0,0),]
     compt = [(2013,8,d,h,0,0) for d,h in zip((15,16,16),(22,2,6))]
     powertime = (2013,8,16,3,0,0)
+    iwind = (2013,8,15,18,0,0)
+    fwind = (2013,8,16,11,0,0)
     matchnc = '/chinook2/jrlawson/bowecho/20130815_hires/wrfout_d02_2013-08-15_00:00:00'
 else:
     raise Exception
@@ -159,6 +164,29 @@ def get_pickle_dirs(en):
 
     return picklefolder,outfolder
 
+def create_ensemble():
+    ensemble = {}
+    if enstype == 'ICBC':
+        for member in ensnames:
+            path = os.path.join(ncroot,case,IC,member,'ICBC')
+            ncfname = glob.glob(os.path.join(path,'wrfout_d*'))[0]
+            fpath = os.path.join(path,ncfname)
+            ensemble[member] = {'path':fpath,'control':(member=='c00')}
+    elif enstype[:4] == 'STCH':
+        # If you need control...
+        # path = os.path.join(ncroot,case,IC,ensnames[0],MP
+        for member in experiments:
+            path = os.path.join(ncroot,case,IC,ensnames[0],MP,member)
+            ncfname = glob.glob(os.path.join(path,'wrfout_d*'))[0]
+            fpath = os.path.join(path,ncfname)
+            ensemble[member] = {'path':fpath,'control':False}
+    elif enstype == 'MXMP' or enstype=='STMX':
+        for member in experiments:
+            path = os.path.join(ncroot,case,IC,ensnames[0],member)
+            ncfname = glob.glob(os.path.join(path,'wrfout_d*'))[0]
+            fpath = os.path.join(path,ncfname)
+            ensemble[member] = {'path':fpath,'control':False}
+    return ensemble
 
 #shear_times = utils.generate_times(itime,ftime,3*60*60)
 #sl_times = utils.generate_times(sl_itime,sl_ftime,1*60*60)
@@ -445,3 +473,12 @@ if delta_plot:
         clvs = N.arange(-9,10,1)
         p.plot_delta('wind10',t,ncdir1=ncdir1,ncdir2=ncdir2,outdir=outdir,cb=True,clvs=clvs,)
 
+
+if probability:
+    ensemble = create_ensemble()
+    outdir2, ncdir = get_folders(ensnames[0],experiments[0])
+    outdir = os.path.dirname(outdir2)
+    # outdir = '/home/jrlawson/public_html/bowecho/{0}/{1}/'.format(case,IC)
+    smooth = 'maxfilter'
+    thresh = 20
+    p.probability_threshold(ensemble,'wind10','over',thresh,iwind,fwind,smooth=smooth,outdir=outdir,level=False)
