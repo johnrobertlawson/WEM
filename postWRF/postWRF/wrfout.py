@@ -15,6 +15,7 @@ import constants as cc
 import scipy.ndimage
 import collections
 import scipy.interpolate
+import datetime
 
 import WEM.utils as utils
 import metconstants as mc
@@ -165,7 +166,7 @@ class WRFOut(object):
             tidx = False
         elif isinstance(utc,int) and utc<500:
             tidx = utc
-        elif isinstance(utc,(list,tuple,int)): # and len(utc[0])==6:
+        elif isinstance(utc,(list,tuple,int,datetime.datetime)): # and len(utc[0])==6:
             tidx = self.get_time_idx(utc)
         elif isinstance(utc,N.ndarray) and isinstance(utc[0],int):
             tidx = utc

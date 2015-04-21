@@ -18,8 +18,8 @@ ncroot = '/chinook2/jrlawson/bowecho/'
 p = WRFEnviron()
 
 # enstype = 'STCH5'
-# enstype = 'STCH'
-enstype = 'ICBC'
+enstype = 'STCH'
+# enstype = 'ICBC'
 # enstype = 'MXMP'
 # enstype = 'STMX'
 
@@ -27,8 +27,8 @@ enstype = 'ICBC'
 # case = '20060526'
 # case = '2006052612'
 #case = '20090910'
-case = '20110419'
-# case = '20130815'
+# case = '20110419'
+case = '20130815'
 
 IC = 'GEFSR2'; ens = 'p04'
 # IC = 'NAM'; ens = 'anl'

@@ -7,13 +7,13 @@ import pdb
 import calendar
 import time
 
-sys.path.append('/home/jrlawson/gitprojects/')
+# sys.path.append('/home/jrlawson/gitprojects/')
 
 from DKE_settings import Settings
 from WEM.postWRF.postWRF import WRFEnviron
 import WEM.utils as utils
 
-compute = 0
+compute = 1
 plot_2D = 1
 plot_1D = 1
 
@@ -22,9 +22,9 @@ case = '20060526'
 #case = '20110419'
 # case = '20130815'
 
-IC = 'NAM'
+IC = 'GEFS'
 experiment = 'MXMP'
-ens = 'anl'
+ens = 'c00'
 MP = 'ICBC'
 # Time script
 scriptstart = time.time()
@@ -54,29 +54,29 @@ else:
 times = utils.generate_times(itime,ftime,2*3600)
 
 if experiment=='STCH':
-    picklefolder = os.path.join(config.wrfout_root,case,IC,ens,MP)
-    p.C.output_root = os.path.join(config.output_root,case,IC,ens,MP)
+    picklefolder = os.path.join(wrfout_root,case,IC,ens,MP)
+    p.C.output_root = os.path.join(output_root,case,IC,ens,MP)
  
     path_to_wrfouts = []
     for s in stoch_names:
-        fpath = os.path.join(config.wrfout_root,case,IC,ens,MP,s)
+        fpath = os.path.join(wrfout_root,case,IC,ens,MP,s)
         path_to_wrfouts.append(p.wrfout_files_in(fpath,dom=1)[0])
     sensitivity=0
 
 elif experiment=='ICBC':
-    picklefolder = os.path.join(config.wrfout_root,case,IC)
-    p.C.output_root = os.path.join(config.output_root,case,IC)
+    picklefolder = os.path.join(wrfout_root,case,IC)
+    p.C.output_root = os.path.join(output_root,case,IC)
     sensitivity=ens_names
     #fpath = os.path.join(config.wrfout_root,case,IC,)
     #path_to_wrfouts = p.wrfout_files_in(fpath,dom=1)
 
 elif experiment=='MXMP':
-    picklefolder = os.path.join(config.wrfout_root,case,IC,ens)
-    outpath = os.path.join(config.output_root,case,IC,ens)
+    picklefolder = os.path.join(wrfout_root,case,IC,ens)
+    outpath = os.path.join(output_root,case,IC,ens)
     sensitivity = MPs
     path_to_wrfouts = []
     for mp in MPs:
-        fpath = os.path.join(config.wrfout_root,case,IC,ens,MP)
+        fpath = os.path.join(wrfout_root,case,IC,ens,MP)
         path_to_wrfouts.append(utils.wrfout_files_in(fpath,dom=1)[0])
 else:
     print "Typo!"

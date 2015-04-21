@@ -178,8 +178,8 @@ class WRFEnviron(object):
         # Data
         self.W = self.get_netcdf(ncdir,ncf=ncf,nct=nct,dom=dom)
         # lats, lons = self.W.get_limited_domain(bounding)
-        data = self.W.get(vrbl,utc=utc,level=level,lons=False,lats=False,other=other)[0,0,:,:]
         # import pdb; pdb.set_trace()
+        data = self.W.get(vrbl,utc=utc,level=level,lons=False,lats=False,other=other)[0,0,:,:]
         # Needs to be shape [1,1,nlats,nlons].
         if smooth>1:
             data = stats.gauss_smooth(data,smooth)

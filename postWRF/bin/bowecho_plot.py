@@ -32,28 +32,28 @@ frontogenesis = 0
 upperlevel = 0
 strongestwind = 0
 accum_rain = 0
-compute_dte = 0
-plot_1D_dte = 0 # To produce top-down maps
-plot_3D_dte = 0 # To produce line graphs
-all_3D_dte = 0 # To produce line graphs for all averages
+compute_dte = 1
+plot_1D_dte = 1 # To produce top-down maps
+plot_3D_dte = 1 # To produce line graphs
+all_3D_dte = 1 # To produce line graphs for all averages
 delta_plot = 0
 powerspectrum = 0
-probability = 1
+probability = 0
 
 # enstype = False
 # enstype = 'STCH'
 # enstype = 'STCH5'
 # enstype = 'ICBC'
-# enstype = 'MXMP'
-enstype = 'STMX'
+enstype = 'MXMP'
+# enstype = 'STMX'
 
 case = '20060526'
-#case = '20090910'
+# case = '20090910'
 # case = '20110419'
 # case = '20130815'
-
-# IC = 'GEFSR2'
-IC = 'NAM'
+ 
+IC = 'GEFSR2'
+# IC = 'NAM'
 # IC = 'RUC'
 # IC = 'GFS'
 # IC = 'RUC'
@@ -84,7 +84,7 @@ elif enstype == 'MXMP':
                     'WSM5','WDM5','Lin','WDM6_Grau','WDM6_Hail',
                     'Morrison_Grau','Morrison_Hail','ICBC']
     # experiments = ['WDM6_Grau',]
-    ensnames = ['anl',]
+    ensnames = ['c00',]
 elif enstype == 'ICBC':
     ensnames =  ['c00'] + ['p'+"%02d" %n for n in range(1,11)]
     experiments = ['ICBC',]
@@ -93,7 +93,7 @@ else:
     if IC == 'RUC':
         experiments = ['VERIF',]
     else:
-        experiments = ['ICBC',]
+        experiments = ['WDM6_Grau','ICBC',]
 
 if case[:4] == '2006':
     nct = (2006,5,26,0,0,0)
@@ -112,7 +112,7 @@ elif case[:4] == '2009':
 elif case[:4] == '2011':
     inittime = (2011,4,19,0,0,0)
     itime = (2011,4,19,18,0,0)
-    ftime = (2011,4,20,10,30,0)
+    ftime = (2011,4,20,12,0,0)
 elif case[:4] == '2013':
     inittime = (2013,8,15,0,0,0)
     itime = (2013,8,15,0,0,0)
@@ -134,11 +134,11 @@ else:
 
 hourly = 3
 level = 2000
-# times = utils.generate_times(itime,ftime,hourly*60*60)
-dtetimes = utils.generate_times(itime,ftime,3*60*60)
+times = utils.generate_times(itime,ftime,hourly*60*60)
+dtetimes = utils.generate_times(itime,ftime,hourly*60*60)
 
 def get_folders(en,ex):
-    if enstype[:4] == 'STCH':
+    if enstype and enstype[:4] == 'STCH':
         out_sd = os.path.join(outroot,case,IC,en,MP,ex)
         wrf_sd = os.path.join(ncroot,case,IC,en,MP,ex)
     else:
@@ -225,8 +225,9 @@ if plot2D or radarplot:
                     # p.plot2D('Td2',t,ncdir=ncdir,outdir=outdir,nct=t,match_nc=matchnc,clvs=N.arange(260,291,1))
                     # p.plot2D('Q2',t,ncdir=ncdir,outdir=outdir,nct=t,match_nc=matchnc,clvs=N.arange(1,20.5,0.5)*10**-3)
                     # p.plot2D('RAINNC',t,ncdir=wrf_sd,outdir=out_sd,locations=locs,clvs=N.arange(1,100,2))
-                    p.plot2D('REFL_comp',t,ncdir=ncdir,outdir=outdir,cb=True,match_nc=matchnc)
-                    # p.plot2D('wind10',t,ncdir=ncdir,outdir=outdir,locations=locs,cb=True,clvs=N.arange(5,32,2))
+                    # p.plot2D('REFL_comp',t,ncdir=ncdir,outdir=outdir,cb=True,match_nc=matchnc)
+                    p.plot2D('cref',t,ncdir=ncdir,outdir=outdir,cb=True)
+                    # p.plot2D('wind10',t,ncdir=ncdir,outdir=outdir,locations=locs,cb=True,clvs=N.arange(10,32,2))
 
                 if radarplot:
                     outdir,datadir = get_verif_dirs()
@@ -378,7 +379,7 @@ if compute_dte or plot_3D_dte or plot_1D_dte or powerspectrum:
     for en in ensnames:
         for ex in experiments:
             od,fpath = get_folders(en,ex)
-            # print fpath
+            print fpath
             path_to_wrfouts.append(utils.netcdf_files_in(fpath))
 
     if compute_dte:
@@ -405,9 +406,8 @@ if compute_dte or plot_3D_dte or plot_1D_dte or powerspectrum:
 
 if all_3D_dte:
     if case[:4] == '2006':
-        EXS = {'GEFS-ICBC':{},'NAM-MXMP':{},'NAM-STMX':{},'NAM-STCH5':{},'GEFS-STCH':{},'NAM-STCH':{}}
+        EXS = {'GEFS-ICBC':{},'NAM-MXMP':{},'NAM-STMX':{},'NAM-STCH5':{},'GEFS-STCH':{},'NAM-STCH':{},'GEFS-MXMP':{}}
         IC = 'NAM';ensnames = 'anl'; MP = 'WDM6_Grau'
-        # IC = 'NAM';ensnames = 'anl'; MP = 'WDM6_Grau'
     else:
         EXS = {'GEFS-ICBC':{},'NAM-MXMP':{},'GEFS-MXMP':{},'GEFS-STCH-thomp':{},'GEFS-STCH-morrh':{},'GEFS-STMX':{}}
         # Compare Morrison-Hail and Thompson STCH members.
@@ -425,7 +425,10 @@ if all_3D_dte:
 
         if IC=='GEFS':
             IC = 'GEFSR2'
-            ensnames = 'p09'
+            if case[:4] == '2006':
+                ensnames = 'c00'
+            else:
+                ensnames = 'p09'
             MP = 'ICBC'
         elif IC=='NAM':
             ensnames = 'anl'

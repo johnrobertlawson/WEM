@@ -3,6 +3,7 @@ Load/download RUC data.
 Loop through dates in case study climo.
 Plot certain fields with WEM.postWRF
 """
+from __future__ import division
 
 import os
 import pdb
@@ -26,7 +27,7 @@ p = WRFEnviron()
 # cases['20091109'] = {'utc':(2009,11,10,0,0,0), 'datadir':os.path.join(RUCdir,'20060526/RUC/anl/VERIF/') }
 # cases['2013'] = {'utc':(2013,8,16,0,0,0), 'datadir':os.path.join(RUCdir,'20130815/RUC/anl/VERIF/') }
 
-download_data = 0
+download_data = 1
 skipcase = 0
 
 def download_RUC(utc,fpath):
@@ -45,17 +46,21 @@ names = ('casedate','caseno','casetime','casestate','bowdate','bowtime','bowstat
 formats = ['S16',]*10
 cases = N.loadtxt(fpath,dtype={'names':names,'formats':formats},skiprows=1,delimiter=',')
 
-plothrs = range(0,36,6)
+# plothrs = (0,12,18)
+plothrs = (0,9,12,15,18)
+Nlim, Elim, Slim, Wlim = [52.0,-78.0,25.0,-128.0]
 
 for n, case in enumerate(cases):
     outroot ='/home/jrlawson/public_html/bowecho/climoplots/'
     outdir = os.path.join(outroot,case['casedate'])
+    
 
     if n<skipcase:
         continue
 
     if case['bowdate'] == '99999999':
         continue
+    utils.trycreate(outdir)
 
     t = case['casedate'] + case['casetime']
     # t = case['bowdate'] + case['bowtime']
@@ -71,24 +76,32 @@ for n, case in enumerate(cases):
     dt = datetime.datetime(*timetuple)
     times = [dt + datetime.timedelta(hours=n) for n in plothrs]
 
-    for utc in times:
+    # import pdb; pdb.set_trace()
+
+    for un,utc in enumerate(times):
+        outstr = case['casedate'] + '_{0:02d}Z'.format(utc.hour)
         if download_data:
             download_RUC(utc,RUCdir)
              
+        print(utc)
         # import pdb; pdb.set_trace()
         if plot_Z:
             fig, ax = plt.subplots()
 
             levels = {}
             # levels[300] = {'color':'blue','clvs':N.arange(8400,9600,120)}
-            levels[500] = {'color':'black','clvs':N.arange(4800,6000,60)}
-            levels[850] = {'color':'red','clvs':N.arange(900,2100,30)}
+            # levels[500] = {'color':'black','clvs':N.arange(4800,6000,60)}
+            # levels[850] = {'color':'red','clvs':N.arange(900,2100,30)}
+            levels[500] = {'color':'black','clvs':N.arange(5460,6000,60),'z':10}
+            levels[925] = {'color':'#9966FF','clvs':N.arange(660,2100,30),'z':1}
 
             for lv in levels:
                 im = p.plot2D('Z',utc=utc,level=lv,ncdir=RUCdir,outdir=outdir,
                             fig=fig,ax=ax,cb=False,clvs=levels[lv]['clvs'],nct=utc,match_nc=False,
-                            smooth=10,plottype='contour',color=levels[lv]['color'])
-            fpath = os.path.join(outdir,case['casedate']+'_overview.png')
+                            smooth=10,plottype='contour',color=levels[lv]['color'],inline=True,)
+                            # Nlim=Nlim,Elim=Elim,Slim=Slim,Wlim=Wlim)
+            fpath = os.path.join(outdir,outstr+'_overview.png')
+            fig.tight_layout()
             fig.savefig(fpath)
             plt.close(fig)
 
@@ -102,7 +115,8 @@ for n, case in enumerate(cases):
 
                 im = p.plot2D('temp_advection',utc=utc,level=lv,ncdir=RUCdir,outdir=outdir,
                             fig=fig,ax=ax,cb=True, clvs=levels[lv]['clvs'], nct=utc,)
-                fpath = os.path.join(outdir,case['casedate']+'_tempadvection_{0}hPa.png'.format(lv))
+                fpath = os.path.join(outdir,outstr+'_tempadvection_{0}hPa.png'.format(lv))
+                fig.tight_layout()
                 fig.savefig(fpath)
                 plt.close(fig)
 
@@ -116,7 +130,8 @@ for n, case in enumerate(cases):
                             fig=fig,ax=ax,cb=True, 
                             #clvs=levels[lv]['clvs'],
                             nct=utc,)
-                fpath = os.path.join(outdir,case['casedate']+'_omega_{0}hPa.png'.format(lv))
+                fpath = os.path.join(outdir,outstr+'_omega_{0}hPa.png'.format(lv))
+                fig.tight_layout()
                 fig.savefig(fpath)
                 plt.close(fig)
 
@@ -132,7 +147,8 @@ for n, case in enumerate(cases):
                             nct=utc,
                             #cmap='bwr'
                             )
-                fpath = os.path.join(outdir,case['casedate']+'_lyapunov_{0}hPa.png'.format(lv))
+                fpath = os.path.join(outdir,outstr+'_lyapunov_{0}hPa.png'.format(lv))
+                fig.tight_layout()
                 fig.savefig(fpath)
                 plt.close(fig)
 

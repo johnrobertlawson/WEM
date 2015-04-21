@@ -13,6 +13,7 @@ import time
 import glob
 import cPickle as pickle
 import unix_tools as utils
+import datetime
 
 import getdata
 
@@ -655,6 +656,7 @@ def string_from_time(usage,t,dom=0,strlen=0,conven=0,**kwargs):
     """
     conven  :   convection of MM/DD versus DD/MM
     """
+    t = ensure_timetuple(t)
 
     if isinstance(t,str):
         if usage == 'output':
@@ -939,11 +941,16 @@ def ensure_datenum(times,fmt='int'):
     elif isinstance(times,basestring):
         print("Don't give me strings...")
         raise Exception
-    elif isinstance(times,collections.Sequence): #2,3,4,5
+    elif isinstance(times,datetime.datetime):
+        dntimes = convert_tuple_to_dntimes(datetime_to_timetuple(times))
+    elif isinstance(times,(list,tuple)): #2,3,4,5
         if not isinstance(times[0],int): #5
             dntimes = convert_tuple_to_dntimes(times)
         elif times[0]<3000: #4
             dntimes = convert_tuple_to_dntimes(times)
+        elif isinstance(times[0],datetime.datetime):
+            dntimes = [convert_tuple_to_dntimes(datetime_to_timetuple(t)) 
+                        for t in times]
         else: #2,3
             dntimes = times
 
@@ -954,6 +961,8 @@ def ensure_datenum(times,fmt='int'):
     else:
         print("Nonsense format choice.")
         raise Exception
+
+    import pdb; pdb.set_trace()
 
 def ensure_timetuple(times,fmt='single'):
     """
@@ -970,20 +979,25 @@ def ensure_timetuple(times,fmt='single'):
     times = (2011,12,1,18,0,0)                          #4
     times = ((2011,12,1,18,0,0),(2011,12,2,6,0,0))      #5
     """
-
     if isinstance(times,int):
         tttimes = [list(time.gmtime(times)),] #1
     elif isinstance(times,basestring):
         print("Don't give me strings...")
         raise Exception
-    elif isinstance(times,collections.Sequence): #2,3,4,5
+    elif isinstance(times,datetime.datetime):
+        tttimes = datetime_to_timetuple(times)
+    elif isinstance(times,(list,tuple)): #2,3,4,5
         if not isinstance(times[0],int): #5
             tttimes = times
         elif times[0]<3000: #4
             tttimes = [times,]
-        else: #2,3
+        elif isinstance(times[0],datetime.datetime):
+            tttimes = [datetime_to_timetuple(t) for t in times]
+        elif isinstance(times[0]>3000): #2,3
             tttimes = [list(time.gmtime(t)) for t in times]
 
+    # import pdb; pdb.set_trace()
+    
     if (fmt == 'list') or (len(tttimes)>1):
         return tttimes
     elif (fmt == 'single') or (len(tttimes)==1):
@@ -991,6 +1005,11 @@ def ensure_timetuple(times,fmt='single'):
     else:
         print("Nonsense format choice.")
         raise Exception
+
+def datetime_to_timetuple(utc):
+    tttime = (utc.year,utc.month,utc.day,
+                utc.hour,utc.minute,utc.second)
+    return tttime
 
 def get_netcdf_naming(model,t,dom=0):
     """
