@@ -20,6 +20,8 @@ import datetime
 import WEM.utils as utils
 import metconstants as mc
 
+debug_get = 0
+
 class WRFOut(object):
 
     """
@@ -218,10 +220,13 @@ class WRFOut(object):
             raise Exception
         # Check if computing required
         # When data is loaded from nc, it is destaggered
-        # pdb.set_trace()
-        print("Computing {0} for level {1} of index {2}".format(vrbl,level,lvidx))
+
+        if debug_get:
+            print("Computing {0} for level {1} of index {2}".format(vrbl,level,lvidx))
+
         if self.check_compute(vrbl):
-            print("Variable {0} exists in dataset.".format(vrbl))
+            if debug_get:
+                print("Variable {0} exists in dataset.".format(vrbl))
             if lvidx is 'isobaric':
                 data = self.get_p(vrbl,tidx,level,lonidx,
                             latidx)
@@ -230,7 +235,8 @@ class WRFOut(object):
             else:
                 raise Exception
         else:
-            print("Variable {0} needs to be computed.".format(vrbl))
+            if debug_get:
+                print("Variable {0} needs to be computed.".format(vrbl))
             if lvidx is 'isobaric':
                 # data = self.get_p(vrbl,tidx,level,lonidx, latidx)[N.newaxis,N.newaxis,:,:]
                 data = self.compute(vrbl,tidx,level,lonidx,latidx,other)

@@ -14,6 +14,7 @@ import glob
 import cPickle as pickle
 import unix_tools as utils
 import datetime
+import heapq
 
 import getdata
 
@@ -766,7 +767,10 @@ def check_vertical_coordinate(level):
 
     # import pdb; pdb.set_trace()
     if isinstance(lv,int):
-        return 'index'
+        if lv<100:
+            return 'index'
+        else:
+            return 'isobaric'
     if lv.endswith('hPa'):
         # import pdb; pdb.set_trace()
         if lv[:4] == '2000':
@@ -1157,3 +1161,98 @@ def return_subdomain(data,lats,lons,Nlim,Elim,Slim,Wlim,
 
     # pdb.set_trace()
     return data,lats,lons
+
+def interp_latlon(data,lat,lon,lats,lons):
+    ntimes = data.shape[0]
+    nlvs = data.shape[1]
+    dataout = N.zeros([ntimes,nlvs,1,1])
+    for lv in range(nlvs):
+    # for t in range(ntimes):
+        dataout[:,lv,0,0] = interp2point(data[:,lv:lv+1,:,:],lat,lon,lats,lons)
+    return dataout
+
+
+def interp2point(data,lat_loc,lon_loc,lat,lon,lvidx=0,xyidx=False):
+        er = 6370000
+        if xyidx:
+            # Don't need data, ignore
+            field = None
+            data = None
+        else:
+            field = data[:,lvidx,:,:]
+            # field = self.make_4D(data)[:,lvidx,:,:]
+        templat = lat.ravel()
+        templon = lon.ravel()
+
+        #calculates the great circle distance from the inquired point
+        delta = haversine_baker(lon_loc,lat_loc,templon,templat,earth_rad=er)
+        #grid distance
+        dxdy = haversine_baker(templon[0],templat[0],templon[1],templat[0],earth_rad=er)
+
+        #9 smallest values to find the index of
+        smallest = heapq.nsmallest(9,delta.ravel())
+
+        wtf = N.in1d(delta.ravel(),smallest)
+        tf2d = N.in1d(delta.ravel(),smallest).reshape(lat.shape)
+        ix,iy = N.where(tf2d == True)
+        if xyidx:
+            xidx = N.median(ix)
+            yidx = N.median(iy)
+            return xidx, yidx
+
+        weights =  1.0 - delta.ravel()[wtf]/(dxdy.ravel() * 2)
+        weighted_mean = N.average(field[:,ix,iy],axis=1,weights=weights.ravel())
+
+        return weighted_mean
+
+def haversine_baker(lon1, lat1, lon2, lat2, radians=False, earth_rad=6371.227):
+    """
+    Allows to calculate geographical distance
+    using the haversine formula.
+    :param lon1: longitude of the first set of locations
+    :type lon1: numpy.ndarray
+    :param lat1: latitude of the frist set of locations
+    :type lat1: numpy.ndarray
+    :param lon2: longitude of the second set of locations
+    :type lon2: numpy.float64
+    :param lat2: latitude of the second set of locations
+    :type lat2: numpy.float64
+    :keyword radians: states if locations are given in terms of radians
+    :type radians: bool
+    :keyword earth_rad: radius of the earth in km
+    :type earth_rad: float
+    :returns: geographical distance in km
+    :rtype: numpy.ndarray
+    """
+
+    if radians == False:
+        cfact = N.pi / 180.0
+        lon1 = cfact * lon1
+        lat1 = cfact * lat1
+        lon2 = cfact * lon2
+        lat2 = cfact * lat2
+
+    # Number of locations in each set of points
+    if not N.shape(lon1):
+        nlocs1 = 1
+        lon1 = N.array([lon1])
+        lat1 = N.array([lat1])
+    else:
+        nlocs1 = N.max(N.shape(lon1))
+    if not N.shape(lon2):
+        nlocs2 = 1
+        lon2 = N.array([lon2])
+        lat2 = N.array([lat2])
+    else:
+        nlocs2 = N.max(N.shape(lon2))
+    # Pre-allocate array
+    distance = N.zeros((nlocs1, nlocs2))
+    i = 0
+    while i < nlocs2:
+        # Perform distance calculation
+        dlat = lat1 - lat2[i]
+        dlon = lon1 - lon2[i]
+        aval = (N.sin(dlat / 2.) ** 2.) + (N.cos(lat1) * N.cos(lat2[i]) * (N.sin(dlon / 2.) ** 2.))
+        distance[:, i] = (2. * earth_rad * N.arctan2(N.sqrt(aval), N.sqrt(1 - aval))).T
+        i += 1
+    return distance.ravel()

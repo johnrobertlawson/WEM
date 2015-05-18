@@ -1503,9 +1503,10 @@ class WRFEnviron(object):
             ncfiles.append(ncfile)
         return ncfiles
 
-    def plot_domains(self,ncdirs,labels,outdir,Nlim,Elim,
+    def plot_domains(self,ncdirs,labels,outdir,fname,Nlim,Elim,
                         Slim,Wlim,colours='black',
-                        nct=False,ncf=False):
+                        nct=False,ncf=False,fill_land=False,
+                        labpos=False,fill_water=False,):
         """
         Plot only the domains for each netCDF file specified.
 
@@ -1538,7 +1539,9 @@ class WRFEnviron(object):
 
         """
         maps.plot_domains(ncdirs,labels,outdir,Nlim,Elim,
-                            Slim,Wlim,colours=colours)
+                            Slim,Wlim,colours=colours,fname=fname,
+                            fill_land=fill_land,fill_water=fill_water,
+                            labpos=labpos)
 
     def frontogenesis(self,utc,level,ncdir,outdir,ncf=False,nct=False,
                         dom=1,smooth=0,clvs=0,title=0,cmap='bwr',
@@ -1714,7 +1717,7 @@ class WRFEnviron(object):
                     Nlim=Nlim,Elim=Elim,Slim=Slim,Wlim=Wlim)
 
     def all_error_growth(self,outdir,infodict,ylim=False,f_prefix=False,
-                            f_suffix=False):
+                            f_suffix=False,energy='total'):
         """
         Compare many ensembles' DKE and DTE spreads on one plot.
         The times don't need to be identical.
@@ -1745,10 +1748,15 @@ class WRFEnviron(object):
             plt.ylim(ylim)
         times_tup = [time.gmtime(t) for t in times]
         time_str = ["{2:02d}/{3:02d}".format(*t) for t in times_tup]
-        plt.gca().set_xticks(times[::2])
-        plt.gca().set_xticklabels(time_str[::2])
+        plt.gca().set_xticks(times[::1])
+        plt.gca().set_xticklabels(time_str[::1])
+        units = r'$m^{2}s^{-2}$'
+        plt.gca().set_ylabel("Difference {0} Energy ({1})".format(
+                            energy.title(),units))
         fname = self.create_fname('allensembles',f_prefix=f_prefix,f_suffix=f_suffix)
         fpath = os.path.join(outdir,fname)
+        plt.gca().relim
+        plt.gca().autoscale_view()
         fig.savefig(fpath)
 
         plt.close()

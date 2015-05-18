@@ -24,6 +24,8 @@ it is compared to.
 This script should inherit WRFOut and override the 'get' command.
 """
 
+debug_get = 0
+
 class RUC(WRFOut):
     def __init__(self,fpath,wrfdir=False):
         """
@@ -532,12 +534,13 @@ class RUC(WRFOut):
         KEYS['PSFC'] = {0:'PRES_252_SFC'}
         KEYS['HGT'] = {0:'HGT_252_SFC'}
         KEYS['PMSL'] = {0:'MSLMA_252_MSL'}
-        KEYS['RH'] = {0:'R_H_252_ISBL'}
+        KEYS['RH'] = {0:'R_H_252_ISBL',3:'RH_P0_L100_GLC0'}
 
         try:
             key = KEYS[vrbl][key_no[self.version]]
         except KeyError:
-            print("Can't find variable {0}".format(vrbl))
+            if debug_get:
+                print("Can't find variable {0}".format(vrbl))
             # raise Exception
             return False
         else:

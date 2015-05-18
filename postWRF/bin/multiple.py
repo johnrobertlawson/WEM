@@ -18,20 +18,20 @@ ncroot = '/chinook2/jrlawson/bowecho/'
 p = WRFEnviron()
 
 # enstype = 'STCH5'
-enstype = 'STCH'
+# enstype = 'STCH'
 # enstype = 'ICBC'
-# enstype = 'MXMP'
+enstype = 'MXMP'
 # enstype = 'STMX'
 
 # case = '2006052512'
 # case = '20060526'
 # case = '2006052612'
 #case = '20090910'
-# case = '20110419'
-case = '20130815'
+case = '20110419'
+# case = '20130815'
 
-IC = 'GEFSR2'; ens = 'p04'
-# IC = 'NAM'; ens = 'anl'
+# IC = 'GEFSR2'; ens = 'p04'
+IC = 'NAM'; ens = 'anl'
 # IC = 'RUC'
 # IC = 'GFS'; ens = 'anl'
 # IC = 'RUC'
@@ -76,8 +76,8 @@ elif case[:4] == '2009':
     ftime = (2009,9,11,12,0,0)
 elif case[:4] == '2011':
     inittime = (2011,4,19,0,0,0)
-    itime = (2011,4,20,1,0,0)
-    ftime = (2011,4,20,9,0,0)
+    itime = (2011,4,19,21,0,0)
+    ftime = (2011,4,20,10,0,0)
     iwind = (2011,4,19,21,0,0)
     fwind = (2011,4,20,9,0,0)
     matchnc = '/chinook2/jrlawson/bowecho/20110419/GEFSR2/c00/ICBC/wrfout_d01_2011-04-19_00:00:00'
@@ -152,7 +152,7 @@ for t in times:
         cb = False
         if plot=='NEXRAD':
             # Verification
-            outdir, ncdir, sp_outdir = get_folders(enslist[-1],exlist[-1])
+            outdir, ncdir, sp_outdir = get_folders(enslist[3],exlist[3])
             print("Looking for data in {0}".format(ncdir))
             p.plot_radar(t,datadir,outdir=outdir,ncdir=ncdir,fig=fig,ax=ax,cb=cb)
         else:
@@ -183,7 +183,7 @@ for t in times:
             other = False
             pt = 'contourf'
             # vrbl = 'PMSL';lv = False;clvs=N.arange(900,1100,4)*10**2;pt='contour';sm=sm*5
-            vrbl = 'strongestwind';lv=False;clvs = N.arange(10,31,1); tstr=False
+            # vrbl = 'strongestwind';lv=False;clvs = N.arange(10,31,1); tstr=False
             # vrbl = 'RH';lv = 700;clvs=N.arange(0,105,5)
             # vrbl = 'Q2';lv = False;clvs=N.arange(1,20.5,0.5)*10**-3
             # vrbl = 'Z';lv = 300;clvs=N.arange(8400,9600,30); pt='contour';sm=sm*3
@@ -192,12 +192,12 @@ for t in times:
             # vrbl = 'T2';lv = False;clvs=N.arange(280,316,1)
             # vrbl = 'shear';lv = False;clvs=N.arange(0,31,1); other = {'top':6,'bottom':0}
             # vrbl = 'frontogen';lv = 2000; clvs = N.arange(-1.5,1.6,0.1)*10**-7
-            # vrbl = 'cref';lv = False;clvs=False;sm=False
+            vrbl = 'cref';lv = False;clvs=False;sm=False
             ######### COMMAND HERE #########
-            # if plot!='RUC': cb = p.plot2D(vrbl,utc=t,level=lv,ncdir=ncdir,outdir=outdir,fig=fig,ax=ax,cb=cb,clvs=clvs,nct=nct,match_nc=mnc,other=other,smooth=sm,plottype=pt)
+            if plot!='RUC': cb = p.plot2D(vrbl,utc=t,level=lv,ncdir=ncdir,outdir=outdir,fig=fig,ax=ax,cb=cb,clvs=clvs,nct=nct,match_nc=mnc,other=other,smooth=sm,plottype=pt)
             # cb = p.plot2D(vrbl,utc=t,level=lv,ncdir=ncdir,outdir=outdir,fig=fig,ax=ax,cb=cb,clvs=clvs,nct=nct,match_nc=mnc,other=other,smooth=sm,plottype=pt)
             # p.frontogenesis(utc=t,level=lv,ncdir=ncdir,outdir=outdir,clvs=clvs,smooth=5,fig=fig,ax=ax,cb=False,match_nc=mnc,nct=nct)
-            if plot!='RUC': cb = p.plot_strongest_wind(iwind,fwind,ncdir=ncdir,outdir=outdir,clvs=clvs,fig=fig,ax=ax,cb=cb)
+            # if plot!='RUC': cb = p.plot_strongest_wind(iwind,fwind,ncdir=ncdir,outdir=outdir,clvs=clvs,fig=fig,ax=ax,cb=cb)
             ################################
         print("Plotting {0} panel".format(plot))
         ax.set_title(plot)

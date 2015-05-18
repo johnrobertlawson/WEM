@@ -12,21 +12,29 @@ from WEM.postWRF.postWRF import WRFEnviron
 import WEM.utils as utils
 #from WEM.postWRF.postWRF.rucplot import RUCPlot
 
+def download_RUC(utc,fpath):
+    print('Downloading {0} RUC file.'.format(utc))
+    utils.getruc(utc,ncpath=fpath,convert2nc=True,duplicate=False)
+
 outdir = '/home/jrlawson/public_html/bowecho/'
 RUCdir = '/chinook2/jrlawson/bowecho/'
 
 p = WRFEnviron()
 
 cases = {}
-cases['20060526'] = {'utc':(2006,5,26,12,0,0), 'datadir':os.path.join(RUCdir,'20060526/RUC/anl/VERIF/')}
-cases['20130815'] = {'utc':(2013,8,15,12,0,0), 'datadir':os.path.join(RUCdir,'20130815/RUC/anl/VERIF/') }
+# cases['20060526'] = {'utc':(2006,5,26,12,0,0), 'datadir':os.path.join(RUCdir,'20060526/RUC/anl/VERIF/')}
+# cases['20130815'] = {'utc':(2013,8,15,12,0,0), 'datadir':os.path.join(RUCdir,'20130815/RUC/anl/VERIF/') }
+cases['20110419'] = {'utc':(2011,4,19,21,0,0), 'datadir':os.path.join(RUCdir,'20110419/RUC/anl/VERIF/') }
 
 Nlim, Elim, Slim, Wlim = [52.0,-78.0,25.0,-128.0]
 
 Zplot = 1
 Tplot = 0
+download_data = 1
 
 for case in cases:
+    if download_data:
+        download_RUC(cases[case]['utc'],cases[case]['datadir'])
     if Zplot:
         fig, ax = plt.subplots()
         cb = False

@@ -12,8 +12,11 @@ from WEM.postWRF.postWRF import WRFEnviron
 import WEM.utils as utils
 #from WEM.postWRF.postWRF.rucplot import RUCPlot
 
-outroot = '/home/jrlawson/public_html/bowecho/'
-ncroot = '/chinook2/jrlawson/bowecho/20130815_hires/'
+
+# case = '20130815'
+case = '20110419'
+ncroot = '/chinook2/jrlawson/bowecho/{0}_hires/'.format(case)
+outroot = '/home/jrlawson/public_html/bowecho/hires/{0}'.format(case)
 
 p = WRFEnviron()
 
@@ -39,46 +42,49 @@ all_3D_dte = 0 # To produce line graphs for all averages
 delta_plot = 0
 
 windlvs = N.arange(10,31,1)
-dom = 2
-case = '20130815'
-ensnames = ['s{0:02d}'.format(e) for e in range(21,31)] + ['c00h',False]
+dom = 1
+# ensnames = ['s{0:02d}'.format(e) for e in range(21,31)] + ['c00h',False]
 # ensnames = [False,'c00h',]
+ensnames = ['s23','s24']
+
+if case[:4] == '2006':
+    nct = (2006,5,26,0,0,0)
+    itime = (2006,5,26,0,0,0)
+    ftime = (2006,5,27,12,0,0)
+    iwind = (2006,5,26,18,0,0)
+    fwind = (2006,5,27,12,0,0)
+    compt = [(2006,5,d,h,0,0) for d,h in zip((26,27,27),(23,3,6))]
+    # times = [(2006,5,27,6,0,0),]
+    # matchnc = '/chinook2/jrlawson/bowecho/20060526/GFS/anl/ICBC/wrfout_d01_2006-05-26_00:00:00'
+
+elif case[:4] == '2011':
+    nct = (2011,4,19,0,0,0)
+    itime = (2011,4,19,21,0,0)
+    ftime = (2011,4,20,11,0,0)
+    matchnc = '/chinook2/jrlawson/bowecho/20110419_hires/s21/wrfout_d02_2011-04-19_00:00:00'
+
+elif case[:4] == '2013':
+    nct = inittime = (2013,8,15,0,0,0)
+    itime = (2013,8,15,21,0,0)
+    ftime = (2013,8,16,8,0,0)
+    iwind = (2013,8,15,21,0,0)
+    fwind = (2013,8,16,7,0,0)
+    compt = [(2013,8,d,h,0,0) for d,h in zip((15,16,16),(22,2,6))]
+    matchnc = '/chinook2/jrlawson/bowecho/20130815_hires/wrfout_d02_2013-08-15_00:00:00'
+else:
+    raise Exception
+
+# hourly = (1.0/12)
+hourly = 1
+level = 2000
+times = utils.generate_times(itime,ftime,hourly*60*60)
+# times = [(2013,8,16,2,0,0),]
+# dtetimes = utils.generate_times(itime,ftime,3*60*60)
+
+skewT_time = (2006,5,27,0,0,0)
+skewT_latlon = (36.73,-102.51) # Boise City, OK
+
 for ens in ensnames: 
-
-# ens = 's26'
-# ens = False
-
-    if case[:4] == '2006':
-        nct = (2006,5,26,0,0,0)
-        itime = (2006,5,26,0,0,0)
-        ftime = (2006,5,27,12,0,0)
-        iwind = (2006,5,26,18,0,0)
-        fwind = (2006,5,27,12,0,0)
-        compt = [(2006,5,d,h,0,0) for d,h in zip((26,27,27),(23,3,6))]
-        # times = [(2006,5,27,6,0,0),]
-        # matchnc = '/chinook2/jrlawson/bowecho/20060526/GFS/anl/ICBC/wrfout_d01_2006-05-26_00:00:00'
-
-    elif case[:4] == '2013':
-        nct = inittime = (2013,8,15,0,0,0)
-        itime = (2013,8,15,21,0,0)
-        ftime = (2013,8,16,8,0,0)
-        iwind = (2013,8,15,21,0,0)
-        fwind = (2013,8,16,7,0,0)
-        compt = [(2013,8,d,h,0,0) for d,h in zip((15,16,16),(22,2,6))]
-        matchnc = '/chinook2/jrlawson/bowecho/20130815_hires/wrfout_d02_2013-08-15_00:00:00'
-    else:
-        raise Exception
-
-    # hourly = (1.0/12)
-    hourly = 1
-    level = 2000
-    # times = utils.generate_times(itime,ftime,hourly*60*60)
-    times = [(2013,8,16,2,0,0),]
-    dtetimes = utils.generate_times(itime,ftime,3*60*60)
-
-    skewT_time = (2006,5,27,0,0,0)
-    skewT_latlon = (36.73,-102.51) # Boise City, OK
-
     if skewT:
         for en in ensnames:
             for ex in experiments:
@@ -88,11 +94,11 @@ for ens in ensnames:
     locs = {'Norman':(35.2,-97.4)}
     if plot2D or radarplot or strongestwind:
         if ens:
-            outdir = os.path.join(outroot,'hires','d0{0}'.format(dom),ens)
+            outdir = os.path.join(outroot,'d0{0}'.format(dom),ens)
             ncdir = os.path.join(ncroot,ens)
         else:
             ncdir = ncroot
-            outdir = os.path.join(outroot,'hires','d0{0}'.format(dom))
+            outdir = os.path.join(outroot,'d0{0}'.format(dom))
 
         if strongestwind:
             p.plot_strongest_wind(iwind,fwind,2000,ncdir=ncdir,nct=nct,outdir=outdir,clvs=windlvs,dom=dom)
@@ -105,12 +111,14 @@ for ens in ensnames:
                 # p.plot2D('RAINNC',t,ncdir=wrf_sd,outdir=out_sd,locations=locs,clvs=N.arange(1,100,2))
                 # p.plot2D('fluidtrapping',t,ncdir=ncroot,nct=nct,outdir=outdir,cb=True,dom=dom,clvs=N.arange(-1,1,0.1)*10**-6)
                 # p.plot2D('lyapunov',t,ncdir=ncroot,nct=nct,outdir=outdir,cb=True,dom=dom,clvs=N.arange(-7.5,8.0,0.5)*10**-3,cmap='bwr')
+                print(ncdir)
+                # p.plot2D('WSPD10MAX',t,ncdir=ncdir,nct=nct,outdir=outdir,cb=True,dom=dom,clvs=N.arange(10,31,1))
                 p.plot2D('cref',t,ncdir=ncdir,nct=nct,outdir=outdir,cb=True,dom=dom)
                 # p.plot2D('REFL_comp',t,ncdir=ncdir,nct=nct,outdir=outdir,cb=True,dom=dom)
                 # p.plot2D('wind10',t,ncdir=ncdir,outdir=outdir,locations=locs,cb=True,clvs=N.arange(5,32,2))
 
             if radarplot:
-                verifdir = '/chinook2/jrlawson/bowecho/20130815/VERIF'
+                verifdir = '/chinook2/jrlawson/bowecho/{0}/VERIF'.format(case)
                 p.plot_radar(t,verifdir,outdir=outdir,ncdir=ncroot,nct=nct,dom=dom)
 
     if axesofdilatation:

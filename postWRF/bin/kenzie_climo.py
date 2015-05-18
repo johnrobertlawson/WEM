@@ -34,10 +34,10 @@ def download_RUC(utc,fpath):
     print('Downloading {0} RUC file.'.format(utc))
     utils.getruc(utc,ncpath=fpath,convert2nc=True,duplicate=False)
 
-plot_Z = 1
-plot_T_adv = 1
-plot_omega = 1
-plot_lyapunov = 0
+plot_Z = 0
+plot_T_adv = 0
+plot_omega = 0
+plot_lyapunov = 1
 
 # TODO: edit WEM so a switch will automatically download the RUC data.
 

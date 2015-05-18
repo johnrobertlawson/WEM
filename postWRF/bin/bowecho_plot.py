@@ -19,7 +19,7 @@ ncroot = '/chinook2/jrlawson/bowecho/'
 p = WRFEnviron()
 
 skewT = 0
-plot2D = 0
+plot2D = 1
 radarplot = 0
 radarcomp = 0
 streamlines = 0
@@ -32,10 +32,10 @@ frontogenesis = 0
 upperlevel = 0
 strongestwind = 0
 accum_rain = 0
-compute_dte = 1
-plot_1D_dte = 1 # To produce top-down maps
-plot_3D_dte = 1 # To produce line graphs
-all_3D_dte = 1 # To produce line graphs for all averages
+compute_dte = 0
+plot_1D_dte = 0 # To produce top-down maps
+plot_3D_dte = 0 # To produce line graphs
+all_3D_dte = 0 # To produce line graphs for all averages
 delta_plot = 0
 powerspectrum = 0
 probability = 0
@@ -47,13 +47,13 @@ probability = 0
 enstype = 'MXMP'
 # enstype = 'STMX'
 
-case = '20060526'
+# case = '20060526'
 # case = '20090910'
-# case = '20110419'
+case = '20110419'
 # case = '20130815'
  
-IC = 'GEFSR2'
-# IC = 'NAM'
+# IC = 'GEFSR2'
+IC = 'NAM'
 # IC = 'RUC'
 # IC = 'GFS'
 # IC = 'RUC'
@@ -61,7 +61,7 @@ IC = 'GEFSR2'
 
 if enstype == 'STCH':
     experiments = ['s'+"%02d" %n for n in range(1,11)]
-    ensnames = ['c00',]
+    ensnames = ['p09',]
     MP = 'ICBC'
     # MP = 'WDM6_Grau'
     # MP = 'Morrison_Hail'
@@ -84,7 +84,7 @@ elif enstype == 'MXMP':
                     'WSM5','WDM5','Lin','WDM6_Grau','WDM6_Hail',
                     'Morrison_Grau','Morrison_Hail','ICBC']
     # experiments = ['WDM6_Grau',]
-    ensnames = ['c00',]
+    ensnames = ['anl',]
 elif enstype == 'ICBC':
     ensnames =  ['c00'] + ['p'+"%02d" %n for n in range(1,11)]
     experiments = ['ICBC',]
@@ -132,10 +132,10 @@ else:
 # itime = (2006,5,25,12,0,0)
 # ftime = (2006,5,27,12,0,0)
 
-hourly = 3
+hourly = 1
 level = 2000
 times = utils.generate_times(itime,ftime,hourly*60*60)
-dtetimes = utils.generate_times(itime,ftime,hourly*60*60)
+# dtetimes = utils.generate_times(itime,ftime,hourly*60*60)
 
 def get_folders(en,ex):
     if enstype and enstype[:4] == 'STCH':
