@@ -1656,7 +1656,7 @@ class WRFEnviron(object):
             level = '{0}hPa'.format(level)
         return level
 
-    def plot_radar(self,utc,datadir,outdir,Nlim=False,Elim=False,
+    def plot_radar(self,utc,datadir,outdir=False,Nlim=False,Elim=False,
                     Slim=False,Wlim=False,ncdir=False,nct=False,
                     ncf=False,dom=1,composite=False,locations=False,
                     fig=False,ax=False,cb=True):
