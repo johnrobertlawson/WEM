@@ -74,7 +74,8 @@ class WRFEnviron(object):
                 fig=False,ax=False,clvs=False,cmap=False,
                 locations=False,cb=True,match_nc=False,
                 Nlim=False,Elim=False,Slim=False,Wlim=False,
-                other=False,color='k',inline=False):
+                other=False,color='k',inline=False,lw=False,
+                extend=False):
         """Basic birds-eye-view plotting.
 
         This script is top-most and decides if the variables is
@@ -201,7 +202,8 @@ class WRFEnviron(object):
         F.plot2D(data,fname,outdir,lats=lats,lons=lons,
                     plottype=plottype,smooth=smooth,
                     clvs=clvs,cmap=cmap,locations=locations,
-                    cb=cb,color=color,inline=inline)
+                    cb=cb,color=color,inline=inline,lw=lw,
+                    extend=extend)
 
 
     def get_cmap_clvs(self,vrbl,level,clvs=False,cmap=False):

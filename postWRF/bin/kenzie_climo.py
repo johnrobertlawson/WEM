@@ -37,17 +37,23 @@ def download_RUC(utc,fpath):
 plot_Z = 0
 plot_T_adv = 0
 plot_omega = 0
-plot_lyapunov = 1
+plot_lyapunov = 0
+plot_regime = 1
 
 # TODO: edit WEM so a switch will automatically download the RUC data.
 
 fpath = '/home/jrlawson/pythoncode/bowecho/snively.csv'
-names = ('casedate','caseno','casetime','casestate','bowdate','bowtime','bowstate','score','type','comments')
-formats = ['S16',]*10
+# names = ('casedate','caseno','casetime','casestate','bowdate','bowtime','bowstate','score','type','comments')
+# formats = ['S16',]*10
+names = ('casedate','caseno','casetime','casestate','bowdate',
+        'bowlat','bowlon','bowtime','bowstate','score',
+        'initlat','initlon','inittime','type','comments')
+formats = ['S16',]*len(names)
 cases = N.loadtxt(fpath,dtype={'names':names,'formats':formats},skiprows=1,delimiter=',')
 
 # plothrs = (0,12,18)
-plothrs = (0,9,12,15,18)
+plothrs = (0,)
+# plothrs = (0,9,12,15,18)
 Nlim, Elim, Slim, Wlim = [52.0,-78.0,25.0,-128.0]
 
 for n, case in enumerate(cases):
@@ -65,7 +71,7 @@ for n, case in enumerate(cases):
     t = case['casedate'] + case['casetime']
     # t = case['bowdate'] + case['bowtime']
     year = int(t[:4])
-    # if year==2007 or year==2008:
+    # if year==2006 or year==2008:
         # continue
     mth = int(t[4:6])
     day = int(t[6:8])
@@ -96,10 +102,13 @@ for n, case in enumerate(cases):
             levels[925] = {'color':'#9966FF','clvs':N.arange(660,2100,30),'z':1}
 
             for lv in levels:
-                im = p.plot2D('Z',utc=utc,level=lv,ncdir=RUCdir,outdir=outdir,
+                try:
+                    im = p.plot2D('Z',utc=utc,level=lv,ncdir=RUCdir,outdir=outdir,
                             fig=fig,ax=ax,cb=False,clvs=levels[lv]['clvs'],nct=utc,match_nc=False,
                             smooth=10,plottype='contour',color=levels[lv]['color'],inline=True,)
                             # Nlim=Nlim,Elim=Elim,Slim=Slim,Wlim=Wlim)
+                except:
+                    continue
             fpath = os.path.join(outdir,outstr+'_overview.png')
             fig.tight_layout()
             fig.savefig(fpath)
@@ -112,9 +121,11 @@ for n, case in enumerate(cases):
 
             for lv in levels:
                 fig, ax = plt.subplots()
-
-                im = p.plot2D('temp_advection',utc=utc,level=lv,ncdir=RUCdir,outdir=outdir,
+                try:
+                    im = p.plot2D('temp_advection',utc=utc,level=lv,ncdir=RUCdir,outdir=outdir,
                             fig=fig,ax=ax,cb=True, clvs=levels[lv]['clvs'], nct=utc,)
+                except:
+                    continue
                 fpath = os.path.join(outdir,outstr+'_tempadvection_{0}hPa.png'.format(lv))
                 fig.tight_layout()
                 fig.savefig(fpath)
@@ -126,10 +137,13 @@ for n, case in enumerate(cases):
 
             for lv in levels:
                 fig, ax = plt.subplots()
-                im = p.plot2D('omega',utc=utc,level=lv,ncdir=RUCdir,outdir=outdir,
+                try:
+                    im = p.plot2D('omega',utc=utc,level=lv,ncdir=RUCdir,outdir=outdir,
                             fig=fig,ax=ax,cb=True, 
                             #clvs=levels[lv]['clvs'],
                             nct=utc,)
+                except:
+                    continue
                 fpath = os.path.join(outdir,outstr+'_omega_{0}hPa.png'.format(lv))
                 fig.tight_layout()
                 fig.savefig(fpath)
@@ -137,18 +151,59 @@ for n, case in enumerate(cases):
 
         if plot_lyapunov:
             levels = {}
-            levels[500] = {'clvs':N.arange(-7.5,8.0,0.5)*10**-3}
+            levels[500] = {'clvs':N.arange(-5.0,5.25,0.25)*10**-4}
 
             for lv in levels:
                 fig, ax = plt.subplots()
-                im = p.plot2D('lyapunov',utc=utc,level=lv,ncdir=RUCdir,outdir=outdir,
+                try:
+                    im = p.plot2D('lyapunov',utc=utc,level=lv,ncdir=RUCdir,outdir=outdir,
                             fig=fig,ax=ax,cb=True,
-                            #clvs=levels[lv]['clvs'], 
+                            # #clvs=levels[lv]['clvs'], 
                             nct=utc,
                             #cmap='bwr'
                             )
+                except:
+                    # If file doesn't exist on server
+                    print("MISSING")
+                    continue
+
+
                 fpath = os.path.join(outdir,outstr+'_lyapunov_{0}hPa.png'.format(lv))
                 fig.tight_layout()
                 fig.savefig(fpath)
                 plt.close(fig)
 
+        if plot_regime:
+            utc = datetime.datetime(*timetuple)
+            Nlim, Elim, Slim, Wlim = [52.0,-78.0,25.0,-128.0]
+            lims = {'Nlim':Nlim, 'Elim':Elim, 'Slim':Slim, 'Wlim':Wlim}
+            fig, ax = plt.subplots()
+            try:
+                LXclvs = N.arange(-3.0,3.125,0.125)*10**-4
+                LXcf = p.plot2D('lyapunov',utc=utc,level=500,ncdir=RUCdir,outdir=outdir,
+                        fig=fig,ax=ax,cb=True,clvs=LXclvs,smooth=1,
+                        nct=utc,cmap='bwr',extend='both',**lims)
+                # LXct = p.plot2D('lyapunov',utc=utc,level=500,ncdir=RUCdir,outdir=outdir,
+                        # fig=fig,ax=ax,cb=False,clvs=[0.5*10**-4,],color='black',lw=0.5,
+                        # nct=utc,plottype='contour',**lims)
+                # Zclvs = N.arange(6000,12000,120)
+                Zclvs = N.arange(3000,9000,60)
+                Zct = p.plot2D('Z',utc=utc,level=500,ncdir=RUCdir,outdir=outdir,
+                        fig=fig,ax=ax,cb=False,clvs=Zclvs,nct=utc,match_nc=False,
+                        smooth=10,plottype='contour',color='darkblue',inline=True,**lims)
+
+            except ValueError:
+                # If file doesn't exist on server
+                print("MISSING")
+                continue
+
+            fig.suptitle('{0} bow echo of score {1:.2f}'.format
+                            (case['type'].upper(),float(case['score'])))
+            fpath = os.path.join(outdir,'Day1_12Z_regime.png')
+            fig.tight_layout()
+            fig.savefig(fpath)
+            plt.close(fig)
+            print("Saved figure to {0}".format(fpath))
+
+if plot_regime:
+    os.system('python /home/jrlawson/public_html/bowecho/climoplots/day1_regimes/copy_regime.py')

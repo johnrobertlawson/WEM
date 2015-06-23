@@ -70,6 +70,12 @@ for d in DATA.keys():
 
 ok_types = ('serial','progressive')
 
+printme = ['{0} {1},{2}'.format(a,b,c) for a,b,c in zip(cases['casedate'],cases['initlat'],cases['initlon'])]
+for o,p in enumerate(printme):
+    if cases['type'][o] in ok_types:
+        print(p)
+raise Exception
+
 if compute:
 
     cnx = -1

@@ -103,8 +103,11 @@ class WRFOut(object):
         """
         # import pdb; pdb.set_trace()
         dn = utils.ensure_datenum(utc)
-        tidx = utils.closest(self.utc,dn)
-        return tidx
+        dns = utils.get_sequence(dn)
+        tidx = []
+        for t in dns:
+            tidx.append(utils.closest(self.utc,t))
+        return N.array(tidx)
 
 
     def check_compute(self,vrbl):

@@ -87,7 +87,7 @@ class BirdsEye(Figure):
                     clvs=False,cmap=False,title=False,cb=True,
                     locations=False,m=False,x=False,y=False,
                     Nlim=False,Elim=False,Slim=False,Wlim=False,
-                    color='k',inline=False):
+                    color='k',inline=False,lw=False,extend=False):
 
         """
         Generic method that plots any matrix of data on a map
@@ -133,10 +133,14 @@ class BirdsEye(Figure):
         if plottype == 'contour':
             plotkwargs['colors'] = color
             plotkwargs['inline'] = inline
+            if lw:
+                plotkwargs['lw'] = lw
             f1 = self.bmap.contour(*plotargs,**plotkwargs)
             if inline:
                 plt.clabel(f1,inline=True,fmt='%d',color='black',fontsize=9)
         elif plottype == 'contourf':
+            if isinstance(extend,str):
+                plotkwargs['extend'] = extend
             f1 = self.bmap.contourf(*plotargs,**plotkwargs)
         elif plottype == 'pcolor':
             f1 = self.bmap.pcolor(*plotargs,**plotkwargs)

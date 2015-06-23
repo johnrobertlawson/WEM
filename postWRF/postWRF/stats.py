@@ -14,23 +14,23 @@ import WEM.utils as utils
 
 from wrfout import WRFOut
 
-def std(ncfiles,va,tidx,lvidx):
+def std(ncfiles,vrbl,utc=False,level=False,other=False):
     """
     Find standard deviation in along axis of ensemble
     members. Returns matrix x-y for plotting
     """
     for n, nc in enumerate(ncfiles):
+        # print("Ensemble member {0} loaded.".format(n))
         W = WRFOut(nc)
-        slices = {'lv':lvidx, 't':tidx}
-        va_array = W.get(va,slices)
-        dims = va_array.shape
+        vrbl_array = W.get(vrbl,utc=utc,level=level,other=other)
 
         if n==0:
-            all_members = N.zeros([len(ncfiles),1,1,dims[-2],dims[-1]])
-        all_members[n,0,0,:,:] = va_array[...]
+            dims = [len(ncfiles),] + list(vrbl_array.shape)
+            all_members = N.zeros(dims)
+        all_members[n,...] = vrbl_array[...]
+        # import pdb; pdb.set_trace()
 
-    std = N.std(all_members,axis=0).reshape([dims[-2],dims[-1]])
-    # pdb.set_trace()
+    std = N.std(all_members,axis=0)
     return std
 
 def gauss_kern(size, sizey=None):
