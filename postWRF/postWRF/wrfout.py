@@ -413,6 +413,7 @@ class WRFOut(object):
         tbl['geopot'] = self.compute_geopotential
         tbl['Z'] = self.compute_geopotential_height
         tbl['dptp'] = self.compute_dptp #density potential temperature pert.
+        tbl['T2p'] = self.compute_T2_pertub
         tbl['dpt'] = self.compute_dpt #density potential temperature .
         tbl['buoyancy'] = self.compute_buoyancy
         tbl['strongestwind'] = self.compute_strongest_wind
@@ -430,6 +431,10 @@ class WRFOut(object):
         tbl['temp_advection'] = self.compute_temp_advection
         tbl['omega'] = self.compute_omega
         tbl['density'] = self.compute_density
+        # tbl['accum_precip'] = self.compute_accum_rain
+        tbl['PMSL_gradient'] = self.compute_PMSL_gradient
+        tbl['T2_gradient'] = self.compute_T2_gradient
+        tbl['Q_pert'] = self.compute_Q_pert
 
         return tbl
 
@@ -469,6 +474,20 @@ class WRFOut(object):
         dTdx, dTdy = N.gradient(T,self.DX,self.DY)
         field = -U*dTdx - V*dTdy
         # pdb.set_trace()
+        return field
+
+    def compute_PMSL_gradient(self,tidx,lvidx,lonidx,latidx,other):
+        P = self.get('PMSL',tidx,lvidx,lonidx,latidx)[0,0,:,:]
+        dPdx, dPdy = N.gradient(P,self.dx,self.dy)
+        field = N.sqrt(dPdx**2 + dPdy**2)
+        # import pdb; pdb.set_trace()
+        return field
+
+    def compute_T2_gradient(self,tidx,lvidx,lonidx,latidx,other):
+        T2 = self.get('T2',tidx,lvidx,lonidx,latidx)[0,0,:,:]
+        dTdx, dTdy = N.gradient(T2,self.dx,self.dy)
+        field = N.sqrt(dTdx**2 + dTdy**2)
+        # import pdb; pdb.set_trace()
         return field
 
     def compute_dryairmass(self,tidx,lvidx,lonidx,latidx,other):
@@ -539,6 +558,18 @@ class WRFOut(object):
         dptp = dpt - dpt_mean
         return dptp
 
+    def compute_T2_pertub(self,tidx,lvidx,lonidx,latidx,other):
+        T2 = self.get('T2',tidx,lvidx,lonidx,latidx)
+        T2_mean = N.mean(T2)
+        T2p = T2-T2_mean 
+        return T2p
+
+    def compute_Q_pert(self,tidx,lvidx,lonidx,latidx,other):
+        Q = self.get('QVAPOR',tidx,lvidx,lonidx,latidx)
+        Q_mean = N.mean(Q)
+        Qp = Q-Q_mean
+        return Qp
+
     def compute_dpt(self,tidx,lvidx,lonidx,latidx,other):
         """
         Potential: if surface level is requested, choose sigma level just
@@ -604,8 +635,11 @@ class WRFOut(object):
         Could make this faster with numpy.digitize()?
         """
         if not other:
-            print("Choose top and bottom for shear calc.")
-            raise Exception
+            print("No shear heights specified. Using 0-6 km by default.")
+            topm = 6000.0
+            botm = 0.0
+            # print("Choose top and bottom for shear calc.")
+            # raise Exception
         else:
             topm = other['top']*1000
             botm = other['bottom']*1000
@@ -883,7 +917,17 @@ class WRFOut(object):
         Pass the array of time indices and it will find the max
         along that axis.
         """
-        wind = self.get('wind10',tidx,lvidx,lonidx,latidx)
+        if 'WSPD10MAX' in self.fields:
+            ww = self.get('WSPD10MAX',tidx,lvidx,lonidx,latidx)
+            if ww.max() > 0.1:
+                print("Using WSPD10MAX data")
+                wind = ww
+            else:
+                print("Using wind10 data")
+                wind = self.get('wind10',tidx,lvidx,lonidx,latidx)
+        else:
+            print("Using wind10 data")
+            wind = self.get('wind10',tidx,lvidx,lonidx,latidx)
         wind_max = N.amax(wind,axis=0)
         # wind_max_smooth = self.test_smooth(wind_max)
         # return wind_max_smooth
@@ -1029,6 +1073,7 @@ class WRFOut(object):
             datain = self.get(vrbl,utc=tidx,lons=lonidx,lats=latidx)[0,...]
             # import pdb; pdb.set_trace()
             # What about RUC, pressure coords
+            # dataout = N.zeros([nlv,P.shape[-1],P.shape[-2]])
             dataout = N.zeros([nlv,P.shape[-2],P.shape[-1]])
             # pdb.set_trace()
             for (i,j), p in N.ndenumerate(dataout[0,:,:]):
@@ -1036,9 +1081,9 @@ class WRFOut(object):
             # dataout = scipy.interpolate.griddata(P.flatten(),datain.flatten(),hPa)
         if nlv == 1:
             # Return 2D if only one level requested
-            return dataout[0,:,:]
+            return self.make_4D(dataout[0,:,:])
         else:
-            return dataout
+            return self.make_4D(dataout)
 
     def interp_to_p_fortran(self,config,nc_path,var,lv):
         """ Uses p_interp fortran code to put data onto a pressure
@@ -1448,12 +1493,14 @@ class WRFOut(object):
         return div
 
     def compute_instantaneous_local_Lyapunov(self,tidx,lvidx,lonidx,latidx,other):
+        # import pdb; pdb.set_trace()
         U = self.get('U',tidx,lvidx,lonidx,latidx)[0,0,:,:]
         V = self.get('V',tidx,lvidx,lonidx,latidx)[0,0,:,:]
         E = self.compute_total_deformation(U,V)
         zeta = self.compute_vorticity(U,V)
         div = self.compute_divergence(U,V)
         D =  0.5*(div + (E**2  - zeta**2)**0.5)
+        # import pdb; pdb.set_trace()
         return D
 
     def return_axis_of_dilatation_components(self,tidx,lvidx=False,lonidx=False,

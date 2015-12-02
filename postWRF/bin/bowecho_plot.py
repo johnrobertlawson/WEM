@@ -2,7 +2,7 @@ import os
 import pdb
 import sys
 import matplotlib as M
-M.use('gtkagg')
+M.use('agg')
 import matplotlib.pyplot as plt
 import numpy as N
 import glob
@@ -19,7 +19,7 @@ ncroot = '/chinook2/jrlawson/bowecho/'
 p = WRFEnviron()
 
 skewT = 0
-plot2D = 1
+plot2D = 0
 radarplot = 0
 radarcomp = 0
 streamlines = 0
@@ -33,7 +33,7 @@ upperlevel = 0
 strongestwind = 0
 accum_rain = 0
 compute_dte = 0
-plot_1D_dte = 0 # To produce top-down maps
+plot_1D_dte = 1 # To produce top-down maps
 plot_3D_dte = 0 # To produce line graphs
 all_3D_dte = 0 # To produce line graphs for all averages
 delta_plot = 0
@@ -43,17 +43,17 @@ probability = 0
 # enstype = False
 # enstype = 'STCH'
 # enstype = 'STCH5'
-# enstype = 'ICBC'
-enstype = 'MXMP'
+enstype = 'ICBC'
+# enstype = 'MXMP'
 # enstype = 'STMX'
 
-# case = '20060526'
+case = '20060526'
 # case = '20090910'
-case = '20110419'
+# case = '20110419'
 # case = '20130815'
  
-# IC = 'GEFSR2'
-IC = 'NAM'
+IC = 'GEFSR2'
+# IC = 'NAM'
 # IC = 'RUC'
 # IC = 'GFS'
 # IC = 'RUC'
@@ -97,8 +97,8 @@ else:
 
 if case[:4] == '2006':
     nct = (2006,5,26,0,0,0)
-    itime = (2006,5,26,0,0,0)
-    ftime = (2006,5,27,12,0,0)
+    itime = (2006,5,26,3,0,0)
+    ftime = (2006,5,26,6,0,0)
     iwind = (2006,5,26,18,0,0)
     fwind = (2006,5,27,12,0,0)
     compt = [(2006,5,d,h,0,0) for d,h in zip((26,27,27),(23,3,6))]
@@ -132,7 +132,7 @@ else:
 # itime = (2006,5,25,12,0,0)
 # ftime = (2006,5,27,12,0,0)
 
-hourly = 1
+hourly = 3
 level = 2000
 times = utils.generate_times(itime,ftime,hourly*60*60)
 # dtetimes = utils.generate_times(itime,ftime,hourly*60*60)
@@ -406,25 +406,49 @@ if compute_dte or plot_3D_dte or plot_1D_dte or powerspectrum:
 
 if all_3D_dte:
     if case[:4] == '2006':
-        EXS = {'GEFS-ICBC':{},'NAM-MXMP':{},'NAM-STMX':{},'NAM-STCH5':{},'GEFS-STCH':{},'NAM-STCH':{},'GEFS-MXMP':{}}
+        # EXS = {'GEFS-ICBC':{},'NAM-MXMP':{},'NAM-STMX':{},'NAM-STCH5':{},'GEFS-STCH':{},'NAM-STCH':{},'GEFS-MXMP':{}}
+        EXS = {'ICBC (GEFS/R2)':{},'MXMP (NAM)':{},'STMX (NAM)':{},'STCH5 (NAM; WDM6 Grau)':{},'STCH (GEFS/R2 c00)':{},'STCH (NAM; WDM6 Grau)':{},'MXMP (GEFS/R2 c00)':{}}
         IC = 'NAM';ensnames = 'anl'; MP = 'WDM6_Grau'
     else:
-        EXS = {'GEFS-ICBC':{},'NAM-MXMP':{},'GEFS-MXMP':{},'GEFS-STCH-thomp':{},'GEFS-STCH-morrh':{},'GEFS-STMX':{}}
+        # EXS = {'GEFS-ICBC':{},'NAM-MXMP':{},'GEFS-MXMP':{},'GEFS-STCH-thomp':{},'GEFS-STCH-morrh':{},'GEFS-STMX':{}}
+        EXS = {'ICBC (GEFS/R2)':{},'MXMP (NAM)':{},'MXMP (GEFS/R2 p09)':{},'STCH (GEFS/R2 p09; Thompson)':{},'STCH (GEFS/R2 p09; Morrison Hail)':{},'STMX (GEFS/R2 p09)':{}}
         # Compare Morrison-Hail and Thompson STCH members.
         MP = 'ICBC'
         
 
     for exper in EXS:
-        exs = exper.split('-')
-        if len(exs)==2:
-            IC, enstype = exs
-            stchmp = False
-            
-        else:
-            IC,enstype,stchmp = exs
-
-        if IC=='GEFS':
+        # exs = exper.split('-')
+        # if len(exs)==2:
+            # IC, enstype = exs
+            # stchmp = False
+        # else:
+            # IC,enstype,stchmp = exs
+        if 'GEFS' in exper:
             IC = 'GEFSR2'
+        else:
+            IC = 'NAM'
+
+        if 'ICBC' in exper:
+            enstype = 'ICBC'
+        elif 'MXMP' in exper:
+            enstype = 'MXMP'
+        elif 'STCH5' in exper:
+            enstype = 'STCH5'
+        elif 'STCH' in exper:
+            enstype = 'STCH'
+        elif 'STMX' in exper:
+            enstype = 'STMX'
+        else:
+            raise Exception
+
+        if 'Thompson' in exper:
+            stchmp = 'thomp'
+        elif 'Morrison' in exper:
+            stchmp = 'morrh'
+        else:
+            stchmp = False
+
+        if IC=='GEFSR2':
             if case[:4] == '2006':
                 ensnames = 'c00'
             else:
@@ -451,6 +475,10 @@ if all_3D_dte:
         pickledir,dummy = get_pickle_dirs(ensnames)
         print exper, pickledir
         EXS[exper] = {'datadir':pickledir,'dataf':'DTE_'+enstype}
+        if 'ST' in exper:
+            EXS[exper]['ls'] = '--'
+        else:
+            EXS[exper]['ls'] = '-'
 
     ylimits = [0,2e8]
     outdir = os.path.join(outroot,case)

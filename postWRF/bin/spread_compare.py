@@ -47,7 +47,8 @@ times = utils.generate_times(itime,ftime,hourly*60*60)
 titlets = ['6h','12h','18h','24h']
 # vrbl = 'wind10'; clvs = N.arange(0.25,5.25,0.25); lv = False
 # vrbl = 'T2'; clvs = N.arange(0.25,5.25,0.25); lv = False
-vrbl = 'Q2'; lv = False
+vrbl = 'cref'; lv= False
+# vrbl = 'Q2'; lv = False
 # vrbl = 'U10'; lv = False
 
 # Dictionary for line plots of std over time
@@ -113,10 +114,17 @@ for pn,plot in enumerate(BOW.keys()):
 if lines:
     fig,ax = plt.subplots(1)
     # for n in range(100):
-    ax.plot(std_line['hires3'],color='lightcoral',lw=0.5,)
-    ax.plot(std_line['normal'],color='lightblue',lw=0.5,)
-    ax.plot(N.mean(std_line['hires3'],axis=1),color='red',lw=3)
-    ax.plot(N.mean(std_line['normal'],axis=1),color='blue',lw=3)
+    ax.plot(std_line['hires3'],color='lightcoral',lw=0.5,label='Nested')
+    ax.plot(std_line['normal'],color='lightblue',lw=0.5,label='Single')
+    ax.plot(N.mean(std_line['hires3'],axis=1),color='red',lw=3,label='Nested mean')
+    ax.plot(N.mean(std_line['normal'],axis=1),color='blue',lw=3,label='Single mean')
+
+    ax.set_xlabel("Forecast time (hr)")
+    ax.set_ylabel("Standard deviation")
+    handles, labels = ax.get_legend_handles_labels()
+    labelpick = labels[0:1] + labels[-3:]
+    handlepick = handles[0:1] + handles[-3:]
+    ax.legend(handlepick, labelpick,loc=2)
 
     fname = 'std_lines_{0}.png'.format(vrbl)
     fpath = os.path.join(outdir,fname)
@@ -141,10 +149,18 @@ if lines:
     gg = N.intersect1d(ee,ff) 
 
     fig,ax = plt.subplots(1)
-    ax.plot(std_line['hires3'][:,gg],color='lightcoral',lw=0.5)
-    ax.plot(std_line['normal'][:,gg],color='lightblue',lw=0.5,)
-    ax.plot(N.mean(std_line['hires3'][:,gg],axis=1),color='red',lw=3)
-    ax.plot(N.mean(std_line['normal'][:,gg],axis=1),color='blue',lw=3)
+    ax.plot(std_line['hires3'][:,gg],color='lightcoral',lw=0.5,label='Nested')
+    ax.plot(std_line['normal'][:,gg],color='lightblue',lw=0.5,label='Single')
+    ax.plot(N.mean(std_line['hires3'][:,gg],axis=1),color='red',lw=3,label='Nested mean')
+    ax.plot(N.mean(std_line['normal'][:,gg],axis=1),color='blue',lw=3,label='Single mean')
+
+    ax.set_xlabel("Forecast time (hr)")
+    ax.set_ylabel("Standard deviation")
+
+    handles, labels = ax.get_legend_handles_labels()
+    labelpick = labels[0:1] + labels[-3:]
+    handlepick = handles[0:1] + handles[-3:]
+    ax.legend(handlepick, labelpick,loc=2)
 
     fname = 'std_lines_{0}_1kmdomain.png'.format(vrbl)
     fpath = os.path.join(outdir,fname)

@@ -13,6 +13,8 @@ import WEM.utils as utils
 import matplotlib.pyplot as plt
 import calendar
 import glob
+import datetime
+
 from birdseye import BirdsEye
 
 class Obs(object):
@@ -149,6 +151,13 @@ class Radar(Obs):
                                 self.lons,Nlim,Elim,Slim,Wlim)
         return data,lats,lons
 
+    def get_dBZ(self,data):
+        if self.fmt == 'n0q':
+            dBZ = (data*0.5)-32
+        elif self.fmt == 'n0r':
+            dBZ = (data*5.0)-30 
+        return dBZ
+
     def plot_radar(self,outdir,fig=False,ax=False,fname=False,Nlim=False,
                     Elim=False, Slim=False,Wlim=False,cb=True):
         """
@@ -176,10 +185,8 @@ class Radar(Obs):
         # radarcmap = ct.ncdc_modified_ISU(self.clvs)
 
         # Convert pixel levels to dBZ
-        if self.fmt == 'n0q':
-            dBZ = (data*0.5)-32
-        elif self.fmt == 'n0r':
-            dBZ = (data*5.0)-30 
+        dBZ = self.get_dBZ(data)
+
            
         # dBZ[dBZ<0] = 0
         
@@ -191,9 +198,11 @@ class Radar(Obs):
             tstr = utils.string_from_time('output',self.utc)
             fname = 'verif_radar_{0}.png'.format(tstr)
         F = BirdsEye(fig=fig,ax=ax)
+        if cb:
+            cb = 'horizontal'
         F.plot2D(dBZ,fname,outdir,lats=lats,lons=lons,
-                    cmap=radarcmap,clvs=N.arange(5.0,90.5,0.5),
-                    cb=cb)
+                    cmap=radarcmap,clvs=N.arange(5,90,5),
+                    cb=cb,cblabel='Composite reflectivity (dBZ)')
         # im = self.ax.contourf(x,y,dBZ,alpha=0.5,cmap=radarcmap,
                                 # levels=N.arange(5.0,90.5,0.5))
         # outpath = os.path.join(outdir,fname)
@@ -272,4 +281,57 @@ class SPCReports(Obs):
             if plot_all:
                 for t in self.reports[threat]['time']:
                     utc = self.report_datenum(t)
+
+class StormReports(Obs):
+    def __init__(self,fpath,):
+        self.r = N.genfromtxt(fpath,dtype=None,
+                names=True,delimiter=',',)#missing='',filling_values='none')
+        # import pdb; pdb.set_trace()
+        self.convert_times() 
+
+    def convert_times(self,):
+        LOLtimes = self.r['BEGIN_TIME']
+        padtimes = []
+        for t in LOLtimes:
+            intt = int(t)
+            padtimes.append('{0:04d}'.format(intt))
+
+        hours = [s[:-2] for s in padtimes]
+        mins = [s[-2:] for s in padtimes]
+        self.datetimes = N.array([datetime.datetime.strptime(s+h+m,'%m/%d/%Y%H%M')
+                        for s,h,m in zip(self.r['BEGIN_DATE'],hours,mins)])
+        # import pdb; pdb.set_trace()
+        # import numpy.lib.recfunctions
+        # self.r = numpy.lib.recfunctions.append_fields(self.r,'datetimes',N.array(dates))
+
+    def plot(self,reports,itime,ftime,fname,outdir,Nlim=False,
+            Elim=False,Slim=False,Wlim=False,
+            annotate=True,fig=False,ax=False,ss=50):
+        reportidx = N.array([n for n,t in zip(range(len(self.r['EVENT_TYPE'])),self.r['EVENT_TYPE']) if reports in t])
+        lateidx = N.where(self.datetimes > itime)
+        earlyidx = N.where(self.datetimes < ftime)
+        timeidx = N.intersect1d(earlyidx,lateidx,)#assume_unique=True)
+        plotidx = N.intersect1d(reportidx,timeidx)
+
+        from mpl_toolkits.basemap import Basemap
+
+        if fig==False:
+            fig,ax = plt.subplots(1,figsize=(6,6))
+        m = Basemap(projection='merc',
+                    llcrnrlat=Slim,
+                    llcrnrlon=Wlim,
+                    urcrnrlat=Nlim,
+                    urcrnrlon=Elim,
+                    lat_ts=(Nlim-Slim)/2.0,
+                    resolution='i',
+                    ax=ax)
+
+        m.drawcoastlines()
+        m.drawstates()
+        m.drawcountries()
+
+        m.scatter(self.r['BEGIN_LON'][plotidx],self.r['BEGIN_LAT'][plotidx],latlon=True,
+                    marker='D',facecolors='blue',edgecolors='black',s=ss)
+        fig.tight_layout()
+        plt.savefig(os.path.join(outdir,fname))
 

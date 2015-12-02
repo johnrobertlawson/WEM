@@ -25,7 +25,7 @@ plot2D = 1
 radarplot = 0
 axesofdilatation = 0
 radarcomp = 0
-streamlines = 0
+streamlines = 1
 rucplot = 0
 coldpoolstrength = 0
 spaghetti = 0
@@ -43,9 +43,9 @@ delta_plot = 0
 
 windlvs = N.arange(10,31,1)
 dom = 1
-# ensnames = ['s{0:02d}'.format(e) for e in range(21,31)] + ['c00h',False]
+ensnames = ['s{0:02d}'.format(e) for e in range(21,31)] + ['c00h',False]
 # ensnames = [False,'c00h',]
-ensnames = ['s23','s24']
+# ensnames = ['s25','s26',]
 
 if case[:4] == '2006':
     nct = (2006,5,26,0,0,0)
@@ -59,8 +59,8 @@ if case[:4] == '2006':
 
 elif case[:4] == '2011':
     nct = (2011,4,19,0,0,0)
-    itime = (2011,4,19,21,0,0)
-    ftime = (2011,4,20,11,0,0)
+    itime = (2011,4,19,18,0,0)
+    ftime = (2011,4,20,9,0,0)
     matchnc = '/chinook2/jrlawson/bowecho/20110419_hires/s21/wrfout_d02_2011-04-19_00:00:00'
 
 elif case[:4] == '2013':
@@ -69,16 +69,18 @@ elif case[:4] == '2013':
     ftime = (2013,8,16,8,0,0)
     iwind = (2013,8,15,21,0,0)
     fwind = (2013,8,16,7,0,0)
+    ptime = (2013,8,16,3,0,0)
     compt = [(2013,8,d,h,0,0) for d,h in zip((15,16,16),(22,2,6))]
     matchnc = '/chinook2/jrlawson/bowecho/20130815_hires/wrfout_d02_2013-08-15_00:00:00'
 else:
     raise Exception
 
 # hourly = (1.0/12)
-hourly = 1
+hourly = 3
 level = 2000
 times = utils.generate_times(itime,ftime,hourly*60*60)
-# times = [(2013,8,16,2,0,0),]
+# times = [(2011,4,20,2,0,0),]
+# times = [(2013,8,15,22,0,0),]
 # dtetimes = utils.generate_times(itime,ftime,3*60*60)
 
 skewT_time = (2006,5,27,0,0,0)
@@ -110,11 +112,12 @@ for ens in ensnames:
                 # p.plot2D('Q2',t,ncdir=ncdir,outdir=outdir,nct=t,match_nc=matchnc,clvs=N.arange(1,20.5,0.5)*10**-3)
                 # p.plot2D('RAINNC',t,ncdir=wrf_sd,outdir=out_sd,locations=locs,clvs=N.arange(1,100,2))
                 # p.plot2D('fluidtrapping',t,ncdir=ncroot,nct=nct,outdir=outdir,cb=True,dom=dom,clvs=N.arange(-1,1,0.1)*10**-6)
-                # p.plot2D('lyapunov',t,ncdir=ncroot,nct=nct,outdir=outdir,cb=True,dom=dom,clvs=N.arange(-7.5,8.0,0.5)*10**-3,cmap='bwr')
-                print(ncdir)
+                # p.plot2D('lyapunov',t,700,ncdir=ncdir,nct=nct,outdir=outdir,cb=True,dom=dom,clvs=N.arange(-7.5,8.0,0.5)*10**-3,cmap='bwr')
+                # print(ncdir)
                 # p.plot2D('WSPD10MAX',t,ncdir=ncdir,nct=nct,outdir=outdir,cb=True,dom=dom,clvs=N.arange(10,31,1))
-                p.plot2D('cref',t,ncdir=ncdir,nct=nct,outdir=outdir,cb=True,dom=dom)
+                # p.plot2D('cref',t,ncdir=ncdir,nct=nct,outdir=outdir,cb=True,dom=dom)
                 # p.plot2D('REFL_comp',t,ncdir=ncdir,nct=nct,outdir=outdir,cb=True,dom=dom)
+                p.plot2D('shear',t,ncdir=ncdir,nct=nct,outdir=outdir,cb=True,dom=dom)
                 # p.plot2D('wind10',t,ncdir=ncdir,outdir=outdir,locations=locs,cb=True,clvs=N.arange(5,32,2))
 
             if radarplot:
@@ -137,11 +140,15 @@ for ens in ensnames:
                         Nlim=42.7,Elim=-94.9,Slim=37.0,Wlim=-101.8)
 
     if streamlines:
-        for en in ensnames:
-            for ex in experiments:
-                for t in times:
-                    out_sd, wrf_sd = get_folders(en,ex)
-                    p.plot_streamlines(t,2000,out_sd=out_sd,wrf_sd=wrf_sd)
+        if ens:
+            outdir = os.path.join(outroot,'d0{0}'.format(dom),ens)
+            ncdir = os.path.join(ncroot,ens)
+        else:
+            ncdir = ncroot
+            outdir = os.path.join(outroot,'d0{0}'.format(dom))
+        for t in times:
+            print(ncdir)
+            p.plot_streamlines(t,700,ncdir,outdir,nct=nct,dom=dom)
 
     if rucplot:
         # RUC file is one-per-time so .nc file is specified beforehand

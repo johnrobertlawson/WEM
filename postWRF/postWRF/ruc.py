@@ -151,6 +151,7 @@ class RUC(WRFOut):
             # destag_dim = None
         # data = self.destagger(vrbldata[sl],destag_dim)
         # return data
+        # pdb.set_trace()
 
         # Flip vertical to match WRF
         if len(vrbldata.shape) == 4:
@@ -468,7 +469,7 @@ class RUC(WRFOut):
         # pdb.set_trace()
         return shear
 
-    def compute_wind10(self,nc):
+    def compute_wind10_2(self,nc):
         """ Version '3' for RAP has U10 and V10
         """
         u = self.get('U')[-1,...]

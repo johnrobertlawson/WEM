@@ -103,7 +103,7 @@ class Figure(object):
         CBax = fig.add_axes([0.15,0.05,0.7,0.02])
         CB = plt.colorbar(cf,cax=CBax,orientation='horizontal')
         CB.set_label(label)
-        self.save(fig,fpath,fname)
+        self.save(fpath,fname)
 
     def basemap_setup(self,smooth=1,lats=False,lons=False,proj='merc',
                         Nlim=False,Elim=False,Slim=False,Wlim=False):

@@ -34,7 +34,8 @@ class BirdsEye(Figure):
         clvs    :   manually override contour levels
         """
         # import pdb; pdb.set_trace()
-        data = self.data.reshape((self.la_n,self.lo_n))
+        # data = self.data.reshape((self.la_n,self.lo_n))
+        data = self.data
 
         # List of args and dictionary of kwargs
         plotargs = [self.x,self.y,data]
@@ -87,7 +88,8 @@ class BirdsEye(Figure):
                     clvs=False,cmap=False,title=False,cb=True,
                     locations=False,m=False,x=False,y=False,
                     Nlim=False,Elim=False,Slim=False,Wlim=False,
-                    color='k',inline=False,lw=False,extend=False):
+                    color='k',inline=False,lw=False,extend=False,
+                    cblabel=False):
 
         """
         Generic method that plots any matrix of data on a map
@@ -124,8 +126,8 @@ class BirdsEye(Figure):
             self.x = x
             self.y = y
 
-        self.la_n = self.data.shape[-2]
-        self.lo_n = self.data.shape[-1]
+        # self.la_n = self.data.shape[-2]
+        # self.lo_n = self.data.shape[-1]
 
         plotargs, plotkwargs = self.get_plot_arguments(clvs=clvs,cmap=cmap,color=color)
 
@@ -148,6 +150,8 @@ class BirdsEye(Figure):
             f1 = self.bmap.pcolormesh(*plotargs,**plotkwargs)
         elif plottype == 'scatter':
             f1 = self.bmap.scatter(*plotargs,**plotkwargs)
+        # elif plottype == 'quiver':
+            # f1 = self.bmap.quiver(*plotargs,**plotkwargs) 
         else:
             print("Specify correct plot type.")
             raise Exception
@@ -168,14 +172,20 @@ class BirdsEye(Figure):
             plt.title(title)
         if cb != False:
             if cb==True:
-                plt.colorbar(f1,orientation='vertical',ax=self.ax)
+                cb1 = plt.colorbar(f1,orientation='vertical',ax=self.ax)
+            elif cb=='horizontal':
+                cb1 = plt.colorbar(f1,orientation='horizontal',ax=self.ax)
             elif cb == 'only':
                 save = False
                 self.fig,self.ax = plt.subplots(figsize=(4,0.8))
-                plt.colorbar(f1,cax=self.ax,orientation='horizontal')
+                cb1 = plt.colorbar(f1,cax=self.ax,orientation='horizontal')
+                if isinstance(cblabel,str):
+                    cb1.set_label(cblabel)
                 self.save(outdir,fname+'_cb')
             else:
-                plt.colorbar(f1,orientation='vertical',cax=cb)
+                cb1 = plt.colorbar(f1,orientation='vertical',cax=cb)
+        if cb and isinstance(cblabel,str):
+            cb1.set_label(cblabel)
         if save:
             self.save(outdir,fname)
             plt.close(self.fig)
@@ -183,7 +193,7 @@ class BirdsEye(Figure):
             return f1
 
     def plot_streamlines(self,U,V,outdir,fname,lats=False,lons=False,smooth=1,
-                            title=False,lw_speed=False):
+                            title=False,lw_speed=False,density=1.8):
         """
         Plot streamlines.
 
@@ -192,7 +202,7 @@ class BirdsEye(Figure):
 
         lw_speed    :   linewidth is proportional to wind speed
         """
-        m,x,y = self.basemap_setup()
+        m,x,y = self.basemap_setup(lats=lats,lons=lons)
 
         if lw_speed:
             wind = N.sqrt(U**2 + V**2)
@@ -204,8 +214,10 @@ class BirdsEye(Figure):
             U = stats.gauss_smooth(U,smooth)
             V = stats.gauss_smooth(V,smooth)
 
-        m.streamplot(x[self.W.x_dim/2,:],y[:,self.W.y_dim/2],U,V,
-                        density=1.8,linewidth=lw,color='k',arrowsize=3)
+        # m.streamplot(x[self.W.x_dim/2,:],y[:,self.W.y_dim/2],U,V,
+                        # density=density,linewidth=lw,color='k',arrowsize=3)
+        m.streamplot(x,y,U,V,
+                        density=density,linewidth=lw,color='k',arrowsize=3)
 
         if isinstance(title,basestring):
             self.ax.set_title(title)
@@ -262,3 +274,7 @@ class BirdsEye(Figure):
         fname = self.create_fname(*naming)
         self.save(outpath,fname)
 
+    def make_subplot_label(ax,label):
+        ax.text(0.05,0.85,label,transform=ax.transAxes,
+            bbox={'facecolor':'white'},fontsize=15,zorder=1000)
+        return

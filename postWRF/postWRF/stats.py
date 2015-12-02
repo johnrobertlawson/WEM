@@ -14,7 +14,7 @@ import WEM.utils as utils
 
 from wrfout import WRFOut
 
-def std(ncfiles,vrbl,utc=False,level=False,other=False):
+def std(ncfiles,vrbl,utc=False,level=False,other=False,axis=0):
     """
     Find standard deviation in along axis of ensemble
     members. Returns matrix x-y for plotting
@@ -23,6 +23,8 @@ def std(ncfiles,vrbl,utc=False,level=False,other=False):
         # print("Ensemble member {0} loaded.".format(n))
         W = WRFOut(nc)
         vrbl_array = W.get(vrbl,utc=utc,level=level,other=other)
+        if vrbl=='cref':
+            vrbl_array[vrbl_array<0] = 0
 
         if n==0:
             dims = [len(ncfiles),] + list(vrbl_array.shape)
@@ -30,8 +32,47 @@ def std(ncfiles,vrbl,utc=False,level=False,other=False):
         all_members[n,...] = vrbl_array[...]
         # import pdb; pdb.set_trace()
 
-    std = N.std(all_members,axis=0)
+    std = N.std(all_members,axis=axis)
     return std
+
+def std_ttest(ncfiles1,ncfiles2,vrbl,utc=False,level=False,other=False):
+    """
+    Find standard deviation in along axis of ensemble
+    members. Returns matrix x-y for plotting. Returns sig test
+    """
+    std = []
+    std_ave = []
+
+    for ncfiles in (ncfiles1, ncfiles2):
+        for n, nc in enumerate(ncfiles):
+            # print("Ensemble member {0} loaded.".format(n))
+            W = WRFOut(nc)
+            vrbl_array = W.get(vrbl,utc=utc,level=level,other=other)
+            if vrbl=='cref':
+                vrbl_array[vrbl_array<0] = 0
+
+            if n==0:
+                dims = [len(ncfiles),] + list(vrbl_array.shape)
+                all_members = N.zeros(dims)
+            all_members[n,...] = vrbl_array[...]
+            # sample[n,...] = vrbl_array[
+            # import pdb; pdb.set_trace()
+
+        sample=all_members
+        std.append(N.std(sample,axis=0)[0,0,:,:])
+        std_ave.append(N.std(all_members, axis=None))
+        
+    # N.random.shuffle(std[0])
+    # N.random.shuffle(std[1])
+
+    choice0 = N.random.choice(std[0].flatten(),size=1000)
+    choice1 = N.random.choice(std[1].flatten(),size=1000)
+    # import pdb; pdb.set_trace()
+
+    # tstat, pvalue = scipy.stats.ttest_rel(std[0],std[1],axis=None)
+    tstat, pvalue = scipy.stats.ttest_rel(choice0,choice1,axis=None)
+
+    return std_ave[0], std_ave[1], tstat, pvalue
 
 def gauss_kern(size, sizey=None):
     """

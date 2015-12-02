@@ -431,18 +431,27 @@ def netcdf_files_in(folder,dom=1,init_time=0,model='auto',return_model=False):
         # Get files, check prefix
         files = glob.glob(os.path.join(folder,'*'))
         matches = 0
+        model_test = []
         for f in files:
-            model_test = determine_model(f.split('/')[-1])
-            if model_test:
-                matches += 1
-                model = model_test
+            model_test.append(determine_model(f.split('/')[-1]))
+            # print(model_test)
+            model_set = set(model_test)
+            # import pdb; pdb.set_trace()
+            # if model_test:
+                # matches += 1
+                # model = model_test
 
+        model_set.discard(False)
+        matches = len(model_set)
+        # import pdb; pdb.set_trace()
         if matches < 1:
             print("No netcdf files found.")
             raise Exception
         elif matches > 1 and isinstance(t,str):
             print("Ambiguous netcdf file selection. Specify model?")
             raise Exception
+        else:
+            model = list(model_set)[0]
 
     # import pdb; pdb.set_trace()
     if model=='wrfout':
@@ -458,6 +467,7 @@ def netcdf_files_in(folder,dom=1,init_time=0,model='auto',return_model=False):
     if t=='auto':
         # We assume the user has wrfout files in different folders for different times
         f = glob.glob(os.path.join(folder,pfx+'*'))
+        # import pdb; pdb.set_trace()
         if len(f) != 1:
             print("Ambiguous netCDF4 selection.")
             raise Exception
@@ -875,7 +885,7 @@ def generate_times(idate,fdate,interval):
     """
     it = calendar.timegm(idate)
     ft = calendar.timegm(fdate)
-    times = range(it,ft,interval)
+    times = N.arange(it,ft,interval,dtype=int)
     return times
 
 def generate_colours(M,n):

@@ -75,7 +75,8 @@ class WRFEnviron(object):
                 locations=False,cb=True,match_nc=False,
                 Nlim=False,Elim=False,Slim=False,Wlim=False,
                 other=False,color='k',inline=False,lw=False,
-                extend=False):
+                extend=False,save=True,accum_hr=False,
+                cblabel=False):
         """Basic birds-eye-view plotting.
 
         This script is top-most and decides if the variables is
@@ -180,7 +181,12 @@ class WRFEnviron(object):
         self.W = self.get_netcdf(ncdir,ncf=ncf,nct=nct,dom=dom)
         # lats, lons = self.W.get_limited_domain(bounding)
         # import pdb; pdb.set_trace()
-        data = self.W.get(vrbl,utc=utc,level=level,lons=False,lats=False,other=other)[0,0,:,:]
+        if vrbl == 'accum_precip':
+            if not accum_hr:
+                raise Exception("Set accumulation period")
+            data = self.W.compute_accum_rain(utc,accum_hr)[0,0,:,:]
+        else:
+            data = self.W.get(vrbl,utc=utc,level=level,lons=False,lats=False,other=other)[0,0,:,:]
         # Needs to be shape [1,1,nlats,nlons].
         if smooth>1:
             data = stats.gauss_smooth(data,smooth)
@@ -199,12 +205,12 @@ class WRFEnviron(object):
         fname = self.create_fname(vrbl,utc,level,f_suffix=f_suffix, f_prefix=f_prefix,other=other)
         F = BirdsEye(self.W,fig=fig,ax=ax)
         # import pdb; pdb.set_trace()
-        F.plot2D(data,fname,outdir,lats=lats,lons=lons,
+        cb = F.plot2D(data,fname,outdir,lats=lats,lons=lons,
                     plottype=plottype,smooth=smooth,
                     clvs=clvs,cmap=cmap,locations=locations,
                     cb=cb,color=color,inline=inline,lw=lw,
-                    extend=extend)
-
+                    extend=extend,save=save,cblabel=cblabel)
+        return cb
 
     def get_cmap_clvs(self,vrbl,level,clvs=False,cmap=False):
        
@@ -848,7 +854,7 @@ class WRFEnviron(object):
 
     def plot_streamlines(self,utc,level,ncdir,outdir,ncf=False,nct=False,
                             f_prefix=False,f_suffix=False,dom=1,smooth=1,
-                            fig=False,ax=False,bounding=False):
+                            fig=False,ax=False,bounding=False,density=1.8):
         """
         Plot streamlines of wind at a level.
 
@@ -905,21 +911,34 @@ class WRFEnviron(object):
         level = self.get_level_string(level)
         # Data
         self.W = self.get_netcdf(ncdir,ncf=ncf,nct=nct,dom=dom)
-        lats, lons = self.W.get_limited_domain(bounding)
+        # lats, lons = self.W.get_limited_domain(bounding)
+        lons = False
+        lats = False
 
         if level=='2000hPa':
-            U = self.W.get('U10',utc,level,lons,lats)[0,:,:]
-            V = self.W.get('V10',utc,level,lons,lats)[0,:,:]
+            U = self.W.get('U10',utc,level,lons,lats)[0,0,:,:]
+            V = self.W.get('V10',utc,level,lons,lats)[0,0,:,:]
         else:
             U = self.W.get('U',utc,level,lons,lats)[0,0,:,:]
             V = self.W.get('V',utc,level,lons,lats)[0,0,:,:]
 
+        if isinstance(bounding,dict):
+            U,lats,lons = utils.return_subdomain(U,self.W.lats1D,self.W.lons1D,
+                                bounding['Nlim'],bounding['Elim'],
+                                bounding['Slim'],bounding['Wlim'],fmt='latlon')
+            V,lats,lons = utils.return_subdomain(V,self.W.lats1D,self.W.lons1D,
+                                bounding['Nlim'],bounding['Elim'],
+                                bounding['Slim'],bounding['Wlim'],fmt='latlon')
+        # else:
+            # lats = False
+            # lons = False
         self.F = BirdsEye(self.W,fig=fig,ax=ax)
         # disp_t = utils.string_from_time('title',utc)
         # print("Plotting {0} at lv {1} for time {2}.".format(
                 # 'streamlines',lv,disp_t))
         fname = self.create_fname('streamlines',utc,level)
-        self.F.plot_streamlines(U,V,outdir,fname)
+        # import pdb; pdb.set_trace()
+        self.F.plot_streamlines(U,V,outdir,fname,density=density,lats=lats,lons=lons)
 
     def plot_strongest_wind(self,itime,ftime,level=2000,ncdir=False,
                             outdir=False,ncf=False,nct=False,
@@ -991,7 +1010,8 @@ class WRFEnviron(object):
         
         F = BirdsEye(self.W,fig=fig,ax=ax)
         fname = self.create_fname('strongestwind',ftime,level=level,f_suffix='_'+deltahr)
-        F.plot2D(data,fname,outdir,clvs=clvs,cb=cb)
+        xx = F.plot2D(data,fname,outdir,clvs=clvs,cb=cb)
+        return xx
 
     def probability_threshold(self,ensemble,vrbl,overunder,threshold,itime,ftime,smooth=False,
                             level=2000, outdir=False,f_prefix=False,f_suffix=False,bounding=False,
@@ -1106,7 +1126,8 @@ class WRFEnviron(object):
 
     def plot_xs(self,vrbl,utc,ncdir,outdir,latA=0,lonA=0,latB=0,lonB=0,
                 ncf=False,nct=False,f_prefix=0,f_suffix=0,dom=1,
-                clvs=False,ylim=False):
+                clvs=False,ylim=False,ztop=8,cmap='jet',
+                contour_vrbl='skip',contour_clvs=False):
         """
         Plot cross-section.
 
@@ -1163,13 +1184,11 @@ class WRFEnviron(object):
         :type ylim:         list,tuple,bool
 
         """
-        self.W = self.get_netcdf(wrf_sd,wrf_nc,dom=dom)
+        self.W = self.get_netcdf(ncdir,ncf=ncf,nct=nct,dom=dom)
 
-        outpath = self.get_outpath(out_sd)
-
-        XS = CrossSection(self.C,self.W,latA,lonA,latB,lonB)
-
-        XS.plot_xs(vrbl,utc,outpath,clvs=clvs,ztop=ztop)
+        XS = CrossSection(self.W,latA,lonA,latB,lonB)
+        XS.plot_xs(vrbl,utc,outdir,clvs=clvs,ztop=ztop,f_suffix=f_suffix,cmap=cmap,
+                contour_vrbl=contour_vrbl,contour_clvs=contour_clvs)
 
 
     def cold_pool_strength(self,utc,ncdir=False,outdir=False,ncf=False,nct=False,
@@ -1661,7 +1680,7 @@ class WRFEnviron(object):
     def plot_radar(self,utc,datadir,outdir=False,Nlim=False,Elim=False,
                     Slim=False,Wlim=False,ncdir=False,nct=False,
                     ncf=False,dom=1,composite=False,locations=False,
-                    fig=False,ax=False,cb=True):
+                    fig=False,ax=False,cb=True,compthresh=False):
         """
         Plot verification radar.
 
@@ -1681,10 +1700,14 @@ class WRFEnviron(object):
             radars = {}
             for n,t in enumerate(utc):
                 radars[n] = Radar(t,datadir)
+                if compthresh:
+                    dBZ = radars[n].get_dBZ(radars[n].data)
+                    radars[n].data[dBZ<compthresh] = 0
                 if n == 0:
                     stack = radars[0].data
                 else:
                     stack = N.dstack((stack,radars[n].data))
+                # import pdb; pdb.set_trace()
 
             max_pixel = N.max(stack,axis=2)
             # Create new instance for the methods
@@ -1743,9 +1766,14 @@ class WRFEnviron(object):
                 ave_stack = utils.vstack_loop(N.asarray(permdata),ave_stack)
 
             total_ave = N.average(ave_stack,axis=0)
-            plt.plot(times,total_ave)
 
-        plt.legend(labels,loc=2,fontsize=9)
+            try:
+                ls = infodict[ex]['ls']
+            except KeyError:
+                ls = '_'
+            plt.plot(times,total_ave,ls)
+
+        plt.legend(labels,loc=2,handlelength=3)
         if ylim:
             plt.ylim(ylim)
         times_tup = [time.gmtime(t) for t in times]
@@ -1756,6 +1784,9 @@ class WRFEnviron(object):
         plt.gca().set_ylabel("Difference {0} Energy ({1})".format(
                             energy.title(),units))
         fname = self.create_fname('allensembles',f_prefix=f_prefix,f_suffix=f_suffix)
+
+        plt.tick_params(top='off')
+
         fpath = os.path.join(outdir,fname)
         plt.gca().relim
         plt.gca().autoscale_view()

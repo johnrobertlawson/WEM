@@ -89,7 +89,9 @@ class CrossSection(Figure):
         self.xx = N.linspace(self.xA,self.xB,self.hyp_pts)
         self.yy = N.linspace(self.yA,self.yB,self.hyp_pts)
         # self.angle = N.radians(90.0) + N.arctan((self.yy[0]-self.yy[-1])/(self.xx[-1]-self.xx[0]))
-        self.angle = N.math.atan2((self.yy[0]-self.yy[-1]),(self.xx[0]-self.xx[-1])) + N.pi
+        # self.angle = N.math.atan2((self.yy[-1]-self.yy[0]),(self.xx[-1]-self.xx[0])) + N.pi
+        self.angle = N.math.atan2((self.xx[-1]-self.xx[0]),(self.yy[-1]-self.yy[0])) + N.pi
+        # self.angle = N.math.atan2((self.yy[0]-self.yy[-1]),(self.xx[0]-self.xx[-1])) + N.pi
         # pdb.set_trace()
         return
     
@@ -139,6 +141,11 @@ class CrossSection(Figure):
         y,x,exactlat,exactlon = utils.getXY(self.W.lats1D,self.W.lons1D,lat,lon)
         return x,y
 
+    def get_wrfout_slice(self,vrbl,utc=False,level=False,x=False,y=False):
+        data = self.W.get(vrbl,utc=utc,level=level)
+        sliced = data[:,:,y,x]
+        return sliced
+
     def get_height(self,t,x,y,z,pts):
         """
         Return terrain heights along cross-section
@@ -159,19 +166,23 @@ class CrossSection(Figure):
         Assuming t=0
         """
         # TODO: change API of W.get()
-        geopot = self.W.get('geopot',{'t':t,'la':y,'lo':x})
-        dryairmass = self.W.get('dryairmass',{'t':t,'la':y,'lo':x})
-        znu = self.W.get('ZNU',{'t':t})
-        znw = self.W.get('ZNW',{'t':t})
+        # geopot = self.W.get('geopot',utc=t,lats=y,lons=x)
+        geopot = N.swapaxes(self.get_wrfout_slice('geopot',utc=t,y=y,x=x)[0,:,:],1,0) # 2D
+        
+        # dryairmass = self.W.get('dryairmass',utc=t,lats=y,lons=x)
+        dryairmass = self.get_wrfout_slice('dryairmass',utc=t,y=y,x=x)[0,0,:] #1D
+        znu = self.W.get('ZNU',utc=t)[0,:,0,0] # 1D
+        znw = self.W.get('ZNW',utc=t)[0,:,0,0] # 1D
 
-        heighthalf = N.zeros((z,pts))
+        heighthalf = N.zeros((pts,z))
         for i in range(pts):
-            pfull = dryairmass[0,i] * znw[0,:]+self.W.P_top
-            phalf = dryairmass[0,i] * znu[0,:]+self.W.P_top
+            pfull = dryairmass[i] * znw[:]+self.W.P_top
+            phalf = dryairmass[i] * znu[:]+self.W.P_top
             for k in range(z):
-                heighthalf[k,i] = self.interp(geopot[0,:,i],pfull[:],phalf[k])/mc.g
+                # import pdb; pdb.set_trace()
+                heighthalf[i,k] = self.interp(geopot[i,:],pfull[:],phalf[k])/mc.g
 
-        terrain_z = geopot[0,0,:]/mc.g
+        terrain_z = geopot[:]/mc.g
         # pdb.set_trace()
         # TODO: import metconstants as mc
         # return heighthalf, terrain_z
@@ -202,7 +213,8 @@ class CrossSection(Figure):
 
 
     
-    def plot_xs(self,vrbl,ttime,outpath,clvs=0,ztop=0):
+    def plot_xs(self,vrbl,ttime,outpath,clvs=0,ztop=0,f_suffix=False,
+                    cmap='jet',contour_vrbl='skip',contour_clvs=False):
         """
         Inputs:
         vrbl        :   variable to plot, from this list:
@@ -211,7 +223,7 @@ class CrossSection(Figure):
         outpath     :   absolute path to directory to save output
 
         """
-        tidx = self.W.get_time_idx(ttime)
+        self.tidx = self.W.get_time_idx(ttime)
 
         xint = self.xx.astype(int)
         yint = self.yy.astype(int)
@@ -227,7 +239,7 @@ class CrossSection(Figure):
         # Generate ticks along cross-section
         xticks = N.arange(0,xs_len,xs_len/self.hyp_pts)
         xlabels = [r"%3.0f" %t for t in xticks]
-        grid = N.swapaxes(N.repeat(N.array(xticks).reshape(self.hyp_pts,1),self.W.z_dim,axis=1),0,1)
+        grid = N.repeat(N.array(xticks).reshape(self.hyp_pts,1),self.W.z_dim,axis=1)
 
         #########
         #### ADD SELF BELOW HERE
@@ -238,7 +250,7 @@ class CrossSection(Figure):
             print("Square domains only here")
         else:
             # TODO: allow easier change of defaults?
-            self.fig.gca().axis([0,(hyp_pts*self.W.dx/1000.0)-1,self.D.plot_zmin,self.D.plot_zmax+self.D.plot_dz])
+            self.fig.gca().axis([0,(self.hyp_pts*self.W.dx/1000.0)-1,self.D.plot_zmin,self.D.plot_zmax+self.D.plot_dz])
 
         # Logic time
         # First, check to see if v is in the list of computable or default
@@ -247,67 +259,57 @@ class CrossSection(Figure):
         # If not, raise Exception.
         # pdb.set_trace()
         # TODO: vailable_vars in WRFOut to check this
-        ps = {'t':tidx, 'la':yint, 'lo':xint}
-        
-        if vrbl in self.W.available_vrbls:
-            data = self.W.get(vrbl,ps)
-            
-            
-        elif vrbl is 'parawind':
-            u = self.W.get('U',ps)
-            v = self.W.get('V',ps)
-            data = N.cos(angle)*u - N.sin(angle)*v
-            # clvs = u_wind_levels
-            extends = 'both'
-            CBlabel = r'Wind Speed (ms$^{-1}$)'
+        # ps = {'utc':self.tidx, 'lats':yint, 'lons':xint}
+       
+        for nn, v in enumerate([vrbl,contour_vrbl]):
+            print(v)
+            if v == 'skip':
+                continue
+            elif v in self.W.available_vrbls:
+                # data = self.W.get(vrbl,**ps)
+                data = self.get_wrfout_slice(v,utc=self.tidx,y=yint,x=xint)
+                
+            elif v is 'parawind':
+                # u = self.W.get('U',**ps)
+                # v = self.W.get('V',**ps)
+                u = self.get_wrfout_slice('U',utc=self.tidx,y=yint,x=xint)
+                v = self.get_wrfout_slice('V',utc=self.tidx,y=yint,x=xint)
+                data = N.cos(self.angle)*u - N.sin(self.angle)*v
+                # clvs = u_wind_levels
+                extends = 'both'
+                CBlabel = r'Wind Speed (ms$^{-1}$)'
 
-        elif vrbl is 'perpwind':
-            u = self.W.get('U',ps)
-            v = self.W.get('V',ps)
-            # Note the negative here. I think it's alright? TODO
-            data = -N.cos(angle)*v + N.sin(angle)*u
-            clvs = u_wind_levels
-            extends = 'both'
-            CBlabel = r'Wind Speed (ms$^{-1}$)'
+            elif v is 'perpwind':
+                u = self.get_wrfout_slice('U',utc=self.tidx,y=yint,x=xint)
+                v = self.get_wrfout_slice('V',utc=self.tidx,y=yint,x=xint)
+                # u = self.W.get('U',ps)
+                # v = self.W.get('V',ps)
+                # Note the negative here. I think it's alright? TODO
+                data = -N.cos(self.angle)*v + N.sin(self.angle)*u
+                # clvs = u_wind_levels
+                extends = 'both'
+                CBlabel = r'Wind Speed (ms$^{-1}$)'
 
-        else:
-            print("Unsupported variable",vrbl)
-            raise Exception
+            else:
+                print("Unsupported variable",v)
+                raise Exception
 
-        # lv = '2000' # Very hacky, setting surface level
-        # S = Scales(vrbl,lv)
+            if nn == 0:
+                kwargs = {}
+                kwargs['alpha'] = 0.6
+                #kwargs['extend'] = 'both'
+                if isinstance(clvs,N.ndarray):
+                    kwargs['levels'] = clvs
+                
+                data = N.swapaxes(data[0,:,:],1,0)    
+                cf = self.ax.contourf(grid,heighthalf,data,cmap=cmap,**kwargs)#,
+            else:
+                # import pdb; pdb.set_trace()       
+                data = N.swapaxes(data[0,:,:],1,0)    
+                ct = self.ax.contour(grid,heighthalf,data,colors=['k',],levels=contour_clvs,linewidths=0.3)
+                self.ax.clabel(ct,inline=1,fontsize=6,fmt='%d')
 
-        # multiplier = S.get_multiplier(vrbl,lv)
-
-        # This is awful....
-        # if S.cm:
-            # cmap = S.cm
-        # elif isinstance(S.clvs,N.ndarray):
-            # if plottype == 'contourf':
-                # cmap = plt.cm.jet
-            # else:
-                # pass
-        # else:
-            # cmap = plt.cm.jet
-
-        # if clvs: pass # This is where to get clvs...
-        #clvs = N.arange(-25,30,5)
-        kwargs = {}
-        kwargs['alpha'] = 0.6
-        #kwargs['extend'] = 'both'
-        if isinstance(clvs,N.ndarray):
-            kwargs['levels'] = clvs
-            
-        cf = self.ax.contourf(grid,heighthalf,data[0,...],**kwargs)#,
-        # cf = self.ax.contourf(grid[0,:],grid[:,0],data[0,...],alpha=0.6,extend='both')#levels=clvs,
-                        # extend='both')#, cmap=cmap)
-                        #norm=,
-
-        # cf = self.ax.contourf(data[0,...])
-        # pdb.set_trace()
-        self.ax.plot(xticks,terrain_z,color='k',)
-        self.ax.fill_between(xticks,terrain_z,0,facecolor='lightgrey')
-        # What is this? TODO
+        self.ax.fill_between(xticks,terrain_z[:,0],0,facecolor='lightgrey')
         labeldelta = 15
 
         self.ax.set_yticks(N.arange(self.D.plot_zmin,
@@ -319,9 +321,9 @@ class CrossSection(Figure):
 
         if ztop:
             self.ax.set_ylim([0,ztop*1000])
-        naming = [vrbl,'xs',datestr]
+        naming = [vrbl,'xs',datestr,f_suffix]
         fname = self.create_fname(*naming)
-        self.save(self.fig,outpath,fname)
+        self.save(outpath,fname)
         #self.close()
         
         CBlabel = str(vrbl)
@@ -340,11 +342,19 @@ class CrossSection(Figure):
             self.create_colorbar(fpath,fname,cf,label=label)
 
     
-    def draw_transect(self,outpath,fname):
+    def draw_transect(self,outpath,fname,radar=True):
         B = BirdsEye(self.W)
         m,x,y = B.basemap_setup()
         m.drawgreatcircle(self.lonA,self.latA,self.lonB,self.latB)
-        self.save(B.fig,outpath,fname)
+        tv = 'Q_pert'
+        lv = 800
+        clvs = N.arange(-0.005,0.0052,0.0002)
+        cmap='BrBG'
+        # S = Scales('cref',False)
+        # clvs = S.clvs
+        # cmap = S.cm
+        m.contourf(x,y,self.W.get(tv,utc=self.tidx,level=lv)[0,0,:,:],levels=clvs,cmap=cmap)
+        B.save(outpath,fname)
         
     def create_linenormal_xs(self,x,y,length_pts=3):
         """
