@@ -943,7 +943,8 @@ class WRFEnviron(object):
     def plot_strongest_wind(self,itime,ftime,level=2000,ncdir=False,
                             outdir=False,ncf=False,nct=False,
                             f_prefix=False,f_suffix=False,bounding=False,
-                            dom=1,clvs=False,fig=False,ax=False,cb=True):
+                            dom=1,clvs=False,fig=False,ax=False,cb=True,
+                            extend='max',cmap='jet',save=True):
         """
         Plot strongest wind at level between itime and ftime.
 
@@ -1010,7 +1011,8 @@ class WRFEnviron(object):
         
         F = BirdsEye(self.W,fig=fig,ax=ax)
         fname = self.create_fname('strongestwind',ftime,level=level,f_suffix='_'+deltahr)
-        xx = F.plot2D(data,fname,outdir,clvs=clvs,cb=cb)
+        xx = F.plot2D(data,fname,outdir,clvs=clvs,cb=cb,cmap=cmap,
+                extend=extend,save=save)
         return xx
 
     def probability_threshold(self,ensemble,vrbl,overunder,threshold,itime,ftime,smooth=False,
@@ -1127,7 +1129,9 @@ class WRFEnviron(object):
     def plot_xs(self,vrbl,utc,ncdir,outdir,latA=0,lonA=0,latB=0,lonB=0,
                 ncf=False,nct=False,f_prefix=0,f_suffix=0,dom=1,
                 clvs=False,ylim=False,ztop=8,cmap='jet',
-                contour_vrbl='skip',contour_clvs=False):
+                contour_vrbl='skip',contour_clvs=False,
+                avepts=False,shiftpts=False,
+                cftix=False,cflabel=False):
         """
         Plot cross-section.
 
@@ -1187,8 +1191,27 @@ class WRFEnviron(object):
         self.W = self.get_netcdf(ncdir,ncf=ncf,nct=nct,dom=dom)
 
         XS = CrossSection(self.W,latA,lonA,latB,lonB)
-        XS.plot_xs(vrbl,utc,outdir,clvs=clvs,ztop=ztop,f_suffix=f_suffix,cmap=cmap,
+        if avepts:
+            XS.plot_average(vrbl,avepts,utc,outdir,clvs=clvs,ztop=ztop,
+                    f_suffix=f_suffix,cmap=cmap,contour_vrbl=contour_vrbl,
+                    contour_clvs=contour_clvs,cflabel=cflabel,cftix=cftix)
+        else:
+            XS.plot_xs(vrbl,utc,outdir,clvs=clvs,ztop=ztop,f_suffix=f_suffix,cmap=cmap,
                 contour_vrbl=contour_vrbl,contour_clvs=contour_clvs)
+
+        if shiftpts is not False:
+            if f_suffix is False:
+                f_suffix = ''
+            for shn in range(-shiftpts,shiftpts+1):
+                if shn:
+                    XS.translate_xs(shn)
+                    super(CrossSection,XS).__init__(self.W)
+                    fsnew = f_suffix + '_SHIFT{0}'.format(shn)
+                    XS.plot_xs(vrbl,utc,outdir,clvs=clvs,ztop=ztop,
+                            f_suffix=fsnew,cmap=cmap,contour_vrbl=contour_vrbl,
+                            contour_clvs=contour_clvs)
+                else:
+                    XS.translate_xs(1)
 
 
     def cold_pool_strength(self,utc,ncdir=False,outdir=False,ncf=False,nct=False,

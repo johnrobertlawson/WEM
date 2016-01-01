@@ -30,10 +30,10 @@ std = 0
 profiles = 0
 frontogenesis = 0
 upperlevel = 0
-strongestwind = 0
+strongestwind = 1
 accum_rain = 0
 compute_dte = 0
-plot_1D_dte = 1 # To produce top-down maps
+plot_1D_dte = 0 # To produce top-down maps
 plot_3D_dte = 0 # To produce line graphs
 all_3D_dte = 0 # To produce line graphs for all averages
 delta_plot = 0
@@ -43,17 +43,17 @@ probability = 0
 # enstype = False
 # enstype = 'STCH'
 # enstype = 'STCH5'
-enstype = 'ICBC'
-# enstype = 'MXMP'
+# enstype = 'ICBC'
+enstype = 'MXMP'
 # enstype = 'STMX'
 
-case = '20060526'
+# case = '20060526'
 # case = '20090910'
-# case = '20110419'
+case = '20110419'
 # case = '20130815'
  
-IC = 'GEFSR2'
-# IC = 'NAM'
+# IC = 'GEFSR2'
+IC = 'NAM'
 # IC = 'RUC'
 # IC = 'GFS'
 # IC = 'RUC'
@@ -61,8 +61,10 @@ IC = 'GEFSR2'
 
 if enstype == 'STCH':
     experiments = ['s'+"%02d" %n for n in range(1,11)]
-    ensnames = ['p09',]
-    MP = 'ICBC'
+    ensnames = ['anl',]
+    # ensnames = ['p09',]
+    # MP = 'ICBC'
+    MP = 'WSM5'
     # MP = 'WDM6_Grau'
     # MP = 'Morrison_Hail'
 elif enstype == 'STCH5':
@@ -77,12 +79,12 @@ elif enstype == 'STMX':
                     'WDM6_Grau_STCH','WDM6_Hail_STCH',
                     'Morrison_Grau_STCH','Morrison_Hail_STCH',]
                     # 'ICBC_STCH']
-    # experiments = ['Ferrier_STCH',]
     ensnames = ['anl',]
 elif enstype == 'MXMP':
     experiments = ['WSM6_Grau','WSM6_Hail','Kessler','Ferrier',
                     'WSM5','WDM5','Lin','WDM6_Grau','WDM6_Hail',
                     'Morrison_Grau','Morrison_Hail','ICBC']
+    experiments = ['WSM5',]
     # experiments = ['WDM6_Grau',]
     ensnames = ['anl',]
 elif enstype == 'ICBC':
@@ -110,9 +112,11 @@ elif case[:4] == '2009':
     itime = (2009,9,10,23,0,0)
     ftime = (2009,9,11,14,0,0)
 elif case[:4] == '2011':
-    inittime = (2011,4,19,0,0,0)
+    nct = inittime = (2011,4,19,0,0,0)
     itime = (2011,4,19,18,0,0)
     ftime = (2011,4,20,12,0,0)
+    iwind = (2011,4,19,18,0,0)
+    fwind = (2011,4,20,12,0,0)
 elif case[:4] == '2013':
     inittime = (2013,8,15,0,0,0)
     itime = (2013,8,15,0,0,0)
@@ -360,7 +364,9 @@ if strongestwind:
     for en in ensnames:
         for ex in experiments:
             outdir, ncdir = get_folders(en,ex)
-            p.plot_strongest_wind(iwind,fwind,2000,ncdir,outdir,clvs=windlvs)
+            # p.plot_strongest_wind(iwind,fwind,2000,ncdir,outdir,clvs=windlvs)
+            p.plot_strongest_wind(iwind,fwind,2000,ncdir=ncdir,nct=nct,outdir=outdir,clvs=windlvs,dom=1,
+                    cmap='jet',cb=True)
 
 if accum_rain:
     for en in ensnames:

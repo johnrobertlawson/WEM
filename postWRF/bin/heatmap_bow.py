@@ -18,7 +18,7 @@ from WEM.postWRF.postWRF.ruc import RUC
 #from WEM.postWRF.postWRF.rucplot import RUCPlot
 
 RUCdir = '/chinook2/jrlawson/bowecho/RUCclimo/heatmap/'
-outdir = '/home/jrlawson/public_html/bowecho/'
+outdir = '/home/jrlawson/public_html/bowecho/heatmaps'
 
 p = WRFEnviron()
 
@@ -42,7 +42,8 @@ compute = 1
 plot = 1
 
 # Set size of box to get data over
-boxwidth = 7
+# boxwidth = 7
+boxwidth = 15
 if boxwidth%2 == 0:
     raise Exception("Box width needs to be odd number")
 else:
@@ -54,7 +55,7 @@ starthr = 4
 # That's 35 times.
 ntimes = 35
 # Key is variable, value is level(s) in tuple
-vrbls = {'temp_advection':(700,850),'omega':(500,),'lyapunov':(500,),'RH':(700,850)}
+vrbls = {'temp_advection':(700,850),'omega':(500,),'lyapunov':(300,500,),'RH':(700,850)}
 # vrbls = {'temp_advection':(850,)}
 lookup_cmap = {'temp_advection':M.cm.Reds, 'omega':M.cm.PuRd, 'lyapunov':M.cm.Blues,'RH':M.cm.YlGn}
 # Rows are cases (14), columns are values (each time)
@@ -74,7 +75,7 @@ printme = ['{0} {1},{2}'.format(a,b,c) for a,b,c in zip(cases['casedate'],cases[
 for o,p in enumerate(printme):
     if cases['type'][o] in ok_types:
         print(p)
-raise Exception
+# raise Exception
 
 if compute:
 
@@ -149,12 +150,12 @@ if compute:
 
 
     # Sort array into descending order of skill
-    dict_fname = os.path.join(RUCdir,'heatmap_dict.pickle')
+    dict_fname = os.path.join(RUCdir,'heatmap_dict_{0}box.pickle'.format(boxwidth))
     with open(dict_fname,'wb') as f:
         pickle.dump(DATA,f)
 
 if plot:
-    dict_fpath = os.path.join(RUCdir,'heatmap_dict.pickle')
+    dict_fpath = os.path.join(RUCdir,'heatmap_dict_{0}box.pickle'.format(boxwidth))
     with open(dict_fpath,'rb') as f:
         HEAT = pickle.load(f)
 
@@ -292,8 +293,8 @@ if plot:
                             top='off',left='off',right='off')
                 ax2.set_ylim(14,0)
 
-                outfname = 'Heatmap_{0}_{1}_{2}hPa.png'.format(
-                            rel_choice,vrbl,lv)
+                outfname = 'Heatmap_{0}_{1}_{2}hPa_{3}box.png'.format(
+                            rel_choice,vrbl,lv,boxwidth)
                 outfpath = os.path.join(outdir,outfname)
                 fig.tight_layout()
                 fig.savefig(outfpath)

@@ -9,9 +9,13 @@ from obs import Radar
 
 class SAL(object):
     def __init__(self,Wctrl_fpath,Wmod_fpath,vrbl,utc,lv=False,
-                    accum_hr=False,radar_datadir=False):
+                    accum_hr=False,radar_datadir=False,thresh=False,
+                    footprint=500):
+        self.utc = utc
         self.C = {}
         self.M = {}
+        self.thresh = thresh
+        self.footprint = footprint
 
         self.M['WRFOut'] = WRFOut(Wmod_fpath)
         self.dx = self.M['WRFOut'].dx
@@ -37,10 +41,21 @@ class SAL(object):
 
         # Set negative values to 0 
         # if vrbl == 'REFL_comp':
-        # import pdb; pdb.set_trace()
         self.C['data'][self.C['data']<0] = 0
         self.M['data'][self.M['data']<0] = 0
         self.vrbl = vrbl
+       
+        """
+        fig, ax = plt.subplots(1)
+        ax.pcolor(self.C['data'])
+        fig.savefig('/home/jrlawson/public_html/bowecho/SALtests/obs_pcolor.png')
+        plt.close(fig)
+        fig, ax = plt.subplots(1)
+        ax.pcolor(self.M['data'])
+        fig.savefig('/home/jrlawson/public_html/bowecho/SALtests/mod_pcolor.png')
+        plt.close(fig)
+        import pdb; pdb.set_trace()
+        """
 
         self.identify_objects()
         self.compute_amplitude()
@@ -78,8 +93,8 @@ class SAL(object):
         self.C['Rmax'] = N.max(self.C['data'])
         self.M['Rmax'] = N.max(self.M['data'])
         if (self.vrbl == 'REFL_comp') or (self.vrbl=='cref'):
-            self.M['Rstar'] = 40.0
-            self.C['Rstar'] = 40.0
+            self.M['Rstar'] = float(self.thresh)
+            self.C['Rstar'] = float(self.thresh)
         else:
             self.C['Rstar'] = self.f * self.C['Rmax']
             self.M['Rstar'] = self.f * self.M['Rmax']
@@ -103,6 +118,7 @@ class SAL(object):
         # vector subtraction
         dist_km = self.vector_diff_km(self.M['x_CoM'],self.C['x_CoM'])
         L1 = dist_km/self.d
+        print("L1 = {0}".format(L1))
         return L1
 
     def vector_diff_km(self,v1,v2):
@@ -115,6 +131,7 @@ class SAL(object):
         r_ctrl = self.compute_r(self.C)
         r_mod = self.compute_r(self.M)
         L2 = 2*(N.abs(r_ctrl-r_mod)/self.d)
+        print("L2 = {0}".format(L2))
         return L2
     
     def compute_r(self,dic):
@@ -128,7 +145,7 @@ class SAL(object):
         return r
 
     def object_operators(self,dic):
-        nsize = 50
+        nsize = self.footprint
         thresh = dic['Rstar']
         data = dic['data']
 
@@ -140,7 +157,7 @@ class SAL(object):
 
         sizes = ndimage.sum(mask, labeled, range(num_objects+1))
 
-        masksize = sizes < 25
+        masksize = sizes < nsize
         remove_pixel = masksize[labeled]
         labeled[remove_pixel] = 0
 
@@ -166,6 +183,23 @@ class SAL(object):
                 R_objs_count += dic['objects'][l]['Rn']
 
         dic['R_tot'] = R_objs_count
+
+        """
+        if 'WRFOut' in dic.keys():
+            typ = 'M'
+        else:
+            typ = 'C'
+        fig, ax = plt.subplots(1)
+        ccc = ax.pcolor(label_im)
+        plt.colorbar(ccc)
+        fig.savefig('/home/jrlawson/public_html/bowecho/SALtests/{0}_objects_{1}.png'.format(typ,self.utc))
+        plt.close(fig)
+        # fig, ax = plt.subplots(1)
+        # ax.pcolor(self.M['data'])
+        # fig.savefig('/home/jrlawson/public_html/bowecho/SALtests/mod_pcolor.png')
+        # plt.close(fig)
+        # import pdb; pdb.set_trace()
+        """
 
         bow_radius = False
         if bow_radius:

@@ -24,18 +24,22 @@ nct = (2013,8,15,0,0,0)
 outdir = '/home/jrlawson/public_html/bowecho/paper2'
 # lims = {'Nlim':41.0,'Elim':-97.4,'Slim':38.3,'Wlim':-101.0}
 latA = 40.3
-lonA = -99.4
-latB = 39.1
-lonB = -98.4
+lonA = -99.3
+latB = 39.0
+lonB = -98.2
 
-vrbl = 'Q_pert'; clvs=N.arange(-0.007,0.0075,0.0005);cmap='BrBG';ctvrbl='parawind';ctclvs=N.arange(-25,30,5)
+# latA = 39.6
+# latB = 39.7
+
+vrbl = 'Q_pert'; clvs=N.arange(-0.007,0.0071,0.0005);cftix=N.arange(-0.007,0.0105,0.0035);cmap='BrBG';ctvrbl='parawind';ctclvs=N.arange(-25,40,5)
 utc = (2013,8,15,21,0,0)
 dom = 1
 
 p = WRFEnviron()
 for nest in ncdir.keys():
     p.plot_xs(vrbl,utc,ncdir[nest],outdir,latA=latA,lonA=lonA,
-            latB=latB,lonB=lonB,nct=nct,dom=dom,f_suffix=nest,
-            clvs=clvs,cmap=cmap,contour_vrbl=ctvrbl,
-            contour_clvs=ctclvs)
+        latB=latB,lonB=lonB,nct=nct,dom=dom,f_suffix=nest,
+        clvs=clvs,cmap=cmap,contour_vrbl=ctvrbl,
+        contour_clvs=ctclvs,cftix=cftix,avepts=2,
+        cflabel='Water mixing ratio perturbation ($kg\,kg^{-1}$)')
 

@@ -2,7 +2,7 @@ import os
 import pdb
 import sys
 import matplotlib as M
-M.use('gtkagg')
+M.use('agg')
 import matplotlib.pyplot as plt
 import numpy as N
 
@@ -25,7 +25,7 @@ plot2D = 1
 radarplot = 0
 axesofdilatation = 0
 radarcomp = 0
-streamlines = 1
+streamlines = 0
 rucplot = 0
 coldpoolstrength = 0
 spaghetti = 0
@@ -41,10 +41,11 @@ plot_3D_dte = 0 # To produce line graphs
 all_3D_dte = 0 # To produce line graphs for all averages
 delta_plot = 0
 
+lims = {'Nlim':41.64,'Wlim':-89.12,'Slim':38.55,'Elim':-87.04}
 windlvs = N.arange(10,31,1)
 dom = 1
 ensnames = ['s{0:02d}'.format(e) for e in range(21,31)] + ['c00h',False]
-# ensnames = [False,'c00h',]
+ensnames = [False,'c00h',]
 # ensnames = ['s25','s26',]
 
 if case[:4] == '2006':
@@ -59,8 +60,10 @@ if case[:4] == '2006':
 
 elif case[:4] == '2011':
     nct = (2011,4,19,0,0,0)
-    itime = (2011,4,19,18,0,0)
-    ftime = (2011,4,20,9,0,0)
+    itime = (2011,4,20,0,0,0)
+    ftime = (2011,4,20,3,0,0)
+    iwind = (2011,4,19,18,0,0)
+    fwind = (2011,4,20,12,0,0)
     matchnc = '/chinook2/jrlawson/bowecho/20110419_hires/s21/wrfout_d02_2011-04-19_00:00:00'
 
 elif case[:4] == '2013':
@@ -76,7 +79,7 @@ else:
     raise Exception
 
 # hourly = (1.0/12)
-hourly = 3
+hourly = 1
 level = 2000
 times = utils.generate_times(itime,ftime,hourly*60*60)
 # times = [(2011,4,20,2,0,0),]
@@ -103,7 +106,8 @@ for ens in ensnames:
             outdir = os.path.join(outroot,'d0{0}'.format(dom))
 
         if strongestwind:
-            p.plot_strongest_wind(iwind,fwind,2000,ncdir=ncdir,nct=nct,outdir=outdir,clvs=windlvs,dom=dom)
+            p.plot_strongest_wind(iwind,fwind,2000,ncdir=ncdir,nct=nct,outdir=outdir,clvs=windlvs,dom=dom,
+                    cmap='jet',cb=True)
 
         for t in times:
             if plot2D:
@@ -115,9 +119,9 @@ for ens in ensnames:
                 # p.plot2D('lyapunov',t,700,ncdir=ncdir,nct=nct,outdir=outdir,cb=True,dom=dom,clvs=N.arange(-7.5,8.0,0.5)*10**-3,cmap='bwr')
                 # print(ncdir)
                 # p.plot2D('WSPD10MAX',t,ncdir=ncdir,nct=nct,outdir=outdir,cb=True,dom=dom,clvs=N.arange(10,31,1))
-                # p.plot2D('cref',t,ncdir=ncdir,nct=nct,outdir=outdir,cb=True,dom=dom)
+                p.plot2D('cref',t,ncdir=ncdir,nct=nct,outdir=outdir,cb=True,dom=dom,**lims)
                 # p.plot2D('REFL_comp',t,ncdir=ncdir,nct=nct,outdir=outdir,cb=True,dom=dom)
-                p.plot2D('shear',t,ncdir=ncdir,nct=nct,outdir=outdir,cb=True,dom=dom)
+                # p.plot2D('shear',t,ncdir=ncdir,nct=nct,outdir=outdir,cb=True,dom=dom)
                 # p.plot2D('wind10',t,ncdir=ncdir,outdir=outdir,locations=locs,cb=True,clvs=N.arange(5,32,2))
 
             if radarplot:

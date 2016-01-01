@@ -20,9 +20,9 @@ from WEM.postWRF.postWRF.wrfout import WRFOut
 # vrbl = 'PMSL_gradient'
 # vrbl = 'cref'
 # vrbl = 'RH'
-# vrbl = 'Q_pert'
+vrbl = 'Q_pert'
 # vrbl = 'shear'
-vrbl = 'wind'
+# vrbl = 'wind'
 # vrbl = 'wind10'
 
 # ncroot = '/chinook2/jrlawson/bowecho/20130815/GEFSR2_paper1/p09'
@@ -42,7 +42,7 @@ PLOTS = {
         'T2_gradient':{'lv':2000,'clvs':N.arange(0.0002,0.0024,0.0002),'cbl':'2-m pot. temp gradient (K/m)','cmap':'cubehelix_r','extend':'max'},
         'cref':{'lv':False,'clvs':False,'cbl':'Simulated composite reflectivity (dBZ)','cmap':False,'extend':False},
         'RH':{'lv':600,'clvs':N.arange(0,105,5),'cbl':'Relative Humidity (%)','cmap':'terrain_r','extend':'max'},
-        'Q_pert':{'lv':800,'clvs':N.arange(-0.005,0.0051,0.0001),'cbl':'Vapor mixing ratio perturbation (kg/kg)','cmap':'BrBG','extend':'both','cbtix':N.arange(-0.005,0.0075,0.0025)},
+        'Q_pert':{'lv':800,'clvs':N.arange(-0.007,0.0071,0.0001),'cbl':'Vapor mixing ratio perturbation (kg/kg)','cmap':'BrBG','extend':'both','cbtix':N.arange(-0.007,0.0105,0.0035)},
         'shear':{'lv':False,'clvs':N.arange(5,32.5,2.5),'cbl':'0--6 km vertical wind shear (m/s)','cmap':'YlGnBu','extend':'max'},
         'wind':{'lv':700,'clvs':N.arange(5,32.5,2.5),'cbl':'Wind speed (m/s)','cmap':'YlGnBu','extend':'max','cbtix':N.arange(5,35,5)},
         'wind10':{'lv':False,'clvs':N.arange(2,18.1,0.1),'cbl':'Wind speed (m/s)','cmap':'Paired','extend':'max'},

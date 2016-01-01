@@ -306,7 +306,7 @@ class StormReports(Obs):
 
     def plot(self,reports,itime,ftime,fname,outdir,Nlim=False,
             Elim=False,Slim=False,Wlim=False,
-            annotate=True,fig=False,ax=False,ss=50):
+            annotate=True,fig=False,ax=False,ss=50,color='blue'):
         reportidx = N.array([n for n,t in zip(range(len(self.r['EVENT_TYPE'])),self.r['EVENT_TYPE']) if reports in t])
         lateidx = N.where(self.datetimes > itime)
         earlyidx = N.where(self.datetimes < ftime)
@@ -331,7 +331,7 @@ class StormReports(Obs):
         m.drawcountries()
 
         m.scatter(self.r['BEGIN_LON'][plotidx],self.r['BEGIN_LAT'][plotidx],latlon=True,
-                    marker='D',facecolors='blue',edgecolors='black',s=ss)
+                    marker='D',facecolors=color,edgecolors='black',s=ss)
         fig.tight_layout()
         plt.savefig(os.path.join(outdir,fname))
 

@@ -17,6 +17,8 @@ ncroot = '/chinook2/jrlawson/bowecho/'
 
 p = WRFEnviron()
 
+lims = {'Nlim':41.05,'Wlim':-89.65,'Slim':38.60,'Elim':-86.90}
+
 # enstype = 'STCH5'
 enstype = 'STCH'
 # enstype = 'ICBC'
@@ -26,14 +28,14 @@ enstype = 'STCH'
 # case = '20060526'
 #case = '20090910'
 # case = '20110419'
-# case = '20110419_hires'
+case = '20110419_hires'
 # case = '20130815_hires'
-case = '20130815'
+# case = '20130815'
 paper = 1
 dom = 1
 
-IC = 'GEFSR2'; ens = 'p09'; MP = 'ICBC'
-# IC = 'NAM'; ens = 'anl'; MP = 'WSM5'
+# IC = 'GEFSR2'; ens = 'p09'; MP = 'ICBC'
+IC = 'NAM'; ens = 'anl'; MP = 'WSM5'
 # IC = 'RUC'
 # IC = 'GFS'; ens = 'anl'
 # IC = 'RUC'
@@ -96,8 +98,8 @@ elif case[:4] == '2009':
     ftime = (2009,9,11,12,0,0)
 elif case[:4] == '2011':
     inittime = (2011,4,19,0,0,0)
-    itime = (2011,4,19,18,0,0)
-    ftime = (2011,4,20,9,0,0)
+    itime = (2011,4,20,2,0,0)
+    ftime = (2011,4,20,3,0,0)
     iwind = (2011,4,19,20,0,0)
     fwind = (2011,4,20,10,0,0)
     matchnc = '/chinook2/jrlawson/bowecho/20110419/GEFSR2/c00/ICBC/wrfout_d01_2011-04-19_00:00:00'
@@ -179,7 +181,7 @@ else:
 outdir,datadir = get_verif_dirs()
 
 for t in times:
-    fig,axes = plt.subplots(nrow,ncol,figsize=(9,6))
+    fig,axes = plt.subplots(nrow,ncol,figsize=(9,7))
     pn = 0
     for ax,plot,en,ex in zip(axes.flat,plotlist,enslist,exlist):
         # cb = False
@@ -188,7 +190,7 @@ for t in times:
             outdir, ncdir, sp_outdir = get_folders(enslist[3],exlist[3])
             # import pdb; pdb.set_trace()
             print("Looking for data in {0}".format(ncdir))
-            p.plot_radar(t,datadir,outdir=False,ncdir=ncdir,fig=fig,ax=ax,cb=False,dom=dom,nct=inittime)
+            p.plot_radar(t,datadir,outdir=False,ncdir=ncdir,fig=fig,ax=ax,cb=False,dom=dom,nct=inittime,**lims)
             make_subplot_label(ax,labels[pn])
             pn += 1
         else:
@@ -229,17 +231,17 @@ for t in times:
             # vrbl='Z';lv=500;clvs=N.arange(5000,6000,50);pt='contour';sm=sm*3
             # vrbl = 'T2';lv = False;clvs=N.arange(280,316,1)
             # vrbl = 'shear';lv = False;clvs=N.arange(5,36,1); other = {'top':6,'bottom':0};extend='max';cmap='YlGnBu'
-            vrbl = 'Q_pert';lv=800;clvs=N.arange(-0.005,0.0051,0.0001);cmap='BrBG';extend='both'
+            # vrbl = 'Q_pert';lv=800;clvs=N.arange(-0.005,0.0051,0.0001);cmap='BrBG';extend='both'
             # vrbl = 'frontogen';lv = 2000; clvs = N.arange(-1.5,1.6,0.1)*10**-7
             # vrbl = 'cref';lv = False;clvs=False;sm=False;extend=False;cmap=False
             # vrbl = 'dptp';lv=2000;clvs=N.arange(-20,1,1);cmap='terrain';extend='min'
-            # vrbl = 'wind10';lv = 2000;clvs=N.arange(5,35,5);sm=False
+            vrbl = 'wind10';lv = 2000;clvs=N.arange(5,26,1);sm=False;extend='max'; cmap='jet';
             # vrbl = 'wind';lv = 850;clvs=N.arange(10,50,5);False;sm=False
             ######### COMMAND HERE #########
-            if plot!='RUC': cb = p.plot2D(vrbl,utc=t,level=lv,ncdir=ncdir,outdir=outdir,fig=fig,ax=ax,cb=False,clvs=clvs,nct=nct,match_nc=mnc,other=other,smooth=sm,plottype=pt,save=False,dom=dom,extend=extend,cmap=cmap)
+            if plot!='RUC': cb = p.plot2D(vrbl,utc=t,level=lv,ncdir=ncdir,outdir=outdir,fig=fig,ax=ax,cb=False,clvs=clvs,nct=nct,match_nc=mnc,other=other,smooth=sm,plottype=pt,save=False,dom=dom,extend=extend,cmap=cmap,**lims)
             # cb = p.plot2D(vrbl,utc=t,level=lv,ncdir=ncdir,outdir=outdir,fig=fig,ax=ax,cb=cb,clvs=clvs,nct=nct,match_nc=mnc,other=other,smooth=sm,plottype=pt)
             # p.frontogenesis(utc=t,level=lv,ncdir=ncdir,outdir=outdir,clvs=clvs,smooth=5,fig=fig,ax=ax,cb=False,match_nc=mnc,nct=nct)
-            # if plot!='RUC': cb = p.plot_strongest_wind(iwind,fwind,ncdir=ncdir,outdir=outdir,clvs=clvs,fig=fig,ax=ax,cb=False,nct=nct,dom=dom)
+            # if plot!='RUC': cb = p.plot_strongest_wind(iwind,fwind,ncdir=ncdir,outdir=outdir,clvs=clvs,fig=fig,ax=ax,cb=False,nct=nct,dom=dom,save=False)
             ################################
             if plot is not 'RUC':
                 try:
@@ -266,10 +268,10 @@ for t in times:
     # axes.flat[-1].colorbar(cb)
     # plt.colorbar(cb,cax=cax)
     # plt.colorbar(cb,cax=axes.flat[-1],use_gridspec=True)
-    fig.tight_layout()
+    fig.tight_layout(h_pad=0.01)
     fig.subplots_adjust(wspace = 0.1, hspace = 0.1)
 
-    if vrbl is not 'strongestwind':
+    if vrbl is not 'sstrongestwind':
         cbar_ax = fig.add_axes([0.81,0.12,0.16,0.023])
         cb1 = plt.colorbar(cb,cax=cbar_ax,orientation='horizontal')#,extend='both')
         cb1.set_label('Comp. Reflectivity (dBZ)')

@@ -80,15 +80,13 @@ class Figure(object):
             print("Saving figure {0}".format(fpath))
             plt.close(self.fig)
 
-    def just_one_colorbar(self,fpath):
-        """
-        docstring for just_one_colorbar"""
+    def just_one_colorbar(self,fpath,fname,cf,label=False,tix=False):
         try:
             with open(fpath): pass
         except IOError:
-            self.create_colorbar(fpath)
+            self.create_colorbar(fpath,fname,cf,label=label,tix=tix)
 
-    def create_colorbar(self,fpath,fname,cf,label=''):
+    def create_colorbar(self,fpath,fname,cf,label='',tix=False):
         """
         Create colorbar.
 
@@ -99,11 +97,11 @@ class Figure(object):
         label   :   colorbar label
 
         """
-        fig = plt.figure()
-        CBax = fig.add_axes([0.15,0.05,0.7,0.02])
-        CB = plt.colorbar(cf,cax=CBax,orientation='horizontal')
+        self.fig = plt.figure()
+        CBax = self.fig.add_axes([0.15,0.05,0.7,0.02])
+        CB = plt.colorbar(cf,cax=CBax,orientation='horizontal',ticks=tix)
         CB.set_label(label)
-        self.save(fpath,fname)
+        self.save(fpath,fname,tight=False)
 
     def basemap_setup(self,smooth=1,lats=False,lons=False,proj='merc',
                         Nlim=False,Elim=False,Slim=False,Wlim=False):
