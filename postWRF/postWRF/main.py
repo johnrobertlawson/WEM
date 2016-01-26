@@ -1696,8 +1696,9 @@ class WRFEnviron(object):
         :returns:       str
         """
         if isinstance(level,int):
-            # Level is in pressure
-            level = '{0}hPa'.format(level)
+            if level > 99:
+                # Level is in pressure
+                level = '{0}hPa'.format(level)
         return level
 
     def plot_radar(self,utc,datadir,outdir=False,Nlim=False,Elim=False,
@@ -1794,7 +1795,12 @@ class WRFEnviron(object):
                 ls = infodict[ex]['ls']
             except KeyError:
                 ls = '_'
-            plt.plot(times,total_ave,ls)
+
+            try:
+                lcolor = infodict[ex]['col']
+                plt.plot(times,total_ave,ls,color=lcolor)
+            except KeyError:
+                plt.plot(times,total_ave,ls,)
 
         plt.legend(labels,loc=2,handlelength=3)
         if ylim:

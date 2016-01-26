@@ -17,7 +17,9 @@ ncroot = '/chinook2/jrlawson/bowecho/'
 
 p = WRFEnviron()
 
-lims = {'Nlim':41.05,'Wlim':-89.65,'Slim':38.60,'Elim':-86.90}
+# lims = {'Nlim':41.05,'Wlim':-89.65,'Slim':38.60,'Elim':-86.90}
+lims = {'Nlim':42.0,'Wlim':-103.0,'Slim':35.0,'Elim':-95.0}
+# lims = {}
 
 # enstype = 'STCH5'
 enstype = 'STCH'
@@ -28,14 +30,14 @@ enstype = 'STCH'
 # case = '20060526'
 #case = '20090910'
 # case = '20110419'
-case = '20110419_hires'
+# case = '20110419_hires'
 # case = '20130815_hires'
-# case = '20130815'
+case = '20130815'
 paper = 1
 dom = 1
 
-# IC = 'GEFSR2'; ens = 'p09'; MP = 'ICBC'
-IC = 'NAM'; ens = 'anl'; MP = 'WSM5'
+IC = 'GEFSR2'; ens = 'p09'; MP = 'ICBC'
+# IC = 'NAM'; ens = 'anl'; MP = 'WSM5'
 # IC = 'RUC'
 # IC = 'GFS'; ens = 'anl'
 # IC = 'RUC'
@@ -115,7 +117,7 @@ elif case[:4] == '2013':
 else:
     raise Exception
 
-hourly = 1
+hourly = 3
 level = 2000
 
 def get_folders(en,ex,ic=IC):
@@ -180,6 +182,8 @@ else:
 
 outdir,datadir = get_verif_dirs()
 
+# for lvl in (1,2,4,7,10,15,20,25,30):
+
 for t in times:
     fig,axes = plt.subplots(nrow,ncol,figsize=(9,7))
     pn = 0
@@ -235,8 +239,8 @@ for t in times:
             # vrbl = 'frontogen';lv = 2000; clvs = N.arange(-1.5,1.6,0.1)*10**-7
             # vrbl = 'cref';lv = False;clvs=False;sm=False;extend=False;cmap=False
             # vrbl = 'dptp';lv=2000;clvs=N.arange(-20,1,1);cmap='terrain';extend='min'
-            vrbl = 'wind10';lv = 2000;clvs=N.arange(5,26,1);sm=False;extend='max'; cmap='jet';
-            # vrbl = 'wind';lv = 850;clvs=N.arange(10,50,5);False;sm=False
+            vrbl = 'wind10';lv = 2000;clvs=N.arange(10,40,5);sm=False;extend='max'; cmap='jet';
+            # vrbl = 'wind';lv = lvl;clvs=N.arange(10,40,5);False;sm=False;cmap='jet';extend='max'
             ######### COMMAND HERE #########
             if plot!='RUC': cb = p.plot2D(vrbl,utc=t,level=lv,ncdir=ncdir,outdir=outdir,fig=fig,ax=ax,cb=False,clvs=clvs,nct=nct,match_nc=mnc,other=other,smooth=sm,plottype=pt,save=False,dom=dom,extend=extend,cmap=cmap,**lims)
             # cb = p.plot2D(vrbl,utc=t,level=lv,ncdir=ncdir,outdir=outdir,fig=fig,ax=ax,cb=cb,clvs=clvs,nct=nct,match_nc=mnc,other=other,smooth=sm,plottype=pt)

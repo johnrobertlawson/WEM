@@ -32,15 +32,21 @@ members = ['WSM6_Grau','WSM6_Grau_MAX','WSM6_Grau_STCH','WSM6_Grau_STCH_MAX',
             'WDM5','WDM5_MAX','WDM5_STCH','WDM5_STCH_MAX']
 ncfile = 'wrfout_d01_2013-08-15_00:00:00'
 nct = (2013,8,15,0,0,0)
-itime = (2013,8,15,17,0,0)
-ftime = (2013,8,16,8,0,0)
-interval = 60*20
+# itime = (2013,8,15,17,0,0)
+itime = (2013,8,16,3,0,0)
+# ftime = (2013,8,16,8,0,0)
+ftime = (2013,8,16,4,0,0)
+# interval = 60*20
+interval = 60*60
+
 times = utils.generate_times(itime,ftime,interval)
-outdir = '/home/jrlawson/public_html/bowecho/paper1/all_MAX/animate'
+outdir = '/home/jrlawson/public_html/bowecho/paper1/all_MAX/'
+# outdir = '/home/jrlawson/public_html/bowecho/paper1/all_MAX/animate'
 
 MAXmembers = [x for x in members if x.endswith('MAX')]
 
-lims = {'Nlim':42.0,'Elim':-95.0,'Slim':34.0,'Wlim':-104.0}
+# lims = {'Nlim':42.0,'Elim':-95.0,'Slim':34.0,'Wlim':-104.0}
+lims = {'Nlim':39.5,'Elim':-95.6,'Slim':35.8,'Wlim':-101.5}
 
 def make_subplot_label(ax,label):
     ax.text(0.05,0.15,label,transform=ax.transAxes,

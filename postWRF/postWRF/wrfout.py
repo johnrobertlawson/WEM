@@ -272,6 +272,7 @@ class WRFOut(object):
         TODO: Get rid of integer arguments earlier in the method chain, and
         make them single-element numpy arrays.
         """
+        # import pdb; pdb.set_trace()
         # First, check dimension that is staggered (if any)
         destag_dim = self.check_destagger(vrbl)
 

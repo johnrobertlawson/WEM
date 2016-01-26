@@ -6,6 +6,7 @@ M.use('agg')
 import matplotlib.pyplot as plt
 import numpy as N
 import glob
+import collections
 
 sys.path.append('/home/jrlawson/gitprojects/')
 
@@ -30,12 +31,12 @@ std = 0
 profiles = 0
 frontogenesis = 0
 upperlevel = 0
-strongestwind = 1
+strongestwind = 0
 accum_rain = 0
 compute_dte = 0
 plot_1D_dte = 0 # To produce top-down maps
 plot_3D_dte = 0 # To produce line graphs
-all_3D_dte = 0 # To produce line graphs for all averages
+all_3D_dte = 1 # To produce line graphs for all averages
 delta_plot = 0
 powerspectrum = 0
 probability = 0
@@ -47,9 +48,9 @@ probability = 0
 enstype = 'MXMP'
 # enstype = 'STMX'
 
-# case = '20060526'
+case = '20060526'
 # case = '20090910'
-case = '20110419'
+# case = '20110419'
 # case = '20130815'
  
 # IC = 'GEFSR2'
@@ -413,11 +414,17 @@ if compute_dte or plot_3D_dte or plot_1D_dte or powerspectrum:
 if all_3D_dte:
     if case[:4] == '2006':
         # EXS = {'GEFS-ICBC':{},'NAM-MXMP':{},'NAM-STMX':{},'NAM-STCH5':{},'GEFS-STCH':{},'NAM-STCH':{},'GEFS-MXMP':{}}
-        EXS = {'ICBC (GEFS/R2)':{},'MXMP (NAM)':{},'STMX (NAM)':{},'STCH5 (NAM; WDM6 Grau)':{},'STCH (GEFS/R2 c00)':{},'STCH (NAM; WDM6 Grau)':{},'MXMP (GEFS/R2 c00)':{}}
+        # EXS = {'ICBC (GEFS/R2)':{},'MXMP (NAM)':{},'STMX (NAM)':{},'STCH5 (NAM; WDM6 Grau)':{},'STCH (GEFS/R2 c00)':{},'STCH (NAM; WDM6 Grau)':{},'MXMP (GEFS/R2 c00)':{}}
+        # EXS = {'ICBC-Thompson':{},'NAM-MXMP':{},'NAM-STMX':{},'NAM-WDM6Grau-STCH5':{},'c00-Thompson-STCH':{},'NAM-WDM6Grau-STCH':{},'c00-MXMP':{}}
+        EXS = collections.OrderedDict([('NAM-MXMP',{}),('NAM-STMX',{}),
+                ('ICBC-Thompson',{}),('NAM-WDM6Grau-STCH',{}),
+                ('NAM-WDM6Grau-STCH5',{}),('c00-MXMP',{}),('c00-Thompson-STCH',{})])
         IC = 'NAM';ensnames = 'anl'; MP = 'WDM6_Grau'
     else:
         # EXS = {'GEFS-ICBC':{},'NAM-MXMP':{},'GEFS-MXMP':{},'GEFS-STCH-thomp':{},'GEFS-STCH-morrh':{},'GEFS-STMX':{}}
-        EXS = {'ICBC (GEFS/R2)':{},'MXMP (NAM)':{},'MXMP (GEFS/R2 p09)':{},'STCH (GEFS/R2 p09; Thompson)':{},'STCH (GEFS/R2 p09; Morrison Hail)':{},'STMX (GEFS/R2 p09)':{}}
+        # EXS = {'ICBC (GEFS/R2)':{},'MXMP (NAM)':{},'MXMP (GEFS/R2 p09)':{},'STCH (GEFS/R2 p09; Thompson)':{},'STCH (GEFS/R2 p09; Morrison Hail)':{},'STMX (GEFS/R2 p09)':{}}
+        # EXS = {'ICBC-Thompson':{},'NAM-MXMP':{},'p09-MXMP':{},'p09-Thompson-STCH':{},'p09-MorrisonHail-STCH':{},'p09-STMX':{}}
+        EXS = collections.OrderedDict([('ICBC-Thompson',{}),('p09-STMX',{}),('p09-MXMP',{}),('NAM-MXMP',{}),('p09-MorrisonHail-STCH',{}),('p09-Thompson-STCH',{})])
         # Compare Morrison-Hail and Thompson STCH members.
         MP = 'ICBC'
         
@@ -429,21 +436,27 @@ if all_3D_dte:
             # stchmp = False
         # else:
             # IC,enstype,stchmp = exs
-        if 'GEFS' in exper:
-            IC = 'GEFSR2'
-        else:
+        if 'NAM' in exper:
             IC = 'NAM'
+        else:
+            IC = 'GEFSR2'
 
         if 'ICBC' in exper:
             enstype = 'ICBC'
+            col = '#56B4E9'
         elif 'MXMP' in exper:
             enstype = 'MXMP'
+            col = '#F0E442'
         elif 'STCH5' in exper:
             enstype = 'STCH5'
+            # col = '#D55E00'
+            col = '#CC79A7'
         elif 'STCH' in exper:
             enstype = 'STCH'
+            col = '#CC79A7'
         elif 'STMX' in exper:
             enstype = 'STMX'
+            col = '#E69F00'
         else:
             raise Exception
 
@@ -480,11 +493,19 @@ if all_3D_dte:
 
         pickledir,dummy = get_pickle_dirs(ensnames)
         print exper, pickledir
-        EXS[exper] = {'datadir':pickledir,'dataf':'DTE_'+enstype}
-        if 'ST' in exper:
+        # EXS[exper] = {'datadir':pickledir,'dataf':'DTE_'+enstype}
+        EXS[exper]['datadir'] = pickledir
+        EXS[exper]['dataf'] = 'DTE_'+enstype
+        EXS[exper]['col'] = col
+        if 'NAM' in exper:
             EXS[exper]['ls'] = '--'
         else:
             EXS[exper]['ls'] = '-'
+
+        if 'STCH5' in exper:
+            EXS[exper]['ls'] = ':'
+        if 'MorrisonHail' in exper:
+            EXS[exper]['ls'] = '-.'
 
     ylimits = [0,2e8]
     outdir = os.path.join(outroot,case)

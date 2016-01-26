@@ -45,6 +45,7 @@ DATA = {}
 for nest in ("SINGLE","NESTED"):
     DATA[nest] = {}
     DATA[nest]['W'] = WRFOut(os.path.join(ncdir[nest],ncfile))
+    import pdb; pdb.set_trace()
     DATA[nest]['U'] = DATA[nest]['W'].get('U',utc=utc,level=lv)[0,0,:,:]
     DATA[nest]['U'],lats,lons = utils.return_subdomain(DATA[nest]['U'],
                     DATA[nest]['W'].lats1D,DATA[nest]['W'].lons1D,
