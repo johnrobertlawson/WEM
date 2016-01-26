@@ -29,7 +29,7 @@ pickledir = '/chinook2/jrlawson/bowecho/paper4_pickles'
 
 baseurl = 'http://nomads.ncdc.noaa.gov/data/meso-eta-hi'
 
-startdate = datetime.datetime(2015,4,24,0,0,0)
+startdate = datetime.datetime(2015,4,1,0,0,0)
 # enddate = datetime.datetime(2015,4,3,0,0,0)
 enddate = datetime.datetime(2015,9,1,0,0,0)
 fhrs = N.arange(12,37,1)
@@ -136,6 +136,7 @@ if download:
 
 
 if SAL_precip_compute:
+    DATA = {}
     # SAL (new) grid
     SALmap, SALlons, SALlats, SAL_native_xx, SAL_native_yy = get_SAL_native_grid()
     SAL_native_mx, SAL_native_my = N.meshgrid(SAL_native_xx,SAL_native_yy)
@@ -154,88 +155,96 @@ if SAL_precip_compute:
 
     date = startdate
     while date < enddate:
+        broken = False
         # Load raw obs data - in mm
         # Add together date +18, +24, +30, +36.
         for deltahour in (18,24,30,36):
             obs_fname = get_ST4_fname(date,deltahour)
             obs_f = os.path.join(precipdir,obs_fname)
-            print(obs_f)
-            OBS = netCDF4.Dataset(obs_f)
-            obs_data = OBS.variables['A_PCP_GDS5_SFC_acc6h'][:]
-            # obs_data = N.swapaxes(OBS.variables['A_PCP_GDS5_SFC_acc6h'][:],1,0)
-
-            if deltahour == 18:
-                stack = obs_data
+            try:
+                OBS = netCDF4.Dataset(obs_f)
+            except RuntimeError:
+                broken = 'ST4_missing'
             else:
-                stack = N.ma.dstack((obs_data,stack))
+                obs_data = OBS.variables['A_PCP_GDS5_SFC_acc6h'][:]
+                # obs_data = N.swapaxes(OBS.variables['A_PCP_GDS5_SFC_acc6h'][:],1,0)
 
-        ST4data_ST4grid = N.ma.sum(stack,axis=2).data
+                if deltahour == 18:
+                    stack = obs_data
+                else:
+                    stack = N.ma.dstack((obs_data,stack))
 
-        # Interpolate onto our grid
-        ST4data_SALgrid = griddata((ST4_SALgrid_xx.flat,ST4_SALgrid_yy.flat),
-                    ST4data_ST4grid.flat,(SAL_native_mx.flat,SAL_native_my.flat))
+        if broken is False:
+            ST4data_ST4grid = N.ma.sum(stack,axis=2).data
 
-        obplotorig = 0
-        obplotproj = 0
-        if obplotorig:
-            # test
-            ST4map.drawcoastlines()
-            ST4map.drawstates()
-            ST4map.contourf(ST4_native_mx,ST4_native_my,
-                N.swapaxes(data_ST4grid,1,0),levels=N.arange(5,75,5)) 
-            plt.gcf().set_size_inches(10,12)
-            plt.savefig('/home/jrlawson/public_html/bowecho/test_ob_origgrid_SAL.png')
-            import pdb; pdb.set_trace()
+            # Interpolate onto our grid
+            print("Starting ST4 interpolation for init time {0}".format(date))
+            ST4data_SALgrid = griddata((ST4_SALgrid_xx.flat,ST4_SALgrid_yy.flat),
+                        ST4data_ST4grid.flat,(SAL_native_mx.flat,SAL_native_my.flat)).reshape(308,537)  
+            print("Done.")
 
-        # TEST
-        if obplotproj:
-            SALmap.drawcoastlines()
-            SALmap.drawstates()
-            data2 = data_SALgrid.reshape(308,537)
-            # SALmap.contourf(SAL_native_mx,SAL_native_my,data_SALgrid,levels=N.arange(5,75,5)) 
-            SALmap.contourf(SAL_native_mx,SAL_native_my,data2,levels=N.arange(5,75,5)) 
-            plt.savefig('/home/jrlawson/public_html/bowecho/test_ob_regrid_SAL.png')
-            import pdb; pdb.set_trace()
+            obplotproj = False
+            # TEST
+            if obplotproj:
+                SALmap.drawcoastlines()
+                SALmap.drawstates()
+                data2 = data_SALgrid.reshape(308,537)
+                SALmap.contourf(SAL_native_mx,SAL_native_my,data2,levels=N.arange(5,75,5)) 
+                plt.savefig('/home/jrlawson/public_html/bowecho/test_ob_regrid_SAL.png')
 
-        # Load NAM data for this time
-        for fcsthr in (24,36):
-            nam_fname = get_NAM_fname(date,fcsthr)
-            nam_f = os.path.join(NAMdir,nam_fname)
-            print(nam_f)
-            NAM = netCDF4.Dataset(nam_f)
-            nam_data = N.swapaxes(NAM.variables['A_PCP_218_SFC_acc12h'][:],1,0)
+            # Load NAM data for this time
+            for fcsthr in (24,36):
+                nam_fname = get_NAM_fname(date,fcsthr)
+                nam_f = os.path.join(NAMdir,nam_fname)
+                try:
+                    NAM = netCDF4.Dataset(nam_f)
+                except RuntimeError:
+                    broken = 'NAM_missing'
+                else:
+                # nam_data = N.swapaxes(NAM.variables['A_PCP_218_SFC_acc12h'][:],1,0)
+                    nam_data = NAM.variables['A_PCP_218_SFC_acc12h'][:]
 
-            if fcsthr == 24:
-                stack = nam_data
-            else:
-                stack = N.dstack((nam_data,stack))
+                    if fcsthr == 24:
+                        stack = nam_data
+                    else:
+                        stack = N.dstack((nam_data,stack))
+        
+        if broken is False:
+            data_NAMgrid = N.sum(stack,axis=2)
 
-        data_NAMgrid = N.sum(stack,axis=2)
+            # Interpolate onto our grid
+            print("Starting NAM interpolation for init time {0}".format(date))
+            NAMdata_SALgrid = griddata((NAM_SALgrid_xx.flat,NAM_SALgrid_yy.flat),
+                        data_NAMgrid.flat,(SAL_native_mx.flat,SAL_native_my.flat)).reshape(308,537)
+            print("Done.")
 
-        # Interpolate onto our grid
-        data_SALgrid = griddata((NAM_SALgrid_xx.flat,NAM_SALgrid_yy.flat),
-                    data_NAMgrid.flat,(SAL_native_mx.flat,SAL_native_my.flat))
+            namplotproj = 0
+            if namplotproj:
+                # test
+                SALmap.drawcoastlines()
+                SALmap.drawstates()
+                SALmap.contourf(SAL_native_mx,SAL_native_my,NAMdata_SALgrid,levels=N.arange(5,75,5)) 
+                plt.savefig('/home/jrlawson/public_html/bowecho/test_NAM_regrid_SAL.png')
 
-        namplotorig = 0
-        namplotproj = 1
-        if namplotorig:
-            NAMmap.drawstates()
-            NAMmap.drawcoastlines()
-            NAMmap.contourf(nam_native_mx,nam_native_my,N.swapaxes(stacksum,1,0),levels=N.arange(5,75,5))
-            plt.gcf().set_size_inches(10,12)
-            plt.savefig('/home/jrlawson/public_html/bowecho/test_NAM_origgrid_SAL.png')
-            import pdb; pdb.set_trace()
-            
-        if namplotproj:
-            # test
-            SALmap.drawcoastlines()
-            SALmap.drawstates()
-            SALmap.contourf(mx,my,nam_regrid,levels=N.arange(5,75,5)) 
-            plt.savefig('/home/jrlawson/public_html/bowecho/test_NAM_regrid_SAL.png')
-            import pdb; pdb.set_trace()
+            # Compute SAL
+            utc = date + datetime.timedelta(hours=36)
+            sal = SAL(ST4data_SALgrid,NAMdata_SALgrid,'accum_precip',utc,accum_hr=24,
+                        footprint=200,datafmt='array',dx=4.0,dy=4.0)
+            # sal = SAL(ctrl_fpath,mod_fpath,'REFL_comp',utc)
+            DATA[date] = {}
+            DATA[date]['S'] = sal.S
+            DATA[date]['A'] = sal.A
+            DATA[date]['L'] = sal.L
+        else:
+            DATA[date] = {'note':broken}
+            DATA[date]['S'] = -9999
+            DATA[date]['A'] = -9999
+            DATA[date]['L'] = -9999
 
-        # Compute SAL
-        ST4data_SALgrid(
-        NAMdata_SALgrid(
-        # Save results to pickle for this day
 
+        date = date + datetime.timedelta(days=1)
+
+    # Save results to pickle for this day
+    picklefname = 'SAL_{0}_{1}f_{2}fp.pickle'.format('accum_precip',7,200)
+    picklef = os.path.join(pickledir,picklefname)
+    pickle.dump(DATA, open(picklef, 'wb'))

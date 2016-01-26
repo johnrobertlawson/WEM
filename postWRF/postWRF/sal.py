@@ -10,30 +10,49 @@ from obs import Radar
 class SAL(object):
     def __init__(self,Wctrl_fpath,Wmod_fpath,vrbl,utc,lv=False,
                     accum_hr=False,radar_datadir=False,thresh=False,
-                    footprint=500):
+                    footprint=500,datafmt='WRF',dx=False,dy=False,
+                    f=1/15.0):
         self.utc = utc
         self.C = {}
         self.M = {}
         self.thresh = thresh
         self.footprint = footprint
+        self.f = f
+        # First, set diagonal length
+        # And load model data
 
-        self.M['WRFOut'] = WRFOut(Wmod_fpath)
-        self.dx = self.M['WRFOut'].dx
-        self.compute_d(self.M['WRFOut'])
-
+        if datafmt == 'WRF':
+            self.M['WRFOut'] = WRFOut(Wmod_fpath)
+            self.dx = self.M['WRFOut'].dx
+            self.dy = self.M['WRFOut'].dy
+            self.x_dim = self.M['WRFOut'].x_dim
+            self.y_dim = self.M['WRFOut'].y_dim
+            self.compute_d()
+        elif datafmt == 'array':
+            self.M['data'] = Wmod_fpath
+            self.dx = dx
+            self.dy = dy
+            self.x_dim, self.y_dim = self.M['data'].shape
+            self.compute_d()
+        
+        # Load verification data
         if Wctrl_fpath is False and (vrbl=='REFL_comp' or vrbl=='cref'):
             use_radar_obs = True
             self.C['data'] = self.get_radar_verif(utc,radar_datadir)
         else:
             use_radar_obs = False
-            Wctrl = WRFOut(Wctrl_fpath)
+            if datafmt == 'WRF':
+                Wctrl = WRFOut(Wctrl_fpath)
+            else:
+                self.C['data'] = Wctrl_fpath
 
         # Get 2D grids for ctrl and model
         if vrbl == 'accum_precip':
             if not accum_hr:
                 raise Exception("Need to set accumulation hours.")
-            self.C['data'] = Wctrl.compute_accum_rain(utc,accum_hr)[0,0,:,:]
-            self.M['data'] = self.M['WRFOut'].compute_accum_rain(utc,accum_hr)[0,0,:,:]
+            if datafmt == 'WRF':
+                self.C['data'] = Wctrl.compute_accum_rain(utc,accum_hr)[0,0,:,:]
+                self.M['data'] = self.M['WRFOut'].compute_accum_rain(utc,accum_hr)[0,0,:,:]
         else:
             self.M['data'] = self.M['WRFOut'].get(vrbl,level=lv,utc=utc)[0,0,:,:]
             if not use_radar_obs:
@@ -41,6 +60,7 @@ class SAL(object):
 
         # Set negative values to 0 
         # if vrbl == 'REFL_comp':
+        
         self.C['data'][self.C['data']<0] = 0
         self.M['data'][self.M['data']<0] = 0
         self.vrbl = vrbl
@@ -83,13 +103,14 @@ class SAL(object):
         # fig.savefig('/home/jrlawson/public_html/bowecho/hires/SAL/dBZ_output.png')
         return dBZ_interp
 
-    def compute_d(self,W):
-        side = W.dx * W.x_dim
-        self.d = N.sqrt(side**2 + side**2)
+    def compute_d(self):
+        xside = self.dx * self.x_dim
+        yside = self.dy * self.y_dim
+        self.d = N.sqrt(xside**2 + yside**2)
         return
 
     def identify_objects(self,):
-        self.f = 1/15.0 # Used in Wernli et al 2008
+        # self.f = 1/15.0 used in Wernli et al 2008
         self.C['Rmax'] = N.max(self.C['data'])
         self.M['Rmax'] = N.max(self.M['data'])
         if (self.vrbl == 'REFL_comp') or (self.vrbl=='cref'):
@@ -152,7 +173,7 @@ class SAL(object):
         mask = N.copy(data)
         mask[data<thresh] = False
         mask[data>=thresh] = True
-
+        # import pdb; pdb.set_trace()
         labeled, num_objects = ndimage.label(mask)
 
         sizes = ndimage.sum(mask, labeled, range(num_objects+1))

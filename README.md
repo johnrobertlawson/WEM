@@ -7,6 +7,11 @@ data via submodule **lazyWRF**. It can also post-process the data (such as
 computing ensemble means, creating postage-stamp plots of all members, etc)
 via submodule **postWRF**.
 
+As a sidenote, I encourage all users of Python to cite packages and acknowledge fellow
+users in publications and presentations. There is often little incentive for 
+researchers to open source their efforts, yet it is a process that needs
+to be encouraged. 
+
 Where do I start?
 =================
 
