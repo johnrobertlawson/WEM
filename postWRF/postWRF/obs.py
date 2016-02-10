@@ -152,6 +152,9 @@ class Radar(Obs):
         return data,lats,lons
 
     def get_dBZ(self,data):
+        if data == 'self':
+            data = self.data
+        
         if self.fmt == 'n0q':
             dBZ = (data*0.5)-32
         elif self.fmt == 'n0r':

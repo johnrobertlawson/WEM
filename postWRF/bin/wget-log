@@ -1,0 +1,15 @@
+--2016-01-29 12:24:41--  ftp://ftp.cdc.noaa.gov/Projects/Reforecast2/2006/200606/2006060100/p08/latlon/hgt_pres_2006060100_p08.grib2
+           => “/chinook2/jrlawson/bowecho/paper3_GEFSdata/hgt_pres_2006060100_p08.grib2”
+Resolving ftp.cdc.noaa.gov... 140.172.38.117
+Connecting to ftp.cdc.noaa.gov|140.172.38.117|:21... connected.
+Logging in as anonymous ... Logged in!
+==> SYST ... done.    ==> PWD ... done.
+==> TYPE I ... done.  ==> CWD (1) /Projects/Reforecast2/2006/200606/2006060100/p08/latlon ... done.
+==> SIZE hgt_pres_2006060100_p08.grib2 ... 64590345
+==> PASV ... done.    ==> RETR hgt_pres_2006060100_p08.grib2 ... done.
+Length: 64590345 (62M) (unauthoritative)
+
+ 4% [==>                                                                 ] 2,922,064   3.21M/s               9% [=====>                                                              ] 6,049,744   5.38M/s              18% [===========>                                                        ] 11,895,776  8.92M/s              30% [===================>                                                ] 19,518,352  12.6M/s              46% [==============================>                                     ] 29,836,200  17.0M/s              57% [======================================>                             ] 37,363,832  19.0M/s              74% [=================================================>                  ] 48,179,952  22.1M/s              86% [=========================================================>          ] 55,686,816  23.3M/s              100%[===================================================================>] 64,590,345  25.3M/s   in 2.4s    
+
+2016-01-29 12:24:44 (25.3 MB/s) - “/chinook2/jrlawson/bowecho/paper3_GEFSdata/hgt_pres_2006060100_p08.grib2” saved [64590345]
+
