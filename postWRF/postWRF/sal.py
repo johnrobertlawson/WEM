@@ -11,7 +11,11 @@ class SAL(object):
     def __init__(self,Wctrl_fpath,Wmod_fpath,vrbl,utc,lv=False,
                     accum_hr=False,radar_datadir=False,thresh=False,
                     footprint=500,ctrl_fmt='obs',mod_fmt='WRF',dx=False,dy=False,
-                    f=1/15.0):
+                    f=1/15.0,datafmt=False):
+        # Set data formats for both inputs to override defaults
+        if datafmt:
+            ctrl_fmt = datafmt
+            mod_fmt = datafmt
         self.utc = utc
         self.C = {}
         self.M = {}
@@ -118,8 +122,8 @@ class SAL(object):
         # Find grid points of local precip max > R*
         # self.C['objects'] = {}
 
-        self.object_operators(self.M)
-        self.object_operators(self.C)
+        self.object_operators(self.M,typ='M')
+        self.object_operators(self.C,typ='C')
 
     def compute_amplitude(self,):
         self.A = (N.mean(self.M['data']) - N.mean(self.C['data']))/(
@@ -161,7 +165,7 @@ class SAL(object):
             r = 0
         return r
 
-    def object_operators(self,dic):
+    def object_operators(self,dic,typ=False):
         nsize = self.footprint
         thresh = dic['Rstar']
         data = dic['data']
@@ -200,22 +204,27 @@ class SAL(object):
                 R_objs_count += dic['objects'][l]['Rn']
 
         dic['R_tot'] = R_objs_count
+        dic['obj_array'] = labeled
 
         """
-        if 'WRFOut' in dic.keys():
-            typ = 'M'
-        else:
-            typ = 'C'
         fig, ax = plt.subplots(1)
         ccc = ax.pcolor(label_im)
         plt.colorbar(ccc)
         fig.savefig('/home/jrlawson/public_html/bowecho/SALtests/{0}_objects_{1}.png'.format(typ,self.utc))
         plt.close(fig)
-        # fig, ax = plt.subplots(1)
-        # ax.pcolor(self.M['data'])
-        # fig.savefig('/home/jrlawson/public_html/bowecho/SALtests/mod_pcolor.png')
-        # plt.close(fig)
+        if typ == 'M':
+            fig, ax = plt.subplots(1)
+            cb1 = ax.pcolormesh(self.M['data'])
+            plt.colorbar(cb1)
+            fig.savefig('/home/jrlawson/public_html/bowecho/SALtests/mod_pcolor.png')
+            plt.close(fig)
         # import pdb; pdb.set_trace()
+        else:
+            fig, ax = plt.subplots(1)
+            cb2 = ax.pcolormesh(self.C['data'])
+            plt.colorbar(cb2)
+            fig.savefig('/home/jrlawson/public_html/bowecho/SALtests/ctrl_pcolor.png')
+            plt.close(fig)
         """
 
         bow_radius = False
@@ -242,6 +251,7 @@ class SAL(object):
             fig.tight_layout()
             fig.savefig('/home/jrlawson/public_html/bowecho/radiustest.png')
             import pdb; pdb.set_trace()
+        # self.obj_dic = dic
 
     def compute_structure(self):
         V_mod = self.compute_V(self.M)
@@ -260,3 +270,22 @@ class SAL(object):
         except ZeroDivisionError:
             V = 0
         return V
+
+    def active_px(self,data='ctrl',fmt='pc'):
+        """
+        Return number of pixels included in chosen dataset's objects.
+        data is set to 'ctrl' or 'mod'.
+        Expressed as percentage.
+        """
+        # import pdb; pdb.set_trace()
+        if data == 'ctrl':
+            dd = self.C['obj_array']
+        elif data == 'mod':
+            dd = self.M['obj_array']
+        active_px = N.count_nonzero(dd)
+        tot_px = dd.size
+        # import pdb; pdb.set_trace()
+        if fmt == 'pc':
+            return (active_px/(tot_px*1.0))*100.0
+        else:
+            return active_px, tot_px

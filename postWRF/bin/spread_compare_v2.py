@@ -60,6 +60,8 @@ vrbl = 'T2'; lv = False
 # vrbl = 'Q2'; lv = False
 # vrbl = 'U10'; lv = False
 
+th = 15
+
 entire_domain = True
 limited_domain = False
 
@@ -81,11 +83,11 @@ if entire_domain:
         
         print("Time",nt)
     # t = False
-        stdval1, stdval2, tstat, pvalue =  stats.std_ttest(ncfiles1,ncfiles2,vrbl,utc=t,level=lv)
+        stdval1, stdval2, tstat, pvalue =  stats.std_ttest(ncfiles1,ncfiles2,vrbl,utc=t,level=lv,th=th)
         BOW['normal']['stdTS'].append(stdval1)
         BOW['hires3']['stdTS'].append(stdval2)
-        tstats.append(tstat)
-        pvalues.append(pvalue)
+        # tstats.append(tstat)
+        # pvalues.append(pvalue)
         # if nt == 9:
             # import pdb; pdb.set_trace()
 
@@ -93,19 +95,19 @@ if entire_domain:
 
     fig,ax = plt.subplots(1)
     # for n in range(100):
-    ax.plot(BOW['hires3']['stdTS'],color='red',lw=2,label='Nested')
-    ax.plot(BOW['normal']['stdTS'],color='blue',lw=2,label='Single')
+    ax.plot(BOW['normal']['stdTS'],color='blue',lw=2,label='SINGLE')
+    ax.plot(BOW['hires3']['stdTS'],color='red',lw=2,label='NESTED')
 
-    ax2 = ax.twinx()
-    ax2.plot(pvalues,color='black',lw=1,label='p Value')
+    # ax2 = ax.twinx()
+    # ax2.plot(pvalues,color='black',lw=1,label='p Value')
 
     ax.set_xlabel("Forecast time (hr)")
     ax.set_ylabel("Standard deviation")
-    ax2.set_ylabel("p Value")
+    # ax2.set_ylabel("p Value")
     handles, labels = ax.get_legend_handles_labels()
-    ax.legend(handles, labels,loc=2)
+    ax.legend(handles, labels,loc='lower center')
 
-    fname = 'std_lines_entiredomain_{0}.png'.format(vrbl)
+    fname = 'std_lines_entiredomain_{0}_{1}th.png'.format(vrbl,th)
     fpath = os.path.join(outdir,fname)
     fig.savefig(fpath)
     print("Saved to {0}".format(fpath))

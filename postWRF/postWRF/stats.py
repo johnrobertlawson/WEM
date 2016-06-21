@@ -35,7 +35,7 @@ def std(ncfiles,vrbl,utc=False,level=False,other=False,axis=0):
     std = N.std(all_members,axis=axis)
     return std
 
-def std_ttest(ncfiles1,ncfiles2,vrbl,utc=False,level=False,other=False):
+def std_ttest(ncfiles1,ncfiles2,vrbl,utc=False,level=False,other=False,th=0):
     """
     Find standard deviation in along axis of ensemble
     members. Returns matrix x-y for plotting. Returns sig test
@@ -49,7 +49,7 @@ def std_ttest(ncfiles1,ncfiles2,vrbl,utc=False,level=False,other=False):
             W = WRFOut(nc)
             vrbl_array = W.get(vrbl,utc=utc,level=level,other=other)
             if vrbl=='cref':
-                vrbl_array[vrbl_array<0] = 0
+                vrbl_array[vrbl_array<th] = th
 
             if n==0:
                 dims = [len(ncfiles),] + list(vrbl_array.shape)

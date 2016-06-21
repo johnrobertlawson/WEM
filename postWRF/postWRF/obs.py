@@ -143,13 +143,22 @@ class Radar(Obs):
         self.m.drawstates()
         self.m.drawcountries()
 
-    def get_subdomain(self,Nlim,Elim,Slim,Wlim):
+    def get_subdomain(self,Nlim,Elim,Slim,Wlim,overwrite=False):
         """
         Return data array between bounds
+
+        If overwrite is True, replace class data with new subdomain
         """
         data,lats,lons = utils.return_subdomain(self.data,self.lats,
                                 self.lons,Nlim,Elim,Slim,Wlim)
-        return data,lats,lons
+
+        if overwrite:
+            self.lats = lats
+            self.lons = lons
+            self.data = data
+            return
+        else:
+            return data,lats,lons
 
     def get_dBZ(self,data):
         if data == 'self':

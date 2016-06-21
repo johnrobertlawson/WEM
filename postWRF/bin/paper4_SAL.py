@@ -11,27 +11,47 @@ import netCDF4
 # from scipy.interpolate import RegularGridInterpolator as RGI
 from scipy.interpolate import RectBivariateSpline as RBS
 from scipy.interpolate import griddata
+from scipy.interpolate import SmoothBivariateSpline as SBS
 import pdb
 from ecmwfapi import ECMWFDataServer
 import sys
 sys.path.append(os.path.dirname(__file__))
 # from cm_list import SALcm
 from cm_list import viridis as SALcm
+import time
+import random
 
 from WEM.postWRF.postWRF.sal import SAL
 from WEM.postWRF.postWRF import WRFEnviron
 import WEM.utils as utils
+from WEM.postWRF.postWRF.scales import Scales
 from WEM.postWRF.postWRF.obs import Radar
+
+method1 = 1
+method2 = 0
+method3 = 0
+
+if method1:
+    mst = 'gdata_px_rand2'
+elif method2:
+    mst = 'RBS'
+elif method3:
+    mst = 'SBS'
 
 download = 0
 SAL_precip_compute = 0
 SAL_cref_compute = 0
-SAL_climo_plot = 1
+SAL_cref_random_compute = 0
+SAL_climo_plot = 0
 # climovrbl = 'accum_precip'
+# accum_hr = 24
 climovrbl = 'cref'
-plotthresh = 40
+# plotthresh = 5
+plotthresh = (5,15,30,40)
 all_taSAL_plot = 0
 plot_domain = 0
+countsize = 0
+active_pixels = 1
 
 NAMdir = '/chinook2/jrlawson/bowecho/paper4_NAMdata'
 radardir = '/chinook2/jrlawson/bowecho/paper4_radardata' 
@@ -41,7 +61,7 @@ outdir = '/home/jrlawson/public_html/bowecho/paper4/'
 baseurl = 'http://nomads.ncdc.noaa.gov/data/meso-eta-hi'
 
 startdate = datetime.datetime(2015,4,1,0,0,0)
-# enddate = datetime.datetime(2015,4,3,0,0,0)
+# enddate = datetime.datetime(2015,4,11,0,0,0)
 enddate = datetime.datetime(2015,9,1,0,0,0)
 fhrs = N.arange(12,37,1)
 
@@ -139,8 +159,16 @@ def get_NAM_fname(date,fcsthr):
     return fname
 
 def get_SAL_native_grid():
-    m = Basemap(projection='merc',llcrnrlat=34.0,llcrnrlon=-110.0,
-                urcrnrlat=45.0,urcrnrlon=-85.0,lat_ts=39.5,)
+    global Nlim
+    Nlim = 45.0
+    global Elim
+    Elim = -85.0
+    global Slim
+    Slim = 34.0
+    global Wlim
+    Wlim = -110.0
+    m = Basemap(projection='merc',llcrnrlat=Slim,llcrnrlon=Wlim,
+                urcrnrlat=Nlim,urcrnrlon=Elim,lat_ts=39.5,resolution='h')
     # m = Basemap(projection='lcc',llcrnrlat=34.0,llcrnrlon=-110.0,
                 # urcrnrlat=45.0,urcrnrlon=-85.0,lat_0=30.0,lat_1=50.0,lon_0=-95.0)
     lons, lats, xx, yy = m.makegrid(537,308,returnxy=True)
@@ -282,7 +310,7 @@ def plot_SAL(data,vrbl='accum_precip',hr='all'):
             threshstr = '{0}dBZ'.format(plotthresh)
         else:
             threshstr = ''
-        fig.savefig(os.path.join(outdir,'SAL_{0}_test_{1}{2}.png'.format(vrbl,threshstr,hrstr)))
+        fig.savefig(os.path.join(outdir,'SAL_{0}_{1}{2}_{3}.png'.format(vrbl,threshstr,hrstr,mst)))
         plt.close(fig)
         # import pdb; pdb.set_trace()
 
@@ -341,11 +369,12 @@ if SAL_precip_compute:
     # nam_mx, nam_my = N.meshgrid(SAL_NAMgrid_xx,SAL_NAMgrid_yy)
 
     date = startdate
+
     while date < enddate:
         broken = False
         # Load raw obs data - in mm
         # Add together date +18, +24, +30, +36.
-        for deltahour in (18,24,30,36):
+        for dn, deltahour in enumerate([18,24,30,36]):
             obs_fname = get_ST4_fname(date,deltahour)
             obs_f = os.path.join(precipdir,obs_fname)
             try:
@@ -356,7 +385,7 @@ if SAL_precip_compute:
                 obs_data = OBS.variables['A_PCP_GDS5_SFC_acc6h'][:]
                 # obs_data = N.swapaxes(OBS.variables['A_PCP_GDS5_SFC_acc6h'][:],1,0)
 
-                if deltahour == 18:
+                if dn == 0:
                     stack = obs_data
                 else:
                     stack = N.ma.dstack((obs_data,stack))
@@ -364,11 +393,34 @@ if SAL_precip_compute:
         if broken is False:
             ST4data_ST4grid = N.ma.sum(stack,axis=2).data
 
+
+            """
+            print("Starting radar ob interpolation for time {0}".format(utc))
+            method1 = 0
+            method2 = 1
+            if method1:
+                obsdata_SALgrid = griddata((obs_SALgrid_xx.flat,obs_SALgrid_yy.flat),
+                        obdata_obgrid.flat,(SAL_native_mx.flat,SAL_native_my.flat)).reshape(308,537)  
+            elif method2:
+                rbs = RBS(obs_SALgrid_xx,obs_SALgrid_yy,obdata_obgrid) 
+                obsdata_SALgrid = N.swapaxes(rbs(SAL_native_xx,SAL_native_yy),1,0)#grid=True)
+            print("Done.")
+            """
+
+
             # Interpolate onto our grid
             print("Starting ST4 interpolation for init time {0}".format(date))
-            ST4data_SALgrid = griddata((ST4_SALgrid_xx.flat,ST4_SALgrid_yy.flat),
-                        ST4data_ST4grid.flat,(SAL_native_mx.flat,SAL_native_my.flat)).reshape(308,537)  
+            if method1:
+                ST4data_SALgrid = griddata((ST4_SALgrid_xx.flat,ST4_SALgrid_yy.flat),
+                        ST4data_ST4grid.flat,(SAL_native_mx.flat,SAL_native_my.flat),method='nearest').reshape(308,537)  
+            elif method2:
+                ST4rbs = RBS(ST4_SALgrid_xx,ST4_SALgrid_yy,ST4data_ST4grid)
+                ST4data_SALgrid = N.swapaxes(ST4rbs(SAL_native_xx,SAL_native_yy),1,0)
+            elif method3:
+                ST4_F = SBS(ST4_SALgrid_xx.flatten(),ST4_SALgrid_yy.flatten(),ST4data_ST4grid.flatten())
+                ST4data_SALgrid = ST4_F(SAL_native_xx,SAL_native_yy)
             print("Done.")
+            # import pdb; pdb.set_trace()
 
             obplotproj = False
             # TEST
@@ -399,11 +451,31 @@ if SAL_precip_compute:
         if broken is False:
             data_NAMgrid = N.sum(stack,axis=2)
 
+            """
+            print("Starting radar ob interpolation for time {0}".format(utc))
+            method1 = 0
+            method2 = 1
+            if method1:
+                obsdata_SALgrid = griddata((obs_SALgrid_xx.flat,obs_SALgrid_yy.flat),
+                        obdata_obgrid.flat,(SAL_native_mx.flat,SAL_native_my.flat)).reshape(308,537)  
+            elif method2:
+                rbs = RBS(obs_SALgrid_xx,obs_SALgrid_yy,obdata_obgrid) 
+                obsdata_SALgrid = N.swapaxes(rbs(SAL_native_xx,SAL_native_yy),1,0)#grid=True)
+            print("Done.")
+            """
+
+
             # Interpolate onto our grid
             print("Starting NAM interpolation for init time {0}".format(date))
-            NAMdata_SALgrid = griddata((NAM_SALgrid_xx.flat,NAM_SALgrid_yy.flat),
-                        data_NAMgrid.flat,(SAL_native_mx.flat,SAL_native_my.flat)).reshape(308,537)
+            if method1:
+                NAMdata_SALgrid = griddata((NAM_SALgrid_xx.flat,NAM_SALgrid_yy.flat),
+                        data_NAMgrid.flat,(SAL_native_mx.flat,SAL_native_my.flat),method='nearest').reshape(308,537)
+            if method2:
+                NAMrbs = RBS(NAM_SALgrid_xx,NAM_SALgrid_yy)
+                NAMdata_SALgrid = N.swapaxes(NAMrbs(SAL_native_xx,SAL_native_yy),1,0)
             print("Done.")
+            # import pdb; pdb.set_trace()
+
 
             namplotproj = 0
             if namplotproj:
@@ -432,17 +504,192 @@ if SAL_precip_compute:
         date = date + datetime.timedelta(days=1)
 
     # Save results to pickle for this day
-    picklefname = 'SAL_{0}_{1}f_{2}fp.pickle'.format('accum_precip',7,200)
+    picklefname = 'SAL_{0}_{1}f_{2}fp_{3}.pickle'.format('accum_precip',7,200,mst)
     picklef = os.path.join(pickledir,picklefname)
     pickle.dump(DATA, open(picklef, 'wb'))
 
 if SAL_cref_compute:
+    hourarr = N.arange(12,36,1)
     # SAL (new) grid
     SALmap, SALlons, SALlats, SAL_native_xx, SAL_native_yy = get_SAL_native_grid()
     SAL_native_mx, SAL_native_my = N.meshgrid(SAL_native_xx,SAL_native_yy)
 
     NAMmap, NAMlons, NAMlats, nam_native_xx, nam_native_yy = get_NAM_native_grid()
     NAM_SALgrid_xx,NAM_SALgrid_yy = SALmap(NAMlons,NAMlats)
+
+    for thresh in plotthresh:
+    # for thresh in (15,):
+        DATA = {}
+        date = startdate
+        # date = datetime.datetime(2015,4,8,0,0,0)
+        while date < enddate:
+            DATA[date] = {}
+            # for deltahour in N.arange(24,36,1):
+            ckpt1 = time.time()
+            # for deltahour in N.arange(34,36,1):
+            for deltahour in N.arange(12,36,1):
+            # random.shuffle(hourarr)
+            # for deltahour in hourarr[0:2]:
+                DATA[date][deltahour] = {}
+                utc = date + datetime.timedelta(hours=deltahour)
+
+                # download, load radar data
+                RADAR = Radar(utc,radardir)
+                # ob_lats_raw = RADAR.lats
+                # ob_lons_raw = RADAR.lons
+
+                # Cut down radar data to zone of interest
+                RADAR.get_subdomain(Nlim=Nlim,Elim=Elim,Slim=Slim,
+                                    Wlim=Wlim,overwrite=True)
+
+                ob_lats = RADAR.lats[::-1]
+                ob_lons = RADAR.lons
+                ob_mlat, ob_mlon = N.meshgrid(ob_lats,ob_lons)
+                obs_SALgrid_mx = SALmap(ob_mlon,ob_mlat)[0]
+                obs_SALgrid_xx = SALmap(ob_mlon,ob_mlat)[0][:,0]
+                obs_SALgrid_my = SALmap(ob_mlon,ob_mlat)[1]
+                obs_SALgrid_yy = SALmap(ob_mlon,ob_mlat)[1][0,:]
+                #### I SWAPPED [1] AND [0] HERE FoR XX/yy
+                #### Also swapped [a,b] to [b,a]
+                # obs_SALgrid_xx, obs_SALgrid_yy = SALmap(ob_lons,ob_lats)
+
+                # obdata_obgrid = N.swapaxes(RADAR.get_dBZ(data='self'),1,0)
+                # obdata_obgrid = N.flipud(N.swapaxes(RADAR.get_dBZ(data='self'),1,0))
+                obdata_obgrid = N.fliplr(N.swapaxes(RADAR.get_dBZ(data='self'),1,0))
+                # obdata_obgrid = N.fliplr(RADAR.get_dBZ(data='self'))
+
+                # import pdb; pdb.set_trace()
+
+                # THIS METHOD2 DEFINITELY WORKS
+                print("Starting radar ob interpolation for time {0}".format(utc))
+                # if method1:
+                    # This requires a nan_to_num method
+                    # obsdata_SALgrid = griddata((obs_SALgrid_mx.flat,obs_SALgrid_my.flat),
+                            # obdata_obgrid.flat,(SAL_native_mx.flat,SAL_native_my.flat)).reshape(308,537)  
+                # elif method2:
+                OBSrbs = RBS(obs_SALgrid_xx,obs_SALgrid_yy,obdata_obgrid) 
+                obsdata_SALgrid = N.swapaxes(OBSrbs(SAL_native_xx,SAL_native_yy),1,0)#grid=True)
+                print("Done.")
+
+                testtest = 0
+                if testtest:
+                    fig, ax = plt.subplots(2,figsize=(4,6))
+                    S = Scales('cref',False)
+                    clvs = S.clvs
+                    cmap = S.cm
+                    origdata = N.swapaxes(obdata_obgrid,1,0)
+                    cbf = ax.flat[1].pcolormesh(origdata,cmap=cmap,vmin=5.0,vmax=70.0)
+                    ax.flat[0].axis([0,200,0,200])
+                    cbf.cmap.set_under("white")
+                    ax.flat[1].pcolormesh(obsdata_SALgrid[300:500,0:200],cmap=cmap,vmin=5.0,vmax=70.0)
+                    ax.flat[0].set_aspect('equal')
+                    ax.flat[1].set_aspect('equal')
+                    ax.flat[1].axis([0,200,0,200])
+                    plt.colorbar(cbf,orientation='horizontal')
+                    plt.tight_layout()
+                    plt.savefig('/home/jrlawson/public_html/bowecho/interp_test5') 
+                    # import pdb; pdb.set_trace()
+
+
+                # NAM data
+                nam_fname = get_NAM_fname(date,fcsthr=deltahour)
+                nam_f = os.path.join(NAMdir,nam_fname)
+                try:
+                    NAM = netCDF4.Dataset(nam_f)
+                except RuntimeError:
+                    DATA[date][deltahour] = {'S':-9999,
+                                            'A':-9999,
+                                            'L':-9999}
+                else:
+                # nam_data = N.swapaxes(NAM.variables['A_PCP_218_SFC_acc12h'][:],1,0)
+                    data_NAMgrid = NAM.variables['REFC_218_EATM'][:]
+
+                    # Interpolate onto our grid
+                    print("Starting NAM interpolation for fcst time {0}".format(utc))
+                    if method1:
+                        NAMdata_SALgrid = griddata((NAM_SALgrid_xx.flat,NAM_SALgrid_yy.flat),
+                                data_NAMgrid.flat,(SAL_native_mx.flat,SAL_native_my.flat),method='linear').reshape(308,537)
+                    elif method2:
+                        raise Exception
+
+                    testgrid = 0
+                    if testgrid:
+                        NAM_nn = griddata((NAM_SALgrid_xx.flat,NAM_SALgrid_yy.flat),
+                                data_NAMgrid.flat,(SAL_native_mx.flat,SAL_native_my.flat),method='nearest').reshape(308,537)
+                        NAM_lin = NAMdata_SALgrid
+                        fig, ax = plt.subplots(4,figsize=(4,6))
+                        S = Scales('cref',False)
+                        clvs = S.clvs
+                        cmap = S.cm
+                        ax.flat[0].pcolormesh(data_NAMgrid[150:310,250:375],cmap=cmap,vmin=5.0,vmax=70.0)
+                        cbf = ax.flat[1].pcolormesh(NAM_lin,cmap=cmap,vmin=5.0,vmax=70.0)
+                        ax.flat[0].axis([0,180,0,110])
+                        cbf.cmap.set_under("white")
+                        ax.flat[2].pcolormesh(NAM_nn,cmap=cmap,vmin=5.0,vmax=70.0)
+                        ax.flat[0].set_aspect('equal')
+                        ax.flat[1].set_aspect('equal')
+                        ax.flat[2].set_aspect('equal')
+                        ax.flat[1].axis([0,537,0,308])
+                        ax.flat[2].axis([0,537,0,308])
+                        ax.flat[3].axis('off')
+                        plt.colorbar(cbf,orientation='horizontal')
+                        plt.tight_layout()
+                        plt.savefig('/home/jrlawson/public_html/bowecho/interp_test6.png')
+                    # print("Done.")
+
+                    # import pdb; pdb.set_trace()
+                    testplot1 = 0
+                    testplot2 = 0
+                    if testplot1:
+                        SALmap.drawcoastlines()
+                        SALmap.drawstates()
+                        SALmap.contourf(SAL_native_mx,SAL_native_my,obsdata_SALgrid,levels=N.arange(5,70,5)) 
+                        plt.gcf().tight_layout()
+                        plt.savefig('/home/jrlawson/public_html/bowecho/test_obcref_SAL_actpx.png')
+                        import pdb; pdb.set_trace()
+                    if testplot2:
+                        SALmap.drawcoastlines()
+                        SALmap.drawstates()
+                        SALmap.contourf(SAL_native_mx,SAL_native_my,NAMdata_SALgrid,levels=N.arange(5,70,5)) 
+                        plt.gcf().tight_layout()
+                        plt.savefig('/home/jrlawson/public_html/bowecho/test_NAMcref_SAL_actpx.png')
+                        import pdb; pdb.set_trace()
+
+                    sal = SAL(obsdata_SALgrid,NAMdata_SALgrid,'cref',utc,thresh=thresh,
+                                footprint=200,ctrl_fmt='array',
+                                mod_fmt='array',dx=4.0,dy=4.0)
+                    # import pdb; pdb.set_trace()
+                    DATA[date][deltahour]['S'] = sal.S
+                    DATA[date][deltahour]['A'] = sal.A
+                    DATA[date][deltahour]['L'] = sal.L
+                    DATA[date][deltahour]['active_px_obs'] = sal.active_px('ctrl')
+                    DATA[date][deltahour]['active_px_NAM'] = sal.active_px('mod')
+                    print('Active pixels for obs and NAM data:\n {0}% and {1}%.'.format(
+                            DATA[date][deltahour]['active_px_obs'],
+                            DATA[date][deltahour]['active_px_NAM']))
+                    # import pdb; pdb.set_trace()
+
+            ckpt2 = time.time()
+            print("One day took this long: {0}".format(ckpt2-ckpt1))
+            date = date + datetime.timedelta(days=1)
+
+        # Save results to pickle for this day
+        picklefname = 'SAL_{0}_{1}dBZ_{2}fp_{3}.pickle'.format('cref',thresh,200,mst)
+        picklef = os.path.join(pickledir,picklefname)
+        pickle.dump(DATA, open(picklef, 'wb'))
+
+
+
+if SAL_cref_random_compute:
+    # SAL (new) grid
+    SALmap, SALlons, SALlats, SAL_native_xx, SAL_native_yy = get_SAL_native_grid()
+    SAL_native_mx, SAL_native_my = N.meshgrid(SAL_native_xx,SAL_native_yy)
+
+    NAMmap, NAMlons, NAMlats, nam_native_xx, nam_native_yy = get_NAM_native_grid()
+    NAM_SALgrid_xx,NAM_SALgrid_yy = SALmap(NAMlons,NAMlats)
+
+    # Generate random matching of times/dates
+
 
     for thresh in (plotthresh,):
         DATA = {}
@@ -468,14 +715,12 @@ if SAL_cref_compute:
                 obdata_obgrid = N.fliplr(N.swapaxes(RADAR.get_dBZ(data='self'),1,0))
 
                 print("Starting radar ob interpolation for time {0}".format(utc))
-                method1 = 0
-                method2 = 1
                 if method1:
                     obsdata_SALgrid = griddata((obs_SALgrid_xx.flat,obs_SALgrid_yy.flat),
                             obdata_obgrid.flat,(SAL_native_mx.flat,SAL_native_my.flat)).reshape(308,537)  
                 elif method2:
-                    rbs = RBS(obs_SALgrid_xx,obs_SALgrid_yy,obdata_obgrid) 
-                    obsdata_SALgrid = N.swapaxes(rbs(SAL_native_xx,SAL_native_yy),1,0)#grid=True)
+                    OBSrbs = RBS(obs_SALgrid_xx,obs_SALgrid_yy,obdata_obgrid) 
+                    obsdata_SALgrid = N.swapaxes(OBSrbs(SAL_native_xx,SAL_native_yy),1,0)#grid=True)
                 print("Done.")
 
 
@@ -494,8 +739,11 @@ if SAL_cref_compute:
 
                     # Interpolate onto our grid
                     print("Starting NAM interpolation for fcst time {0}".format(utc))
-                    NAMdata_SALgrid = griddata((NAM_SALgrid_xx.flat,NAM_SALgrid_yy.flat),
+                    if method1:
+                        NAMdata_SALgrid = griddata((NAM_SALgrid_xx.flat,NAM_SALgrid_yy.flat),
                                 data_NAMgrid.flat,(SAL_native_mx.flat,SAL_native_my.flat)).reshape(308,537)
+                    elif method2:
+                        raise Exception
                     print("Done.")
 
                     testplot1 = 1
@@ -523,32 +771,43 @@ if SAL_cref_compute:
             date = date + datetime.timedelta(days=1)
 
         # Save results to pickle for this day
-        picklefname = 'SAL_{0}_{1}dBZ_{2}fp.pickle'.format('cref',thresh,200)
+        picklefname = 'SAL_{0}_{1}dBZ_{2}fp_{3}.pickle'.format('cref',thresh,200,mst)
         picklef = os.path.join(pickledir,picklefname)
         pickle.dump(DATA, open(picklef, 'wb'))
-
 
 if SAL_climo_plot:
     # Load data
     if climovrbl == 'accum_precip':
-        picklefname = 'SAL_{0}_{1}f_{2}fp.pickle'.format('accum_precip',7,200)
+        picklefname = 'SAL_{0}_{1}f_{2}fp_{3}.pickle'.format('accum_precip',7,200,mst)
     elif climovrbl == 'cref':
-        picklefname = 'SAL_{0}_{1}dBZ_{2}fp.pickle'.format('cref',plotthresh,200)
+        picklefname = 'SAL_{0}_{1}dBZ_{2}fp_{3}.pickle'.format('cref',plotthresh,200,mst)
     picklef = os.path.join(pickledir,picklefname)
     DATA = pickle.load(open(picklef, 'rb'))
 
-    plot_all = 0
+    plot_all = 1
     covar_plot = 0
-    traj_plot = 1
+    traj_plot = 0
 
     if plot_all:
         plot_SAL(DATA,climovrbl)
 
     if covar_plot:
-        for thresh in (5,15,30,40):
+        SALS = {}
+        for thresh in (5,15,30):
+            picklefname = 'SAL_{0}_{1}dBZ_{2}fp_{3}.pickle'.format('cref',plotthresh,200,mst)
+            picklef = os.path.join(pickledir,picklefname)
+            SALS[thresh] = pickle.load(open(picklef, 'rb'))
+        ss = []
+        aa = []
+        ll = []
+        date = startdate
+        while date < enddate:
             for t in N.arange(12,36,1):
-                pass
-        # Covariance of a date/time cref with date accum precip?
+                for thresh in (5,15,30):
+                    SALS[thresh][date][t]['S']
+                if t == 35:
+                    date = date + datetime.timedelta(days=1)
+
 
     if traj_plot:
         S_meds = {}
@@ -558,7 +817,7 @@ if SAL_climo_plot:
         for th in (5,15,30,40):
             print("Thresh {0}".format(th))
             TRAJ[th] = {}
-            picklefname = 'SAL_{0}_{1}dBZ_{2}fp.pickle'.format('cref',th,200)
+            picklefname = 'SAL_{0}_{1}dBZ_{2}fp_{3}.pickle'.format('cref',th,200,mst)
             picklef = os.path.join(pickledir,picklefname)
             DATA = pickle.load(open(picklef, 'rb'))
             TRAJ[th]['S_med'] = []
@@ -592,8 +851,8 @@ if SAL_climo_plot:
         ax.set_xlim([0.3,1.7])
         ax.set_ylim([0.4,1.1])
 
-        term_mark = 1
-        scattersw = 0
+        term_mark = 0
+        scattersw = 1
         # Plot all on a trajectory diagram
         # handles = []
         # labels = []
@@ -624,7 +883,7 @@ if SAL_climo_plot:
             if scattersw:
                 cm = M.colors.ListedColormap(N.flipud(N.array(SALcm)))
                 scs = ax.scatter(TRAJ[th]['S_med'],TRAJ[th]['A_med'],c=TRAJ[th]['L_med'],
-                            vmin=0,vmax=1,s=25,
+                            vmin=0.15,vmax=0.25,s=25,
                             cmap=cm, alpha=1.0,edgecolor='k',linewidth=0.15,
                             zorder=500)
 
@@ -635,7 +894,7 @@ if SAL_climo_plot:
 
         if scattersw:
             cbax = fig.add_axes([0.17, 0.83, 0.22, 0.05])
-            cblab = N.array([0.0,0.25,0.5,0.75,1.0,2.0])
+            cblab = N.arange(0.1,0.5,0.05)
             cb = plt.colorbar(scs,cax=cbax,
                         ticks=cblab,orientation='horizontal',)
             cb.set_label('Location component',labelpad=-38)
@@ -647,8 +906,12 @@ if SAL_climo_plot:
                     bbox_transform=plt.gcf().transFigure)
             # ax.legend(handles=handles,labels=labels)
 
+        if scattersw:
+            fname = 'SAL_trajSAL'
+        else:
+            fname = 'SAL_trajSA'
         fig.tight_layout()
-        fig.savefig(os.path.join(outdir,'SAL_trajectories.png'))
+        fig.savefig(os.path.join(outdir,'{0}_{1}.png'.format(fname,mst)))
         plt.close(fig)
 
         fig = plt.figure(1,figsize=(6,3))
@@ -685,4 +948,133 @@ if SAL_climo_plot:
         ax.set_ylabel("Total absolute SAL error")
 
         fig.tight_layout()
-        fig.savefig(os.path.join(outdir,'taSAL'))
+        fname = 'taSAL_{0}'.format(mst)
+        fig.savefig(os.path.join(outdir,fname))
+
+if countsize:
+    COUNT = {}
+    for th in (5,15,30,40,'acc'):
+        if th == 'acc':
+            picklefname = 'SAL_{0}_{1}f_{2}fp_{3}.pickle'.format('accum_precip',7,200,mst)
+        else:
+            picklefname = 'SAL_{0}_{1}dBZ_{2}fp_{3}.pickle'.format('cref',th,200,mst)
+        picklef = os.path.join(pickledir,picklefname)
+        DATA = pickle.load(open(picklef, 'rb'))
+        COUNT[th] = {}
+        COUNT[th]['OK'] = 0
+        COUNT[th]['missing'] = 0
+        COUNT[th]['SAL0'] = 0
+        COUNT[th]['SAL2'] = 0
+
+        for k,day in DATA.items():
+            for hr in N.arange(12,36,1):
+                # Compute median S,A,L for each time/thold
+                if th == 'acc':
+                    S = day['S']
+                    A = day['A']
+                    L = day['L']
+                else:
+                    S = day[hr]['S']
+                    A = day[hr]['A']
+                    L = day[hr]['L']
+
+                if S == -9999:
+                    COUNT[th]['missing'] += 1
+                elif (abs(S)<2.0) and (abs(A)<2.0) and (abs(L)<2.0) and  (abs(S)>0.0) and (abs(A)>0.0) and (abs(L)>0.0):
+                    COUNT[th]['OK'] += 1
+                elif (abs(S)==0.0) or (abs(A)==0.0) or (abs(L)==0.0): 
+                    COUNT[th]['SAL0'] += 1
+                elif (abs(S)==2.0) or (abs(A)==2.0) or (abs(L)==2.0): 
+                    COUNT[th]['SAL2'] += 1
+
+if active_pixels:
+    # Count number of active pixels in obs and NAM cref per hour
+    # Save to pickle file
+    # Generate plot similar to Fig 5 (taSAL) to add underneath
+
+    legpatch = [0,]*6
+    ll = {5:('',''),30:('',''),15:('Obs','NAM')}
+    for thresh,color,ln in zip((5,15,30),(('#E69F00','#f2cf7f'),
+                            ('#56B4E9','#aad9f4'),('#009E73','#7fceb9')),range(3)):
+        # for th,color in zip((5,15,30,40),('r','k','b','g')):
+        legpatch[ln] = M.patches.Patch(color=color[0],label=ll[thresh][0])
+        legpatch[ln+3] = M.patches.Patch(color=color[1],label=ll[thresh][1])
+    # for thresh in plotthresh:
+        # import pdb; pdb.set_trace()
+        if thresh == 40:
+            continue
+        pfname = '/chinook2/jrlawson/bowecho/paper4_pickles/SAL_cref_{0}dBZ_200fp_gdata_px_rand2.pickle'.format(thresh)
+        randomdata = pickle.load(open(pfname,'rb'))
+        # import pdb; pdb.set_trace()
+
+        scatter_px = 0
+        if scatter_px:
+            fig,ax = plt.subplots(1,figsize=(5,5))
+            for d in randomdata.keys():
+                for h in randomdata[d].keys():
+                    try:
+                        ax.scatter(randomdata[d][h]['active_px_obs'],
+                            randomdata[d][h]['active_px_NAM'],
+                            alpha=1.0,edgecolor='k',linewidth=0.15)
+                    except KeyError:
+                        pass
+            ax.set_aspect('equal',adjustable='box')
+            fig.tight_layout()
+            plt.savefig(os.path.join(outdir,'scatter_{0}dBZ_active_px.png'.format(thresh)))
+            plt.close(fig)
+
+        fig = plt.figure(1,figsize=(6,3))
+        ax = fig.add_subplot(111)
+        xx = N.arange(12,36,1)
+
+        obpx_AVE = []
+        NAMpx_AVE = []
+        for h in N.arange(12,36,1):
+            hr_obpx_l = []
+            hr_NAMpx_l = []
+            for d in randomdata.keys():
+                try:
+                    hr_obpx_l.append(randomdata[d][h]['active_px_obs'])
+                except KeyError:
+                    pass
+                else:
+                    hr_NAMpx_l.append(randomdata[d][h]['active_px_NAM'])
+            obpx_AVE.append(N.mean(hr_obpx_l))
+            NAMpx_AVE.append(N.mean(hr_NAMpx_l))
+
+        # import pdb; pdb.set_trace()
+        w = 0.3
+        ax.grid(zorder=1)
+        b1 = ax.bar(xx-w/2.0,obpx_AVE,width=w,color=color[0],alpha=1.0,align='center',label='Obs',zorder=100)
+        b2 = ax.bar(xx+w/2.0,NAMpx_AVE,width=w,color=color[1],alpha=1.0,align='center',label='NAM',zorder=101)
+
+        # legpatch = [M.patches.Patch(color='black',label='Obs'),
+                     # M.patches.Patch(color='lightgrey',label='NAM')]
+    # import pdb; pdb.set_trace()
+    ax.legend(handles=legpatch,ncol=2,loc=5,
+            bbox_to_anchor=(0.4, 0.1),
+            bbox_transform=plt.gcf().transFigure,
+            borderaxespad=0.0)
+
+    ax.set_xlim([11,36])
+    # ax.set_ylim([1.0,3.0])
+
+    ax.set_xticks(N.arange(12,36,3))
+
+    # plt.axvline(24, color='k')
+   
+    ax.spines['right'].set_visible(False)
+    ax.spines['bottom'].set_visible(False)
+    ax.yaxis.set_ticks_position('left')
+    ax.xaxis.set_ticks_position('top')
+
+    ax.invert_yaxis()
+
+
+    # ax.set_axis_bgcolor('lightgrey')
+    # ax.set_xlabel("Forecast hour")
+    ax.set_ylabel("Average active pixels (%)")
+
+    fig.tight_layout()
+    fname = 'activepx_bar_{0}'.format(mst)
+    fig.savefig(os.path.join(outdir,fname))

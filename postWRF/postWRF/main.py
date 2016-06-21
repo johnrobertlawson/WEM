@@ -76,7 +76,7 @@ class WRFEnviron(object):
                 Nlim=False,Elim=False,Slim=False,Wlim=False,
                 other=False,color='k',inline=False,lw=False,
                 extend=False,save=True,accum_hr=False,
-                cblabel=False):
+                cblabel=False,ideal=False):
         """Basic birds-eye-view plotting.
 
         This script is top-most and decides if the variables is
@@ -201,6 +201,7 @@ class WRFEnviron(object):
         # Scales
         cmap, clvs = self.get_cmap_clvs(vrbl,level,cmap=cmap,clvs=clvs)
 
+
         # Figure
         fname = self.create_fname(vrbl,utc,level,f_suffix=f_suffix, f_prefix=f_prefix,other=other)
         F = BirdsEye(self.W,fig=fig,ax=ax)
@@ -209,7 +210,8 @@ class WRFEnviron(object):
                     plottype=plottype,smooth=smooth,
                     clvs=clvs,cmap=cmap,locations=locations,
                     cb=cb,color=color,inline=inline,lw=lw,
-                    extend=extend,save=save,cblabel=cblabel)
+                    extend=extend,save=save,cblabel=cblabel,
+                    ideal=ideal)
         return cb
 
     def get_cmap_clvs(self,vrbl,level,clvs=False,cmap=False):
@@ -854,7 +856,8 @@ class WRFEnviron(object):
 
     def plot_streamlines(self,utc,level,ncdir,outdir,ncf=False,nct=False,
                             f_prefix=False,f_suffix=False,dom=1,smooth=1,
-                            fig=False,ax=False,bounding=False,density=1.8):
+                            fig=False,ax=False,bounding=False,density=1.8,
+                            ideal=False):
         """
         Plot streamlines of wind at a level.
 
@@ -938,7 +941,8 @@ class WRFEnviron(object):
                 # 'streamlines',lv,disp_t))
         fname = self.create_fname('streamlines',utc,level)
         # import pdb; pdb.set_trace()
-        self.F.plot_streamlines(U,V,outdir,fname,density=density,lats=lats,lons=lons)
+        self.F.plot_streamlines(U,V,outdir,fname,density=density,lats=lats,lons=lons,
+                                ideal=ideal)
 
     def plot_strongest_wind(self,itime,ftime,level=2000,ncdir=False,
                             outdir=False,ncf=False,nct=False,

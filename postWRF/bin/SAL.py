@@ -23,7 +23,7 @@ paper = 2
 # threshs = [15,20,25,30,35,40]
 # fps = [100,200,400,600]
 threshs = [15,]
-fps = [201,]
+fps = [199,]
 cases = ['2013081500',]
 
 import itertools
@@ -35,19 +35,17 @@ for case in cases:
         # vrbl = 'REFL_comp'; clvs=False; use_radar_obs = True
         accum_hr = 1
 
-        plotfig = 1
-        SALplot = 0
-        SALplot_only = 0
+        plotfig = 0
+        SALplot = 1
+        SALplot_only = 1
 
         if case[:4] == '2011':
             # itime = (2011,4,19,23,0,0)
             itime = (2011,4,19,0,0,0)
             ftime = (2011,4,20,12,30,0)
         elif case[:4] == '2013':
-            itime = (2013,8,16,0,0,0)
-            # itime = (2013,8,15,0,0,0)
-            ftime = (2013,8,16,1,0,0)
-            # ftime = (2013,8,16,13,0,0)
+            itime = (2013,8,15,0,0,0)
+            ftime = (2013,8,16,13,0,0)
         hourly = 1
 
         times = utils.generate_times(itime,ftime,hourly*60*60)

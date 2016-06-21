@@ -25,9 +25,13 @@ vrbl = 'Q_pert'
 # vrbl = 'wind'
 # vrbl = 'wind10'
 
+plot_cref = 1
+
 # ncroot = '/chinook2/jrlawson/bowecho/20130815/GEFSR2_paper1/p09'
 ncdir = {'SINGLE':'/chinook2/jrlawson/bowecho/20130815/GEFSR2_paper2/p09/ICBC/',
         'NESTED':'/chinook2/jrlawson/bowecho/20130815_hires/'}
+# ncdir = {'SINGLE':'/chinook2/jrlawson/bowecho/20130815/GEFSR2_paper2/p09/ICBC/s06',
+        # 'NESTED':'/chinook2/jrlawson/bowecho/20130815_hires/s22'}
 ncfile = 'wrfout_d01_2013-08-15_00:00:00'
 nct = (2013,8,15,0,0,0)
 itime = (2013,8,15,20,0,0)
@@ -35,11 +39,13 @@ ftime = (2013,8,15,23,0,0)
 interval = 1*60*60
 times = utils.generate_times(itime,ftime,interval)
 outdir = '/home/jrlawson/public_html/bowecho/paper2'
+# lims = {'Nlim':41.0,'Elim':-95.4,'Slim':35.9,'Wlim':-102.0}
 lims = {'Nlim':41.0,'Elim':-97.4,'Slim':38.3,'Wlim':-101.0}
+# ensm = {'SINGLE':'s06','NESTED':'s12'}
 
 PLOTS = {
         'PMSL_gradient':{'lv':2000,'clvs':N.arange(0.02,0.18,0.02),'cbl':'PMSL gradient (Pa/m)','cmap':'cubehelix_r','extend':'max'},
-        'T2_gradient':{'lv':2000,'clvs':N.arange(0.0002,0.0024,0.0002),'cbl':'2-m pot. temp gradient (K/m)','cmap':'cubehelix_r','extend':'max'},
+        'T2_gradient':{'lv':2000,'clvs':N.arange(0.0002,0.0024,0.0002),'cbl':'2-m pot. temp gradient (K/m)','cmap':'cubehelix_r','extend':'max','cbtix':N.arange(0.0002,0.0026,0.0004)},
         'cref':{'lv':False,'clvs':False,'cbl':'Simulated composite reflectivity (dBZ)','cmap':False,'extend':False},
         'RH':{'lv':600,'clvs':N.arange(0,105,5),'cbl':'Relative Humidity (%)','cmap':'terrain_r','extend':'max'},
         'Q_pert':{'lv':800,'clvs':N.arange(-0.007,0.0071,0.0001),'cbl':'Vapor mixing ratio perturbation (kg/kg)','cmap':'BrBG','extend':'both','cbtix':N.arange(-0.007,0.0105,0.0035)},
@@ -77,7 +83,8 @@ for nest in ('SINGLE','NESTED'):
         cb = p.plot2D(vrbl,utc=t,level=PLOTS[vrbl]['lv'],ncdir=ncdir[nest],outdir=False,fig=fig,ax=ax,cb=cb_opt,
                 clvs=PLOTS[vrbl]['clvs'],nct=nct,plottype='contourf',cmap=PLOTS[vrbl]['cmap'],
                 extend=PLOTS[vrbl]['extend'],save=False,dom=1,**lims)
-        p.plot2D('cref',utc=t,level=False,ncdir=ncdir[nest],outdir=False,fig=fig,ax=ax,cb=cb_opt,
+        if plot_cref:
+            p.plot2D('cref',utc=t,level=False,ncdir=ncdir[nest],outdir=False,fig=fig,ax=ax,cb=cb_opt,
                 clvs=[35,],nct=nct,plottype='contour',cmap=None,
                 extend=False,save=False,dom=1,smooth=3,**lims)
         # else:
@@ -89,7 +96,8 @@ for nest in ('SINGLE','NESTED'):
                        # bounding=lims,dom=1,density=0.8)
         make_subplot_label(ax,labels.next())
         if tn == len(times)-1:
-            ax.text(1.03,0.42,nest+'\nControl\n(No SKEB)',transform=ax.transAxes)
+            # ax.text(1.03,0.42,nest+'\n\n{0}'.format(ensm[nest]),transform=ax.transAxes)
+            ax.text(1.03,0.42,nest+'\n\nControl\n\n(No SKEB)',transform=ax.transAxes)
 
 
 fig.tight_layout()

@@ -33,7 +33,7 @@ enstype = 'STCH'
 # case = '20110419_hires'
 # case = '20130815_hires'
 case = '20130815'
-paper = 1
+paper = 2
 dom = 1
 
 IC = 'GEFSR2'; ens = 'p09'; MP = 'ICBC'
@@ -237,9 +237,9 @@ for t in times:
             # vrbl = 'shear';lv = False;clvs=N.arange(5,36,1); other = {'top':6,'bottom':0};extend='max';cmap='YlGnBu'
             # vrbl = 'Q_pert';lv=800;clvs=N.arange(-0.005,0.0051,0.0001);cmap='BrBG';extend='both'
             # vrbl = 'frontogen';lv = 2000; clvs = N.arange(-1.5,1.6,0.1)*10**-7
-            # vrbl = 'cref';lv = False;clvs=False;sm=False;extend=False;cmap=False
+            vrbl = 'cref';lv = False;clvs=False;sm=False;extend=False;cmap=False
             # vrbl = 'dptp';lv=2000;clvs=N.arange(-20,1,1);cmap='terrain';extend='min'
-            vrbl = 'wind10';lv = 2000;clvs=N.arange(10,40,5);sm=False;extend='max'; cmap='jet';
+            # vrbl = 'wind10';lv = 2000;clvs=N.arange(10,40,5);sm=False;extend='max'; cmap='jet';
             # vrbl = 'wind';lv = lvl;clvs=N.arange(10,40,5);False;sm=False;cmap='jet';extend='max'
             ######### COMMAND HERE #########
             if plot!='RUC': cb = p.plot2D(vrbl,utc=t,level=lv,ncdir=ncdir,outdir=outdir,fig=fig,ax=ax,cb=False,clvs=clvs,nct=nct,match_nc=mnc,other=other,smooth=sm,plottype=pt,save=False,dom=dom,extend=extend,cmap=cmap,**lims)

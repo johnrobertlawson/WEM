@@ -14,7 +14,7 @@ def plot_domains(wrfouts,labels,outpath,Nlim,Elim,
 
     if not labpos:
         labpos = ['lr',]*len(labels)
-    fig, ax = plt.subplots(1)
+    fig, ax = plt.subplots(1,figsize=(5,5))
 
     # Create basemap first of all
     #basemap_res = getattr(self.C,'basemap_res',self.D.basemap_res)
@@ -51,20 +51,25 @@ def plot_domains(wrfouts,labels,outpath,Nlim,Elim,
         #Nlim, Elim, Slim, Wlim = W.get_limits()
         x,y = m(W.lons,W.lats)
         xl = len(x[0,:])
-        midpt = len(y[0,:])/2         
+        midx = len(x[0,:])/2  
+        yl = len(y[0,:])
+        midy = len(y[0,:])/2         
         
         if lp == 'lr':
-            xylab = (x[0,-(0.2*xl)],y[0,midpt])
+            xylab = (x[0,-(0.2*xl)],y[0,midy])
             halab = 'left'
         elif lp == 'ur':
-            xylab = (x[0,-(0.2*xl)],y[-1,midpt])
+            xylab = (x[0,-(0.2*xl)],y[-1,midy])
             halab = 'left'
         elif lp == 'll':
-            xylab = (x[0,(0.2*xl)],y[0,midpt])
+            xylab = (x[0,(0.2*xl)],y[0,midy])
             halab = 'right'
         elif lp == 'ul':
-            xylab = (x[0,(0.2*xl)],y[-1,midpt])
+            xylab = (x[0,(0.2*xl)],y[-1,midy])
             halab = 'right'
+        elif lp == 'lc':
+            xylab = (x[0,midx],y[0,midy])
+            halab = 'center'
         else:
             raise Exception("Label position needs to be ll, lr, ul, ur.")
 

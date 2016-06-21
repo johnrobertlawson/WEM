@@ -1500,7 +1500,10 @@ class WRFOut(object):
         E = self.compute_total_deformation(U,V)
         zeta = self.compute_vorticity(U,V)
         div = self.compute_divergence(U,V)
-        D =  0.5*(div + (E**2  - zeta**2)**0.5)
+        EzArr = (E**2  - zeta**2)**0.5
+        Ez_nonan = N.nan_to_num(EzArr)
+        # D =  0.5*(div + (E**2  - zeta**2)**0.5)
+        D =  0.5*(div + Ez_nonan)
         # import pdb; pdb.set_trace()
         return D
 

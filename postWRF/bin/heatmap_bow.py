@@ -41,9 +41,16 @@ compute = 1
 # Manipulate and plot data?
 plot = 1
 
+
+lytest = 1
+
 # Set size of box to get data over
 # boxwidth = 7
-boxwidth = 15
+if lytest:
+    boxwidth = 15
+else:
+    boxwidth = 15
+
 if boxwidth%2 == 0:
     raise Exception("Box width needs to be odd number")
 else:
@@ -55,9 +62,14 @@ starthr = 4
 # That's 35 times.
 ntimes = 35
 # Key is variable, value is level(s) in tuple
-vrbls = {'temp_advection':(700,850),'omega':(500,),'lyapunov':(300,500,),'RH':(700,850)}
+if lytest:
+    vrbls = {'lyapunov':(500,)}
+else:
+    vrbls = {'temp_advection':(700,850),'omega':(500,),'lyapunov':(300,500,),'RH':(700,850),'shear':(False,)}
+    # vrbls = {'shear':(False,)}
 # vrbls = {'temp_advection':(850,)}
-lookup_cmap = {'temp_advection':M.cm.Reds, 'omega':M.cm.PuRd, 'lyapunov':M.cm.Blues,'RH':M.cm.YlGn}
+lookup_cmap = {'temp_advection':M.cm.Reds, 'omega':M.cm.PuRd, 'lyapunov':M.cm.Blues,
+                'shear':M.cm.Greys, 'RH':M.cm.YlGn}
 # Rows are cases (14), columns are values (each time)
 
 arr = N.zeros([14,ntimes])
@@ -143,7 +155,11 @@ if compute:
                             val = N.nan
                         else:
                             # nanmean because of Lyapunov vals sometimes missing
-                            val = N.nanmean(R.get(vrbl,utc=t,level=lv)[0,0,yidx,xidx])
+                            # import pdb; pdb.set_trace()
+                            if lytest:
+                                val = N.nanmax(R.get(vrbl,utc=t,level=lv)[0,0,yidx,xidx]) 
+                            else:
+                                val = N.nanmean(R.get(vrbl,utc=t,level=lv)[0,0,yidx,xidx])
 
                         DATA[d][vrbl][lv][cnx,tn] = val
                         print("Value for {0} = {1}".format(vrbl,val))
@@ -224,7 +240,6 @@ if plot:
                     tidx = N.arange(idx0,idx1+1)
 
                     # Extract the indices from data into relative
-                    # import pdb; pdb.set_trace()
                     relative[sn,:] = data[sn,tidx] 
 
                     # Deal with nans by interpolating
@@ -293,8 +308,12 @@ if plot:
                             top='off',left='off',right='off')
                 ax2.set_ylim(14,0)
 
-                outfname = 'Heatmap_{0}_{1}_{2}hPa_{3}box.png'.format(
+                outfname = 'Heatmap_{0}_{1}_{2}hPa_{3}box'.format(
                             rel_choice,vrbl,lv,boxwidth)
+                if lytest:
+                    outfname = outfname + '_lytest2.png'
+                else:
+                    outfname = outfname + '.png'
                 outfpath = os.path.join(outdir,outfname)
                 fig.tight_layout()
                 fig.savefig(outfpath)

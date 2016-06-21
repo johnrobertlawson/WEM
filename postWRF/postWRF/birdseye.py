@@ -89,7 +89,7 @@ class BirdsEye(Figure):
                     locations=False,m=False,x=False,y=False,
                     Nlim=False,Elim=False,Slim=False,Wlim=False,
                     color='k',inline=False,lw=False,extend=False,
-                    cblabel=False):
+                    cblabel=False,ideal=False):
 
         """
         Generic method that plots any matrix of data on a map
@@ -112,7 +112,12 @@ class BirdsEye(Figure):
         """
         # INITIALISE
         self.data = data
-        if x is False and y is False and m is False:
+        if ideal:
+            self.bmap = plt
+            self.x = N.arange(len(data[:,0]))
+            self.y = N.arange(len(data[0,:]))
+
+        elif x is False and y is False and m is False:
             if not Nlim:
                 self.bmap,self.x,self.y = self.basemap_setup(smooth=smooth,lats=lats,
                                                     lons=lons,)#ax=self.ax)
@@ -193,7 +198,7 @@ class BirdsEye(Figure):
             return f1
 
     def plot_streamlines(self,U,V,outdir,fname,lats=False,lons=False,smooth=1,
-                            title=False,lw_speed=False,density=1.8):
+                            title=False,lw_speed=False,density=1.8,ideal=False):
         """
         Plot streamlines.
 
@@ -202,7 +207,12 @@ class BirdsEye(Figure):
 
         lw_speed    :   linewidth is proportional to wind speed
         """
-        m,x,y = self.basemap_setup(lats=lats,lons=lons)
+        if ideal:
+            m = plt
+            x = N.arange(len(U[:,0]))
+            y = N.arange(len(U[0,:]))
+        else:
+            m,x,y = self.basemap_setup(lats=lats,lons=lons)
 
         if lw_speed:
             wind = N.sqrt(U**2 + V**2)

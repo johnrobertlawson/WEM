@@ -22,7 +22,7 @@ PLOTS = {
 ncroot = '/chinook2/jrlawson/bowecho/20130815/GEFSR2_paper1/p09'
 ncdir = {'SINGLE':'/chinook2/jrlawson/bowecho/20130815/GEFSR2_paper2/p09/ICBC/s06',
         'NESTED':'/chinook2/jrlawson/bowecho/20130815_hires/s22'}
-plotnames = ['NEXRAD',] + ['s06 (SINGLE)','s22 (NESTED)']*2
+plotnames = ['NEXRAD',] + ['s06 (SINGLE)','s12 (NESTED)']*2
 ncfile = 'wrfout_d01_2013-08-15_00:00:00'
 radar_datadir = os.path.join('/chinook2/jrlawson/bowecho/20130815/VERIF')
 nct = (2013,8,15,0,0,0)

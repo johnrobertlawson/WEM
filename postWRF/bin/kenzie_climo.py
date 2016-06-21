@@ -51,8 +51,8 @@ names = ('casedate','caseno','casetime','casestate','bowdate',
 formats = ['S16',]*len(names)
 cases = N.loadtxt(fpath,dtype={'names':names,'formats':formats},skiprows=1,delimiter=',')
 
-# plothrs = (0,12,18)
-plothrs = (0,)
+plothrs = (0,12)
+# plothrs = (0,)
 # plothrs = (0,9,12,15,18)
 Nlim, Elim, Slim, Wlim = [52.0,-78.0,25.0,-128.0]
 
