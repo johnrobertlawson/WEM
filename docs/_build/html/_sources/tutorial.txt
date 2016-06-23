@@ -5,7 +5,7 @@ Tutorial
 --------
 
 This will lead you through an example for automating WRF runs, 
-creating statistics from an ensemble, and plotting data.
+creating statistics from an ensemble, and plotting data!
 
 Installation
 ------------

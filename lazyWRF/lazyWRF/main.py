@@ -39,7 +39,8 @@ class Lazy:
                 #   'NAMFCST':go_NAMFCST, 'GFSANL':go_GFSANL,
                 #   'GFSFCST':go_GFSFCST}
                 
-        self.GO = {'GEFSR2':self.go_GEFSR2}
+        self.GO = {'GEFSR2':self.go_GEFSR2,
+                    'em_quarter_ss':self.go_quarter_ss,}
                     
         """
         self.enstype is a list of ensemble models or types.

@@ -29,7 +29,8 @@ import os
 import pdb
 import time
 import matplotlib as M
-M.use('gtkagg')
+# M.use('gtkagg')
+M.use('agg')
 import matplotlib.pyplot as plt
 
 from wrfout import WRFOut
