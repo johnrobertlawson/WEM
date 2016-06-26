@@ -24,6 +24,17 @@ column 4 is U wind (m/s)
 
 column 5 is V wind (m/s)
 --- no row 1
+
+METHODS FOR PROFILE GENERATION
+Temp:
+    - Weisman and Klemp
+    etc
+Wind:
+    - Blah
+
+Dewpoint:
+    - Blah
+
 """
 
 def calc_theta(z,ztr=12000.0,theta0=300.0,thetatr=343,Ttr=213):
