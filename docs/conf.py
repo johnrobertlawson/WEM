@@ -15,7 +15,6 @@
 
 import sys
 import os
-sys.path.append('/home/jrlawson/gitprojects/alabaster')
 import alabaster
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
