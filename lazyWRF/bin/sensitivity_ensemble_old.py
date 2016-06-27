@@ -31,11 +31,11 @@ for n,ens in enumerate(ensnames):
     jobid = p_real.stdout.read()[:5] # Assuming first five digits = job ID.
 
     # Run wrf.exe, but wait until real.exe has finished without errors
-    print 'Now submitting wrf.exe.'
+    print('Now submitting wrf.exe.')
     # Again, change name of submission script if needed
     p_wrf = subprocess.Popen('qsub -d '+pathtoWRF+' wrf_run.sh -W depend=afterok:'+jobid,cwd=pathtoWRF,shell=True)
     p_wrf.wait()
-    print "real.exe and wrf.exe submitted."
+    print("real.exe and wrf.exe submitted.")
 
     # Wait an hour to make sure real.exe is complete and wrf.exe is writing to file
     time.sleep(60*60)
@@ -47,7 +47,7 @@ for n,ens in enumerate(ensnames):
         tailoutput = tailrsl.stdout.read()
         if "SUCCESS COMPLETE WRF" in tailoutput:
             finished = 1
-            print "WRF has finished; moving to next case."
+            print("WRF has finished; moving to next case.")
         else:
             time.sleep(5*60) # Try again in 5 min
 

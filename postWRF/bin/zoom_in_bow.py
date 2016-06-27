@@ -75,7 +75,7 @@ for nest in ('SINGLE','NESTED'):
         dt = datetime.datetime(*time.gmtime(t)[:-2])
         nicetime = '{0:%H:%M UTC %Y/%m/%d}'.format(dt)
         # Verification
-        ax = axit.next()
+        ax = next(axit)
         if nest == 'SINGLE':
             ax.set_title(nicetime)
 
@@ -94,7 +94,7 @@ for nest in ('SINGLE','NESTED'):
             # lims = False
             # cb = p.plot_streamlines(t,PLOTS[vrbl]['lv'],ncdir[nest],outdir=False,fig=fig,ax=ax,nct=nct,
                        # bounding=lims,dom=1,density=0.8)
-        make_subplot_label(ax,labels.next())
+        make_subplot_label(ax,next(labels))
         if tn == len(times)-1:
             # ax.text(1.03,0.42,nest+'\n\n{0}'.format(ensm[nest]),transform=ax.transAxes)
             ax.text(1.03,0.42,nest+'\n\nControl\n\n(No SKEB)',transform=ax.transAxes)
@@ -111,6 +111,6 @@ fname = '{0}_KSOK13_zoom.png'.format(vrbl)
 fpath = os.path.join(outdir,fname)
 utils.trycreate(outdir)
 fig.savefig(fpath)
-print("Saved at {0}.".format(fpath))
+print(("Saved at {0}.".format(fpath)))
 plt.close(fig)
 

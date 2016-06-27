@@ -4,8 +4,8 @@ import scipy.ndimage as ndimage
 import scipy.ndimage.filters as filters
 import matplotlib.pyplot as plt
 
-from wrfout import WRFOut
-from obs import Radar
+from .wrfout import WRFOut
+from .obs import Radar
 
 class SAL(object):
     def __init__(self,Wctrl_fpath,Wmod_fpath,vrbl,utc,lv=False,
@@ -82,7 +82,7 @@ class SAL(object):
         self.compute_location()
         self.compute_structure()
 
-        print("S = {0}    A = {1}     L = {2}".format(self.S,self.A,self.L))
+        print(("S = {0}    A = {1}     L = {2}".format(self.S,self.A,self.L)))
 
     def get_radar_verif(self,utc,datapath):
         RADAR = Radar(utc,datapath)
@@ -139,7 +139,7 @@ class SAL(object):
         # vector subtraction
         dist_km = self.vector_diff_km(self.M['x_CoM'],self.C['x_CoM'])
         L1 = dist_km/self.d
-        print("L1 = {0}".format(L1))
+        print(("L1 = {0}".format(L1)))
         return L1
 
     def vector_diff_km(self,v1,v2):
@@ -152,12 +152,12 @@ class SAL(object):
         r_ctrl = self.compute_r(self.C)
         r_mod = self.compute_r(self.M)
         L2 = 2*(N.abs(r_ctrl-r_mod)/self.d)
-        print("L2 = {0}".format(L2))
+        print(("L2 = {0}".format(L2)))
         return L2
     
     def compute_r(self,dic):
         Rn_sum = 0
-        for k,v in dic['objects'].items():
+        for k,v in list(dic['objects'].items()):
             Rn_sum += v['Rn'] * self.vector_diff_km(dic['x_CoM'],v['CoM']) 
         try:
             r = Rn_sum / dic['R_tot']
@@ -176,7 +176,7 @@ class SAL(object):
         # import pdb; pdb.set_trace()
         labeled, num_objects = ndimage.label(mask)
 
-        sizes = ndimage.sum(mask, labeled, range(num_objects+1))
+        sizes = ndimage.sum(mask, labeled, list(range(num_objects+1)))
 
         masksize = sizes < nsize
         remove_pixel = masksize[labeled]
@@ -229,7 +229,7 @@ class SAL(object):
 
         bow_radius = False
         if bow_radius:
-            sizes2 = ndimage.sum(mask,label_im, range(len(labels+1)))
+            sizes2 = ndimage.sum(mask,label_im, list(range(len(labels+1))))
             bigidx = N.where(sizes2==N.sort(sizes2)[-1])[0][0]
             # import pdb; pdb.set_trace()
             slicex, slicey = ndimage.find_objects(label_im==bigidx)[0]
@@ -263,7 +263,7 @@ class SAL(object):
 
     def compute_V(self,dic):
         Vn_sum = 0
-        for k,v in dic['objects'].items():
+        for k,v in list(dic['objects'].items()):
             Vn_sum += v['Rn'] * v['Vn']
         try:
             V = Vn_sum / dic['R_tot']

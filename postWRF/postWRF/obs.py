@@ -15,7 +15,7 @@ import calendar
 import glob
 import datetime
 
-from birdseye import BirdsEye
+from .birdseye import BirdsEye
 
 class Obs(object):
     """
@@ -192,7 +192,7 @@ class Radar(Obs):
         # x,y = self.m(*N.meshgrid(lons,lats[::-1]))
 
         # Custom colorbar
-        import colourtables as ct
+        from . import colourtables as ct
         radarcmap = ct.reflect_ncdc(self.clvs)
         # radarcmap = ct.ncdc_modified_ISU(self.clvs)
 
@@ -266,7 +266,7 @@ class SPCReports(Obs):
                 formats = ('S4','S4','S4','S4',
                             'S4','f4','f4')
             self.reports[threat] = N.loadtxt(fpath,dtype={'names':names,'formats':formats},
-                                        skiprows=1,delimiter=',',usecols=range(8))
+                                        skiprows=1,delimiter=',',usecols=list(range(8)))
             #times = reports['time']
             self.threats = threats
 
@@ -319,7 +319,7 @@ class StormReports(Obs):
     def plot(self,reports,itime,ftime,fname,outdir,Nlim=False,
             Elim=False,Slim=False,Wlim=False,
             annotate=True,fig=False,ax=False,ss=50,color='blue'):
-        reportidx = N.array([n for n,t in zip(range(len(self.r['EVENT_TYPE'])),self.r['EVENT_TYPE']) if reports in t])
+        reportidx = N.array([n for n,t in zip(list(range(len(self.r['EVENT_TYPE']))),self.r['EVENT_TYPE']) if reports in t])
         lateidx = N.where(self.datetimes > itime)
         earlyidx = N.where(self.datetimes < ftime)
         timeidx = N.intersect1d(earlyidx,lateidx,)#assume_unique=True)

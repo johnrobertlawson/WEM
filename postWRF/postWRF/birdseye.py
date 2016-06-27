@@ -15,12 +15,12 @@ import collections
 import os
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 
-from wrfout import WRFOut
-from defaults import Defaults
-from figure import Figure
+from .wrfout import WRFOut
+from .defaults import Defaults
+from .figure import Figure
 import WEM.utils as utils
-from scales import Scales
-import stats
+from .scales import Scales
+from . import stats
 
 class BirdsEye(Figure):
     def __init__(self,nc=False,ax=0,fig=0):
@@ -162,7 +162,7 @@ class BirdsEye(Figure):
             raise Exception
 
         if isinstance(locations,dict):
-            for k,v in locations.iteritems():
+            for k,v in locations.items():
                 if isinstance(v,tuple) and len(v) == 2:
                     xpt, ypt = self.bmap(v[1],v[0])
                     # bbox_style = {'boxstyle':'square','fc':'white','alpha':0.5}
@@ -173,7 +173,7 @@ class BirdsEye(Figure):
                     print("Not a valid location argument.")
                     raise Exception
 
-        if isinstance(title,basestring):
+        if isinstance(title,str):
             plt.title(title)
         if cb != False:
             if cb==True:
@@ -229,7 +229,7 @@ class BirdsEye(Figure):
         m.streamplot(x,y,U,V,
                         density=density,linewidth=lw,color='k',arrowsize=3)
 
-        if isinstance(title,basestring):
+        if isinstance(title,str):
             self.ax.set_title(title)
 
         self.save(outdir,fname)
@@ -264,8 +264,8 @@ class BirdsEye(Figure):
             data = self.W.get(va,slices)[0,...]
             # m.contour(x,y,data,levels=[contour,])
             ct = m.contour(x,y,data,colors=[colours[n],],levels=[contour,],label=wrfout.split('/')[-2])
-            print("Plotting contour level {0} for {1} from file \n {2}".format(
-                            contour,va,wrfout))
+            print(("Plotting contour level {0} for {1} from file \n {2}".format(
+                            contour,va,wrfout)))
             # ctlist.append(ct)
             # self.ax.legend()
 

@@ -1,10 +1,11 @@
 import calendar
 from netCDF4 import Dataset
 import matplotlib.pyplot as plt
-from defaults import Defaults
+from .defaults import Defaults
 from mpl_toolkits.basemap import Basemap
 import numpy as N
-import WEM.utils.utils as utils
+
+import WEM.utils as utils
 import os
 
 class ECMWF:
@@ -18,7 +19,7 @@ class ECMWF:
         self.lats = self.ec.variables['g0_lat_2'][:] #N to S
         self.lons = self.ec.variables['g0_lon_3'][:] #W to E
         self.lvs = self.ec.variables['lv_ISBL1'][:] #jet to sfc
-        self.fields = self.ec.variables.keys()
+        self.fields = list(self.ec.variables.keys())
         self.dims = self.ec.variables['Z_GDS0_ISBL'].shape
         self.x_dim = self.dims[3]
         self.y_dim = self.dims[2]
@@ -98,8 +99,8 @@ class ECMWF:
             datestr = utils.string_from_time('output',t)
             fname = '_'.join(('ECMWF',va,str(lv),datestr)) + '.png'
 
-            print("Plotting {0} at {1} for {2}".format(
-                        va,lv,datestr))
+            print(("Plotting {0} at {1} for {2}".format(
+                        va,lv,datestr)))
 
             plt.clabel(f1, inline=1, fmt='%4u', fontsize=12, colors='k')
 

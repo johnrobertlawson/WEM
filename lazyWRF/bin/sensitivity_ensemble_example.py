@@ -51,7 +51,7 @@ def edit_namelist_input(old,new,pathtoWRF=pathtoWRF):
             nameout.close()
             break
     if not exists:        
-        print("Line %s not found" % old)
+        print(("Line %s not found" % old))
         raise Exception
     else:
         return
@@ -82,7 +82,7 @@ for n,ens in enumerate(ensnames):
     if n<skipfirst:
         continue
     else:
-        print("Running",ens)
+        print(("Running",ens))
     # First, edit namelists
     if ensembletype == 'STCH':
         edit_namelist_input('stoch_force_opt','1')
@@ -116,13 +116,13 @@ for n,ens in enumerate(ensnames):
     child = ssh_command(user,host,password,REALcmd)
     child.expect(pexpect.EOF)
     jobid = child.before[2:7]
-    print(child.before)
+    print((child.before))
 
     # WRF.PBS
     WRFcmd = ' '.join(('qsub','-d',pathtoWRF,'wrf_run.sh','-W','depend=afterok:'+jobid)) 
     child = ssh_command(user,host,password,WRFcmd)
     child.expect(pexpect.EOF)
-    print(child.before)
+    print((child.before))
 
     # DONE WITH DERECHO NOW
 
@@ -147,7 +147,7 @@ for n,ens in enumerate(ensnames):
         tailoutput = tailrsl.stdout.read()
         if "SUCCESS COMPLETE WRF" in tailoutput:
             finished = 1
-            print "WRF has finished; moving to next case."
+            print("WRF has finished; moving to next case.")
         else:
             time.sleep(5*60) # Try again in 5 min
 

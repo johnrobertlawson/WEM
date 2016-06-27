@@ -13,7 +13,7 @@ import os
 
 # Custom imports
 import WEM.utils as utils
-from defaults import Defaults
+from .defaults import Defaults
 
 class Figure(object):
     def __init__(self,nc=False,ax=0,fig=0,plotn=(1,1),layout='normal'):
@@ -77,7 +77,7 @@ class Figure(object):
             if tight:
                 self.fig.tight_layout()
             self.fig.savefig(fpath,bbox_inches='tight')
-            print("Saving figure {0}".format(fpath))
+            print(("Saving figure {0}".format(fpath)))
             plt.close(self.fig)
 
     def just_one_colorbar(self,fpath,fname,cf,label=False,tix=False):

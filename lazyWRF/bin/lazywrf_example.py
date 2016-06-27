@@ -54,9 +54,9 @@ email = 0
 
 ##### WRF run SETTINGS #####
 # Start and end date in (YYYY,MM,DD,H,M,S)
-idate = (2006,05,26,0,0,0)
+idate = (2006,0o5,26,0,0,0)
 interval = 6.0 # In hours, as a float
-fdate = (2006,05,27,12,0,0)
+fdate = (2006,0o5,27,12,0,0)
 domains = 1
 e_we = (500,) # Needs to be same length as number of domains
 e_sn = (500,)
@@ -161,7 +161,7 @@ def get_init_files(initdata,idate,interval,fdate,pathtoinitdata):
     ffiledate = fdaten - fdaten%(interval*3600) + (interval*3600)
 
     # Create a range of required file dates
-    required_dates = range(int(ifiledate),int(ffiledate),int(interval*3600))
+    required_dates = list(range(int(ifiledate),int(ffiledate),int(interval*3600)))
 
     # List all files in initialisation data folder
     initfiles = glob.glob(pathtoinitdata + '*')
@@ -179,10 +179,10 @@ def get_init_files(initdata,idate,interval,fdate,pathtoinitdata):
         try:
             checkfiles_prefix.index(1) + checkfiles_date.index(1)
         except ValueError:
-            print 'Downloading required file for ' + fname_date
+            print('Downloading required file for ' + fname_date)
             download_data(fname_date,init_data,pathtoinitdata)
         else:     
-            print 'Data for ' + fname_date + ' already exists.'
+            print('Data for ' + fname_date + ' already exists.')
     return
 
 # This function runs a script and checks for errors; raises exception if one exists
@@ -192,9 +192,9 @@ def intelligent_run(executable,email):
     os.system(command)
     logfile = open(executable + '.log').readlines() 
     if "Successful completion" in logfile[-1]:
-        print '>>>>>>>> ' , executable, "has completed successfully. <<<<<<<<"
+        print('>>>>>>>> ' , executable, "has completed successfully. <<<<<<<<")
     else:
-        print '!!!!!!!! ' , executable, "has failed. Exiting... !!!!!!!!"
+        print('!!!!!!!! ' , executable, "has failed. Exiting... !!!!!!!!")
         if email:
             os.system('tail '+logfile+' | mail -s "lazyWRF message: error in '+executable+'." '+email)
         raise Exception
@@ -266,7 +266,7 @@ if WRF:
     # Copy original in case of bugs
     os.system('cp ' + pathtoWRF + 'namelist.input{,.python_backup}')
     
-    print 'met_em* linked. Now amending namelist.input.'
+    print('met_em* linked. Now amending namelist.input.')
 
     # Compute run time
     dt_1 = calendar.timegm(idate)
@@ -319,19 +319,19 @@ if WRF:
 
     
     if submit_job:
-        print 'Namelist edited. Now submitting real.exe.'  
+        print('Namelist edited. Now submitting real.exe.')  
         # Run real, get ID number of job
         # Change name of submission script if needed
         p_real = subprocess.Popen('qsub -d '+pathtoWRF+' real_run.sh',cwd=pathtoWRF,shell=True,stdout=subprocess.PIPE)
         p_real.wait()
         jobid = p_real.stdout.read()[:5] # Assuming first five digits = job ID.
         # Run WRF but wait until Real has finished without errors
-        print 'Now submitting wrf.exe.'  
+        print('Now submitting wrf.exe.')  
         # Again, change name of submission script if needed
         p_wrf = subprocess.Popen('qsub -d '+pathtoWRF+' wrf_run.sh -W depend=afterok:'+jobid,cwd=pathtoWRF,shell=True)
         p_wrf.wait()
-        print "real.exe and wrf.exe submitted. Exiting Python script."
+        print("real.exe and wrf.exe submitted. Exiting Python script.")
 
     else:
-        print "Pre-processing complete. Exiting Python script."
+        print("Pre-processing complete. Exiting Python script.")
 

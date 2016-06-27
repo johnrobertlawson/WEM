@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import datetime
 import os
 import numpy as N 
-import cPickle as pickle
+import pickle as pickle
 import matplotlib as M
 from mpl_toolkits.basemap import Basemap
 import netCDF4
@@ -224,7 +224,7 @@ def plot_SAL(data,vrbl='accum_precip',hr='all'):
             AA.append(v['A'])
             LL.append(v['L'])
         else:
-            print("Skipping due to missing data: {0}".format(k))
+            print(("Skipping due to missing data: {0}".format(k)))
             sc = None
         return sc, SS, AA, LL
         # ax.annotate(k[1:],xy=(v['S']+0.03,v['A']+0.03),xycoords='data',fontsize=5)
@@ -235,7 +235,7 @@ def plot_SAL(data,vrbl='accum_precip',hr='all'):
         hrs = (36,)
 
     for hr in hrs:
-        print('For hour {0}:'.format(hr))
+        print(('For hour {0}:'.format(hr)))
         SS = []
         AA = []
         LL = []
@@ -253,12 +253,12 @@ def plot_SAL(data,vrbl='accum_precip',hr='all'):
         ax.set_ylim([-2,2])
 
         if vrbl == 'accum_precip':
-            for k,v in DATA.items():
+            for k,v in list(DATA.items()):
                 sc, SS, AA, LL = scatplot(ax,v,SS,AA,LL)
                 if sc:
                     scs = sc
         elif vrbl == 'cref':
-            for k,day in DATA.items():
+            for k,day in list(DATA.items()):
                 sc,SS,AA,LL = scatplot(ax,day[hr],SS,AA,LL)
                 if sc:
                     scs = sc
@@ -409,7 +409,7 @@ if SAL_precip_compute:
 
 
             # Interpolate onto our grid
-            print("Starting ST4 interpolation for init time {0}".format(date))
+            print(("Starting ST4 interpolation for init time {0}".format(date)))
             if method1:
                 ST4data_SALgrid = griddata((ST4_SALgrid_xx.flat,ST4_SALgrid_yy.flat),
                         ST4data_ST4grid.flat,(SAL_native_mx.flat,SAL_native_my.flat),method='nearest').reshape(308,537)  
@@ -466,7 +466,7 @@ if SAL_precip_compute:
 
 
             # Interpolate onto our grid
-            print("Starting NAM interpolation for init time {0}".format(date))
+            print(("Starting NAM interpolation for init time {0}".format(date)))
             if method1:
                 NAMdata_SALgrid = griddata((NAM_SALgrid_xx.flat,NAM_SALgrid_yy.flat),
                         data_NAMgrid.flat,(SAL_native_mx.flat,SAL_native_my.flat),method='nearest').reshape(308,537)
@@ -561,7 +561,7 @@ if SAL_cref_compute:
                 # import pdb; pdb.set_trace()
 
                 # THIS METHOD2 DEFINITELY WORKS
-                print("Starting radar ob interpolation for time {0}".format(utc))
+                print(("Starting radar ob interpolation for time {0}".format(utc)))
                 # if method1:
                     # This requires a nan_to_num method
                     # obsdata_SALgrid = griddata((obs_SALgrid_mx.flat,obs_SALgrid_my.flat),
@@ -605,7 +605,7 @@ if SAL_cref_compute:
                     data_NAMgrid = NAM.variables['REFC_218_EATM'][:]
 
                     # Interpolate onto our grid
-                    print("Starting NAM interpolation for fcst time {0}".format(utc))
+                    print(("Starting NAM interpolation for fcst time {0}".format(utc)))
                     if method1:
                         NAMdata_SALgrid = griddata((NAM_SALgrid_xx.flat,NAM_SALgrid_yy.flat),
                                 data_NAMgrid.flat,(SAL_native_mx.flat,SAL_native_my.flat),method='linear').reshape(308,537)
@@ -664,13 +664,13 @@ if SAL_cref_compute:
                     DATA[date][deltahour]['L'] = sal.L
                     DATA[date][deltahour]['active_px_obs'] = sal.active_px('ctrl')
                     DATA[date][deltahour]['active_px_NAM'] = sal.active_px('mod')
-                    print('Active pixels for obs and NAM data:\n {0}% and {1}%.'.format(
+                    print(('Active pixels for obs and NAM data:\n {0}% and {1}%.'.format(
                             DATA[date][deltahour]['active_px_obs'],
-                            DATA[date][deltahour]['active_px_NAM']))
+                            DATA[date][deltahour]['active_px_NAM'])))
                     # import pdb; pdb.set_trace()
 
             ckpt2 = time.time()
-            print("One day took this long: {0}".format(ckpt2-ckpt1))
+            print(("One day took this long: {0}".format(ckpt2-ckpt1)))
             date = date + datetime.timedelta(days=1)
 
         # Save results to pickle for this day
@@ -714,7 +714,7 @@ if SAL_cref_random_compute:
                 # obdata_obgrid = N.flipud(N.swapaxes(RADAR.get_dBZ(data='self'),1,0))
                 obdata_obgrid = N.fliplr(N.swapaxes(RADAR.get_dBZ(data='self'),1,0))
 
-                print("Starting radar ob interpolation for time {0}".format(utc))
+                print(("Starting radar ob interpolation for time {0}".format(utc)))
                 if method1:
                     obsdata_SALgrid = griddata((obs_SALgrid_xx.flat,obs_SALgrid_yy.flat),
                             obdata_obgrid.flat,(SAL_native_mx.flat,SAL_native_my.flat)).reshape(308,537)  
@@ -738,7 +738,7 @@ if SAL_cref_random_compute:
                     data_NAMgrid = NAM.variables['REFC_218_EATM'][:]
 
                     # Interpolate onto our grid
-                    print("Starting NAM interpolation for fcst time {0}".format(utc))
+                    print(("Starting NAM interpolation for fcst time {0}".format(utc)))
                     if method1:
                         NAMdata_SALgrid = griddata((NAM_SALgrid_xx.flat,NAM_SALgrid_yy.flat),
                                 data_NAMgrid.flat,(SAL_native_mx.flat,SAL_native_my.flat)).reshape(308,537)
@@ -815,7 +815,7 @@ if SAL_climo_plot:
         L_meds = {}
         TRAJ = {}
         for th in (5,15,30,40):
-            print("Thresh {0}".format(th))
+            print(("Thresh {0}".format(th)))
             TRAJ[th] = {}
             picklefname = 'SAL_{0}_{1}dBZ_{2}fp_{3}.pickle'.format('cref',th,200,mst)
             picklef = os.path.join(pickledir,picklefname)
@@ -827,7 +827,7 @@ if SAL_climo_plot:
                 SS = []
                 AA = []
                 LL = []
-                for k,day in DATA.items():
+                for k,day in list(DATA.items()):
                     # Compute median S,A,L for each time/threshold
                     S = day[hr]['S']
                     A = day[hr]['A']
@@ -867,7 +867,7 @@ if SAL_climo_plot:
 
             npointsHiRes = len(HiS_meds)
             # ax.set_color_cycle([plotcm(1.0*i/(npointsHiRes-1)) for i in range(npointsHiRes-1)])        
-            for i,alphi in zip(range(npointsHiRes-1),N.linspace(0.10,1.00,num=npointsHiRes+1)):
+            for i,alphi in zip(list(range(npointsHiRes-1)),N.linspace(0.10,1.00,num=npointsHiRes+1)):
                 ax.plot(HiS_meds[i:i+2],HiA_meds[i:i+2],
                      # alpha=float(i)/(npointsHiRes-1),
                      alpha=alphi,
@@ -966,7 +966,7 @@ if countsize:
         COUNT[th]['SAL0'] = 0
         COUNT[th]['SAL2'] = 0
 
-        for k,day in DATA.items():
+        for k,day in list(DATA.items()):
             for hr in N.arange(12,36,1):
                 # Compute median S,A,L for each time/thold
                 if th == 'acc':
@@ -995,7 +995,7 @@ if active_pixels:
     legpatch = [0,]*6
     ll = {5:('',''),30:('',''),15:('Obs','NAM')}
     for thresh,color,ln in zip((5,15,30),(('#E69F00','#f2cf7f'),
-                            ('#56B4E9','#aad9f4'),('#009E73','#7fceb9')),range(3)):
+                            ('#56B4E9','#aad9f4'),('#009E73','#7fceb9')),list(range(3))):
         # for th,color in zip((5,15,30,40),('r','k','b','g')):
         legpatch[ln] = M.patches.Patch(color=color[0],label=ll[thresh][0])
         legpatch[ln+3] = M.patches.Patch(color=color[1],label=ll[thresh][1])
@@ -1010,8 +1010,8 @@ if active_pixels:
         scatter_px = 0
         if scatter_px:
             fig,ax = plt.subplots(1,figsize=(5,5))
-            for d in randomdata.keys():
-                for h in randomdata[d].keys():
+            for d in list(randomdata.keys()):
+                for h in list(randomdata[d].keys()):
                     try:
                         ax.scatter(randomdata[d][h]['active_px_obs'],
                             randomdata[d][h]['active_px_NAM'],
@@ -1032,7 +1032,7 @@ if active_pixels:
         for h in N.arange(12,36,1):
             hr_obpx_l = []
             hr_NAMpx_l = []
-            for d in randomdata.keys():
+            for d in list(randomdata.keys()):
                 try:
                     hr_obpx_l.append(randomdata[d][h]['active_px_obs'])
                 except KeyError:

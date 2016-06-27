@@ -13,7 +13,7 @@ import WEM.utils as utils
 #from WEM.postWRF.postWRF.rucplot import RUCPlot
 
 def download_RUC(utc,fpath):
-    print('Downloading {0} RUC file.'.format(utc))
+    print(('Downloading {0} RUC file.'.format(utc)))
     utils.getruc(utc,ncpath=fpath,convert2nc=True,duplicate=False)
 
 outdir = '/home/jrlawson/public_html/bowecho/'

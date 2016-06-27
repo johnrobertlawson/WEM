@@ -333,7 +333,7 @@ if profiles:
         out_d = os.path.dirname(out_d)
         ml = -3
     for t in times:
-        for ln,ll in locs.iteritems():
+        for ln,ll in locs.items():
             p.twopanel_profile(vrbl,t,wrf_sds,out_d,two_panel=1,
                                 xlim=xlim,ylim=[500,1000,50],
                                 latlon=ll,locname=ln,ml=ml)
@@ -386,7 +386,7 @@ if compute_dte or plot_3D_dte or plot_1D_dte or powerspectrum:
     for en in ensnames:
         for ex in experiments:
             od,fpath = get_folders(en,ex)
-            print fpath
+            print(fpath)
             path_to_wrfouts.append(utils.netcdf_files_in(fpath))
 
     if compute_dte:
@@ -396,7 +396,7 @@ if compute_dte or plot_3D_dte or plot_1D_dte or powerspectrum:
     if plot_1D_dte:
         # Contour fixed at these values
         # V = range(250,5250,250)
-        V = range(500,18000,500)
+        V = list(range(500,18000,500))
         VV = [250,] + V
         ofname = pfname
         p.plot_diff_energy('1D','DTE',pickledir,outdir,dataf=pfname,outprefix=ofname,clvs=VV,utc=False,cb=True)
@@ -492,7 +492,7 @@ if all_3D_dte:
             pass
 
         pickledir,dummy = get_pickle_dirs(ensnames)
-        print exper, pickledir
+        print(exper, pickledir)
         # EXS[exper] = {'datadir':pickledir,'dataf':'DTE_'+enstype}
         EXS[exper]['datadir'] = pickledir
         EXS[exper]['dataf'] = 'DTE_'+enstype

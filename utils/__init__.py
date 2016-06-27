@@ -1,6 +1,6 @@
 """
 References these utilities in WEM.utils.
 """
-from unix_tools import *
-from GIS_tools import *
-from getdata import *
+from .unix_tools import *
+from .GIS_tools import *
+from .getdata import *

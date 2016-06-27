@@ -79,7 +79,7 @@ elif experiment=='MXMP':
         fpath = os.path.join(wrfout_root,case,IC,ens,MP)
         path_to_wrfouts.append(utils.wrfout_files_in(fpath,dom=1)[0])
 else:
-    print "Typo!"
+    print("Typo!")
     raise Exception
     
 pfname = 'DTE_' + experiment
@@ -90,7 +90,7 @@ if compute:
 
 if plot_2D:
     # Contour fixed at these values
-    V = range(250,5250,250)
+    V = list(range(250,5250,250))
     VV = [100,] + V
     ofname = pfname + '_2D'
     for t in times:

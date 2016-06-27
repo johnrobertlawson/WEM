@@ -79,9 +79,9 @@ if entire_domain:
                     for e in BOW[plot]['ensnames']]
     del plot
 
-    for nt,t in (zip(range(len(times)),times)): 
+    for nt,t in (list(zip(list(range(len(times))),times))): 
         
-        print("Time",nt)
+        print(("Time",nt))
     # t = False
         stdval1, stdval2, tstat, pvalue =  stats.std_ttest(ncfiles1,ncfiles2,vrbl,utc=t,level=lv,th=th)
         BOW['normal']['stdTS'].append(stdval1)
@@ -110,7 +110,7 @@ if entire_domain:
     fname = 'std_lines_entiredomain_{0}_{1}th.png'.format(vrbl,th)
     fpath = os.path.join(outdir,fname)
     fig.savefig(fpath)
-    print("Saved to {0}".format(fpath))
+    print(("Saved to {0}".format(fpath)))
     plt.close(fig)
 
 if limited_domain:
@@ -152,5 +152,5 @@ if limited_domain:
     fname = 'std_lines_{0}_1kmdomain.png'.format(vrbl)
     fpath = os.path.join(outdir,fname)
     fig.savefig(fpath)
-    print("Saved to {0}".format(fpath))
+    print(("Saved to {0}".format(fpath)))
     plt.close(fig)

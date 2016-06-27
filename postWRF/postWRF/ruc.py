@@ -13,9 +13,9 @@ import calendar
 import sys
 #sys.path.append('/home/jrlawson/gitprojects/')
 import WEM.utils as utils
-from figure import Figure
-from defaults import Defaults
-from wrfout import WRFOut
+from .figure import Figure
+from .defaults import Defaults
+from .wrfout import WRFOut
 
 """
 RUC/RAP data will probably need to be cut down to fit the WRF domain
@@ -91,7 +91,7 @@ class RUC(WRFOut):
             self.x_dim = self.lats.shape[1]
 
         # import pdb; pdb.set_trace()
-        print('RUC file loaded from {0}'.format(self.fpath))
+        print(('RUC file loaded from {0}'.format(self.fpath)))
         # import pdb; pdb.set_trace()
 
     def get_utc_time(self,rawtime,fmt='datenum'):
@@ -173,7 +173,7 @@ class RUC(WRFOut):
             lvidx = False
         elif coords == 'index':
             lvidx = level
-        elif isinstance(coords,basestring):
+        elif isinstance(coords,str):
             if coords == 'surface':
                 lvidx = 0
             elif coords == 'isobaric':
@@ -225,8 +225,8 @@ class RUC(WRFOut):
         for va in variables:
             printtime = ('/'.join(["%02u" %s for s in self.ts[:4]]) +
                              "%02u" %self.ts[4] + ' UTC')
-            print("Plotting {0} for level {1} at time {2}".format(
-                va,lv,printtime))
+            print(("Plotting {0} for level {1} at time {2}".format(
+                va,lv,printtime)))
             if 'scale' in kwargs:
                 kwargs['scale'] = variables[va]['scale']
             if 'top' in kwargs:
@@ -452,9 +452,9 @@ class RUC(WRFOut):
         for i in range(225):
             for j in range(301):
                 topidx[i,j] = round(N.interp(
-                                topm,Z[:,i,j],range(37)))
+                                topm,Z[:,i,j],list(range(37))))
                 botidx[i,j] = round(N.interp(
-                                botm,Z[:,i,j],range(37)))
+                                botm,Z[:,i,j],list(range(37))))
                 ushear[i,j] = u[topidx[i,j],i,j] - u[botidx[i,j],i,j]
                 vshear[i,j] = v[topidx[i,j],i,j] - v[botidx[i,j],i,j]
 
@@ -477,7 +477,7 @@ class RUC(WRFOut):
         return N.sqrt(u**2 + v**2)
 
     def get_p(self,vrbl,tidx,level,lonidx,latidx):
-        if isinstance(level,basestring) and level.endswith('hPa'):
+        if isinstance(level,str) and level.endswith('hPa'):
             hPa = 100.0*int(level.split('h')[0])
             nlv = 1
         elif isinstance(level,(float,int)):
@@ -541,7 +541,7 @@ class RUC(WRFOut):
             key = KEYS[vrbl][key_no[self.version]]
         except KeyError:
             if debug_get:
-                print("Can't find variable {0}".format(vrbl))
+                print(("Can't find variable {0}".format(vrbl)))
             # raise Exception
             return False
         else:

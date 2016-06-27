@@ -377,9 +377,9 @@ vrbls = ['hgt_pres',]#'ugrd_pres','vgrd_pres']
 
 if download_GEFS_data:
     for date in cases['datetimes']:
-        print("Date = {0}".format(date))
+        print(("Date = {0}".format(date)))
         for member in gefsmembers:
-            print("Member = {0}".format(member))
+            print(("Member = {0}".format(member)))
             for vrbl in vrbls:
                 ncks_fname = '{0}_{1:04d}{2:02d}{3:02d}{4:02d}_{5}_ncks.nc'.format(
                         vrbl,date.year,date.month,date.day,date.hour,member)
@@ -388,7 +388,7 @@ if download_GEFS_data:
                 if os.path.join(GEFSdir,ncks_fname) in flist:
                     print("Already downloaded/ncksed")
                 else:
-                    print("Variable = {0}".format(vrbl))
+                    print(("Variable = {0}".format(vrbl)))
                     grb_fpath = download_GEFS(vrbl,date,member,coord='latlon')
                     nc_fpath = convert_to_nc(grb_fpath)
 
@@ -452,10 +452,10 @@ if heat is not False:
                     # import pdb; pdb.set_trace()
                 # if int(date.year) < 2008:
                     # continue
-                print("Computing {1} for {0}".format(date,heat))
+                print(("Computing {1} for {0}".format(date,heat)))
                 HEAT[date] = {heat:[]}
                 for h,fcsthr in enumerate(HEAT['times']): 
-                    print("Forecast hour {0}.".format(fcsthr))
+                    print(("Forecast hour {0}.".format(fcsthr)))
                     for member in pmembers:
                         nc = get_nc(nctype,date,member=member,vrbl='Z',fcsthr=False)
                         if nctype is 'GEFSR2':

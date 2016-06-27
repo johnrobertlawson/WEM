@@ -44,7 +44,7 @@ def getgefs(dates,download=1,split=1,lowres=0,custom_ens=0,control=1,
                 CATNAME = d + '_' + e + '.grib2'
                 cmnd = "wget -nc -nd --output-document=" + CATNAME + ' ' + url + fname
                 os.system(cmnd)
-                print d, e, " Downloaded."
+                print(d, e, " Downloaded.")
          
     # This section will split the data into forecast times for WRF to read
     # Using WGRIB2
@@ -119,7 +119,7 @@ def getnam(dates,hours,datatype,**kwargs):
     def get_218fcst(dates,hours,Tmax,Tint):
         for d in dates:
             for h in hours:
-                fhs = range(0,Tmax+Tint,Tint)
+                fhs = list(range(0,Tmax+Tint,Tint))
                 for fh in fhs:
                     fpad = "%03d" %fh
                     if age == 'old':

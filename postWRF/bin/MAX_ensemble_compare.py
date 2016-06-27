@@ -54,7 +54,7 @@ def make_subplot_label(ax,label):
     return
 
 cb_saved = {}
-for vrbl in PLOTS.keys():
+for vrbl in list(PLOTS.keys()):
     cb_saved[vrbl] = False
 p = WRFEnviron()
 # Compare old and new runs
@@ -62,7 +62,7 @@ labels = ['a)','b)','c)','d)','e)','f)']
 
 for tn,t in enumerate(times):
     nicetime = datetime.datetime(*time.gmtime(t)[:-2])
-    for vrbl,PL in PLOTS.iteritems():
+    for vrbl,PL in PLOTS.items():
         fig, axes = plt.subplots(3,2,figsize=(6,9))
         for n,ens in enumerate(MAXmembers):
             ncdir = os.path.join(ncroot,ens)
@@ -108,5 +108,5 @@ for tn,t in enumerate(times):
         utils.trycreate(outdir)
         fig.savefig(fpath)
         plt.close(fig)
-        print("Saved figure for {0} at {1:%Y%m%d %H:%M}.".format(vrbl,nicetime))
+        print(("Saved figure for {0} at {1:%Y%m%d %H:%M}.".format(vrbl,nicetime)))
 

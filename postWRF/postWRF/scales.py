@@ -21,7 +21,7 @@ from matplotlib.colors import LinearSegmentedColormap
 import numpy as N
 import matplotlib.pyplot as plt
 
-import colourtables as ct
+from . import colourtables as ct
 import WEM.utils as utils
 
 class Scales(object):

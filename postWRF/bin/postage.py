@@ -120,7 +120,7 @@ else:
     height += 1
 
 for time_str in time_strs:
-    print('Creating image for time {0}'.format(time_str))
+    print(('Creating image for time {0}'.format(time_str)))
     for p,panel in enumerate(panellist):
         # caserootdir = os.path.join(config.output_root,case_str,IC)
         fname = '_'.join((va_str,lv_str,time_str)) + '.png'
@@ -167,9 +167,9 @@ for time_str in time_strs:
                     img = M.image.imread(fname)
                     ax.imshow(img)
                 else:
-                    print "RUC file not there"
+                    print("RUC file not there")
             else:
-                print "Verif skipped"
+                print("Verif skipped")
         elif p == 1 and not verifplot and ex is not 'ICBC':
             img = M.image.imread(fpath)
             ax.imshow(img)
@@ -180,9 +180,9 @@ for time_str in time_strs:
             try:
                 img = M.image.imread(fpath)
             except:
-                print "Skipping ", panel
+                print("Skipping ", panel)
             else:
-                print "Plotting ", panel
+                print("Plotting ", panel)
                 ax.imshow(img)
         ax.axis('off')
         plt.title(panel)
@@ -195,7 +195,7 @@ for time_str in time_strs:
             
     outfilename = '_'.join(('postage',ex,va_str,lv_str,time_str)) + '.png'
     outfilepath = os.path.join(outfiledir,outfilename)
-    print outfilepath
+    print(outfilepath)
     utils.trycreate(outfiledir)
     #plt.tight_layout()
     fig.savefig(outfilepath)

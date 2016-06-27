@@ -11,7 +11,7 @@ import os
 import numpy as N
 import calendar
 import pdb
-import constants as cc
+from . import constants as cc
 import scipy.ndimage
 import collections
 import scipy.interpolate
@@ -62,8 +62,8 @@ class WRFOut(object):
 
         self.P_top = self.nc.variables['P_TOP'][0]
         # Loads variable lists
-        self.fields = self.nc.variables.keys()
-        self.computed_fields = self.return_tbl().keys()
+        self.fields = list(self.nc.variables.keys())
+        self.computed_fields = list(self.return_tbl().keys())
         self.available_vrbls = self.fields + self.computed_fields
 
         # Get times in nicer format
@@ -187,7 +187,7 @@ class WRFOut(object):
             lvidx = False
         elif coords == 'index':
             lvidx = level
-        elif isinstance(coords,basestring):
+        elif isinstance(coords,str):
             if coords == 'surface':
                 lvidx = 0
             else:
@@ -225,11 +225,11 @@ class WRFOut(object):
         # When data is loaded from nc, it is destaggered
 
         if debug_get:
-            print("Computing {0} for level {1} of index {2}".format(vrbl,level,lvidx))
+            print(("Computing {0} for level {1} of index {2}".format(vrbl,level,lvidx)))
 
         if self.check_compute(vrbl):
             if debug_get:
-                print("Variable {0} exists in dataset.".format(vrbl))
+                print(("Variable {0} exists in dataset.".format(vrbl)))
             if lvidx is 'isobaric':
                 data = self.get_p(vrbl,tidx,level,lonidx,
                             latidx)
@@ -239,7 +239,7 @@ class WRFOut(object):
                 raise Exception
         else:
             if debug_get:
-                print("Variable {0} needs to be computed.".format(vrbl))
+                print(("Variable {0} needs to be computed.".format(vrbl)))
             if lvidx is 'isobaric':
                 # data = self.get_p(vrbl,tidx,level,lonidx, latidx)[N.newaxis,N.newaxis,:,:]
                 data = self.compute(vrbl,tidx,level,lonidx,latidx,other)
@@ -658,9 +658,9 @@ class WRFOut(object):
             for i in range(self.y_dim):
                 # import pdb; pdb.set_trace()
                 topidx[i,j] = round(N.interp(
-                                topm,Z[0,:,i,j],range(self.z_dim)))
+                                topm,Z[0,:,i,j],list(range(self.z_dim))))
                 botidx[i,j] = round(N.interp(
-                                botm,Z[0,:,i,j],range(self.z_dim)))
+                                botm,Z[0,:,i,j],list(range(self.z_dim))))
                 ushear[i,j] = u[0,topidx[i,j],i,j] - u[0,botidx[i,j],i,j]
                 vshear[i,j] = v[0,topidx[i,j],i,j] - v[0,botidx[i,j],i,j]
 
@@ -959,7 +959,7 @@ class WRFOut(object):
         axes = {0:"Time",1:"bottom",2:"south",3:"west"}
         missing = []
 
-        for ax, axname in axes.iteritems():
+        for ax, axname in axes.items():
             present = bool([True for d in dims if axname in d])
             if not present:
                 missing.append(ax)
@@ -1050,7 +1050,7 @@ class WRFOut(object):
 
         if vrbl=='pressure',create constant grid.
         """
-        if isinstance(level,basestring) and level.endswith('hPa'):
+        if isinstance(level,str) and level.endswith('hPa'):
             hPa = 100.0*int(level.split('h')[0])
             nlv = 1
         elif isinstance(level,(float,int)):
@@ -1194,7 +1194,7 @@ class WRFOut(object):
         # yyy = [X.yy,]
         X.translate_xs(-swath_width/2)
         for n in range(swath_width):
-            print("Cross section #{0}".format(n))
+            print(("Cross section #{0}".format(n)))
         # for xx, yy in zip(xxx, yyy):
             X.translate_xs(1)
             xx = X.xx
@@ -1318,7 +1318,7 @@ class WRFOut(object):
             ### METHOD 1: USING THRESHOLDS
             # By default
             gfidx = shp/2
-            for n, s, t in zip(range(shp)[::-1],shear[::-1],T2grad[::-1]):
+            for n, s, t in zip(list(range(shp))[::-1],shear[::-1],T2grad[::-1]):
                 if (abs(s)>2.0) and (t<2.0):
                     gfidx = n
                     break
@@ -1331,7 +1331,7 @@ class WRFOut(object):
 
             xsh_idx = N.where(shear == shear.max())[0][0]
             xtg_idx = N.where(T2grad == T2grad.max())[0][0]
-            print("Max shear loc: {0} ... max tempgrad loc: {1}".format(xsh_idx,xtg_idx))
+            print(("Max shear loc: {0} ... max tempgrad loc: {1}".format(xsh_idx,xtg_idx)))
 
             if method==2:
                 gfidx = int((xsh_idx + xtg_idx)/2.0)

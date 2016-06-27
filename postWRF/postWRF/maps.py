@@ -2,7 +2,7 @@
 import matplotlib.pyplot as plt
 from mpl_toolkits.basemap import Basemap
 import collections
-from wrfout import WRFOut
+from .wrfout import WRFOut
 import os
 
 def plot_domains(wrfouts,labels,outpath,Nlim,Elim,
@@ -47,7 +47,7 @@ def plot_domains(wrfouts,labels,outpath,Nlim,Elim,
     # Get corners of each domain
     for gridlabel,fpath,col,lp in zip(labels,wrfouts,colours,labpos):
         W = WRFOut(fpath)
-        print("Plotting domain {0} for {1}".format(gridlabel,fpath))
+        print(("Plotting domain {0} for {1}".format(gridlabel,fpath)))
         #Nlim, Elim, Slim, Wlim = W.get_limits()
         x,y = m(W.lons,W.lats)
         xl = len(x[0,:])
@@ -87,4 +87,4 @@ def plot_domains(wrfouts,labels,outpath,Nlim,Elim,
     fpath = os.path.join(outpath,fname)
     fig.tight_layout()
     fig.savefig(fpath)
-    print("Saved to "+fpath)
+    print(("Saved to "+fpath))

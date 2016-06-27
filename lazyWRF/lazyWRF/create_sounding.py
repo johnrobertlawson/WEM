@@ -37,7 +37,7 @@ Dewpoint:
 
 """
 
-class Profile(Object):
+class Profile(object):
     def __init__(self,method='MW01'):
         pass
 
@@ -61,7 +61,7 @@ class Profile(Object):
 
         profile :   array_like
             Atmospheric profile.
-        """"
+        """
 
 
     def calc_theta(self,z,ztr=12000.0,theta0=300.0,thetatr=343,Ttr=213):
@@ -73,7 +73,7 @@ class Profile(Object):
 
     def calc_RH(self,z,ztr=12000.0):
         if z <= ztr:
-            RH = 1-(0.75*(z/ztr)**1.25
+            RH = 1-(0.75*(z/ztr)**1.25)
         else:
             RH = 0.25
         return RH

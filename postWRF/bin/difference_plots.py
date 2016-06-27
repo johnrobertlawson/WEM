@@ -93,7 +93,7 @@ if diffplot:
     fpath = os.path.join(outdir,fname)
     utils.trycreate(outdir)
     fig.savefig(fpath)
-    print("Saved at {0}.".format(fpath))
+    print(("Saved at {0}.".format(fpath)))
     plt.close(fig)
 
 # Two together
@@ -128,6 +128,6 @@ for nest in ('SINGLE','NESTED'):
     fpath = os.path.join(outdir,fname)
     utils.trycreate(outdir)
     fig.savefig(fpath)
-    print("Saved at {0}.".format(fpath))
+    print(("Saved at {0}.".format(fpath)))
     plt.close(fig)
 

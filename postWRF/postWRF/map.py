@@ -1,4 +1,4 @@
-from figure import Figure
+from .figure import Figure
 
 class Map(Figure):
     def plot_domains(self,wrfouts,labels,latlons,colour=0):
@@ -32,7 +32,7 @@ class Map(Figure):
         # Get corners of each domain
         for gridlabel,fpath,colour in zip(labels,wrfouts,colours):
             W = WRFOut(fpath)
-            print("Plotting domain {0} for {1}".format(gridlabel,fpath))
+            print(("Plotting domain {0} for {1}".format(gridlabel,fpath)))
             #Nlim, Elim, Slim, Wlim = W.get_limits()
             x,y = m(W.lons,W.lats)
             xl = len(x[0,:])

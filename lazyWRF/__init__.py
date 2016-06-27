@@ -1,2 +1,2 @@
 # import lazyWRF
-import lazyWRF
+from . import lazyWRF

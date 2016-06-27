@@ -7,10 +7,10 @@ import collections
 import pdb
 
 # from figure import Figure
-import colourtables as ct
-from scales import Scales
-from figure import Figure
-from defaults import Defaults
+from . import colourtables as ct
+from .scales import Scales
+from .figure import Figure
+from .defaults import Defaults
 
 class Clicker(Figure):
     # def __init__(self,config,wrfout,ax=0):
@@ -57,7 +57,7 @@ class Clicker(Figure):
         plt.show(self.fig)
         
     def on_press(self, event):
-        print 'press'
+        print('press')
         self.x0 = event.xdata
         self.y0 = event.ydata
 
@@ -70,7 +70,7 @@ class Clicker(Figure):
         self.ax.figure.canvas.draw()
 
     def on_release_box(self, event):
-        print 'release'
+        print('release')
         self.x1 = event.xdata
         self.y1 = event.ydata
         self.rect.set_width(self.x1 - self.x0)
@@ -79,7 +79,7 @@ class Clicker(Figure):
         self.ax.figure.canvas.draw()
 
     def on_release_line(self, event):
-        print 'release'
+        print('release')
         self.x1 = event.xdata
         self.y1 = event.ydata
         # self.rect.set_width(self.x1 - self.x0)
@@ -120,7 +120,7 @@ class Clicker(Figure):
         plt.show(self.fig)
         user_is_happy = 0
         while not user_is_happy:
-            self.km = int(raw_input("Specify line-normal width (km): "))
+            self.km = int(input("Specify line-normal width (km): "))
             if not isinstance(self.km,int):
                 print("Value is not integer.")
                 raise Exception
@@ -132,7 +132,7 @@ class Clicker(Figure):
             plt.show(self.fig)
             
             while True:
-                doesitwork = raw_input("Does this work? (y/n/x): ")
+                doesitwork = input("Does this work? (y/n/x): ")
                 if doesitwork == 'y':
                     user_is_happy = 1
                     break

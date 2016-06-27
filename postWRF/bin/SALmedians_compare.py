@@ -57,26 +57,26 @@ cb = {}
 nicetimes = iter(['21 h','24 h','27 h'])
 
 for tn,t in enumerate(times):
-    print("Creating row for time #{0} of {1}.".format(tn+1,len(times)))
+    print(("Creating row for time #{0} of {1}.".format(tn+1,len(times))))
 
     # Verification
-    ax = axit.next()
+    ax = next(axit)
     p.plot_radar(t,radar_datadir,ncdir=ncdir['SINGLE'],fig=fig,ax=ax,cb=False,nct=nct,dom=1,**lims)
-    make_subplot_label(ax,labels.next())
+    make_subplot_label(ax,next(labels))
     if tn == 0:
-        ax.set_title(pltitle.next())
+        ax.set_title(next(pltitle))
 
     # Sim cref
     for vrbl, nest in zip(('cref','cref','dptp','dptp'),('SINGLE','NESTED','SINGLE','NESTED')):
-        print(vrbl, nest)
-        ax = axit.next()
+        print((vrbl, nest))
+        ax = next(axit)
         cb[vrbl] = p.plot2D(vrbl,utc=t,level=PLOTS[vrbl]['lv'],ncdir=ncdir[nest],outdir=False,fig=fig,ax=ax,cb=False,
                 clvs=PLOTS[vrbl]['clvs'],nct=nct,plottype='contourf',cmap=PLOTS[vrbl]['cmap'],
                 extend=PLOTS[vrbl]['extend'],save=False,**lims)
         if tn == 0:
-            ax.set_title(pltitle.next())
-        make_subplot_label(ax,labels.next())
-    ax.text(1.1,0.5,nicetimes.next(),transform=ax.transAxes)
+            ax.set_title(next(pltitle))
+        make_subplot_label(ax,next(labels))
+    ax.text(1.1,0.5,next(nicetimes),transform=ax.transAxes)
 
 fig.tight_layout()
 fig.subplots_adjust(bottom=0.13,right=0.92)

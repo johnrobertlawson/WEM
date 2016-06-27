@@ -61,8 +61,8 @@ for case in NC:
         mnc = os.path.join(NC[case]['Gncdir'],NC[case]['Gnc'])
         fig,axes = plt.subplots(nrow,ncol,figsize=(6,6))
         axn = 0
-        for vrbl in PLOT.keys():
-            for lv,clvs in PLOT[vrbl].items():
+        for vrbl in list(PLOT.keys()):
+            for lv,clvs in list(PLOT[vrbl].items()):
                 for model,ncdir in zip(['RUC','GEFSR2','NAM'],(NC[case]['Rncdir'],NC[case]['Gncdir'],NC[case]['Nncdir'])):
                     if model=='RUC':
                         nct = t
@@ -75,7 +75,7 @@ for case in NC:
         fpath = os.path.join(outroot,fnameout)
         fig.tight_layout()
         fig.savefig(fpath)
-        print('Saved to {0}'.format(fpath))
+        print(('Saved to {0}'.format(fpath)))
 
 
 

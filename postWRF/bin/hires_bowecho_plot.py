@@ -189,7 +189,7 @@ for ens in ensnames:
             hr = utils.ensure_timetuple(t)[3]
             fpath = os.path.join(outdir,'coldpool_{0:02d}Z.png'.format(hr))
             fig.savefig(fpath)
-            print("Saving figure to {0}".format(fpath))
+            print(("Saving figure to {0}".format(fpath)))
             plt.close(fig)
 
     if spaghetti:
@@ -239,7 +239,7 @@ for ens in ensnames:
             out_d = os.path.dirname(out_d)
             ml = -3
         for t in times:
-            for ln,ll in locs.iteritems():
+            for ln,ll in locs.items():
                 p.twopanel_profile(vrbl,t,wrf_sds,out_d,two_panel=1,
                                     xlim=xlim,ylim=[500,1000,50],
                                     latlon=ll,locname=ln,ml=ml)
@@ -298,7 +298,7 @@ for ens in ensnames:
 
         if plot_1D_dte:
             # Contour fixed at these values
-            V = range(250,5250,250)
+            V = list(range(250,5250,250))
             VV = [100,] + V
             ofname = pfname
             p.plot_diff_energy('1D','DTE',pickledir,outdir,dataf=pfname,outprefix=ofname,clvs=VV,utc=False)
@@ -352,7 +352,7 @@ for ens in ensnames:
                 pass
 
             pickledir,dummy = get_pickle_dirs(ensnames)
-            print exper, pickledir
+            print(exper, pickledir)
             EXS[exper] = {'datadir':pickledir,'dataf':'DTE_'+enstype}
 
         ylimits = [0,2e8]

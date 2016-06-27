@@ -11,11 +11,11 @@ import glob
 
 import sys
 #sys.path.append('/home/jrlawson/gitprojects/')
-import WEM.utils.utils as utils
+import WEM.utils as utils
 import WEM.utils.gridded_data as gridded_data
-from figure import Figure
-from defaults import Defaults
-from wrfout import WRFOut
+from .figure import Figure
+from .defaults import Defaults
+from .wrfout import WRFOut
 
 """
 RUC/RAP data will probably need to be cut down to fit the WRF domain
@@ -75,7 +75,7 @@ class RUCPlot(Figure):
             self.x_dim = self.lats.shape[1]
 
 
-        print('RUC file loaded from {0}'.format(self.fpath))
+        print(('RUC file loaded from {0}'.format(self.fpath)))
 
     def cut_lat_lon(self):
         """ Return a smaller array of data
@@ -129,8 +129,8 @@ class RUCPlot(Figure):
         for va in variables:
             printtime = ('/'.join(["%02u" %s for s in self.ts[:4]]) +
                              "%02u" %self.ts[4] + ' UTC')
-            print("Plotting {0} for level {1} at time {2}".format(
-                va,lv,printtime))
+            print(("Plotting {0} for level {1} at time {2}".format(
+                va,lv,printtime)))
             if 'scale' in kwargs:
                 kwargs['scale'] = variables[va]['scale']
             if 'top' in kwargs:
@@ -356,9 +356,9 @@ class RUCPlot(Figure):
         for i in range(225):
             for j in range(301):
                 topidx[i,j] = round(N.interp(
-                                topm,Z[:,i,j],range(37)))
+                                topm,Z[:,i,j],list(range(37))))
                 botidx[i,j] = round(N.interp(
-                                botm,Z[:,i,j],range(37)))
+                                botm,Z[:,i,j],list(range(37))))
                 ushear[i,j] = u[topidx[i,j],i,j] - u[botidx[i,j],i,j]
                 vshear[i,j] = v[topidx[i,j],i,j] - v[botidx[i,j],i,j]
 

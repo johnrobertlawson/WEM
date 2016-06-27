@@ -4,7 +4,7 @@ Can use .TS files (?)
 Can use model output.
 
 """
-from wrfout import WRFOut
+from .wrfout import WRFOut
 import matplotlib.pyplot as plt
 import os
 
@@ -34,4 +34,4 @@ class TimeSeries:
         fname = 'meteogram_{0}_{1}.png'.format(vrbl,self.locname)
         fpath = os.path.join(outdir,fname)
         fig.savefig(fpath)
-        print("Saved meteogram to {0}".format(fpath))
+        print(("Saved meteogram to {0}".format(fpath)))

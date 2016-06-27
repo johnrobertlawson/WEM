@@ -51,7 +51,7 @@ def gefs_soil():
 
 def gefs_atmos(i,nextens):
     datestring = get_datestring()
-    print datestring
+    print(datestring)
     # Set path to gefs data
     pathtogefsdata = gefsdir+datestring+'_'+nextens+'_f*'
         
@@ -77,7 +77,7 @@ def submit_job(linkonly=0):
         p_real.wait()
         jobid = p_real.stdout.read()[:5] # Assuming first five digits = job ID.
         # Run WRF but wait until Real has finished without errors
-        print 'Now submitting wrf.exe.'
+        print('Now submitting wrf.exe.')
         # Again, change name of submisGsion script if needed
         p_wrf = subprocess.Popen('qsub -d '+pathtoWRF+' wrf_run.sh -W depend=afterok:'+jobid,cwd=pathtoWRF,shell=True)
         p_wrf.wait()
@@ -91,7 +91,7 @@ def submit_job(linkonly=0):
             tailoutput = tailrsl.stdout.read()
             if "SUCCESS COMPLETE WRF" in tailoutput:
                 finished = 1
-                print "WRF has finished; moving to next case."
+                print("WRF has finished; moving to next case.")
             else:
                 time.sleep(5*60) # Try again in 5 min
 

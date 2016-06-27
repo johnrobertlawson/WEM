@@ -3,7 +3,7 @@ Load/download RUC data.
 Loop through dates in case study climo.
 Plot certain fields with WEM.postWRF
 """
-from __future__ import division
+
 
 import os
 import pdb
@@ -31,7 +31,7 @@ download_data = 1
 skipcase = 0
 
 def download_RUC(utc,fpath):
-    print('Downloading {0} RUC file.'.format(utc))
+    print(('Downloading {0} RUC file.'.format(utc)))
     utils.getruc(utc,ncpath=fpath,convert2nc=True,duplicate=False)
 
 plot_Z = 0
@@ -203,7 +203,7 @@ for n, case in enumerate(cases):
             fig.tight_layout()
             fig.savefig(fpath)
             plt.close(fig)
-            print("Saved figure to {0}".format(fpath))
+            print(("Saved figure to {0}".format(fpath)))
 
 if plot_regime:
     os.system('python /home/jrlawson/public_html/bowecho/climoplots/day1_regimes/copy_regime.py')

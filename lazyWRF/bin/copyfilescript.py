@@ -20,15 +20,15 @@ def copyfiles(pathtoWRF,outdir,ensmem,confirm_switch=0):
     
     files = ('wrfout*','namelistCOPY.input','wrfbdy*','wrfinput*','*.TS', 'tslist.txt','rsl.error.0000','*.PH','*.QV','*.TH','*.UU','*.VV')
     if confirm_switch:
-        confirm = raw_input("Move data files to directory"+outloc+" (y/n) ? ")
+        confirm = input("Move data files to directory"+outloc+" (y/n) ? ")
 
         if confirm=='n':
-            print "Aborting."
+            print("Aborting.")
             raise Exception
         elif confirm=='y':
             pass
         else:
-            print "Type y or n."
+            print("Type y or n.")
             raise Exception
 
     ### Create commands
@@ -45,14 +45,14 @@ def copyfiles(pathtoWRF,outdir,ensmem,confirm_switch=0):
 
     for cInd, c in enumerate(commandlist):
         dir = os.path.dirname(outloc)
-        print "Checking for directory for command #", cInd
+        print("Checking for directory for command #", cInd)
         try:
             os.stat(dir)
         except:
             os.makedirs(dir)
-            print "Creating directory."
+            print("Creating directory.")
         os.system(c)
-        print 'Completing command #', cInd
+        print('Completing command #', cInd)
 
     # Wipe rsl.error and rsl.out files
     os.system('rm -f rsl.error* rsl.out*')

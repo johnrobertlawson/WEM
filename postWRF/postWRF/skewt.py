@@ -7,7 +7,7 @@ import matplotlib as M
 M.use('Agg')
 import matplotlib.pyplot as plt
 import pdb
-import cPickle as pickle
+import pickle as pickle
 import sys
 import os
 
@@ -16,8 +16,8 @@ import os
 #from Params import mc.Tz,mc.Tb,mc.kappa,barb_increments,self.P_bot,outdir,ens
 #from Utils import gamma_s,td,e,openWRF,getDimensions,convert_time
 
-from figure import Figure
-from wrfout import WRFOut
+from .figure import Figure
+from .wrfout import WRFOut
 import WEM.utils as utils
 import metconstants as mc
 
@@ -257,7 +257,7 @@ class SkewT(Figure):
             data_dict = {'u':u,'v':v,'T':T,'Td':Td,'P':P}
             with open(pickle_path,'wb') as p:
                 pickle.dump(data_dict,p)
-            print("Saving data to {0}".format(pickle_path))
+            print(("Saving data to {0}".format(pickle_path)))
 
             return
         else:
@@ -329,7 +329,7 @@ class SkewT(Figure):
             Td = self.td(self.e(w,P))
             return Td
         else:
-            print 'Use valid variable.'
+            print('Use valid variable.')
 
     def gettime(self,):
         t = convert_time(dom,timetuple)

@@ -125,7 +125,7 @@ def get_folders(en,ex,ic=IC):
         ic_data = 'GEFSR2_paper{0}'.format(paper)
     else:
         ic_data = ic
-    print ic
+    print(ic)
 
     if case.endswith('hires'):
         out_sd = os.path.join(outroot,'hires',case[:8],'d0{0}'.format(dom),ex)
@@ -193,7 +193,7 @@ for t in times:
             # Verification
             outdir, ncdir, sp_outdir = get_folders(enslist[3],exlist[3])
             # import pdb; pdb.set_trace()
-            print("Looking for data in {0}".format(ncdir))
+            print(("Looking for data in {0}".format(ncdir)))
             p.plot_radar(t,datadir,outdir=False,ncdir=ncdir,fig=fig,ax=ax,cb=False,dom=dom,nct=inittime,**lims)
             make_subplot_label(ax,labels[pn])
             pn += 1
@@ -219,7 +219,7 @@ for t in times:
                 outdir, ncdir, sp_outdir = get_folders(en,ex)
                 if plot=='ICBC' and enstype[:4] =='STCH':
                     ncdir = os.path.dirname(ncdir)
-            print("Looking for data in {0}".format(ncdir))
+            print(("Looking for data in {0}".format(ncdir)))
 
             tstr = t
             # pdb.set_trace()
@@ -254,7 +254,7 @@ for t in times:
                     pass
                 else:
                     pn += 1
-        print("Plotting {0} panel".format(plot))
+        print(("Plotting {0} panel".format(plot)))
         if plot=='ICBC':
             axtitle = 'Control'
         elif plot=='RUC':
@@ -285,4 +285,4 @@ for t in times:
     utils.trycreate(sp_outdir)
     fig.savefig(sp_fpath)
     plt.close(fig)
-    print("Saving figure to {0}".format(sp_fpath))
+    print(("Saving figure to {0}".format(sp_fpath)))

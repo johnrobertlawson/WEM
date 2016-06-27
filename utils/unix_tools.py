@@ -3,7 +3,7 @@ Utility scripts to help with directory, file, etc issues
 """
 
 import os
-import GIS_tools as utils
+from . import GIS_tools as utils
 try:
     import paramiko
 except ImportError:
@@ -30,5 +30,5 @@ def ssh_client(ky,domain,username,password):
     return client
     stdin, stdout, stderr = client.exec_command('ls')
     for line in stdout:
-        print '... ' + line.strip('\n')
+        print('... ' + line.strip('\n'))
     client.close()

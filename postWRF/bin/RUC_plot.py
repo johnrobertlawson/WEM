@@ -55,8 +55,8 @@ for en in ensnames:
     # Reload settings
     p.C = Settings()
     # Change paths to new location
-    p.C.output_root = os.path.join(config.output_root,case,IC,en,experiment.keys()[0])
-    p.C.wrfout_root = os.path.join(config.wrfout_root,case,IC,en,experiment.keys()[0])
+    p.C.output_root = os.path.join(config.output_root,case,IC,en,list(experiment.keys())[0])
+    p.C.wrfout_root = os.path.join(config.wrfout_root,case,IC,en,list(experiment.keys())[0])
     p.plot_2D(variables)
 
 

@@ -36,7 +36,7 @@ utc = (2013,8,15,21,0,0)
 dom = 1
 
 p = WRFEnviron()
-for nest in ncdir.keys():
+for nest in list(ncdir.keys()):
     p.plot_xs(vrbl,utc,ncdir[nest],outdir,latA=latA,lonA=lonA,
         latB=latB,lonB=lonB,nct=nct,dom=dom,f_suffix=nest,
         clvs=clvs,cmap=cmap,contour_vrbl=ctvrbl,

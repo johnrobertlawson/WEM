@@ -49,18 +49,18 @@ def get_times(itime,ftime,int_hr):
 
 config = Settings()
 
-wy = input('Which year: ')
+wy = eval(input('Which year: '))
 
-IC = raw_input('ICs? (GEFSR2/NAM/GFS): ')
+IC = input('ICs? (GEFSR2/NAM/GFS): ')
 
-ex = raw_input('MXMP? ICBC? STCH? STMX?: ')
+ex = input('MXMP? ICBC? STCH? STMX?: ')
 
 if ex == 'MXMP':
     experiments = ['WSM6_Grau','WSM6_Hail','Kessler','Ferrier','WSM5',
                    'WDM5','Lin','WDM6_Grau','WDM6_Hail','Morrison_Grau',
                    'Morrison_Hail']
     if IC == 'GEFSR2': 
-        ens = raw_input('Which ensemble member? (c00, p01 etc): ')
+        ens = input('Which ensemble member? (c00, p01 etc): ')
     else:
         ens = 'anl'
 
@@ -71,7 +71,7 @@ elif ex == 'STMX':
     experiments = [e+'_STCH' for e in experiments]
 
     if IC == 'GEFSR2': 
-        ens = raw_input('Which ensemble member? (c00, p01 etc): ')
+        ens = input('Which ensemble member? (c00, p01 etc): ')
     else:
         ens = 'anl'
 
@@ -82,15 +82,15 @@ elif ex == 'ICBC':
 elif ex == 'STCH':
     experiments = ['s'+"%02d" %n for n in range(1,11)]
 
-    MP = raw_input('Which control microphysics scheme? (Ferrier, Morrison_Grau, etc) ')
+    MP = input('Which control microphysics scheme? (Ferrier, Morrison_Grau, etc) ')
  
     if IC == 'GEFSR2':
-        ens = raw_input('Which ensemble member? (c00, p01 etc): ')
+        ens = input('Which ensemble member? (c00, p01 etc): ')
     else:
         ens = 'anl'
  
-plot = raw_input('variable to plot? (cref/shear03/shear06/strongestwind): ')
-lv_str = raw_input('what level? ')
+plot = input('variable to plot? (cref/shear03/shear06/strongestwind): ')
+lv_str = input('what level? ')
 
 if wy == 2006:
     case_str = '20060526'
@@ -140,7 +140,7 @@ elif plot == 'shear06':
 
 elif plot == 'strongestwind':
     va_str = 'strongestwind'
-    duration = raw_input("What duration? ")
+    duration = input("What duration? ")
     # lv_str = ''
 
 elif plot == 'streamlines':
@@ -193,7 +193,7 @@ else:
     height += 1
 
 for time_str in time_strs:
-    print('Creating image for time {0}'.format(time_str))
+    print(('Creating image for time {0}'.format(time_str)))
     for p,panel in enumerate(panellist):
         # caserootdir = os.path.join(config.output_root,case_str,IC)
         fname = '_'.join((va_str,time_str,lv_str)) + '.png'
@@ -241,9 +241,9 @@ for time_str in time_strs:
                     img = M.image.imread(fname)
                     ax.imshow(img)
                 else:
-                    print "RUC file not there"
+                    print("RUC file not there")
             else:
-                print "Verif skipped"
+                print("Verif skipped")
         elif p == 1 and not verifplot and ex is not 'ICBC':
             img = M.image.imread(fpath)
             ax.imshow(img)
@@ -254,9 +254,9 @@ for time_str in time_strs:
             try:
                 img = M.image.imread(fpath)
             except:
-                print "Skipping ", panel
+                print("Skipping ", panel)
             else:
-                print "Plotting ", panel
+                print("Plotting ", panel)
                 ax.imshow(img)
         ax.axis('off')
         # import pdb; pdb.set_trace()
@@ -272,7 +272,7 @@ for time_str in time_strs:
             
     outfilename = '_'.join(('postage',ex,va_str,lv_str,time_str)) + '.png'
     outfilepath = os.path.join(outfiledir,outfilename)
-    print outfilepath
+    print(outfilepath)
     utils.trycreate(outfiledir)
     #plt.tight_layout()
     fig.savefig(outfilepath)

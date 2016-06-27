@@ -13,14 +13,14 @@ data (reflectivity, etc).
 
 # Imports
 import numpy as N
-from figure import Figure
+from .figure import Figure
 import pdb
 import matplotlib.pyplot as plt
 
 import WEM.utils as utils
 import metconstants as mc
-from scales import Scales
-from birdseye import BirdsEye
+from .scales import Scales
+from .birdseye import BirdsEye
 # from defaults import Defaults
 
 class CrossSection(Figure):
@@ -71,17 +71,17 @@ class CrossSection(Figure):
         elif (self.angle > 337.5) and (self.angle < 360.0):
             shxa = -sh; shxb = -sh; shya = 0;  shyb = 0
         else:
-            print("Angle {0} is weird.".format(self.angle))
+            print(("Angle {0} is weird.".format(self.angle)))
             raise Exception
             
-        print("Old coordinates:",self.xA,self.xB,self.yA,self.yB)
+        print(("Old coordinates:",self.xA,self.xB,self.yA,self.yB))
         self.xA += shxa
         self.xB += shxb
         self.yA += shya
         self.yB += shyb
         self.xx = N.linspace(self.xA,self.xB,self.hyp_pts)
         self.yy = N.linspace(self.yA,self.yB,self.hyp_pts)
-        print("New coordinates:",self.xA,self.xB,self.yA,self.yB)
+        print(("New coordinates:",self.xA,self.xB,self.yA,self.yB))
 
         self.angle = N.radians(self.angle) 
 
@@ -198,7 +198,7 @@ class CrossSection(Figure):
         element in geopot. The length of the geopot and pres arrays must be the same.
         """
         if (len(geopot) != len(pres)):
-            raise Exception, "Arrays geopot and pres must have same length"
+            raise Exception("Arrays geopot and pres must have same length")
     
         k = len(pres)-1
         while (k > 1 and pres[k-1] <= p):
@@ -280,7 +280,7 @@ class CrossSection(Figure):
                     CBlabel = r'Wind Speed (ms$^{-1}$)'
 
                 else:
-                    print("Unsupported variable",v)
+                    print(("Unsupported variable",v))
                     raise Exception
 
                 if nn == 0:
@@ -418,7 +418,7 @@ class CrossSection(Figure):
                 CBlabel = r'Wind Speed (ms$^{-1}$)'
 
             else:
-                print("Unsupported variable",v)
+                print(("Unsupported variable",v))
                 raise Exception
 
             if nn == 0:

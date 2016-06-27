@@ -20,7 +20,7 @@ from netCDF4 import Dataset
 import calendar
 import collections
 import copy
-import cPickle as pickle
+import pickle as pickle
 import fnmatch
 import glob
 import itertools
@@ -33,23 +33,23 @@ import matplotlib as M
 M.use('agg')
 import matplotlib.pyplot as plt
 
-from wrfout import WRFOut
-from figure import Figure
-from birdseye import BirdsEye
-from ruc import RUC
-from skewt import SkewT
-from skewt import Profile
+from .wrfout import WRFOut
+from .figure import Figure
+from .birdseye import BirdsEye
+from .ruc import RUC
+from .skewt import SkewT
+from .skewt import Profile
 #import scales
-from defaults import Defaults
+from .defaults import Defaults
 import WEM.utils as utils
-from xsection import CrossSection
-from clicker import Clicker
-import maps
-import stats
-from scales import Scales
-from obs import Obs
-from obs import Radar
-from ts import TimeSeries
+from .xsection import CrossSection
+from .clicker import Clicker
+from . import maps
+from . import stats
+from .scales import Scales
+from .obs import Obs
+from .obs import Radar
+from .ts import TimeSeries
 
 # TODO: Make this awesome
 
@@ -263,19 +263,19 @@ class WRFEnviron(object):
             strs.append(time_str)
 
         if isinstance(other,dict):
-            for k,v in other.iteritems():
+            for k,v in other.items():
                 strs.append(str(v))
 
         # import pdb; pdb.set_trace()
 
         fname = '_'.join(strs)
 
-        if isinstance(f_prefix,basestring):
+        if isinstance(f_prefix,str):
             fname = '_'.join((f_prefix,fname))
-        if isinstance(f_suffix,basestring):
+        if isinstance(f_suffix,str):
             fname = '_'.join((fname,f_suffix))
 
-        if isinstance(extension,basestring):
+        if isinstance(extension,str):
             fname = '.'.join((fname,extension))
 
         return fname
@@ -322,7 +322,7 @@ class WRFEnviron(object):
             elif model=='wrfout':
                 return WRFOut(fpath)
             else:
-                print("Unrecognised netCDF4 file type at {0}".format(fpath))
+                print(("Unrecognised netCDF4 file type at {0}".format(fpath)))
 
     def generate_times(self,itime,ftime,interval):
         """
@@ -494,7 +494,7 @@ class WRFEnviron(object):
                 break
 
         for t, delt in enumerate(deltatimes):
-            print('Computing for time {0}'.format(time.gmtime(delt)))
+            print(('Computing for time {0}'.format(time.gmtime(delt))))
             for n, perm in enumerate(data):
                 diff0 = data[perm]['values'][t][0]
                 diff1 = data[perm]['values'][t+1][0]
@@ -622,13 +622,13 @@ class WRFEnviron(object):
                 fig.savefig(fpath)
 
                 plt.close()
-                print("Saved type #1 {0}.".format(fpath))
+                print(("Saved type #1 {0}.".format(fpath)))
 
             # Averages for each sensitivity
             labels = []
             fig = plt.figure()
             ave_of_ave_stack = 0
-            for sens in AVE.keys():
+            for sens in list(AVE.keys()):
                 plt.plot(times,AVE[sens])
                 labels.append(sens)
                 ave_of_ave_stack = utils.vstack_loop(AVE[sens],ave_of_ave_stack)
@@ -649,7 +649,7 @@ class WRFEnviron(object):
             fig.savefig(fpath)
 
             plt.close()
-            print("Saved type #2 {0}.".format(fpath))
+            print(("Saved type #2 {0}.".format(fpath)))
             #pdb.set_trace()
 
 
@@ -676,7 +676,7 @@ class WRFEnviron(object):
             fig.savefig(fpath)
 
             plt.close()
-            print("Saved type #3 {0}.".format(fpath))
+            print(("Saved type #3 {0}.".format(fpath)))
 
     def composite_profile(self,vrbl,utc,enspaths,latlon=False,
                             dom=1,mean=True,std=True,xlim=False,
@@ -788,7 +788,7 @@ class WRFEnviron(object):
             C.ax.scatter(x0,y0,marker='x')
         else:
             t_long = utils.string_from_time('output',utc)
-            print("Pick location for {0}".format(t_long))
+            print(("Pick location for {0}".format(t_long)))
             C = Clicker(self.C,self.W,fig=P2.fig,ax=P2.ax0,data=self.data)
             # fig should be P2.fig.
             # C.fig.tight_layout()
@@ -849,8 +849,8 @@ class WRFEnviron(object):
             ST = SkewT(W)
             ST.plot_skewT(utc,latlon,dom,outdir,save_output=save_output)
             nice_time = utils.string_from_time('title',utc)
-            print("Plotted Skew-T for time {0} at {1}".format(
-                        nice_time,latlon))
+            print(("Plotted Skew-T for time {0} at {1}".format(
+                        nice_time,latlon)))
         else:
             #ST = SkewT(self.C)
             pass
@@ -1030,7 +1030,7 @@ class WRFEnviron(object):
         self.ensemble = ensemble # Dictionary
         nens = 0
         for ens in self.ensemble:
-            print("Computing for ensemble member {0}.".format(ens))
+            print(("Computing for ensemble member {0}.".format(ens)))
             # pdb.set_trace()
             if self.ensemble[ens]['control']:
                 continue
@@ -1512,7 +1512,7 @@ class WRFEnviron(object):
         if isinstance(clvs,N.ndarray):
             plotkwargs['clvs'] = clvs
         F.plot_data(std_data,'contourf',outpath,fname_t,t,**plotkwargs)
-        print("Plotting std dev for {0} at time {1}".format(va,t_name))
+        print(("Plotting std dev for {0} at time {1}".format(va,t_name)))
 
     def list_ncfiles(self,ncdirs,nct=False,ncf=False,dom=0,path_only=1):
         """
@@ -1827,7 +1827,7 @@ class WRFEnviron(object):
         fig.savefig(fpath)
 
         plt.close()
-        print("Saved plot to {0}.".format(fpath))
+        print(("Saved plot to {0}.".format(fpath)))
         
     def plot_delta(self,vrbl,utc,level=False,ncdir1=False,ncdir2=False,
                             outdir=False,ncf1=False,ncf2=False,nct=False,
@@ -1973,5 +1973,5 @@ class WRFEnviron(object):
         for enspath in ncfiles:
             NCs.append(self.get_netcdf(enspath,ncf=ncf,nct=nct,dom=dom))
        
-        TS = TimeSeries(NCs,loc.values()[0],loc.keys()[0])
+        TS = TimeSeries(NCs,list(loc.values())[0],list(loc.keys())[0])
         TS.meteogram(vrbl,outdir=outdir)

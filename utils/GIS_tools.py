@@ -11,12 +11,12 @@ import pdb
 import sys
 import time
 import glob
-import cPickle as pickle
-import unix_tools as utils
+import pickle as pickle
+from . import unix_tools as utils
 import datetime
 import heapq
 
-import getdata
+from . import getdata
 
 def decompose_wind(wspd,wdir,convert=0):
     # Split wind speed/wind direction into u,v
@@ -70,7 +70,7 @@ def csvprocess(data,names,convert=0):
     D = {} # Initialise dictionary of data
     for s in stationlist:
         D[s] = {} # Initialise dictionary of station/s
-        print 'Loading station data for ' + s
+        print('Loading station data for ' + s)
         those = N.where(data['stid']==s) # Indices of obs
         obNum = len(those[0]) # Number of obs
 
@@ -311,9 +311,9 @@ def wrf_nc_load(dom,var,ncfolder,datestr,thin,Nlim=0,Elim=0,Slim=0,Wlim=0):
     return m, x, y, x_th, y_th, data, nc
 
 def mkloop(dom='d03',fpath='./'):
-    print "Creating a pretty loop..."
+    print("Creating a pretty loop...")
     os.system('convert -delay 50 '+fpath+dom+'*.png > -loop '+fpath+dom+'_windloop.gif')
-    print "Finished!"
+    print("Finished!")
 
 def p_interpol(dom,var,ncfolder,datestr):
     datestr2 = datestr[0:4]+'-'+datestr[4:6]+'-'+datestr[6:8]+'_'+datestr[8:10]+':00:00'
@@ -368,25 +368,25 @@ def find_time_index(wrftime,reqtimetuple,tupleformat=1):
 def TimeSfcLatLon(nc,varlist,times,latslons='all'):
     # Time (DateTime in string)
     if times == 'all':
-        timeInds = range(nc.variables['Times'].shape[0])
+        timeInds = list(range(nc.variables['Times'].shape[0]))
     elif len(times)==1: # If only one time is desired
         # Time is in 6-tuple format
         timeInds = find_time_index(nc.variables['Times'],times) # This function is from this module
     elif len(times)==2: # Find all times between A and B
         timeIndA = find_time_index(nc.variables['Times'],times[0])
         timeIndB = find_time_index(nc.variables['Times'],times[1])
-        timeInds = range(timeIndA,timeIndB)
+        timeInds = list(range(timeIndA,timeIndB))
     # Lat/lon of interest and their grid pointd
     lats = nc.variables['XLAT'][:]
     lons = nc.variables['XLONG'][:]
     if latslons == 'all':
-        latInds = range(lats.shape[-2])
-        lonInds = range(lons.shape[-1])
+        latInds = list(range(lats.shape[-2]))
+        lonInds = list(range(lons.shape[-1]))
     else:
         xmin,ymax = gridded_data.getXY(lats,lons,Nlim,Wlim)
         xmax,ymin = gridded_data.getXY(lats,lons,Slim,Elim)
-        latInds = range(ymin,ymax)
-        lonInds = range(xmin,xmax)
+        latInds = list(range(ymin,ymax))
+        lonInds = list(range(xmin,xmax))
 
     # Return sliced data
     data = {}
@@ -575,7 +575,7 @@ def wrfout_files_in(folders,dom=0,init_time='notset',descend=1,avoid=0,
     # pdb.set_trace()
     if unambiguous:
         if not len(wrfouts) == 1:
-            print("Found {0} wrfout files.".format(len(wrfouts)))
+            print(("Found {0} wrfout files.".format(len(wrfouts))))
             raise Exception
         else:
             return wrfouts[0]
@@ -616,7 +616,7 @@ def gettopo():
     # Create lat/lon grid
     lats = N.arange(-60,90,ypixel)#[::-1]
     lons = N.arange(-180,180,xpixel)#[::-1]
-    print 'Topographic data has been loaded. Everest is but a mere pixel.'
+    print('Topographic data has been loaded. Everest is but a mere pixel.')
     return topodata, lats, lons
 
 def xs_distance(Alat, Alon, Blat, Blon):
@@ -766,13 +766,13 @@ def check_vertical_coordinate(level):
     """ Check to see what type of level is requested by user.
 
     """
-    if isinstance(level,(basestring,int)):
+    if isinstance(level,(str,int)):
         lv = level
     elif isinstance(level,(list,tuple,N.ndarray)):
         lv = level[0]
     else:
-        print("What have you given me here? Level is"
-                "{0}".format(type(level)))
+        print(("What have you given me here? Level is"
+                "{0}".format(type(level))))
         raise Exception
 
     # import pdb; pdb.set_trace()
@@ -846,7 +846,7 @@ def dstack_loop_v2(data, obj):
     If obj does exist, stack data.
     """
     try:
-        print obj
+        print(obj)
     except NameError:
         stack = data
     else:
@@ -913,7 +913,7 @@ def get_sequence(x,sos=0):
     else:
         y = x
 
-    if isinstance(y, collections.Sequence) and not isinstance(y, basestring):
+    if isinstance(y, collections.Sequence) and not isinstance(y, str):
         # i.e., if y is a list or tuple
         return x
     else:
@@ -952,7 +952,7 @@ def ensure_datenum(times,fmt='int'):
     """
     if isinstance(times,int):
         dntimes = [times,] #1
-    elif isinstance(times,basestring):
+    elif isinstance(times,str):
         print("Don't give me strings...")
         raise Exception
     elif isinstance(times,datetime.datetime):
@@ -995,7 +995,7 @@ def ensure_timetuple(times,fmt='single'):
     """
     if isinstance(times,int):
         tttimes = [list(time.gmtime(times)),] #1
-    elif isinstance(times,basestring):
+    elif isinstance(times,str):
         print("Don't give me strings...")
         raise Exception
     elif isinstance(times,datetime.datetime):
@@ -1061,7 +1061,7 @@ def determine_model(fname):
 
     models = {'wrfout_d':'wrfout','ruc':'ruc','rap':'ruc'}
 
-    for k,v in models.iteritems():
+    for k,v in models.items():
         if k in fname[:10]:
             return v
 
@@ -1087,12 +1087,12 @@ def save_data(data,folder,fname,format='pickle'):
     elif format=='json':
         j = json.dumps(data)
         with open(fpath+'.json','w') as f:
-            print >> f,j
+            print(j, file=f)
     else:
         print("Give suitable saving format.")
         raise Exception
 
-    print("Saved file {0} to {1}.".format(fname,folder))
+    print(("Saved file {0} to {1}.".format(fname,folder)))
 
 def load_data(folder,fname,format='pickle'):
     """
@@ -1113,7 +1113,7 @@ def load_data(folder,fname,format='pickle'):
         print("Give suitable loading format.")
         raise Exception
 
-    print("Loaded file {0} from {1}.".format(fname,folder))
+    print(("Loaded file {0} from {1}.".format(fname,folder)))
     return data
 
 

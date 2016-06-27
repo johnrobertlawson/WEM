@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import datetime
 import os
 import numpy as N 
-import cPickle as pickle
+import pickle as pickle
 
 from WEM.postWRF.postWRF.sal import SAL
 from WEM.postWRF.postWRF import WRFEnviron
@@ -151,7 +151,7 @@ for case in cases:
                     else:
                         radar_datadir = False
 
-                    print("----- {0}\t{1} ------".format(nest,utc))
+                    print(("----- {0}\t{1} ------".format(nest,utc)))
                     # for ens in ensnames[0:1]:
                     for ens,ax in zip(ensnames,axes.flat[1:12]):
                         # if ens=='s21':
@@ -191,7 +191,7 @@ for case in cases:
                         plt.axvline(0, color='k')
                         ax.set_xlim([-2,2])
                         ax.set_ylim([-2,2])
-                        for k,v in DATA.items():
+                        for k,v in list(DATA.items()):
                             sc = ax.scatter(v['S'],v['A'],c=v['L'],vmin=0,vmax=2,s=25,cmap=plt.cm.get_cmap('nipy_spectral_r'))
                             ax.annotate(k[1:],xy=(v['S']+0.03,v['A']+0.03),xycoords='data',fontsize=5)
                         # CBax t= fig.add_axes([0.15,0.05,0.7,0.02])

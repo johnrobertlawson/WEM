@@ -81,7 +81,7 @@ plotfname = 'DKE_500_'
 times = [(2011,m,d,12,0,0) for m,d in zip((11,11,12),(29,30,1))]
 runfolder = os.path.join(rootdir,initdate)
 path_to_plots = os.path.join(outdir,initdate)
-V = range(200,2200,200)
+V = list(range(200,2200,200))
 labels = ['a)','b)','c)']
 
 for ax,t,label in zip(axes14.flat, times,labels):
@@ -110,7 +110,7 @@ plotfname = 'DKE_500_'
 times = [(2011,m,d,12,0,0) for m,d in zip((11,11,12),(29,30,1))]
 runfolder = os.path.join(rootdir,initdate)
 path_to_plots = os.path.join(outdir,initdate)
-V = range(200,2200,200)
+V = list(range(200,2200,200))
 labels = ['a)','b)','c)']
 
 for ax,t,label in zip(axes15.flat, times,labels):
@@ -140,7 +140,7 @@ plotfname = 'DKE_500_'
 times = [(2011,m,d,12,0,0) for m,d in zip((11,11,12),(29,30,1))]
 runfolder = os.path.join(rootdir,initdate)
 path_to_plots = os.path.join(outdir,initdate)
-V = range(200,2200,200)
+V = list(range(200,2200,200))
 labels = ['a)','b)','c)']
 
 for ax,t,label in zip(axes16.flat, times,labels):

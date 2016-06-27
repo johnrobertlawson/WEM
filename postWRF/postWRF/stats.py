@@ -12,7 +12,7 @@ import os
 
 import WEM.utils as utils
 
-from wrfout import WRFOut
+from .wrfout import WRFOut
 
 def std(ncfiles,vrbl,utc=False,level=False,other=False,axis=0):
     """
@@ -160,7 +160,7 @@ def compute_diff_energy(ptype,energy,files,times,upper=None,lower=None,
     :returns: N.ndarray -- time series or list of 2D arrays
 
     """
-    if d_save and not isinstance(d_save,basestring):
+    if d_save and not isinstance(d_save,str):
         d_save = os.environ['HOME']
 
     # First, save or output? Can't be neither!
@@ -169,7 +169,7 @@ def compute_diff_energy(ptype,energy,files,times,upper=None,lower=None,
                 "power")
         raise Exception
 
-    print("Saving pickle file to {0}".format(d_save))
+    print(("Saving pickle file to {0}".format(d_save)))
     # Look up the method to use depending on type of plot
     PLOTS = {'1D':DE_z, '3D':DE_xyz}
 
@@ -186,7 +186,7 @@ def compute_diff_energy(ptype,energy,files,times,upper=None,lower=None,
     print('Start loop')
     # pdb.set_trace()
     for n, perm in enumerate(itertools.combinations(files,2)):
-        print("No. {0} from {1} permutations".format(n,nperm))
+        print(("No. {0} from {1} permutations".format(n,nperm)))
         perm_start = time.time()
         DATA[str(n)] = {}
         f1, f2 = perm
@@ -217,7 +217,7 @@ def compute_diff_energy(ptype,energy,files,times,upper=None,lower=None,
         DATA[str(n)]['file1'] = f1
         DATA[str(n)]['file2'] = f2
         # import pdb; pdb.set_trace()
-        print "Calculation #{0} took {1:2.1f} seconds.".format(n,time.time()-perm_start)
+        print("Calculation #{0} took {1:2.1f} seconds.".format(n,time.time()-perm_start))
 
     if d_return and not d_save:
         return DATA
@@ -270,7 +270,7 @@ def DE_xyz(nc0,nc1,t_idx,energy,*args):
 
     DKE = []
     for n,t in enumerate(t_idx):
-        print("Finding DKE at time {0} of {1}.".format(n,len(t)))
+        print(("Finding DKE at time {0} of {1}.".format(n,len(t))))
         DKE_hr = 0   # Sum up all DKE for the 3D space
         for i in range(xlen):
             if energy=='kinetic':
@@ -280,7 +280,7 @@ def DE_xyz(nc0,nc1,t_idx,energy,*args):
                 DKE_hr += N.sum(0.5*((U0[t,:,:,i]-U1[t,:,:,i])**2 +
                             (V0[t,:,:-1,i]-V1[t,:,:-1,i])**2 +
                             kappa*(T0[t,:,:,i]-T1[t,:,:,i])**2))
-        print("DTE at this time: {0}".format(DKE_hr))
+        print(("DTE at this time: {0}".format(DKE_hr)))
         DKE.append(DKE_hr)
     return DKE
 
@@ -357,7 +357,7 @@ def DE_z(nc0,nc1,t,energy,lower,upper):
     DKE = []
     DKE2D = N.zeros((xlen,ylen))
     print_time = ''.join((nc0.variables['Times'][t]))
-    print("Calculating 3D grid for time {0}...".format(print_time))
+    print(("Calculating 3D grid for time {0}...".format(print_time)))
     gridpts = latlon(xlen,ylen)
     for gridpt in gridpts:
         i,j = gridpt

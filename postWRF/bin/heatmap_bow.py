@@ -1,4 +1,4 @@
-from __future__ import division
+
 
 import os
 import pdb
@@ -8,7 +8,7 @@ M.use('agg')
 import matplotlib.pyplot as plt
 import numpy as N
 import datetime
-import cPickle as pickle
+import pickle as pickle
 
 # import WEM.lazyWRF.lazyWRF as lazyWRF
 from WEM.postWRF.postWRF import WRFEnviron
@@ -23,7 +23,7 @@ outdir = '/home/jrlawson/public_html/bowecho/heatmaps'
 p = WRFEnviron()
 
 def download_RUC(utc,fpath):
-    print('Downloading {0} RUC file.'.format(utc))
+    print(('Downloading {0} RUC file.'.format(utc)))
     utils.getruc(utc,ncpath=fpath,convert2nc=True,duplicate=False)
 
 fpath = '/home/jrlawson/pythoncode/bowecho/snively.csv'
@@ -75,8 +75,8 @@ lookup_cmap = {'temp_advection':M.cm.Reds, 'omega':M.cm.PuRd, 'lyapunov':M.cm.Bl
 arr = N.zeros([14,ntimes])
 
 # Create data arrays
-for d in DATA.keys():
-    for v in vrbls.keys():
+for d in list(DATA.keys()):
+    for v in list(vrbls.keys()):
         DATA[d][v] = {}
         for lv in vrbls[v]:
             DATA[d][v][lv] = N.zeros_like(arr)
@@ -93,12 +93,12 @@ if compute:
 
     cnx = -1
     for cn, case in enumerate(cases):
-        print("Fetching data for case {0}".format(case['casedate']))
+        print(("Fetching data for case {0}".format(case['casedate'])))
 
         # Ignore ambiguous cases (leaving 14 good ones)
         if case['type'] not in ok_types:
-            print("Skipping {0} as type is {1}.".format(case['casedate'],
-                                                    case['type']))
+            print(("Skipping {0} as type is {1}.".format(case['casedate'],
+                                                    case['type'])))
             continue
         else:
             cnx += 1
@@ -114,7 +114,7 @@ if compute:
 
         # outstr = case['casedate'] + '_{0:02d}Z'.format(utc.hour)
         for tn,t in enumerate(times):
-            print("Getting data for time {0}".format(t))
+            print(("Getting data for time {0}".format(t)))
             download_RUC(t,RUCdir)
 
             # Load RUC data
@@ -131,7 +131,7 @@ if compute:
                 pass
 
 
-            for d in DATA.keys():
+            for d in list(DATA.keys()):
                 if R is not None:
                     if d=='INIT':
                         ptlat = float(case['initlat'])
@@ -162,7 +162,7 @@ if compute:
                                 val = N.nanmean(R.get(vrbl,utc=t,level=lv)[0,0,yidx,xidx])
 
                         DATA[d][vrbl][lv][cnx,tn] = val
-                        print("Value for {0} = {1}".format(vrbl,val))
+                        print(("Value for {0} = {1}".format(vrbl,val)))
 
 
     # Sort array into descending order of skill
@@ -175,8 +175,8 @@ if plot:
     with open(dict_fpath,'rb') as f:
         HEAT = pickle.load(f)
 
-    for rel_choice in DATA.keys():
-        for vrbl in vrbls.keys():
+    for rel_choice in list(DATA.keys()):
+        for vrbl in list(vrbls.keys()):
             for lv in DATA[rel_choice][vrbl]:
                 data = HEAT[rel_choice][vrbl][lv]
                 # This is the list of cases (rows in array)
@@ -317,4 +317,4 @@ if plot:
                 outfpath = os.path.join(outdir,outfname)
                 fig.tight_layout()
                 fig.savefig(outfpath)
-                print("Saved figure to {0}".format(outfpath))
+                print(("Saved figure to {0}".format(outfpath)))

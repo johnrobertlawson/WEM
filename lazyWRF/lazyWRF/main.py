@@ -31,8 +31,8 @@ class Lazy:
         """
         self.casestr = casestr
         self.IC = IC
-        self.experiment = experiment.keys()[0]
-        self.control = experiment.values()[0]
+        self.experiment = list(experiment.keys())[0]
+        self.control = list(experiment.values())[0]
         self.ensnames = ensnames
         
         # self.GO = {'GEFSR2':go_GEFSR2,'NAMANL':go_NAMANL,
@@ -119,16 +119,16 @@ class Lazy:
             
                 
     def copy_files(self,tofolder):
-        """ 
-        Move wrfout* files to folder.
+        """Move wrfout files to folder.
         Create folder if it doesn't exist
 
-        Move *.TS files if they exist
+        Move .TS files if they exist
         Copy namelist.input to that folder.
         Copy rsl.error.0000 to the folder.
         
         Input(s):
         args = names of folder tree, in order of depth.
+
         """
         root = self.C.path_to_storage
         topath = os.path.join(root,tofolder)
@@ -143,7 +143,7 @@ class Lazy:
             files['*.TS'] = 'mv'
             files['tslist'] = 'cp'
         
-        for f,transfer in files.iteritems():
+        for f,transfer in files.items():
             fs = os.path.join(self.C.path_to_WRF,f)
             command = '%s %s %s' %(transfer,fs,topath)
             os.system(command)
@@ -164,7 +164,7 @@ class Lazy:
         jobid = p_real.stdout.read()[:5] # Assuming first five digits = job ID.
         
         # Run WRF but wait until real.exe has finished without errors
-        print 'Now submitting wrf.exe.'
+        print('Now submitting wrf.exe.')
         wrf_cmd = 'qsub -d %s wrf_run.sh -W depend=afterok:%s' %(self.C.path_to_WRF,jobid)
         p_wrf = subprocess.Popen(wrf_cmd,cwd=self.C.path_to_WRF,shell=True)
         p_wrf.wait()
@@ -180,7 +180,7 @@ class Lazy:
             tailoutput = tailrsl.stdout.read()
             if "SUCCESS COMPLETE WRF" in tailoutput:
                 finished = 1
-                print "WRF has finished; moving to next case."
+                print("WRF has finished; moving to next case.")
             else:
                 # Need to check if job has died! If so, kill script, warn user
                 time.sleep(5*60) # Try again in 5 min
@@ -228,17 +228,19 @@ class Lazy:
         os.system(command)
         
     def edit_namelist(self,suffix,sett,newval,maxdom=1):
-        """ Method edits namelist.wps or namelist.input.
+        """Method edits namelist.wps or namelist.input.
         
-        Inputs:
-        suffix  :   which namelist needs changing
-        sett    :   setting that needs changing
-        newval  :   its new value -> currently replaces whole line
-        maxdom  :   number of domains to edit
-                    (this is relevant for multiple columns?)
-                    
-        No outputs, just changes the file.
+        Args:
+            suffix : which namelist needs changing
+            sett : setting that needs changing
+            newval : its new value -> currently replaces whole line
+            maxdom : number of domains to edit
+                (this is relevant for multiple columns?)
+        
+        Returns:
+            None.
         """
+
         if suffix == 'wps':
             f = os.path.join(self.C.path_to_WPS,'namelist.wps')
         elif suffix == 'input':
@@ -265,7 +267,7 @@ class Lazy:
         #    f,suffix = exe.split('.')            
         
         command = os.path.join('./',self.C.path_to_WPS,exe)
-        print command
+        print(command)
         os.system(command)
         
         # Wait until complete, then check tail file
@@ -277,7 +279,7 @@ class Lazy:
             pass
             #return True
         else:
-            print ('Running %s has failed. Check %s.'%(exe,log))
+            print(('Running %s has failed. Check %s.'%(exe,log)))
             raise Exception
 
     def generate_date(self,date,outstyle='wps'):
@@ -300,7 +302,7 @@ class Lazy:
             # pdb.set_trace()
             command = 'cp %s %s' %(f,f2)
             os.system(command)
-            print("Backed up namelist.%s." %(suffix))
+            print(("Backed up namelist.%s." %(suffix)))
             
                 
                 

@@ -69,9 +69,9 @@ for pn,plot in enumerate(BOW.keys()):
             continue
     # 2 experiments, four times, 250 random points
     std_line[plot] = N.zeros([len(times),npts])
-    for nt,t in (zip(range(len(times)),times)): 
+    for nt,t in (list(zip(list(range(len(times))),times))): 
         
-        print("Time",nt)
+        print(("Time",nt))
         W = WRFOut(ncfiles[0])
         if fourpanel:
             titlet = titlets[nt]
@@ -108,7 +108,7 @@ for pn,plot in enumerate(BOW.keys()):
         fname = 'std_{0}_{1}.png'.format(vrbl,plot)
         fpath = os.path.join(outdir,fname)
         fig.savefig(fpath)
-        print("Saved to {0}".format(fpath))
+        print(("Saved to {0}".format(fpath)))
         plt.close(fig)
 
 if lines:
@@ -129,7 +129,7 @@ if lines:
     fname = 'std_lines_{0}.png'.format(vrbl)
     fpath = os.path.join(outdir,fname)
     fig.savefig(fpath)
-    print("Saved to {0}".format(fpath))
+    print(("Saved to {0}".format(fpath)))
     plt.close(fig)
 
     # Get lat/lon limits of 1-km domain
@@ -165,5 +165,5 @@ if lines:
     fname = 'std_lines_{0}_1kmdomain.png'.format(vrbl)
     fpath = os.path.join(outdir,fname)
     fig.savefig(fpath)
-    print("Saved to {0}".format(fpath))
+    print(("Saved to {0}".format(fpath)))
     plt.close(fig)

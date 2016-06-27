@@ -43,7 +43,7 @@ ensemblelist = ['c00'] + ['p'+str(n) for n in range(1,11)]
 try:
     arg = sys.argv[1]
 except IndexError: 
-    print "A command-line argument is required (-e or -a)"
+    print("A command-line argument is required (-e or -a)")
     raise Exception
 #finally:
 #    if arg == '-a':
@@ -83,7 +83,7 @@ if arg == '-a':
         # Check to see if last member was E10
         # If it is, our work here is done
         if "p10" in softlink:
-            print "Last ensemble member already completed"
+            print("Last ensemble member already completed")
             raise Exception
         else:
             for idx, n in enumerate(ensemblelist):
@@ -123,7 +123,7 @@ if submit_job == 1:
     # Run WRF but wait until Real has finished without errors
     p_wrf = subprocess.call([qsub,wrf_run.sh,-W,"afterok=jobid"],
                             cwd=pathtoWRF,shell=True)
-    print "real.exe and wrf.exe submitted. Exiting Python script."
+    print("real.exe and wrf.exe submitted. Exiting Python script.")
 else:
-    print "Pre-processing complete. Exiting Python script."
+    print("Pre-processing complete. Exiting Python script.")
 
