@@ -42,7 +42,8 @@ sys.path.insert(0,os.path.abspath('../postWRF/'))
 extensions = [
     'sphinx.ext.autodoc',
     #'sphinx.ext.viewcode',
-    'alabaster'
+    'alabaster',
+    'numpydoc',
 ]
 
 # Add any paths that contain templates here, relative to this directory.

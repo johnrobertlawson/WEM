@@ -37,24 +37,48 @@ Dewpoint:
 
 """
 
-def calc_theta(z,ztr=12000.0,theta0=300.0,thetatr=343,Ttr=213):
-    if z <= ztr:
-        theta = theta0 + (thetatr - theta0) * (z/ztr)**1.25
-    else:
-        theta = thetatr * N.exp((mc.g/(mc.cp*Ttr))*(z-ztr))
-    return theta
+class Profile(Object):
+    def __init__(self,method='MW01'):
+        pass
 
-def calc_RH(z,ztr=12000.0):
-    if z <= ztr:
-        RH = 1-(0.75*(z/ztr)**1.25
-    else:
-        RH = 0.25
-    return RH
+    def buoyancy(self,E,m,z,H=14500):
+        """
+        Parcel buoyancy profile, or Eq. (A1) in MW01.
 
-def calc_U(z,us,zs=3000):
-    U = us * (N.tanh(z)/zs)
-    return U
+        Parameters
+        ----------
+        E   :   int, float
+            Specified CAPE
+        m   :   int, float
+            Profile compression parameter
+        z   :   int, float
+            Altitude above ground level (metres)
+        H   :   int, float, optional
+            Vertical scale
 
-heights = N.hstack((array([10,35]),N.arange(100,20100,100),
-                    N.arange(20000,30500,500)))
-qs = N.arange(11,16.25,0.25)
+        Returns
+        -------
+
+        profile :   array_like
+            Atmospheric profile.
+        """"
+
+
+    def calc_theta(self,z,ztr=12000.0,theta0=300.0,thetatr=343,Ttr=213):
+        if z <= ztr:
+            theta = theta0 + (thetatr - theta0) * (z/ztr)**1.25
+        else:
+            theta = thetatr * N.exp((mc.g/(mc.cp*Ttr))*(z-ztr))
+        return theta
+
+    def calc_RH(self,z,ztr=12000.0):
+        if z <= ztr:
+            RH = 1-(0.75*(z/ztr)**1.25
+        else:
+            RH = 0.25
+        return RH
+
+    def calc_U(self,z,us,zs=3000):
+        U = us * (N.tanh(z)/zs)
+        return U
+
