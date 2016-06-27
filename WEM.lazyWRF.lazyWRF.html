@@ -1,0 +1,310 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>WEM.lazyWRF.lazyWRF package &mdash; WEM 0.9.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.9.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="WEM 0.9.0 documentation" href="index.html" />
+    <link rel="up" title="WEM.lazyWRF package" href="WEM.lazyWRF.html" />
+    <link rel="next" title="WEM.postWRF package" href="WEM.postWRF.html" />
+    <link rel="prev" title="WEM.lazyWRF package" href="WEM.lazyWRF.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="wem-lazywrf-lazywrf-package">
+<h1>WEM.lazyWRF.lazyWRF package<a class="headerlink" href="#wem-lazywrf-lazywrf-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-WEM.lazyWRF.lazyWRF.create_sounding">
+<span id="wem-lazywrf-lazywrf-create-sounding-module"></span><h2>WEM.lazyWRF.lazyWRF.create_sounding module<a class="headerlink" href="#module-WEM.lazyWRF.lazyWRF.create_sounding" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="WEM.lazyWRF.lazyWRF.create_sounding.Profile">
+<em class="property">class </em><code class="descclassname">WEM.lazyWRF.lazyWRF.create_sounding.</code><code class="descname">Profile</code><span class="sig-paren">(</span><em>method='MW01'</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.lazyWRF.lazyWRF.create_sounding.Profile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<dl class="method">
+<dt id="WEM.lazyWRF.lazyWRF.create_sounding.Profile.buoyancy">
+<code class="descname">buoyancy</code><span class="sig-paren">(</span><em>E</em>, <em>m</em>, <em>z</em>, <em>H=14500</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.lazyWRF.lazyWRF.create_sounding.Profile.buoyancy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parcel buoyancy profile, or Eq. (A1) in MW01.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>E</strong> (<em>int, float</em>) &#8211; Specified CAPE</li>
+<li><strong>m</strong> (<em>int, float</em>) &#8211; Profile compression parameter</li>
+<li><strong>z</strong> (<em>int, float</em>) &#8211; Altitude above ground level (metres)</li>
+<li><strong>H</strong> (<em>int, float, optional</em>) &#8211; Vertical scale</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>profile</strong> &#8211;
+Atmospheric profile.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">array_like</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="WEM.lazyWRF.lazyWRF.create_sounding.Profile.calc_RH">
+<code class="descname">calc_RH</code><span class="sig-paren">(</span><em>z</em>, <em>ztr=12000.0</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.lazyWRF.lazyWRF.create_sounding.Profile.calc_RH" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="WEM.lazyWRF.lazyWRF.create_sounding.Profile.calc_U">
+<code class="descname">calc_U</code><span class="sig-paren">(</span><em>z</em>, <em>us</em>, <em>zs=3000</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.lazyWRF.lazyWRF.create_sounding.Profile.calc_U" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="WEM.lazyWRF.lazyWRF.create_sounding.Profile.calc_theta">
+<code class="descname">calc_theta</code><span class="sig-paren">(</span><em>z</em>, <em>ztr=12000.0</em>, <em>theta0=300.0</em>, <em>thetatr=343</em>, <em>Ttr=213</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.lazyWRF.lazyWRF.create_sounding.Profile.calc_theta" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-WEM.lazyWRF.lazyWRF.main">
+<span id="wem-lazywrf-lazywrf-main-module"></span><h2>WEM.lazyWRF.lazyWRF.main module<a class="headerlink" href="#module-WEM.lazyWRF.lazyWRF.main" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="WEM.lazyWRF.lazyWRF.main.Lazy">
+<em class="property">class </em><code class="descclassname">WEM.lazyWRF.lazyWRF.main.</code><code class="descname">Lazy</code><span class="sig-paren">(</span><em>config</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.lazyWRF.lazyWRF.main.Lazy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<dl class="method">
+<dt id="WEM.lazyWRF.lazyWRF.main.Lazy.copy_files">
+<code class="descname">copy_files</code><span class="sig-paren">(</span><em>tofolder</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.lazyWRF.lazyWRF.main.Lazy.copy_files" title="Permalink to this definition">¶</a></dt>
+<dd><p>Move wrfout files to folder.
+Create folder if it doesn&#8217;t exist</p>
+<p>Move .TS files if they exist
+Copy namelist.input to that folder.
+Copy rsl.error.0000 to the folder.</p>
+<p>Input(s):
+args = names of folder tree, in order of depth.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="WEM.lazyWRF.lazyWRF.main.Lazy.copy_namelist">
+<code class="descname">copy_namelist</code><span class="sig-paren">(</span><em>suffix</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.lazyWRF.lazyWRF.main.Lazy.copy_namelist" title="Permalink to this definition">¶</a></dt>
+<dd><p>Appends current time to namelist to create backup.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="WEM.lazyWRF.lazyWRF.main.Lazy.edit_namelist">
+<code class="descname">edit_namelist</code><span class="sig-paren">(</span><em>suffix</em>, <em>sett</em>, <em>newval</em>, <em>maxdom=1</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.lazyWRF.lazyWRF.main.Lazy.edit_namelist" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method edits namelist.wps or namelist.input.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>suffix</strong> &#8211; which namelist needs changing</li>
+<li><strong>sett</strong> &#8211; setting that needs changing</li>
+<li><strong>newval</strong> &#8211; its new value -&gt; currently replaces whole line</li>
+<li><strong>maxdom</strong> &#8211; number of domains to edit
+(this is relevant for multiple columns?)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="WEM.lazyWRF.lazyWRF.main.Lazy.generate_date">
+<code class="descname">generate_date</code><span class="sig-paren">(</span><em>date</em>, <em>outstyle='wps'</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.lazyWRF.lazyWRF.main.Lazy.generate_date" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates date string for namelist files.</p>
+<p>Input:</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="WEM.lazyWRF.lazyWRF.main.Lazy.go">
+<code class="descname">go</code><span class="sig-paren">(</span><em>casestr</em>, <em>IC</em>, <em>experiment</em>, <em>ensnames</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.lazyWRF.lazyWRF.main.Lazy.go" title="Permalink to this definition">¶</a></dt>
+<dd><p>Inputs: (all folder names)
+casestr     :   string of case study initialisation date/time
+IC          :   initial condition model
+experiment  :   dictionary. Key: ensemble type (ICBC,STCH,MXMP)</p>
+<blockquote>
+<div><blockquote>
+<div>-initial condition/boundary condition
+-stochastic kinetic energy backscatter
+-mixed model parameterisations</div></blockquote>
+<dl class="docutils">
+<dt>Value...</dt>
+<dd>-model configuration (CTRL) for ICBC
+-initial condition model/ens member for others</dd>
+</dl>
+</div></blockquote>
+<dl class="docutils">
+<dt>ensnames <span class="classifier-delimiter">:</span> <span class="classifier">list of ensemble member names</span></dt>
+<dd><ul class="first last simple">
+<li>e.g. c00,p01,p02</li>
+</ul>
+</dd>
+</dl>
+<p><a href="#id1"><span class="problematic" id="id2">**</span></a>kwargs include:
+WPS_only    :   stop after linking met_em files to WRF folder</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="WEM.lazyWRF.lazyWRF.main.Lazy.go_GEFSR2">
+<code class="descname">go_GEFSR2</code><span class="sig-paren">(</span><em>ensns</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.lazyWRF.lazyWRF.main.Lazy.go_GEFSR2" title="Permalink to this definition">¶</a></dt>
+<dd><p>Runs WPS, WRF for one set of initial conditions
+and settings based on the GEFSR2 model.</p>
+<p>Inputs:
+ensns   :   names of ensemble member</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="WEM.lazyWRF.lazyWRF.main.Lazy.link_to_IC_Vtable">
+<code class="descname">link_to_IC_Vtable</code><span class="sig-paren">(</span><em>IC</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.lazyWRF.lazyWRF.main.Lazy.link_to_IC_Vtable" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="WEM.lazyWRF.lazyWRF.main.Lazy.link_to_IC_data">
+<code class="descname">link_to_IC_data</code><span class="sig-paren">(</span><em>IC</em>, <em>*args</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.lazyWRF.lazyWRF.main.Lazy.link_to_IC_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Inputs:
+<a href="#id3"><span class="problematic" id="id4">*</span></a>args   :   e.g. ensemble member</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="WEM.lazyWRF.lazyWRF.main.Lazy.link_to_met_em">
+<code class="descname">link_to_met_em</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#WEM.lazyWRF.lazyWRF.main.Lazy.link_to_met_em" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="WEM.lazyWRF.lazyWRF.main.Lazy.link_to_soil_Vtable">
+<code class="descname">link_to_soil_Vtable</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#WEM.lazyWRF.lazyWRF.main.Lazy.link_to_soil_Vtable" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="WEM.lazyWRF.lazyWRF.main.Lazy.link_to_soil_data">
+<code class="descname">link_to_soil_data</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#WEM.lazyWRF.lazyWRF.main.Lazy.link_to_soil_data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="WEM.lazyWRF.lazyWRF.main.Lazy.run_exe">
+<code class="descname">run_exe</code><span class="sig-paren">(</span><em>exe</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.lazyWRF.lazyWRF.main.Lazy.run_exe" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run WPS executables, then check to see if it failed.
+If not, return True to proceed.</p>
+<p>Input:
+exe     :   .exe file name.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="WEM.lazyWRF.lazyWRF.main.Lazy.submit_job">
+<code class="descname">submit_job</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#WEM.lazyWRF.lazyWRF.main.Lazy.submit_job" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-WEM.lazyWRF.lazyWRF">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-WEM.lazyWRF.lazyWRF" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">WEM</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="tutorial.html">WEM package</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="WEM.html">WEM package</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="WEM.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="WEM.lazyWRF.html">WEM.lazyWRF package</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="WEM.lazyWRF.html#subpackages">Subpackages</a></li>
+<li class="toctree-l4"><a class="reference internal" href="WEM.lazyWRF.html#module-WEM.lazyWRF">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="WEM.postWRF.html">WEM.postWRF package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="WEM.utils.html">WEM.utils package</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="WEM.html#module-WEM">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2014, John Lawson.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.8</a>
+      
+      |
+      <a href="_sources/WEM.lazyWRF.lazyWRF.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

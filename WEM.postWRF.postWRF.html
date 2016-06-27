@@ -1,0 +1,2894 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>WEM.postWRF.postWRF package &mdash; WEM 0.9.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.9.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="WEM 0.9.0 documentation" href="index.html" />
+    <link rel="up" title="WEM.postWRF package" href="WEM.postWRF.html" />
+    <link rel="next" title="WEM.utils package" href="WEM.utils.html" />
+    <link rel="prev" title="WEM.postWRF package" href="WEM.postWRF.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="wem-postwrf-postwrf-package">
+<h1>WEM.postWRF.postWRF package<a class="headerlink" href="#wem-postwrf-postwrf-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-WEM.postWRF.postWRF.axes">
+<span id="wem-postwrf-postwrf-axes-module"></span><h2>WEM.postWRF.postWRF.axes module<a class="headerlink" href="#module-WEM.postWRF.postWRF.axes" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="WEM.postWRF.postWRF.axes.Axes">
+<em class="property">class </em><code class="descclassname">WEM.postWRF.postWRF.axes.</code><code class="descname">Axes</code><span class="sig-paren">(</span><em>config</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.axes.Axes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.axes.Axes.setup">
+<code class="descname">setup</code><span class="sig-paren">(</span><em>config</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.axes.Axes.setup" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-WEM.postWRF.postWRF.birdseye">
+<span id="wem-postwrf-postwrf-birdseye-module"></span><h2>WEM.postWRF.postWRF.birdseye module<a class="headerlink" href="#module-WEM.postWRF.postWRF.birdseye" title="Permalink to this headline">¶</a></h2>
+<p>Top-down 2D plots, which are so common in meteorology
+that they get their own file here.</p>
+<p>Subclass of Figure.</p>
+<dl class="class">
+<dt id="WEM.postWRF.postWRF.birdseye.BirdsEye">
+<em class="property">class </em><code class="descclassname">WEM.postWRF.postWRF.birdseye.</code><code class="descname">BirdsEye</code><span class="sig-paren">(</span><em>nc=False</em>, <em>ax=0</em>, <em>fig=0</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.birdseye.BirdsEye" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#WEM.postWRF.postWRF.figure.Figure" title="WEM.postWRF.postWRF.figure.Figure"><code class="xref py py-class docutils literal"><span class="pre">WEM.postWRF.postWRF.figure.Figure</span></code></a></p>
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.birdseye.BirdsEye.axes_of_dilatation">
+<code class="descname">axes_of_dilatation</code><span class="sig-paren">(</span><em>xdata</em>, <em>ydata</em>, <em>fname</em>, <em>outdir</em>, <em>lats=False</em>, <em>lons=False</em>, <em>smooth=False</em>, <em>locations=False</em>, <em>x=False</em>, <em>y=False</em>, <em>m=False</em>, <em>Nlim=False</em>, <em>Elim=False</em>, <em>Slim=False</em>, <em>Wlim=False</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.birdseye.BirdsEye.axes_of_dilatation" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.birdseye.BirdsEye.get_plot_arguments">
+<code class="descname">get_plot_arguments</code><span class="sig-paren">(</span><em>cmap=False</em>, <em>clvs=False</em>, <em>color=False</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.birdseye.BirdsEye.get_plot_arguments" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns colourmap and contouring levels</p>
+<p>Options keyword arguments:
+clvs    :   manually override contour levels</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.birdseye.BirdsEye.make_subplot_label">
+<code class="descname">make_subplot_label</code><span class="sig-paren">(</span><em>ax</em>, <em>label</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.birdseye.BirdsEye.make_subplot_label" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.birdseye.BirdsEye.plot2D">
+<code class="descname">plot2D</code><span class="sig-paren">(</span><em>data</em>, <em>fname</em>, <em>outdir</em>, <em>plottype='contourf'</em>, <em>save=True</em>, <em>smooth=1</em>, <em>lats=False</em>, <em>lons=False</em>, <em>clvs=False</em>, <em>cmap=False</em>, <em>title=False</em>, <em>cb=True</em>, <em>locations=False</em>, <em>m=False</em>, <em>x=False</em>, <em>y=False</em>, <em>Nlim=False</em>, <em>Elim=False</em>, <em>Slim=False</em>, <em>Wlim=False</em>, <em>color='k'</em>, <em>inline=False</em>, <em>lw=False</em>, <em>extend=False</em>, <em>cblabel=False</em>, <em>ideal=False</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.birdseye.BirdsEye.plot2D" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generic method that plots any matrix of data on a map</p>
+<p>Inputs:
+data        :   2D matrix of data
+outdir      :   path to plots
+outf        :   filename for output (with or without .png)</p>
+<p>Optional:
+plottype    :   matplotlib function for plotting
+smooth      :   Gaussian smooth by this many grid spaces
+clvs        :   scale for contours
+title       :   title on plot
+save        :   whether to save to file</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>locations</strong> (<em>dict</em>) &#8211; Locations to plot on the basemap.
+Format: locations = {&#8216;label&#8217;:(lat,lon),etc}</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.birdseye.BirdsEye.plot_streamlines">
+<code class="descname">plot_streamlines</code><span class="sig-paren">(</span><em>U</em>, <em>V</em>, <em>outdir</em>, <em>fname</em>, <em>lats=False</em>, <em>lons=False</em>, <em>smooth=1</em>, <em>title=False</em>, <em>lw_speed=False</em>, <em>density=1.8</em>, <em>ideal=False</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.birdseye.BirdsEye.plot_streamlines" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot streamlines.</p>
+<p>U       :   U-component of wind (nx x ny)
+V       :   V-component of wind (same dimensions)</p>
+<p>lw_speed    :   linewidth is proportional to wind speed</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.birdseye.BirdsEye.spaghetti">
+<code class="descname">spaghetti</code><span class="sig-paren">(</span><em>t</em>, <em>lv</em>, <em>va</em>, <em>contour</em>, <em>wrfouts</em>, <em>outpath</em>, <em>da=0</em>, <em>dom=0</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.birdseye.BirdsEye.spaghetti" title="Permalink to this definition">¶</a></dt>
+<dd><p>wrfouts     :   list of wrfout files</p>
+<p>Only change dom if there are multiple domains.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-WEM.postWRF.postWRF.clicker">
+<span id="wem-postwrf-postwrf-clicker-module"></span><h2>WEM.postWRF.postWRF.clicker module<a class="headerlink" href="#module-WEM.postWRF.postWRF.clicker" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="WEM.postWRF.postWRF.clicker.Clicker">
+<em class="property">class </em><code class="descclassname">WEM.postWRF.postWRF.clicker.</code><code class="descname">Clicker</code><span class="sig-paren">(</span><em>wrfout</em>, <em>data=0</em>, <em>fig=0</em>, <em>ax=0</em>, <em>clvs=False</em>, <em>cmap=False</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.clicker.Clicker" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#WEM.postWRF.postWRF.figure.Figure" title="WEM.postWRF.postWRF.figure.Figure"><code class="xref py py-class docutils literal"><span class="pre">WEM.postWRF.postWRF.figure.Figure</span></code></a></p>
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.clicker.Clicker.click_x_y">
+<code class="descname">click_x_y</code><span class="sig-paren">(</span><em>plotpoint=0</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.clicker.Clicker.click_x_y" title="Permalink to this definition">¶</a></dt>
+<dd><p>plotpoint       :   boolean. If yes, plot point.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.clicker.Clicker.draw_box">
+<code class="descname">draw_box</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.clicker.Clicker.draw_box" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.clicker.Clicker.draw_line">
+<code class="descname">draw_line</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.clicker.Clicker.draw_line" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.clicker.Clicker.on_press">
+<code class="descname">on_press</code><span class="sig-paren">(</span><em>event</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.clicker.Clicker.on_press" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.clicker.Clicker.on_release_box">
+<code class="descname">on_release_box</code><span class="sig-paren">(</span><em>event</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.clicker.Clicker.on_release_box" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.clicker.Clicker.on_release_line">
+<code class="descname">on_release_line</code><span class="sig-paren">(</span><em>event</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.clicker.Clicker.on_release_line" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.clicker.Clicker.on_release_point">
+<code class="descname">on_release_point</code><span class="sig-paren">(</span><em>event</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.clicker.Clicker.on_release_point" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.clicker.Clicker.onpick">
+<code class="descname">onpick</code><span class="sig-paren">(</span><em>event</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.clicker.Clicker.onpick" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.clicker.Clicker.overlay_data">
+<code class="descname">overlay_data</code><span class="sig-paren">(</span><em>data</em>, <em>clvs=False</em>, <em>cmap=False</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.clicker.Clicker.overlay_data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.clicker.Clicker.set_box_width">
+<code class="descname">set_box_width</code><span class="sig-paren">(</span><em>X</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.clicker.Clicker.set_box_width" title="Permalink to this definition">¶</a></dt>
+<dd><p>Ask user to specify a width that is normal to the
+cross-section X. The plot will show with the box displayed.
+If the user is not happy, they can try again.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-WEM.postWRF.postWRF.colourtables">
+<span id="wem-postwrf-postwrf-colourtables-module"></span><h2>WEM.postWRF.postWRF.colourtables module<a class="headerlink" href="#module-WEM.postWRF.postWRF.colourtables" title="Permalink to this headline">¶</a></h2>
+<p>Colour tables for plotting.</p>
+<p>Adapted from code by Luke Madaus and David-John Gagne II</p>
+<dl class="function">
+<dt id="WEM.postWRF.postWRF.colourtables.PkBlfloat">
+<code class="descclassname">WEM.postWRF.postWRF.colourtables.</code><code class="descname">PkBlfloat</code><span class="sig-paren">(</span><em>datarange</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.colourtables.PkBlfloat" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="WEM.postWRF.postWRF.colourtables.PuRdBlfloat">
+<code class="descclassname">WEM.postWRF.postWRF.colourtables.</code><code class="descname">PuRdBlfloat</code><span class="sig-paren">(</span><em>datarange</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.colourtables.PuRdBlfloat" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="WEM.postWRF.postWRF.colourtables.RdBuWH">
+<code class="descclassname">WEM.postWRF.postWRF.colourtables.</code><code class="descname">RdBuWH</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.colourtables.RdBuWH" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="WEM.postWRF.postWRF.colourtables.RdBufloat">
+<code class="descclassname">WEM.postWRF.postWRF.colourtables.</code><code class="descname">RdBufloat</code><span class="sig-paren">(</span><em>*args</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.colourtables.RdBufloat" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="WEM.postWRF.postWRF.colourtables.bw_irsat">
+<code class="descclassname">WEM.postWRF.postWRF.colourtables.</code><code class="descname">bw_irsat</code><span class="sig-paren">(</span><em>*args</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.colourtables.bw_irsat" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="WEM.postWRF.postWRF.colourtables.dewpoint1">
+<code class="descclassname">WEM.postWRF.postWRF.colourtables.</code><code class="descname">dewpoint1</code><span class="sig-paren">(</span><em>*args</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.colourtables.dewpoint1" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="WEM.postWRF.postWRF.colourtables.grays">
+<code class="descclassname">WEM.postWRF.postWRF.colourtables.</code><code class="descname">grays</code><span class="sig-paren">(</span><em>*args</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.colourtables.grays" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="WEM.postWRF.postWRF.colourtables.irsat">
+<code class="descclassname">WEM.postWRF.postWRF.colourtables.</code><code class="descname">irsat</code><span class="sig-paren">(</span><em>*args</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.colourtables.irsat" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="WEM.postWRF.postWRF.colourtables.mixprecip1">
+<code class="descclassname">WEM.postWRF.postWRF.colourtables.</code><code class="descname">mixprecip1</code><span class="sig-paren">(</span><em>*args</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.colourtables.mixprecip1" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="WEM.postWRF.postWRF.colourtables.ncdc_modified_ISU">
+<code class="descclassname">WEM.postWRF.postWRF.colourtables.</code><code class="descname">ncdc_modified_ISU</code><span class="sig-paren">(</span><em>nlvs</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.colourtables.ncdc_modified_ISU" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="WEM.postWRF.postWRF.colourtables.precip1">
+<code class="descclassname">WEM.postWRF.postWRF.colourtables.</code><code class="descname">precip1</code><span class="sig-paren">(</span><em>*args</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.colourtables.precip1" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="WEM.postWRF.postWRF.colourtables.rain1">
+<code class="descclassname">WEM.postWRF.postWRF.colourtables.</code><code class="descname">rain1</code><span class="sig-paren">(</span><em>*args</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.colourtables.rain1" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="WEM.postWRF.postWRF.colourtables.reflect">
+<code class="descclassname">WEM.postWRF.postWRF.colourtables.</code><code class="descname">reflect</code><span class="sig-paren">(</span><em>*args</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.colourtables.reflect" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="WEM.postWRF.postWRF.colourtables.reflect_ncdc">
+<code class="descclassname">WEM.postWRF.postWRF.colourtables.</code><code class="descname">reflect_ncdc</code><span class="sig-paren">(</span><em>*args</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.colourtables.reflect_ncdc" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="WEM.postWRF.postWRF.colourtables.sftemp">
+<code class="descclassname">WEM.postWRF.postWRF.colourtables.</code><code class="descname">sftemp</code><span class="sig-paren">(</span><em>*args</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.colourtables.sftemp" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="WEM.postWRF.postWRF.colourtables.snow1">
+<code class="descclassname">WEM.postWRF.postWRF.colourtables.</code><code class="descname">snow1</code><span class="sig-paren">(</span><em>*args</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.colourtables.snow1" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="WEM.postWRF.postWRF.colourtables.snow2">
+<code class="descclassname">WEM.postWRF.postWRF.colourtables.</code><code class="descname">snow2</code><span class="sig-paren">(</span><em>*args</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.colourtables.snow2" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="WEM.postWRF.postWRF.colourtables.thetae">
+<code class="descclassname">WEM.postWRF.postWRF.colourtables.</code><code class="descname">thetae</code><span class="sig-paren">(</span><em>*args</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.colourtables.thetae" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="WEM.postWRF.postWRF.colourtables.universal_reflect">
+<code class="descclassname">WEM.postWRF.postWRF.colourtables.</code><code class="descname">universal_reflect</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.colourtables.universal_reflect" title="Permalink to this definition">¶</a></dt>
+<dd><p>Map a number to a colour.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-WEM.postWRF.postWRF.constants">
+<span id="wem-postwrf-postwrf-constants-module"></span><h2>WEM.postWRF.postWRF.constants module<a class="headerlink" href="#module-WEM.postWRF.postWRF.constants" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-WEM.postWRF.postWRF.defaults">
+<span id="wem-postwrf-postwrf-defaults-module"></span><h2>WEM.postWRF.postWRF.defaults module<a class="headerlink" href="#module-WEM.postWRF.postWRF.defaults" title="Permalink to this headline">¶</a></h2>
+<p>Default settings that are used when the user does not specify their own.</p>
+<dl class="class">
+<dt id="WEM.postWRF.postWRF.defaults.Defaults">
+<em class="property">class </em><code class="descclassname">WEM.postWRF.postWRF.defaults.</code><code class="descname">Defaults</code><a class="headerlink" href="#WEM.postWRF.postWRF.defaults.Defaults" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-WEM.postWRF.postWRF.ecmwf">
+<span id="wem-postwrf-postwrf-ecmwf-module"></span><h2>WEM.postWRF.postWRF.ecmwf module<a class="headerlink" href="#module-WEM.postWRF.postWRF.ecmwf" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="WEM.postWRF.postWRF.ecmwf.ECMWF">
+<em class="property">class </em><code class="descclassname">WEM.postWRF.postWRF.ecmwf.</code><code class="descname">ECMWF</code><span class="sig-paren">(</span><em>fpath</em>, <em>config</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.ecmwf.ECMWF" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.ecmwf.ECMWF.basemap_setup">
+<code class="descname">basemap_setup</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.ecmwf.ECMWF.basemap_setup" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.ecmwf.ECMWF.ecmwf_times">
+<code class="descname">ecmwf_times</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.ecmwf.ECMWF.ecmwf_times" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.ecmwf.ECMWF.find_level_idx">
+<code class="descname">find_level_idx</code><span class="sig-paren">(</span><em>lv</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.ecmwf.ECMWF.find_level_idx" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.ecmwf.ECMWF.find_time_idx">
+<code class="descname">find_time_idx</code><span class="sig-paren">(</span><em>t</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.ecmwf.ECMWF.find_time_idx" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.ecmwf.ECMWF.get">
+<code class="descname">get</code><span class="sig-paren">(</span><em>va</em>, <em>lv</em>, <em>t</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.ecmwf.ECMWF.get" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.ecmwf.ECMWF.get_key">
+<code class="descname">get_key</code><span class="sig-paren">(</span><em>va</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.ecmwf.ECMWF.get_key" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.ecmwf.ECMWF.plot">
+<code class="descname">plot</code><span class="sig-paren">(</span><em>va</em>, <em>lv</em>, <em>times</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.ecmwf.ECMWF.plot" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-WEM.postWRF.postWRF.figure">
+<span id="wem-postwrf-postwrf-figure-module"></span><h2>WEM.postWRF.postWRF.figure module<a class="headerlink" href="#module-WEM.postWRF.postWRF.figure" title="Permalink to this headline">¶</a></h2>
+<p>All matplotlib figures are subclasses of Figure.</p>
+<dl class="class">
+<dt id="WEM.postWRF.postWRF.figure.Figure">
+<em class="property">class </em><code class="descclassname">WEM.postWRF.postWRF.figure.</code><code class="descname">Figure</code><span class="sig-paren">(</span><em>nc=False</em>, <em>ax=0</em>, <em>fig=0</em>, <em>plotn=(1</em>, <em>1)</em>, <em>layout='normal'</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.figure.Figure" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>C   :   configuration settings
+W   :   data</p>
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.figure.Figure.basemap_setup">
+<code class="descname">basemap_setup</code><span class="sig-paren">(</span><em>smooth=1</em>, <em>lats=False</em>, <em>lons=False</em>, <em>proj='merc'</em>, <em>Nlim=False</em>, <em>Elim=False</em>, <em>Slim=False</em>, <em>Wlim=False</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.figure.Figure.basemap_setup" title="Permalink to this definition">¶</a></dt>
+<dd><p>Needs rewriting to include limited domains based on lats/lons.
+Currently, assuming whole domain is plotted.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.figure.Figure.create_colorbar">
+<code class="descname">create_colorbar</code><span class="sig-paren">(</span><em>fpath</em>, <em>fname</em>, <em>cf</em>, <em>label=''</em>, <em>tix=False</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.figure.Figure.create_colorbar" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create colorbar.</p>
+<p>Inputs:
+fpath   :   path to file
+fname   :   filename
+cf      :   contour filling for legend
+label   :   colorbar label</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.figure.Figure.create_fname">
+<code class="descname">create_fname</code><span class="sig-paren">(</span><em>*naming</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.figure.Figure.create_fname" title="Permalink to this definition">¶</a></dt>
+<dd><p>Default naming should be:
+Variable + time + level</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.figure.Figure.figsize">
+<code class="descname">figsize</code><span class="sig-paren">(</span><em>defwidth</em>, <em>defheight</em>, <em>fig</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.figure.Figure.figsize" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.figure.Figure.just_one_colorbar">
+<code class="descname">just_one_colorbar</code><span class="sig-paren">(</span><em>fpath</em>, <em>fname</em>, <em>cf</em>, <em>label=False</em>, <em>tix=False</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.figure.Figure.just_one_colorbar" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.figure.Figure.save">
+<code class="descname">save</code><span class="sig-paren">(</span><em>outpath</em>, <em>fname</em>, <em>tight=True</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.figure.Figure.save" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.figure.Figure.title_time">
+<code class="descname">title_time</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.figure.Figure.title_time" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-WEM.postWRF.postWRF.lookuptable">
+<span id="wem-postwrf-postwrf-lookuptable-module"></span><h2>WEM.postWRF.postWRF.lookuptable module<a class="headerlink" href="#module-WEM.postWRF.postWRF.lookuptable" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="WEM.postWRF.postWRF.lookuptable.LookUpTable">
+<em class="property">class </em><code class="descclassname">WEM.postWRF.postWRF.lookuptable.</code><code class="descname">LookUpTable</code><a class="headerlink" href="#WEM.postWRF.postWRF.lookuptable.LookUpTable" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-WEM.postWRF.postWRF.main">
+<span id="wem-postwrf-postwrf-main-module"></span><h2>WEM.postWRF.postWRF.main module<a class="headerlink" href="#module-WEM.postWRF.postWRF.main" title="Permalink to this headline">¶</a></h2>
+<p>This handles user requests and controls computations and plotting.</p>
+<p>This script is API and should not be doing any hard work of
+importing matplotlib etc!</p>
+<p>Useful/utility scripts are in WEM.utils.</p>
+<p>TODO: move all DKE stuff to stats and figure/birdseye.</p>
+<p>TODO: move more utilities to utils.</p>
+<p>TODO: generalise plotting so the mountain of arguments can be easily changed
+and documented. Right now a small change to general plotting API takes a lot
+of time, and the documentation is a bit crazy.</p>
+<p>TODO: make boring methods private, e.g. _create_fname(). Then hide it from
+documentation if it is revealed to the user at the top level.</p>
+<dl class="class">
+<dt id="WEM.postWRF.postWRF.main.WRFEnviron">
+<em class="property">class </em><code class="descclassname">WEM.postWRF.postWRF.main.</code><code class="descname">WRFEnviron</code><a class="headerlink" href="#WEM.postWRF.postWRF.main.WRFEnviron" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Main environment API.</p>
+<p>This currently only loads default settings.</p>
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.main.WRFEnviron.all_error_growth">
+<code class="descname">all_error_growth</code><span class="sig-paren">(</span><em>outdir</em>, <em>infodict</em>, <em>ylim=False</em>, <em>f_prefix=False</em>, <em>f_suffix=False</em>, <em>energy='total'</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.main.WRFEnviron.all_error_growth" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compare many ensembles&#8217; DKE and DTE spreads on one plot.
+The times don&#8217;t need to be identical.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.main.WRFEnviron.cold_pool_strength">
+<code class="descname">cold_pool_strength</code><span class="sig-paren">(</span><em>utc</em>, <em>ncdir=False</em>, <em>outdir=False</em>, <em>ncf=False</em>, <em>nct=False</em>, <em>f_prefix=False</em>, <em>f_suffix=False</em>, <em>swath_width=100</em>, <em>bounding=False</em>, <em>dom=1</em>, <em>twoplot=False</em>, <em>fig=0</em>, <em>axes=0</em>, <em>dz=0</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.main.WRFEnviron.cold_pool_strength" title="Permalink to this definition">¶</a></dt>
+<dd><p>Pick A, B points on sim ref overlay
+This sets the angle between north and line AB
+Also sets the length in along-line direction
+For every gridpt along line AB:</p>
+<blockquote>
+<div><ul class="simple">
+<li>Locate gust front via shear</li>
+<li>Starting at front, do 3-grid-pt-average in line-normal
+direction</li>
+</ul>
+</div></blockquote>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>swath_width</strong> (<em>int</em>) &#8211; length in gridpoint in cross-section-normal
+direction.</li>
+<li><strong>bounding</strong> (<em>dict</em>) &#8211; bounding box for domain.
+Dictionary contains four keys (Nlim, Elim, Slim, Wlim)
+with float values (northern latitude limit, eastern
+longitude limit, southern latitude limit, western
+latitude limit, respectively).</li>
+<li><strong>dom</strong> (<em>int</em>) &#8211; domain for plotting (for WRF data).
+If zero, the only netCDF file present will be
+plotted.</li>
+<li><strong>twoplot</strong> (<em>bool</em>) &#8211; If true, return two figures: cold pool strength
+and the cref/cross-section</li>
+<li><strong>dz</strong> (<em>bool</em>) &#8211; plot height of cold pool only.</li>
+<li><strong>fig</strong> (<em>bool,matplotlib.figure</em>) &#8211; value of False will create new figure. A value of
+matplotlib.figure object will plot data onto
+this figure (similarly for axis, below).</li>
+<li><strong>ax</strong> (<em>bool,matplotlib.axis</em>) &#8211; matplotlib.axis object to plot onto.
+If tuple/list of length two, this is the
+first and second axis, if twoplot is True.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.main.WRFEnviron.composite_profile">
+<code class="descname">composite_profile</code><span class="sig-paren">(</span><em>vrbl</em>, <em>utc</em>, <em>enspaths</em>, <em>latlon=False</em>, <em>dom=1</em>, <em>mean=True</em>, <em>std=True</em>, <em>xlim=False</em>, <em>ylim=False</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.main.WRFEnviron.composite_profile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot multiple vertical profiles of atmospheric variables
+including optional mean and standard deviation.</p>
+<p>Superceded by <a class="reference internal" href="#WEM.postWRF.postWRF.main.WRFEnviron.twopanel_profile" title="WEM.postWRF.postWRF.main.WRFEnviron.twopanel_profile"><code class="xref py py-func docutils literal"><span class="pre">twopanel_profile()</span></code></a>?</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>vrbl</strong> (<em>str</em>) &#8211; WRF variable or computed quantity</li>
+<li><strong>utc</strong> (<em>int,list,tuple</em>) &#8211; date/time</li>
+<li><strong>enspaths</strong> (<em>list,tuple</em>) &#8211; absolute paths to all netCDF files for each
+ensemble member.</li>
+<li><strong>latlon</strong> (<em>bool,tuple,list</em>) &#8211; (lat,lon) for plotting. If this is False,
+a pop-up window will allow user to choose
+location.</li>
+<li><strong>dom</strong> (<em>int</em>) &#8211; WRF domain to use</li>
+<li><strong>mean</strong> (<em>bool</em>) &#8211; plot ensemble mean of variable</li>
+<li><strong>std</strong> (<em>bool</em>) &#8211; plot ensemble standard deviate of variable
+(+/- 1 sigma)</li>
+<li><strong>xlim</strong> (<em>bool,tuple,list</em>) &#8211; x-axis limit. False is automatic.</li>
+<li><strong>ylim</strong> (<em>bool,tuple,list</em>) &#8211; y-axis limit, False is automatic.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.main.WRFEnviron.compute_diff_energy">
+<code class="descname">compute_diff_energy</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.main.WRFEnviron.compute_diff_energy" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.main.WRFEnviron.create_fname">
+<code class="descname">create_fname</code><span class="sig-paren">(</span><em>vrbl</em>, <em>utc=False</em>, <em>level=False</em>, <em>other=False</em>, <em>f_prefix=False</em>, <em>f_suffix=False</em>, <em>extension='png'</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.main.WRFEnviron.create_fname" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate a filename (without extension) for saving a figure.
+Differentiate between similar plots for e.g. different domains by
+using the f_suffix/f_prefix options.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>vrbl</strong> (<em>str</em>) &#8211; variable name as found in WRF, or one of
+the computed fields available in WEM.</li>
+<li><strong>utc</strong> (<em>tuple,list,int</em>) &#8211; one date/time. The tuple/list format is
+YYYY,MM,DD,HH,MM,SS (ready for calendar.timegm).
+Integer format is epoch/datenum (time.gmtime).</li>
+<li><strong>level</strong> (<em>str</em>) &#8211; required level.</li>
+<li><strong>f_prefix</strong> (<em>bool,str</em>) &#8211; custom filename prefix for output. Ignore if False.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>:param f_suffix     custom filename suffix for output. Ignore if False.
+:type f_suffix      bool,str</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">str &#8211; filename with extension.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.main.WRFEnviron.delta_diff_energy">
+<code class="descname">delta_diff_energy</code><span class="sig-paren">(</span><em>vrbl</em>, <em>utc0</em>, <em>utc1</em>, <em>energy</em>, <em>datadir</em>, <em>outdir</em>, <em>meanvrbl='Z'</em>, <em>meanlevel=500</em>, <em>dataf=False</em>, <em>outprefix=False</em>, <em>outsuffix=False</em>, <em>clvs=0</em>, <em>title=False</em>, <em>fig=False</em>, <em>ax=False</em>, <em>ncdata=False</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.main.WRFEnviron.delta_diff_energy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot DKE/DTE growth with time: delta DKE/DTE (DDKE/DDTE).
+Filled contours of DDKE or DDTE is optionally plotted over
+the ensemble mean of a variable (contours). DDKE/DDTE is valid
+halfway between the first and second times specified.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>vrbl</strong> (<em>str</em>) &#8211; Vertically integrated (&#8216;sum_z&#8217;) or summated over all
+dimensions (&#8216;sum_xyz&#8217;).</li>
+<li><strong>utc0</strong> (<em>tuple,list,int</em>) &#8211; First date/time. The tuple/list format is
+YYYY,MM,DD,HH,MM,SS (ready for calendar.timegm).
+Integer format is epoch/datenum (ready for
+time.gmtime).</li>
+<li><strong>utc1</strong> (<em>tuple,list,int</em>) &#8211; as for <cite>utc0</cite>, but for the second time.</li>
+<li><strong>energy</strong> (<em>str</em>) &#8211; DKE (&#8216;kinetic&#8217;) or DTE (&#8216;total&#8217;).</li>
+<li><strong>datadir</strong> (<em>str</em>) &#8211; directory holding computed data</li>
+<li><strong>outdir</strong> (<em>str</em>) &#8211; root directory for plots</li>
+<li><strong>dataf</strong> (<em>str</em>) &#8211; file name of data file, if ambiguous</li>
+<li><strong>f_prefix</strong> (<em>bool,str</em>) &#8211; custom filename prefix for output. Ignore if False.</li>
+<li><strong>f_suffix</strong> (<em>bool,str</em>) &#8211; custom filename suffix for output. Ignore if False.</li>
+<li><strong>clvs</strong> (<em>bool,N.ndarray</em>) &#8211; contour levels for DDKE/DDTE. Generate with
+<code class="xref py py-func docutils literal"><span class="pre">numpy.arange()</span></code>.</li>
+<li><strong>meanclvs</strong> (<em>bool,N.ndarray</em>) &#8211; contour levels for ensemble mean. Generate with
+<code class="xref py py-func docutils literal"><span class="pre">numpy.arange()</span></code>.</li>
+<li><strong>title</strong> (<em>bool,str</em>) &#8211; title for output</li>
+<li><strong>fig</strong> (<em>bool,matplotlib.figure</em>) &#8211; value of False will create new figure. A value of
+matplotlib.figure object will plot data onto
+this figure (similarly for axis, below).</li>
+<li><strong>ax</strong> (<em>bool,matplotlib.axis</em>) &#8211; matplotlib.axis object to plot onto</li>
+<li><strong>meanvrbl</strong> (<em>str</em>) &#8211; variable of ensemble mean (WRF key or computed vrbl)</li>
+<li><strong>meanlevel</strong> (<em>int,str</em>) &#8211; level for the ensemble mean variable.
+Lowest model level is integer 2000.
+Pressure level is integer in hPa, e.g. 850.
+Isentropic surface is a string + K, e.g. &#8216;320K&#8217;.
+Geometric height is a string + m, e.g. &#8216;4000m&#8217;.</li>
+<li><strong>ncdata</strong> &#8211; if meanvrbl is not False, list of absolute
+paths to all netcdf files of ensemble members</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.main.WRFEnviron.frontogenesis">
+<code class="descname">frontogenesis</code><span class="sig-paren">(</span><em>utc</em>, <em>level</em>, <em>ncdir</em>, <em>outdir</em>, <em>ncf=False</em>, <em>nct=False</em>, <em>dom=1</em>, <em>smooth=0</em>, <em>clvs=0</em>, <em>title=0</em>, <em>cmap='bwr'</em>, <em>fig=False</em>, <em>ax=False</em>, <em>cb=True</em>, <em>match_nc=False</em>, <em>Nlim=False</em>, <em>Elim=False</em>, <em>Slim=False</em>, <em>Wlim=False</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.main.WRFEnviron.frontogenesis" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute and plot Miller frontogenesis as d/dt of theta gradient.</p>
+<p>Use a centred-in-time derivative; hence, if
+time index is start or end of wrfout file, skip the plot.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>utc</strong> (<em>tuple,list,int</em>) &#8211; one date/time. The tuple/list format is
+YYYY,MM,DD,HH,MM,SS (ready for calendar.timegm).
+Integer format is epoch/datenum (ready for
+time.gmtime).</li>
+<li><strong>level</strong> (<em>int,str</em>) &#8211; required level.
+Lowest model level is integer 2000.
+Pressure level is integer in hPa, e.g. 850.
+Isentropic surface is a string + K, e.g. &#8216;320K&#8217;.
+Geometric height is a string + m, e.g. &#8216;4000m&#8217;.</li>
+<li><strong>ncdir</strong> (<em>str</em>) &#8211; directory of netcdf data file</li>
+<li><strong>outdir</strong> (<em>str</em>) &#8211; directory to save output figures</li>
+<li><strong>ncf</strong> (<em>bool,str</em>) &#8211; filename of netcdf data file if ambiguous within ncdir.
+If no wrfout file is explicitly specified, the
+netCDF file in that folder is chosen if unambiguous.</li>
+<li><strong>nct</strong> (<em>bool,str</em>) &#8211; initialisation time of netcdf data file, if
+ambiguous within ncdir.</li>
+<li><strong>f_prefix</strong> (<em>bool,str</em>) &#8211; custom filename prefix for output. Ignore if False.</li>
+<li><strong>f_suffix</strong> (<em>bool,str</em>) &#8211; custom filename suffix for output. Ignore if False.</li>
+<li><strong>bounding</strong> (<em>dict</em>) &#8211; bounding box for domain.
+Dictionary contains four keys (Nlim, Elim, Slim, Wlim)
+with float values (northern latitude limit, eastern
+longitude limit, southern latitude limit, western
+latitude limit, respectively).</li>
+<li><strong>smooth</strong> (<em>int</em>) &#8211; pass data through a Gaussian filter. Value of 1 is
+essentially <a href="#id1"><span class="problematic" id="id2">`</span></a>off&#8217;.
+Integer greater than zero is the degree of smoothing,
+in grid spacing.</li>
+<li><strong>dom</strong> (<em>int</em>) &#8211; domain for plotting (for WRF data).
+If zero, the only netCDF file present will be
+plotted.</li>
+<li><strong>fig</strong> (<em>bool,matplotlib.figure</em>) &#8211; value of False will create new figure. A value of
+matplotlib.figure object will plot data onto
+this figure (similarly for axis, below).</li>
+<li><strong>ax</strong> (<em>bool,matplotlib.axis</em>) &#8211; matplotlib.axis object to plot onto</li>
+<li><strong>clvs</strong> (<em>bool,numpy.ndarray</em>) &#8211; contour levels for plotting.
+Generate using numpy.arange.
+False is automatic.</li>
+<li><strong>cmap</strong> (<em>str</em>) &#8211; matplotlib.cmap name. Pick a nice one from
+<a class="reference external" href="http://matplotlib.org/examples/color/">http://matplotlib.org/examples/color/</a>
+colormaps_reference.html</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.main.WRFEnviron.generate_times">
+<code class="descname">generate_times</code><span class="sig-paren">(</span><em>itime</em>, <em>ftime</em>, <em>interval</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.main.WRFEnviron.generate_times" title="Permalink to this definition">¶</a></dt>
+<dd><p>Wrapper for utility method
+<a class="reference internal" href="WEM.utils.html#WEM.utils.GIS_tools.generate_times" title="WEM.utils.GIS_tools.generate_times"><code class="xref py py-func docutils literal"><span class="pre">WEM.utils.GIS_tools.generate_times()</span></code></a>, so user can access
+this at the top level to loop over times.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.main.WRFEnviron.get_cmap_clvs">
+<code class="descname">get_cmap_clvs</code><span class="sig-paren">(</span><em>vrbl</em>, <em>level</em>, <em>clvs=False</em>, <em>cmap=False</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.main.WRFEnviron.get_cmap_clvs" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.main.WRFEnviron.get_level_string">
+<code class="descname">get_level_string</code><span class="sig-paren">(</span><em>level</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.main.WRFEnviron.get_level_string" title="Permalink to this definition">¶</a></dt>
+<dd><p>Makes sure user&#8217;s level input is a string.
+Saves typing hPa for the common usage of pressure levels.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>level</strong> (<em>str,int</em>) &#8211; desired level.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">str</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.main.WRFEnviron.get_list">
+<code class="descname">get_list</code><span class="sig-paren">(</span><em>dic</em>, <em>key</em>, <em>default</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.main.WRFEnviron.get_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fetch value from dictionary.</p>
+<p>If it doesn&#8217;t exist, use default.
+If the value is an integer, make a list of one.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.main.WRFEnviron.get_netcdf">
+<code class="descname">get_netcdf</code><span class="sig-paren">(</span><em>ncdir</em>, <em>ncf=False</em>, <em>nct=False</em>, <em>dom=1</em>, <em>path_only=False</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.main.WRFEnviron.get_netcdf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the WRFOut, ECMWF, or RUC instance.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>ncdir</strong> &#8211; absolute path to directory that contains the
+netCDF file.</li>
+<li><strong>ncf</strong> (<em>bool,str</em>) &#8211; filename of netcdf data file if ambiguous within ncdir.
+If no wrfout file is explicitly specified, the
+netCDF file in that folder is chosen if unambiguous.</li>
+<li><strong>nct</strong> (<em>bool,str</em>) &#8211; initialisation time of netcdf data file, if
+ambiguous within ncdir.</li>
+<li><strong>dom</strong> (<em>int</em>) &#8211; domain for plotting (for WRF data).
+If zero, the only netCDF file present will be
+plotted.</li>
+<li><strong>path_only</strong> (<em>bool</em>) &#8211; if True, return only absolute path to file.
+This is useful to loop over ensemble members and
+generate a list of files.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.main.WRFEnviron.list_ncfiles">
+<code class="descname">list_ncfiles</code><span class="sig-paren">(</span><em>ncdirs</em>, <em>nct=False</em>, <em>ncf=False</em>, <em>dom=0</em>, <em>path_only=1</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.main.WRFEnviron.list_ncfiles" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create list of absolute paths or objects* to netCDF files, given the
+list/tuple of directories they are in. If ambiguous, user
+needs to specify domain, and either the filename (if
+all identical) or initialisation time of the run (this
+needs to be the same for all files).</p>
+<p>Note * that the object will be a WRFOut instance if netCDF is
+a wrfout file, RUC instance for RUC, or EC instance for ECMWF.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>ncdirs</strong> (<em>tuple,list</em>) &#8211; absolute paths to directories containing
+netCDF files.</li>
+<li><strong>ncf</strong> (<em>bool,str</em>) &#8211; filename of netcdf data file if ambiguous within ncdir.
+If no wrfout file is explicitly specified, the
+netCDF file in that folder is chosen if unambiguous.</li>
+<li><strong>nct</strong> (<em>bool,str</em>) &#8211; initialisation time of netcdf data file, if
+ambiguous within ncdir.</li>
+<li><strong>dom</strong> (<em>int</em>) &#8211; domain for plotting (for WRF data).
+If zero, the only netCDF file present will be
+plotted.</li>
+<li><strong>path_only</strong> &#8211; if True, return only strings to the files.
+if False, return the instances (RUC,EC,WRFOut).</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">either a list of absolute path strings, or
+a list of instances (RUC,EC,WRFOut).</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>TODO: Deal with ambiguous selections.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.main.WRFEnviron.make_1D">
+<code class="descname">make_1D</code><span class="sig-paren">(</span><em>data</em>, <em>output='list'</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.main.WRFEnviron.make_1D" title="Permalink to this definition">¶</a></dt>
+<dd><p>Ensure input data is a time series
+of 1D values, and numpy array.</p>
+<p>List of arrays -&gt; Numpy array or list</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.main.WRFEnviron.meteogram">
+<code class="descname">meteogram</code><span class="sig-paren">(</span><em>vrbl</em>, <em>loc</em>, <em>ncfiles</em>, <em>outdir=False</em>, <em>ncf=False</em>, <em>nct=False</em>, <em>dom=1</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.main.WRFEnviron.meteogram" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.main.WRFEnviron.plot2D">
+<code class="descname">plot2D</code><span class="sig-paren">(</span><em>vrbl</em>, <em>utc</em>, <em>level=False</em>, <em>ncdir=False</em>, <em>outdir=False</em>, <em>ncf=False</em>, <em>nct=False</em>, <em>f_prefix=0</em>, <em>f_suffix=False</em>, <em>dom=1</em>, <em>plottype='contourf'</em>, <em>smooth=1</em>, <em>fig=False</em>, <em>ax=False</em>, <em>clvs=False</em>, <em>cmap=False</em>, <em>locations=False</em>, <em>cb=True</em>, <em>match_nc=False</em>, <em>Nlim=False</em>, <em>Elim=False</em>, <em>Slim=False</em>, <em>Wlim=False</em>, <em>other=False</em>, <em>color='k'</em>, <em>inline=False</em>, <em>lw=False</em>, <em>extend=False</em>, <em>save=True</em>, <em>accum_hr=False</em>, <em>cblabel=False</em>, <em>ideal=False</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.main.WRFEnviron.plot2D" title="Permalink to this definition">¶</a></dt>
+<dd><p>Basic birds-eye-view plotting.</p>
+<p>This script is top-most and decides if the variables is
+built into WRF default output or needs computing. It unstaggers
+and slices data from the wrfout file appropriately.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>vrbl</strong> (<em>str</em>) &#8211; variable name as found in WRF, or one of
+the computed fields available in WEM</li>
+<li><strong>utc</strong> (<em>tuple,list,int</em>) &#8211; one date/time. The tuple/list format is
+YYYY,MM,DD,HH,MM,SS (ready for calendar.timegm).
+Integer format is epoch/datenum (ready for
+time.gmtime).</li>
+<li><strong>level</strong> (<em>int,str,bool</em>) &#8211; required level.
+Can be False if variable has no level.
+Lowest model level is integer 2000.
+Pressure level is integer in hPa, e.g. 850.
+Isentropic surface is a string + K, e.g. &#8216;320K&#8217;.
+Geometric height is a string + m, e.g. &#8216;4000m&#8217;.</li>
+<li><strong>ncdir</strong> (<em>str,bool</em>) &#8211; directory of netcdf data file.
+False uses home directory.</li>
+<li><strong>outdir</strong> (<em>str,bool</em>) &#8211; directory to save output figures
+False uses home directory.</li>
+<li><strong>ncf</strong> (<em>bool,str</em>) &#8211; filename of netcdf data file if ambiguous within ncdir.
+If no wrfout file is explicitly specified, the
+netCDF file in that folder is chosen if unambiguous.</li>
+<li><strong>nct</strong> (<em>bool,str</em>) &#8211; initialisation time of netcdf data file, if
+ambiguous within ncdir.</li>
+<li><strong>f_prefix</strong> (<em>bool,str</em>) &#8211; custom filename prefix for output. Ignore if False.</li>
+<li><strong>f_suffix</strong> (<em>bool,str</em>) &#8211; custom filename suffix for output. Ignore if False.</li>
+<li><strong>smooth</strong> (<em>int</em>) &#8211; pass data through a Gaussian filter. Value of 1 is
+essentially <a href="#id3"><span class="problematic" id="id4">`</span></a>off&#8217;.
+Integer greater than zero is the degree of smoothing,
+in grid spacing.</li>
+<li><strong>dom</strong> (<em>int</em>) &#8211; domain for plotting (for WRF data).
+If zero, the only netCDF file present will be
+plotted.</li>
+<li><strong>fig</strong> (<em>bool,matplotlib.figure</em>) &#8211; value of False will create new figure. A value of
+matplotlib.figure object will plot data onto
+this figure (similarly for axis, below).</li>
+<li><strong>ax</strong> (<em>bool,matplotlib.axis</em>) &#8211; matplotlib.axis object to plot onto</li>
+<li><strong>clvs</strong> (<em>bool,numpy.ndarray</em>) &#8211; contour levels for plotting.
+Generate using numpy.arange.
+False is automatic.</li>
+<li><strong>cmap</strong> (<em>str</em>) &#8211; matplotlib.cmap name. Pick a nice one from
+<a class="reference external" href="http://matplotlib.org/examples/color/">http://matplotlib.org/examples/color/</a>
+colormaps_reference.html</li>
+<li><strong>locations</strong> (<em>dict</em>) &#8211; Locations to plot on the basemap.
+Format: locations = {&#8216;label&#8217;:(lat,lon),etc}</li>
+<li><strong>cb</strong> (<em>bool</em>) &#8211; plot a colorbar.</li>
+<li><strong>match_nc</strong> (<em>str</em>) &#8211; Use domain from other netCDF file.
+Absolute path to this netCDF file.</li>
+<li><strong>Nlim</strong> (<em>float</em>) &#8211; north limit (latitude) for plot</li>
+<li><strong>Elim</strong> (<em>float</em>) &#8211; east limit (longitude) for plot</li>
+<li><strong>Slim</strong> (<em>float</em>) &#8211; south limit (latitude) for plot</li>
+<li><strong>Wlim</strong> (<em>float</em>) &#8211; west limit (longitude) for plot</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Params plottype:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><p class="first">matplotlib command for plotting data
+(contour or contourf).</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.main.WRFEnviron.plot_accum_rain">
+<code class="descname">plot_accum_rain</code><span class="sig-paren">(</span><em>utc</em>, <em>accum_hr</em>, <em>ncdir</em>, <em>outdir</em>, <em>ncf=False</em>, <em>nct=False</em>, <em>f_prefix=0</em>, <em>f_suffix=False</em>, <em>dom=1</em>, <em>plottype='contourf'</em>, <em>smooth=1</em>, <em>fig=False</em>, <em>ax=False</em>, <em>clvs=False</em>, <em>cmap=False</em>, <em>locations=False</em>, <em>Nlim=False</em>, <em>Elim=False</em>, <em>Slim=False</em>, <em>Wlim=False</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.main.WRFEnviron.plot_accum_rain" title="Permalink to this definition">¶</a></dt>
+<dd><p>Needs to be expanded to include other forms of precip.
+Plot accumulated precip (RAIN!) valid at time utc for accum_hr hours.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.main.WRFEnviron.plot_axes_of_dilatation">
+<code class="descname">plot_axes_of_dilatation</code><span class="sig-paren">(</span><em>utc</em>, <em>level=False</em>, <em>ncdir=False</em>, <em>outdir=False</em>, <em>ncf=False</em>, <em>nct=False</em>, <em>f_prefix=0</em>, <em>f_suffix=False</em>, <em>dom=1</em>, <em>plottype='contourf'</em>, <em>smooth=1</em>, <em>fig=False</em>, <em>ax=False</em>, <em>clvs=False</em>, <em>cmap=False</em>, <em>locations=False</em>, <em>cb=True</em>, <em>match_nc=False</em>, <em>Nlim=False</em>, <em>Elim=False</em>, <em>Slim=False</em>, <em>Wlim=False</em>, <em>other=False</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.main.WRFEnviron.plot_axes_of_dilatation" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.main.WRFEnviron.plot_delta">
+<code class="descname">plot_delta</code><span class="sig-paren">(</span><em>vrbl</em>, <em>utc</em>, <em>level=False</em>, <em>ncdir1=False</em>, <em>ncdir2=False</em>, <em>outdir=False</em>, <em>ncf1=False</em>, <em>ncf2=False</em>, <em>nct=False</em>, <em>f_prefix=0</em>, <em>f_suffix=False</em>, <em>dom=1</em>, <em>plottype='contourf'</em>, <em>smooth=1</em>, <em>fig=False</em>, <em>ax=False</em>, <em>clvs=False</em>, <em>cmap=False</em>, <em>locations=False</em>, <em>cb=True</em>, <em>match_nc=False</em>, <em>Nlim=False</em>, <em>Elim=False</em>, <em>Slim=False</em>, <em>Wlim=False</em>, <em>other=False</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.main.WRFEnviron.plot_delta" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.main.WRFEnviron.plot_diff_energy">
+<code class="descname">plot_diff_energy</code><span class="sig-paren">(</span><em>vrbl</em>, <em>energy</em>, <em>datadir</em>, <em>outdir</em>, <em>utc=False</em>, <em>dataf=False</em>, <em>outprefix=False</em>, <em>outsuffix=False</em>, <em>clvs=False</em>, <em>title=False</em>, <em>fig=False</em>, <em>ax=False</em>, <em>cb=False</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.main.WRFEnviron.plot_diff_energy" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function requires data already generated by
+<a class="reference internal" href="#WEM.postWRF.postWRF.stats.compute_diff_energy" title="WEM.postWRF.postWRF.stats.compute_diff_energy"><code class="xref py py-func docutils literal"><span class="pre">WEM.postWRF.postWRF.stats.compute_diff_energy()</span></code></a>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>vrbl</strong> (<em>str</em>) &#8211; Vertically integrated (&#8216;2D&#8217;) or summated over all
+dimensions (&#8216;3D&#8217;).</li>
+<li><strong>utc</strong> (<em>tuple,list,int</em>) &#8211; one date/time. The tuple/list format is
+YYYY,MM,DD,HH,MM,SS (ready for calendar.timegm).
+Integer format is epoch/datenum (ready for
+time.gmtime).
+If false, loop over all times</li>
+<li><strong>energy</strong> (<em>str</em>) &#8211; DKE or DTE.</li>
+<li><strong>datadir</strong> (<em>str</em>) &#8211; directory holding computed data</li>
+<li><strong>outdir</strong> (<em>str</em>) &#8211; root directory for plots</li>
+<li><strong>dataf</strong> (<em>str</em>) &#8211; file name of data file, if ambiguous</li>
+<li><strong>f_prefix</strong> (<em>bool,str</em>) &#8211; custom filename prefix for output. Ignore if False.</li>
+<li><strong>f_suffix</strong> (<em>bool,str</em>) &#8211; custom filename suffix for output. Ignore if False.</li>
+<li><strong>clvs</strong> (<em>bool,N.ndarray</em>) &#8211; contour levels for plot. Generate with
+<code class="xref py py-func docutils literal"><span class="pre">numpy.arange()</span></code>.</li>
+<li><strong>title</strong> (<em>bool,str</em>) &#8211; title for output</li>
+<li><strong>fig</strong> (<em>bool,matplotlib.figure</em>) &#8211; value of False will create new figure. A value of
+matplotlib.figure object will plot data onto
+this figure (similarly for axis, below).</li>
+<li><strong>ax</strong> (<em>bool,matplotlib.axis</em>) &#8211; matplotlib.axis object to plot onto</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.main.WRFEnviron.plot_diff_energy_spectrum">
+<code class="descname">plot_diff_energy_spectrum</code><span class="sig-paren">(</span><em>energy</em>, <em>ncfiles</em>, <em>utc=False</em>, <em>outdir=False</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.main.WRFEnviron.plot_diff_energy_spectrum" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute total KE/TE and the power spectrum of DKE/DTE for a time.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.main.WRFEnviron.plot_domains">
+<code class="descname">plot_domains</code><span class="sig-paren">(</span><em>ncdirs</em>, <em>labels</em>, <em>outdir</em>, <em>fname</em>, <em>Nlim</em>, <em>Elim</em>, <em>Slim</em>, <em>Wlim</em>, <em>colours='black'</em>, <em>nct=False</em>, <em>ncf=False</em>, <em>fill_land=False</em>, <em>labpos=False</em>, <em>fill_water=False</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.main.WRFEnviron.plot_domains" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot only the domains for each netCDF file specified.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>ncdirs</strong> (<em>str,tuple,list</em>) &#8211; Absolute paths to all netCDF directories,
+or one single absolute path if only
+one domain is to be plotted.</li>
+<li><strong>labels</strong> (<em>str,tuple,list</em>) &#8211; labels for each domain.</li>
+<li><strong>outdir</strong> (<em>str</em>) &#8211; directory to save output figures</li>
+<li><strong>Nlim</strong> (<em>float</em>) &#8211; north limit (latitude) for plot</li>
+<li><strong>Elim</strong> (<em>float</em>) &#8211; east limit (longitude) for plot</li>
+<li><strong>Slim</strong> (<em>float</em>) &#8211; south limit (latitude) for plot</li>
+<li><strong>Wlim</strong> (<em>float</em>) &#8211; west limit (longitude) for plot</li>
+<li><strong>colours</strong> (<em>str,list,tuple</em>) &#8211; colours for each domain box, in the same order as
+the ncdirs sequence (if more than one)</li>
+<li><strong>ncf</strong> (<em>bool,str</em>) &#8211; filename of netcdf data file if ambiguous within ncdir.
+If no wrfout file is explicitly specified, the
+netCDF file in that folder is chosen if unambiguous.</li>
+<li><strong>nct</strong> (<em>bool,str</em>) &#8211; initialisation time of netcdf data file, if
+ambiguous within ncdir.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.main.WRFEnviron.plot_error_growth">
+<code class="descname">plot_error_growth</code><span class="sig-paren">(</span><em>outdir</em>, <em>datadir</em>, <em>dataf=False</em>, <em>sensitivity=False</em>, <em>ylim=0</em>, <em>f_prefix=False</em>, <em>f_suffix=False</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.main.WRFEnviron.plot_error_growth" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plots line graphs of DKE/DTE error growth
+varying by a sensitivity - e.g. error growth involving
+all members that use a certain parameterisation.</p>
+<p>Requires data file in pickle format already produced by
+[method here].</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>datadir</strong> (<em>str</em>) &#8211; folder with pickle data</li>
+<li><strong>dataf</strong> (<em>str</em>) &#8211; data (pickle) filename if ambiguous</li>
+<li><strong>ensnames</strong> (<em>list,tuple</em>) &#8211; names of each ensemble member, e.g. the
+parameterisation scheme, the initial
+conditions used. This is used as the
+label for the plot legend.</li>
+<li><strong>ylim</strong> (<em>list,tuple</em>) &#8211; [min,max] for y axis range</li>
+<li><strong>f_prefix</strong> (<em>bool,str</em>) &#8211; custom filename prefix for output. Ignore if False.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>:param f_suffix     custom filename suffix for output. Ignore if False.
+:type f_suffix      bool,str</p>
+<p>TODO: is sensitivity/ensnames variable OK to be optional?</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.main.WRFEnviron.plot_radar">
+<code class="descname">plot_radar</code><span class="sig-paren">(</span><em>utc</em>, <em>datadir</em>, <em>outdir=False</em>, <em>Nlim=False</em>, <em>Elim=False</em>, <em>Slim=False</em>, <em>Wlim=False</em>, <em>ncdir=False</em>, <em>nct=False</em>, <em>ncf=False</em>, <em>dom=1</em>, <em>composite=False</em>, <em>locations=False</em>, <em>fig=False</em>, <em>ax=False</em>, <em>cb=True</em>, <em>compthresh=False</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.main.WRFEnviron.plot_radar" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot verification radar.</p>
+<p>composite allows plotting max reflectivity for a number of times
+over a given domain.
+This can show the evolution of a system.</p>
+<p>Need to rewrite so plotting is done in birdseye.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.main.WRFEnviron.plot_skewT">
+<code class="descname">plot_skewT</code><span class="sig-paren">(</span><em>utc</em>, <em>ncdir=False</em>, <em>outdir=False</em>, <em>ncf=False</em>, <em>nct=False</em>, <em>f_prefix=False</em>, <em>f_suffix=False</em>, <em>latlon=False</em>, <em>dom=1</em>, <em>save_output=False</em>, <em>composite=0</em>, <em>ax=False</em>, <em>fig=False</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.main.WRFEnviron.plot_skewT" title="Permalink to this definition">¶</a></dt>
+<dd><p>TODO: use Clicker instance if latlon is False.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>utc</strong> (<em>tuple,list,int</em>) &#8211; one date/time. The tuple/list format is
+YYYY,MM,DD,HH,MM,SS (ready for calendar.timegm).
+Integer format is epoch/datenum (ready for
+time.gmtime).</li>
+<li><strong>ncdir</strong> (<em>str</em>) &#8211; directory of netcdf data file</li>
+<li><strong>ncf</strong> (<em>bool,str</em>) &#8211; filename of netcdf data file if ambiguous within ncdir.
+If no wrfout file is explicitly specified, the
+netCDF file in that folder is chosen if unambiguous.</li>
+<li><strong>nct</strong> (<em>bool,str</em>) &#8211; initialisation time of netcdf data file, if
+ambiguous within ncdir.</li>
+<li><strong>f_prefix</strong> (<em>bool,str</em>) &#8211; custom filename prefix for output. Ignore if False.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Outdir:</th><td class="field-body"><p class="first last">directory to save output figures</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>:param f_suffix     custom filename suffix for output. Ignore if False.
+:type f_suffix      bool,str
+:param latlon:      (lat,lon) for plotting. If False, choose from</p>
+<blockquote>
+<div>pop-up.</div></blockquote>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>dom</strong> (<em>int</em>) &#8211; WRF domain to plot from.</li>
+<li><strong>save_output</strong> (<em>bool</em>) &#8211; not sure why this here? TODO</li>
+<li><strong>composite</strong> (<em>list,tuple,bool</em>) &#8211; If not False, plot numerous Skew-Ts on the same graph.
+List is absolute paths to netCDF files.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.main.WRFEnviron.plot_streamlines">
+<code class="descname">plot_streamlines</code><span class="sig-paren">(</span><em>utc</em>, <em>level</em>, <em>ncdir</em>, <em>outdir</em>, <em>ncf=False</em>, <em>nct=False</em>, <em>f_prefix=False</em>, <em>f_suffix=False</em>, <em>dom=1</em>, <em>smooth=1</em>, <em>fig=False</em>, <em>ax=False</em>, <em>bounding=False</em>, <em>density=1.8</em>, <em>ideal=False</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.main.WRFEnviron.plot_streamlines" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot streamlines of wind at a level.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>utc</strong> (<em>tuple,list,int</em>) &#8211; one date/time. The tuple/list format is
+YYYY,MM,DD,HH,MM,SS (ready for calendar.timegm).
+Integer format is epoch/datenum (ready for
+time.gmtime).</li>
+<li><strong>level</strong> (<em>int,str</em>) &#8211; required level.
+Lowest model level is integer 2000.
+Pressure level is integer in hPa, e.g. 850.
+Isentropic surface is a string + K, e.g. &#8216;320K&#8217;.
+Geometric height is a string + m, e.g. &#8216;4000m&#8217;.</li>
+<li><strong>ncdir</strong> (<em>str</em>) &#8211; directory of netcdf data file</li>
+<li><strong>ncf</strong> (<em>bool,str</em>) &#8211; filename of netcdf data file if ambiguous within ncdir.
+If no wrfout file is explicitly specified, the
+netCDF file in that folder is chosen if unambiguous.</li>
+<li><strong>nct</strong> (<em>bool,str</em>) &#8211; initialisation time of netcdf data file, if
+ambiguous within ncdir.</li>
+<li><strong>f_prefix</strong> (<em>bool,str</em>) &#8211; custom filename prefix for output. Ignore if False.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Outdir:</th><td class="field-body"><p class="first last">directory to save output figures</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>:param f_suffix     custom filename suffix for output. Ignore if False.
+:type f_suffix      bool,str
+:param bounding:    bounding box for domain.</p>
+<blockquote>
+<div>Dictionary contains four keys (Nlim, Elim, Slim, Wlim)
+with float values (northern latitude limit, eastern
+longitude limit, southern latitude limit, western
+latitude limit, respectively).</div></blockquote>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>smooth</strong> (<em>int</em>) &#8211; pass data through a Gaussian filter. Value of 1 is
+essentially <a href="#id5"><span class="problematic" id="id6">`</span></a>off&#8217;.
+Integer greater than zero is the degree of smoothing,
+in grid spacing.</li>
+<li><strong>dom</strong> (<em>int</em>) &#8211; domain for plotting (for WRF data).
+If zero, the only netCDF file present will be
+plotted.</li>
+<li><strong>fig</strong> (<em>bool,matplotlib.figure</em>) &#8211; value of False will create new figure. A value of
+matplotlib.figure object will plot data onto
+this figure (similarly for axis, below).</li>
+<li><strong>ax</strong> (<em>bool,matplotlib.axis</em>) &#8211; matplotlib.axis object to plot onto</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>TODO: extra kwargs to account for arrow size, density, etc.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.main.WRFEnviron.plot_strongest_wind">
+<code class="descname">plot_strongest_wind</code><span class="sig-paren">(</span><em>itime</em>, <em>ftime</em>, <em>level=2000</em>, <em>ncdir=False</em>, <em>outdir=False</em>, <em>ncf=False</em>, <em>nct=False</em>, <em>f_prefix=False</em>, <em>f_suffix=False</em>, <em>bounding=False</em>, <em>dom=1</em>, <em>clvs=False</em>, <em>fig=False</em>, <em>ax=False</em>, <em>cb=True</em>, <em>extend='max'</em>, <em>cmap='jet'</em>, <em>save=True</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.main.WRFEnviron.plot_strongest_wind" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot strongest wind at level between itime and ftime.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>itime</strong> (<em>tuple,list,int</em>) &#8211; initial time. The tuple/list format is
+YYYY,MM,DD,HH,MM,SS (ready for calendar.timegm).
+Integer format is epoch/datenum (ready for
+time.gmtime).</li>
+<li><strong>ftime</strong> (<em>tuple,list,int</em>) &#8211; final time. Same format as <cite>itime</cite>.</li>
+<li><strong>level</strong> (<em>int,str</em>) &#8211; required level.
+Lowest model level is integer 2000.
+Pressure level is integer in hPa, e.g. 850.
+Isentropic surface is a string + K, e.g. &#8216;320K&#8217;.
+Geometric height is a string + m, e.g. &#8216;4000m&#8217;.</li>
+<li><strong>ncdir</strong> (<em>str</em>) &#8211; directory of netcdf data file</li>
+<li><strong>ncf</strong> (<em>bool,str</em>) &#8211; filename of netcdf data file if ambiguous within ncdir.
+If no wrfout file is explicitly specified, the
+netCDF file in that folder is chosen if unambiguous.</li>
+<li><strong>nct</strong> (<em>bool,str</em>) &#8211; initialisation time of netcdf data file, if
+ambiguous within ncdir.</li>
+<li><strong>f_prefix</strong> (<em>bool,str</em>) &#8211; custom filename prefix for output. Ignore if False.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Outdir:</th><td class="field-body"><p class="first last">directory to save output figures</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>:param f_suffix     custom filename suffix for output. Ignore if False.
+:type f_suffix      bool,str
+:param bounding:    bounding box for domain.</p>
+<blockquote>
+<div>Dictionary contains four keys (Nlim, Elim, Slim, Wlim)
+with float values (northern latitude limit, eastern
+longitude limit, southern latitude limit, western
+latitude limit, respectively).</div></blockquote>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>dom</strong> (<em>int</em>) &#8211; domain for plotting (for WRF data).
+If zero, the only netCDF file present will be
+plotted.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.main.WRFEnviron.plot_xs">
+<code class="descname">plot_xs</code><span class="sig-paren">(</span><em>vrbl</em>, <em>utc</em>, <em>ncdir</em>, <em>outdir</em>, <em>latA=0</em>, <em>lonA=0</em>, <em>latB=0</em>, <em>lonB=0</em>, <em>ncf=False</em>, <em>nct=False</em>, <em>f_prefix=0</em>, <em>f_suffix=0</em>, <em>dom=1</em>, <em>clvs=False</em>, <em>ylim=False</em>, <em>ztop=8</em>, <em>cmap='jet'</em>, <em>contour_vrbl='skip'</em>, <em>contour_clvs=False</em>, <em>avepts=False</em>, <em>shiftpts=False</em>, <em>cftix=False</em>, <em>cflabel=False</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.main.WRFEnviron.plot_xs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot cross-section.</p>
+<p>If no lat/lon transect is indicated, a popup appears for the user
+to pick points. The popup can have an overlaid field such as reflectivity
+to help with the process.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>vrbl</strong> (<em>str</em>) &#8211; variable name as found in WRF, or one of
+the computed fields available in WEM</li>
+<li><strong>utc</strong> (<em>tuple,list,int</em>) &#8211; one date/time. The tuple/list format is
+YYYY,MM,DD,HH,MM,SS (ready for calendar.timegm).
+Integer format is epoch/datenum (ready for
+time.gmtime).</li>
+<li><strong>ncdir</strong> (<em>str</em>) &#8211; directory of netcdf data file</li>
+<li><strong>outdir</strong> (<em>str</em>) &#8211; directory to save output figures</li>
+<li><strong>latA</strong> (<em>bool,float</em>) &#8211; latitude of transect start point.
+False triggers a pop-up box.</li>
+<li><strong>lonA</strong> &#8211; longitude of transect start point.
+False triggers a pop-up box.</li>
+<li><strong>latB</strong> (<em>bool,float</em>) &#8211; latitude of transect end point.
+False triggers a pop-up box.</li>
+<li><strong>lonB</strong> (<em>bool,float</em>) &#8211; longitude of transect end point.
+False triggers a pop-up box.</li>
+<li><strong>ncf</strong> (<em>bool,str</em>) &#8211; filename of netcdf data file if ambiguous within ncdir.
+If no wrfout file is explicitly specified, the
+netCDF file in that folder is chosen if unambiguous.</li>
+<li><strong>nct</strong> (<em>bool,str</em>) &#8211; initialisation time of netcdf data file, if
+ambiguous within ncdir.</li>
+<li><strong>f_prefix</strong> (<em>bool,str</em>) &#8211; custom filename prefix for output. Ignore if False.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>:param f_suffix     custom filename suffix for output. Ignore if False.
+:type f_suffix      bool,str
+:param dom:         domain for plotting (for WRF data).</p>
+<blockquote>
+<div>If zero, the only netCDF file present will be
+plotted.</div></blockquote>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>clvs</strong> (<em>numpy.ndarray,bool</em>) &#8211; contouring for the variable plotted.
+False is automatic.
+Generate the <cite>numpy.ndarray</cite> with
+<code class="xref py py-func docutils literal"><span class="pre">numpy.arange()</span></code>.</li>
+<li><strong>ylim</strong> (<em>list,tuple,bool</em>) &#8211; [min,max] (in km) altitude to plot.
+False is automatic (all model levels)</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.main.WRFEnviron.probability_threshold">
+<code class="descname">probability_threshold</code><span class="sig-paren">(</span><em>ensemble</em>, <em>vrbl</em>, <em>overunder</em>, <em>threshold</em>, <em>itime</em>, <em>ftime</em>, <em>smooth=False</em>, <em>level=2000</em>, <em>outdir=False</em>, <em>f_prefix=False</em>, <em>f_suffix=False</em>, <em>bounding=False</em>, <em>dom=1</em>, <em>clvs=False</em>, <em>fig=False</em>, <em>ax=False</em>, <em>cb=True</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.main.WRFEnviron.probability_threshold" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create threshold contour plots.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.main.WRFEnviron.spaghetti">
+<code class="descname">spaghetti</code><span class="sig-paren">(</span><em>vrbl</em>, <em>utc</em>, <em>level</em>, <em>contour</em>, <em>ncdirs</em>, <em>outdir</em>, <em>bounding=False</em>, <em>dom=1</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.main.WRFEnviron.spaghetti" title="Permalink to this definition">¶</a></dt>
+<dd><p>Do a multi-member spaghetti plot, contouring a value of
+a given variable.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>vrbl</strong> (<em>str</em>) &#8211; variable name as found in WRF, or one of
+the computed fields available in WEM</li>
+<li><strong>utc</strong> (<em>tuple,list,int</em>) &#8211; one date/time. The tuple/list format is
+YYYY,MM,DD,HH,MM,SS (ready for calendar.timegm).
+Integer format is epoch/datenum (ready for
+time.gmtime).</li>
+<li><strong>level</strong> (<em>int,str</em>) &#8211; required level.
+Lowest model level is integer 2000.
+Pressure level is integer in hPa, e.g. 850.
+Isentropic surface is a string + K, e.g. &#8216;320K&#8217;.
+Geometric height is a string + m, e.g. &#8216;4000m&#8217;.</li>
+<li><strong>contour</strong> (<em>float,int</em>) &#8211; contour to draw for data</li>
+<li><strong>ncdirs</strong> (<em>list,tuple</em>) &#8211; directories of netcdf data file</li>
+<li><strong>outdir</strong> (<em>str</em>) &#8211; directory to save output figures</li>
+<li><strong>bounding</strong> (<em>dict</em>) &#8211; bounding box for domain.
+Dictionary contains four keys (Nlim, Elim, Slim, Wlim)
+with float values (northern latitude limit, eastern
+longitude limit, southern latitude limit, western
+latitude limit, respectively).</li>
+<li><strong>dom</strong> (<em>int</em>) &#8211; domain for plotting (for WRF data).
+If zero, the only netCDF file present will be
+plotted.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.main.WRFEnviron.std">
+<code class="descname">std</code><span class="sig-paren">(</span><em>vrbl</em>, <em>utc</em>, <em>level</em>, <em>ncdirs</em>, <em>outdir</em>, <em>ncf=False</em>, <em>nct=False</em>, <em>f_prefix=False</em>, <em>f_suffix=False</em>, <em>bounding=False</em>, <em>smooth=1</em>, <em>dom=1</em>, <em>plottype='contourf'</em>, <em>fig=False</em>, <em>ax=False</em>, <em>clvs=False</em>, <em>cmap='jet'</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.main.WRFEnviron.std" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot standard deviation of all members for given variable.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>vrbl</strong> (<em>str</em>) &#8211; variable name as found in WRF, or one of
+the computed fields available in WEM</li>
+<li><strong>utc</strong> (<em>tuple,list,int</em>) &#8211; one date/time. The tuple/list format is
+YYYY,MM,DD,HH,MM,SS (ready for calendar.timegm).
+Integer format is epoch/datenum (ready for
+time.gmtime).</li>
+<li><strong>level</strong> (<em>int,str</em>) &#8211; required level.
+Lowest model level is integer 2000.
+Pressure level is integer in hPa, e.g. 850.
+Isentropic surface is a string + K, e.g. &#8216;320K&#8217;.
+Geometric height is a string + m, e.g. &#8216;4000m&#8217;.</li>
+<li><strong>ncdirs</strong> &#8211; directories of netcdf data files for all
+ensemble members. If not ambiguous, user needs
+to specify either ncf (if all data
+files have the same name) or nct (they need
+to have the same start time).</li>
+<li><strong>outdir</strong> (<em>str</em>) &#8211; directory to save output figures</li>
+<li><strong>ncf</strong> (<em>bool,str</em>) &#8211; filename of netcdf data file if ambiguous within ncdir.
+If no wrfout file is explicitly specified, the
+netCDF file in that folder is chosen if unambiguous.</li>
+<li><strong>nct</strong> (<em>bool,str</em>) &#8211; initialisation time of netcdf data file, if
+ambiguous within ncdir.</li>
+<li><strong>f_prefix</strong> (<em>bool,str</em>) &#8211; custom filename prefix for output. Ignore if False.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>:param f_suffix     custom filename suffix for output. Ignore if False.
+:type f_suffix      bool,str
+:param bounding:    bounding box for domain.</p>
+<blockquote>
+<div>Dictionary contains four keys (Nlim, Elim, Slim, Wlim)
+with float values (northern latitude limit, eastern
+longitude limit, southern latitude limit, western
+latitude limit, respectively).</div></blockquote>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>smooth</strong> (<em>int</em>) &#8211; pass data through a Gaussian filter. Value of 1 is
+essentially <a href="#id7"><span class="problematic" id="id8">`</span></a>off&#8217;.
+Integer greater than zero is the degree of smoothing,
+in grid spacing.</li>
+<li><strong>dom</strong> (<em>int</em>) &#8211; domain for plotting (for WRF data).
+If zero, the only netCDF file present will be
+plotted.</li>
+<li><strong>fig</strong> (<em>bool,matplotlib.figure</em>) &#8211; value of False will create new figure. A value of
+matplotlib.figure object will plot data onto
+this figure (similarly for axis, below).</li>
+<li><strong>ax</strong> (<em>bool,matplotlib.axis</em>) &#8211; matplotlib.axis object to plot onto</li>
+<li><strong>clvs</strong> (<em>bool,numpy.ndarray</em>) &#8211; contour levels for plotting.
+Generate using numpy.arange.
+False is automatic.</li>
+<li><strong>cmap</strong> (<em>str</em>) &#8211; matplotlib.cmap name. Pick a nice one from
+<a class="reference external" href="http://matplotlib.org/examples/color/">http://matplotlib.org/examples/color/</a>
+colormaps_reference.html</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Params plottype:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><p class="first last">matplotlib command for plotting data
+(contour or contourf).</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.main.WRFEnviron.twopanel_profile">
+<code class="descname">twopanel_profile</code><span class="sig-paren">(</span><em>vrbl</em>, <em>utc</em>, <em>enspaths</em>, <em>outdir</em>, <em>two_panel=1</em>, <em>dom=1</em>, <em>mean=1</em>, <em>std=1</em>, <em>xlim=False</em>, <em>ylim=False</em>, <em>latlon=False</em>, <em>locname=False</em>, <em>overlay=False</em>, <em>ml=-2</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.main.WRFEnviron.twopanel_profile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create two-panel figure with profile location on map,
+with profile of all ensemble members in comparison.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>vrbl</strong> (<em>str</em>) &#8211; WRF variable or computed quantity</li>
+<li><strong>utc</strong> (<em>int,list,tuple</em>) &#8211; date/time</li>
+<li><strong>enspaths</strong> (<em>list,tuple</em>) &#8211; absolute paths to all netCDF files for each
+ensemble member.</li>
+<li><strong>outdir</strong> (<em>str</em>) &#8211; directory for plot output</li>
+<li><strong>two_panel</strong> (<em>bool</em>) &#8211; Add extra panel of location if True.</li>
+<li><strong>dom</strong> (<em>int</em>) &#8211; WRF domain to use</li>
+<li><strong>mean</strong> (<em>bool</em>) &#8211; plot ensemble mean of variable</li>
+<li><strong>std</strong> (<em>bool</em>) &#8211; plot ensemble standard deviate of variable
+(+/- 1 sigma)</li>
+<li><strong>xlim</strong> (<em>bool,tuple,list</em>) &#8211; x-axis limit. False is automatic.</li>
+<li><strong>ylim</strong> (<em>bool,tuple,list</em>) &#8211; y-axis limit, False is automatic.</li>
+<li><strong>latlon</strong> (<em>bool,tuple,list</em>) &#8211; (lat,lon) for plotting. If this is False,
+a pop-up window will allow user to choose
+location.</li>
+<li><strong>locname</strong> (<em>str</em>) &#8211; this is passed to the filename of output
+figure when saved, to differentiate similar
+plots of different locations.</li>
+<li><strong>overlay</strong> (<em>str</em>) &#8211; data from the same time to overlay on inset
+basemap. E.g. radar reflectivity.
+TODO: this is only cref right now (bool)</li>
+<li><strong>ml</strong> (<em>int</em>) &#8211; member level. Negative number that corresponds
+to the folder in the absolute path string,
+for naming purposes. Useful for file naming,
+labelling.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-WEM.postWRF.postWRF.map">
+<span id="wem-postwrf-postwrf-map-module"></span><h2>WEM.postWRF.postWRF.map module<a class="headerlink" href="#module-WEM.postWRF.postWRF.map" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="WEM.postWRF.postWRF.map.Map">
+<em class="property">class </em><code class="descclassname">WEM.postWRF.postWRF.map.</code><code class="descname">Map</code><span class="sig-paren">(</span><em>nc=False</em>, <em>ax=0</em>, <em>fig=0</em>, <em>plotn=(1</em>, <em>1)</em>, <em>layout='normal'</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.map.Map" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#WEM.postWRF.postWRF.figure.Figure" title="WEM.postWRF.postWRF.figure.Figure"><code class="xref py py-class docutils literal"><span class="pre">WEM.postWRF.postWRF.figure.Figure</span></code></a></p>
+<p>C   :   configuration settings
+W   :   data</p>
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.map.Map.plot_domains">
+<code class="descname">plot_domains</code><span class="sig-paren">(</span><em>wrfouts</em>, <em>labels</em>, <em>latlons</em>, <em>colour=0</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.map.Map.plot_domains" title="Permalink to this definition">¶</a></dt>
+<dd><p>wrfouts     :   list of wrfout file paths
+latlons     :   dictionary of Nlim,Elim,Slim,Wlim</p>
+<blockquote>
+<div>for plot</div></blockquote>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-WEM.postWRF.postWRF.maps">
+<span id="wem-postwrf-postwrf-maps-module"></span><h2>WEM.postWRF.postWRF.maps module<a class="headerlink" href="#module-WEM.postWRF.postWRF.maps" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="WEM.postWRF.postWRF.maps.plot_domains">
+<code class="descclassname">WEM.postWRF.postWRF.maps.</code><code class="descname">plot_domains</code><span class="sig-paren">(</span><em>wrfouts</em>, <em>labels</em>, <em>outpath</em>, <em>Nlim</em>, <em>Elim</em>, <em>Slim</em>, <em>Wlim</em>, <em>colours='k'</em>, <em>fname=False</em>, <em>fill_land=False</em>, <em>labpos=False</em>, <em>fill_water=False</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.maps.plot_domains" title="Permalink to this definition">¶</a></dt>
+<dd><p>wrfouts     :   list of wrfout file paths</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-WEM.postWRF.postWRF.obs">
+<span id="wem-postwrf-postwrf-obs-module"></span><h2>WEM.postWRF.postWRF.obs module<a class="headerlink" href="#module-WEM.postWRF.postWRF.obs" title="Permalink to this headline">¶</a></h2>
+<p>Scripts related to plotting of observed data, such as surface observations,
+radar reflectivity, severe weather reports.</p>
+<dl class="class">
+<dt id="WEM.postWRF.postWRF.obs.Obs">
+<em class="property">class </em><code class="descclassname">WEM.postWRF.postWRF.obs.</code><code class="descname">Obs</code><span class="sig-paren">(</span><em>fpath</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.obs.Obs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>An instance represents a data set.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="WEM.postWRF.postWRF.obs.Radar">
+<em class="property">class </em><code class="descclassname">WEM.postWRF.postWRF.obs.</code><code class="descname">Radar</code><span class="sig-paren">(</span><em>utc</em>, <em>datapath</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.obs.Radar" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#WEM.postWRF.postWRF.obs.Obs" title="WEM.postWRF.postWRF.obs.Obs"><code class="xref py py-class docutils literal"><span class="pre">WEM.postWRF.postWRF.obs.Obs</span></code></a></p>
+<p>Composite radar archive data from mesonet.agron.iastate.edu.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>datapath</strong> (<em>str</em>) &#8211; Absolute path to folder or .png file</li>
+<li><strong>wldpath</strong> (<em>str</em>) &#8211; Absolute path to .wld file</li>
+<li><strong>fmt</strong> (<em>str</em>) &#8211; format of data - N0Q or N0R</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.obs.Radar.generate_basemap">
+<code class="descname">generate_basemap</code><span class="sig-paren">(</span><em>fig</em>, <em>ax</em>, <em>Nlim=False</em>, <em>Elim=False</em>, <em>Slim=False</em>, <em>Wlim=False</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.obs.Radar.generate_basemap" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate basemap.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>ax</strong> (<em>matplotlib.basemap?</em>) &#8211; The axis on which to create the basemap</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.obs.Radar.get_dBZ">
+<code class="descname">get_dBZ</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.obs.Radar.get_dBZ" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.obs.Radar.get_radar_fname">
+<code class="descname">get_radar_fname</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.obs.Radar.get_radar_fname" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.obs.Radar.get_radar_url">
+<code class="descname">get_radar_url</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.obs.Radar.get_radar_url" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.obs.Radar.get_subdomain">
+<code class="descname">get_subdomain</code><span class="sig-paren">(</span><em>Nlim</em>, <em>Elim</em>, <em>Slim</em>, <em>Wlim</em>, <em>overwrite=False</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.obs.Radar.get_subdomain" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return data array between bounds</p>
+<p>If overwrite is True, replace class data with new subdomain</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.obs.Radar.plot_radar">
+<code class="descname">plot_radar</code><span class="sig-paren">(</span><em>outdir</em>, <em>fig=False</em>, <em>ax=False</em>, <em>fname=False</em>, <em>Nlim=False</em>, <em>Elim=False</em>, <em>Slim=False</em>, <em>Wlim=False</em>, <em>cb=True</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.obs.Radar.plot_radar" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot radar data.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="WEM.postWRF.postWRF.obs.SPCReports">
+<em class="property">class </em><code class="descclassname">WEM.postWRF.postWRF.obs.</code><code class="descname">SPCReports</code><span class="sig-paren">(</span><em>utc</em>, <em>datadir</em>, <em>wind=True</em>, <em>hail=True</em>, <em>torn=True</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.obs.SPCReports" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#WEM.postWRF.postWRF.obs.Obs" title="WEM.postWRF.postWRF.obs.Obs"><code class="xref py py-class docutils literal"><span class="pre">WEM.postWRF.postWRF.obs.Obs</span></code></a></p>
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.obs.SPCReports.plot_reports">
+<code class="descname">plot_reports</code><span class="sig-paren">(</span><em>fig=False</em>, <em>ax=False</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.obs.SPCReports.plot_reports" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.obs.SPCReports.report_datenum">
+<code class="descname">report_datenum</code><span class="sig-paren">(</span><em>timestamp</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.obs.SPCReports.report_datenum" title="Permalink to this definition">¶</a></dt>
+<dd><p>convert timestamp to datenum format.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="WEM.postWRF.postWRF.obs.StormReports">
+<em class="property">class </em><code class="descclassname">WEM.postWRF.postWRF.obs.</code><code class="descname">StormReports</code><span class="sig-paren">(</span><em>fpath</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.obs.StormReports" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#WEM.postWRF.postWRF.obs.Obs" title="WEM.postWRF.postWRF.obs.Obs"><code class="xref py py-class docutils literal"><span class="pre">WEM.postWRF.postWRF.obs.Obs</span></code></a></p>
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.obs.StormReports.convert_times">
+<code class="descname">convert_times</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.obs.StormReports.convert_times" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.obs.StormReports.plot">
+<code class="descname">plot</code><span class="sig-paren">(</span><em>reports</em>, <em>itime</em>, <em>ftime</em>, <em>fname</em>, <em>outdir</em>, <em>Nlim=False</em>, <em>Elim=False</em>, <em>Slim=False</em>, <em>Wlim=False</em>, <em>annotate=True</em>, <em>fig=False</em>, <em>ax=False</em>, <em>ss=50</em>, <em>color='blue'</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.obs.StormReports.plot" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-WEM.postWRF.postWRF.ruc">
+<span id="wem-postwrf-postwrf-ruc-module"></span><h2>WEM.postWRF.postWRF.ruc module<a class="headerlink" href="#module-WEM.postWRF.postWRF.ruc" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="WEM.postWRF.postWRF.ruc.RUC">
+<em class="property">class </em><code class="descclassname">WEM.postWRF.postWRF.ruc.</code><code class="descname">RUC</code><span class="sig-paren">(</span><em>fpath</em>, <em>wrfdir=False</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.ruc.RUC" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#WEM.postWRF.postWRF.wrfout.WRFOut" title="WEM.postWRF.postWRF.wrfout.WRFOut"><code class="xref py py-class docutils literal"><span class="pre">WEM.postWRF.postWRF.wrfout.WRFOut</span></code></a></p>
+<p>config  :   configuration settings
+t       :   time, datenum format</p>
+<p>optional key-word arguments:
+wrfdir  :   if picked, domain is cut down</p>
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.ruc.RUC.basemap_setup">
+<code class="descname">basemap_setup</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.ruc.RUC.basemap_setup" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.ruc.RUC.check_compute">
+<code class="descname">check_compute</code><span class="sig-paren">(</span><em>vrbl</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.ruc.RUC.check_compute" title="Permalink to this definition">¶</a></dt>
+<dd><p>OVERRIDE WRFOUT VERSION</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.ruc.RUC.colocate_WRF_map">
+<code class="descname">colocate_WRF_map</code><span class="sig-paren">(</span><em>wrfdir</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.ruc.RUC.colocate_WRF_map" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.ruc.RUC.compute_shear_old">
+<code class="descname">compute_shear_old</code><span class="sig-paren">(</span><em>nc</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.ruc.RUC.compute_shear_old" title="Permalink to this definition">¶</a></dt>
+<dd><p>top and bottom in km.
+kwargs[&#8216;top&#8217;]
+kwargs[&#8216;bottom&#8217;]</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.ruc.RUC.compute_wind10_2">
+<code class="descname">compute_wind10_2</code><span class="sig-paren">(</span><em>nc</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.ruc.RUC.compute_wind10_2" title="Permalink to this definition">¶</a></dt>
+<dd><p>Version &#8216;3&#8217; for RAP has U10 and V10</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.ruc.RUC.cut_2D_array">
+<code class="descname">cut_2D_array</code><span class="sig-paren">(</span><em>data_in</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.ruc.RUC.cut_2D_array" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a smaller array of data
+depending of specified limits</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.ruc.RUC.cut_lat_lon">
+<code class="descname">cut_lat_lon</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.ruc.RUC.cut_lat_lon" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a smaller array of data
+depending of specified limits</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.ruc.RUC.get_MAYBE">
+<code class="descname">get_MAYBE</code><span class="sig-paren">(</span><em>vrbl</em>, <em>utc=False</em>, <em>level=False</em>, <em>lats=False</em>, <em>lons=False</em>, <em>smooth=1</em>, <em>other=False</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.ruc.RUC.get_MAYBE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Overwrite WRFOut method here.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.ruc.RUC.get_OLD">
+<code class="descname">get_OLD</code><span class="sig-paren">(</span><em>va</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.ruc.RUC.get_OLD" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.ruc.RUC.get_fname">
+<code class="descname">get_fname</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.ruc.RUC.get_fname" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.ruc.RUC.get_grid_spacing">
+<code class="descname">get_grid_spacing</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.ruc.RUC.get_grid_spacing" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.ruc.RUC.get_key">
+<code class="descname">get_key</code><span class="sig-paren">(</span><em>vrbl</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.ruc.RUC.get_key" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the netcdf key for the desired variable</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.ruc.RUC.get_latlon">
+<code class="descname">get_latlon</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.ruc.RUC.get_latlon" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.ruc.RUC.get_p">
+<code class="descname">get_p</code><span class="sig-paren">(</span><em>vrbl</em>, <em>tidx</em>, <em>level</em>, <em>lonidx</em>, <em>latidx</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.ruc.RUC.get_p" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.ruc.RUC.get_time_seq">
+<code class="descname">get_time_seq</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.ruc.RUC.get_time_seq" title="Permalink to this definition">¶</a></dt>
+<dd><p>Makes sure time is time sequence
+(YYYY,MM,DD,HH,MM,SS)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.ruc.RUC.get_utc_time">
+<code class="descname">get_utc_time</code><span class="sig-paren">(</span><em>rawtime</em>, <em>fmt='datenum'</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.ruc.RUC.get_utc_time" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.ruc.RUC.get_version">
+<code class="descname">get_version</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.ruc.RUC.get_version" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.ruc.RUC.load">
+<code class="descname">load</code><span class="sig-paren">(</span><em>vrbl</em>, <em>tidx</em>, <em>lvidx</em>, <em>lonidx</em>, <em>latidx</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.ruc.RUC.load" title="Permalink to this definition">¶</a></dt>
+<dd><p>OVERRIDE WRFOUT VERSION</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.ruc.RUC.plot">
+<code class="descname">plot</code><span class="sig-paren">(</span><em>variables</em>, <em>lv</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.ruc.RUC.plot" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.ruc.RUC.plot_streamlines">
+<code class="descname">plot_streamlines</code><span class="sig-paren">(</span><em>va</em>, <em>lv</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.ruc.RUC.plot_streamlines" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.ruc.RUC.plot_variable">
+<code class="descname">plot_variable</code><span class="sig-paren">(</span><em>va</em>, <em>lv</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.ruc.RUC.plot_variable" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="wem-postwrf-postwrf-rucplot-module">
+<h2>WEM.postWRF.postWRF.rucplot module<a class="headerlink" href="#wem-postwrf-postwrf-rucplot-module" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-WEM.postWRF.postWRF.sal">
+<span id="wem-postwrf-postwrf-sal-module"></span><h2>WEM.postWRF.postWRF.sal module<a class="headerlink" href="#module-WEM.postWRF.postWRF.sal" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="WEM.postWRF.postWRF.sal.SAL">
+<em class="property">class </em><code class="descclassname">WEM.postWRF.postWRF.sal.</code><code class="descname">SAL</code><span class="sig-paren">(</span><em>Wctrl_fpath</em>, <em>Wmod_fpath</em>, <em>vrbl</em>, <em>utc</em>, <em>lv=False</em>, <em>accum_hr=False</em>, <em>radar_datadir=False</em>, <em>thresh=False</em>, <em>footprint=500</em>, <em>ctrl_fmt='obs'</em>, <em>mod_fmt='WRF'</em>, <em>dx=False</em>, <em>dy=False</em>, <em>f=0.06666666666666667</em>, <em>datafmt=False</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.sal.SAL" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.sal.SAL.active_px">
+<code class="descname">active_px</code><span class="sig-paren">(</span><em>data='ctrl'</em>, <em>fmt='pc'</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.sal.SAL.active_px" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return number of pixels included in chosen dataset&#8217;s objects.
+data is set to &#8216;ctrl&#8217; or &#8216;mod&#8217;.
+Expressed as percentage.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.sal.SAL.compute_L1">
+<code class="descname">compute_L1</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.sal.SAL.compute_L1" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.sal.SAL.compute_L2">
+<code class="descname">compute_L2</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.sal.SAL.compute_L2" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.sal.SAL.compute_V">
+<code class="descname">compute_V</code><span class="sig-paren">(</span><em>dic</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.sal.SAL.compute_V" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.sal.SAL.compute_amplitude">
+<code class="descname">compute_amplitude</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.sal.SAL.compute_amplitude" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.sal.SAL.compute_d">
+<code class="descname">compute_d</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.sal.SAL.compute_d" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.sal.SAL.compute_location">
+<code class="descname">compute_location</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.sal.SAL.compute_location" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.sal.SAL.compute_r">
+<code class="descname">compute_r</code><span class="sig-paren">(</span><em>dic</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.sal.SAL.compute_r" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.sal.SAL.compute_structure">
+<code class="descname">compute_structure</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.sal.SAL.compute_structure" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.sal.SAL.get_radar_verif">
+<code class="descname">get_radar_verif</code><span class="sig-paren">(</span><em>utc</em>, <em>datapath</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.sal.SAL.get_radar_verif" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.sal.SAL.identify_objects">
+<code class="descname">identify_objects</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.sal.SAL.identify_objects" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.sal.SAL.object_operators">
+<code class="descname">object_operators</code><span class="sig-paren">(</span><em>dic</em>, <em>typ=False</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.sal.SAL.object_operators" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.sal.SAL.vector_diff_km">
+<code class="descname">vector_diff_km</code><span class="sig-paren">(</span><em>v1</em>, <em>v2</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.sal.SAL.vector_diff_km" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="WEM.postWRF.postWRF.sal.SAL.vrbl">
+<code class="descname">vrbl</code><em class="property"> = None</em><a class="headerlink" href="#WEM.postWRF.postWRF.sal.SAL.vrbl" title="Permalink to this definition">¶</a></dt>
+<dd><p>fig, ax = plt.subplots(1)
+ax.pcolor(self.C[&#8216;data&#8217;])
+fig.savefig(&#8216;/home/jrlawson/public_html/bowecho/SALtests/obs_pcolor.png&#8217;)
+plt.close(fig)
+fig, ax = plt.subplots(1)
+ax.pcolor(self.M[&#8216;data&#8217;])
+fig.savefig(&#8216;/home/jrlawson/public_html/bowecho/SALtests/mod_pcolor.png&#8217;)
+plt.close(fig)
+import pdb; pdb.set_trace()</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-WEM.postWRF.postWRF.scales">
+<span id="wem-postwrf-postwrf-scales-module"></span><h2>WEM.postWRF.postWRF.scales module<a class="headerlink" href="#module-WEM.postWRF.postWRF.scales" title="Permalink to this headline">¶</a></h2>
+<p>This file contains colorbar scales for plotting.</p>
+<p>INPUTS</p>
+<p>va      :   variable to be plotted
+lv      :   level to be plotted</p>
+<p>OUTPUTS</p>
+<p>cm      :   colour map
+clvs    :   contour levels</p>
+<p>Level = 2000 indicates surface.</p>
+<p>Default settings are listed at the bottom.
+These can be overwritten in user&#8217;s config file... somehow</p>
+<dl class="class">
+<dt id="WEM.postWRF.postWRF.scales.Scales">
+<em class="property">class </em><code class="descclassname">WEM.postWRF.postWRF.scales.</code><code class="descname">Scales</code><span class="sig-paren">(</span><em>vrbl</em>, <em>lv</em>, <em>clvs=0</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.scales.Scales" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.scales.Scales.find_nearest_level">
+<code class="descname">find_nearest_level</code><span class="sig-paren">(</span><em>lv</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.scales.Scales.find_nearest_level" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.scales.Scales.get_dict_of_levels">
+<code class="descname">get_dict_of_levels</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.scales.Scales.get_dict_of_levels" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.scales.Scales.get_multiplier">
+<code class="descname">get_multiplier</code><span class="sig-paren">(</span><em>vrbl</em>, <em>lv</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.scales.Scales.get_multiplier" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-WEM.postWRF.postWRF.skewt">
+<span id="wem-postwrf-postwrf-skewt-module"></span><h2>WEM.postWRF.postWRF.skewt module<a class="headerlink" href="#module-WEM.postWRF.postWRF.skewt" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="WEM.postWRF.postWRF.skewt.Profile">
+<em class="property">class </em><code class="descclassname">WEM.postWRF.postWRF.skewt.</code><code class="descname">Profile</code><span class="sig-paren">(</span><em>nc=0</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.skewt.Profile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#WEM.postWRF.postWRF.figure.Figure" title="WEM.postWRF.postWRF.figure.Figure"><code class="xref py py-class docutils literal"><span class="pre">WEM.postWRF.postWRF.figure.Figure</span></code></a></p>
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.skewt.Profile.composite_profile">
+<code class="descname">composite_profile</code><span class="sig-paren">(</span><em>va</em>, <em>plot_time</em>, <em>plot_latlon</em>, <em>wrfouts</em>, <em>outpath</em>, <em>dom=1</em>, <em>mean=True</em>, <em>std=True</em>, <em>xlim=False</em>, <em>ylim=False</em>, <em>fig=False</em>, <em>ax=False</em>, <em>locname=0</em>, <em>ml=-2</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.skewt.Profile.composite_profile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loop over wrfout files.
+Get profile of variable
+Plot all members</p>
+<p>Optional standard deviation
+Optional mean</p>
+<p>If ax, save image to that axis</p>
+<dl class="docutils">
+<dt>ml <span class="classifier-delimiter">:</span> <span class="classifier">member level. negative number that corresponds to the</span></dt>
+<dd>folder in absolute string for naming purposes.</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="WEM.postWRF.postWRF.skewt.SkewT">
+<em class="property">class </em><code class="descclassname">WEM.postWRF.postWRF.skewt.</code><code class="descname">SkewT</code><span class="sig-paren">(</span><em>nc=False</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.skewt.SkewT" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#WEM.postWRF.postWRF.figure.Figure" title="WEM.postWRF.postWRF.figure.Figure"><code class="xref py py-class docutils literal"><span class="pre">WEM.postWRF.postWRF.figure.Figure</span></code></a></p>
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.skewt.SkewT.dewpoint">
+<code class="descname">dewpoint</code><span class="sig-paren">(</span><em>nc</em>, <em>time</em>, <em>y</em>, <em>x</em>, <em>P</em>, <em>linestyle='dashed'</em>, <em>color='black'</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.skewt.SkewT.dewpoint" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.skewt.SkewT.dewpoint_real">
+<code class="descname">dewpoint_real</code><span class="sig-paren">(</span><em>td</em>, <em>P</em>, <em>color='red'</em>, <em>linestyle='dashed'</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.skewt.SkewT.dewpoint_real" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.skewt.SkewT.dry_adiabats">
+<code class="descname">dry_adiabats</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.skewt.SkewT.dry_adiabats" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.skewt.SkewT.e">
+<code class="descname">e</code><span class="sig-paren">(</span><em>w</em>, <em>p</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.skewt.SkewT.e" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns vapor pressure (Pa) at mixing ratio w (kg/kg) and pressure p (Pa)
+Formula 2.18 in Rogers&amp;Yau</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.skewt.SkewT.es">
+<code class="descname">es</code><span class="sig-paren">(</span><em>T</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.skewt.SkewT.es" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns saturation vapor pressure (Pascal) at temperature T (Celsius)
+Formula 2.17 in Rogers&amp;Yau</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.skewt.SkewT.gamma_s">
+<code class="descname">gamma_s</code><span class="sig-paren">(</span><em>T</em>, <em>p</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.skewt.SkewT.gamma_s" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates moist adiabatic lapse rate for T (Celsius) and p (Pa)
+Note: We calculate dT/dp, not dT/dz
+See formula 3.16 in Rogers&amp;Yau for dT/dz, but this must be combined with
+the dry adiabatic lapse rate (gamma = g/cp) and the
+inverse of the hydrostatic equation (dz/dp = -RT/pg)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.skewt.SkewT.gettime">
+<code class="descname">gettime</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.skewt.SkewT.gettime" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.skewt.SkewT.isobars">
+<code class="descname">isobars</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.skewt.SkewT.isobars" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.skewt.SkewT.isotherms">
+<code class="descname">isotherms</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.skewt.SkewT.isotherms" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.skewt.SkewT.moist_adiabats">
+<code class="descname">moist_adiabats</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.skewt.SkewT.moist_adiabats" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.skewt.SkewT.plot_skewT">
+<code class="descname">plot_skewT</code><span class="sig-paren">(</span><em>plot_time</em>, <em>plot_latlon</em>, <em>dom</em>, <em>outpath</em>, <em>save_output=0</em>, <em>save_plot=1</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.skewt.SkewT.plot_skewT" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.skewt.SkewT.return_data">
+<code class="descname">return_data</code><span class="sig-paren">(</span><em>whichdata</em>, <em>nc</em>, <em>time</em>, <em>y</em>, <em>x</em>, <em>thin_locs</em>, <em>P=None</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.skewt.SkewT.return_data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.skewt.SkewT.skewT_composite">
+<code class="descname">skewT_composite</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.skewt.SkewT.skewT_composite" title="Permalink to this definition">¶</a></dt>
+<dd><p>Open pickle files from multiple soundings
+Find mean Td/T</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.skewt.SkewT.skewnessTerm">
+<code class="descname">skewnessTerm</code><span class="sig-paren">(</span><em>P</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.skewt.SkewT.skewnessTerm" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.skewt.SkewT.td">
+<code class="descname">td</code><span class="sig-paren">(</span><em>e</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.skewt.SkewT.td" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns dew point temperature (C) at vapor pressure e (Pa)
+Insert Td in 2.17 in Rogers&amp;Yau and solve for Td</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.skewt.SkewT.temperature">
+<code class="descname">temperature</code><span class="sig-paren">(</span><em>nc</em>, <em>time</em>, <em>y</em>, <em>x</em>, <em>P</em>, <em>linestyle='solid'</em>, <em>color='black'</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.skewt.SkewT.temperature" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.skewt.SkewT.temperature_real">
+<code class="descname">temperature_real</code><span class="sig-paren">(</span><em>T</em>, <em>P</em>, <em>color='red'</em>, <em>linestyle='dashed'</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.skewt.SkewT.temperature_real" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.skewt.SkewT.windbarbs">
+<code class="descname">windbarbs</code><span class="sig-paren">(</span><em>nc</em>, <em>time</em>, <em>y</em>, <em>x</em>, <em>P</em>, <em>thin_locs</em>, <em>n=45.0</em>, <em>color='black'</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.skewt.SkewT.windbarbs" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.skewt.SkewT.windbarbs_real">
+<code class="descname">windbarbs_real</code><span class="sig-paren">(</span><em>uwind</em>, <em>vwind</em>, <em>P</em>, <em>delta=3</em>, <em>color='red'</em>, <em>n=37.5</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.skewt.SkewT.windbarbs_real" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-WEM.postWRF.postWRF.stats">
+<span id="wem-postwrf-postwrf-stats-module"></span><h2>WEM.postWRF.postWRF.stats module<a class="headerlink" href="#module-WEM.postWRF.postWRF.stats" title="Permalink to this headline">¶</a></h2>
+<p>Scripts involving statistics or data manipulation here.</p>
+<dl class="function">
+<dt id="WEM.postWRF.postWRF.stats.DE_xyz">
+<code class="descclassname">WEM.postWRF.postWRF.stats.</code><code class="descname">DE_xyz</code><span class="sig-paren">(</span><em>nc0</em>, <em>nc1</em>, <em>t_idx</em>, <em>energy</em>, <em>*args</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.stats.DE_xyz" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computation for difference kinetic energy (DKE).
+Sums DKE over the 3D space, returns a time series.</p>
+<p>Destaggering is not enabled as it introduces
+computational cost that is of miniscule value considering
+the magnitudes of output values.</p>
+<p>Inputs:</p>
+<p>nc0     :   netCDF file
+nc1     :   netCDF file
+t_idx   :   times indices to difference
+energy  :   kinetic or total
+<a href="#id9"><span class="problematic" id="id10">*</span></a>args   :   to catch lower/upper boundary which isn&#8217;t relevant here</p>
+<p>Outputs:</p>
+<p>data    :   time series.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="WEM.postWRF.postWRF.stats.DE_z">
+<code class="descclassname">WEM.postWRF.postWRF.stats.</code><code class="descname">DE_z</code><span class="sig-paren">(</span><em>nc0</em>, <em>nc1</em>, <em>t</em>, <em>energy</em>, <em>lower</em>, <em>upper</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.stats.DE_z" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computation for difference kinetic energy (DKE).
+Sums DKE over all levels between lower and upper,
+for each grid point, and returns a 2D array.</p>
+<p>Destaggering is not enabled as it introduces
+computational cost that is of miniscule value considering
+the magnitudes of output values.</p>
+<p>Method finds levels nearest lower/upper hPa and sums between
+them inclusively.</p>
+<p>Inputs:</p>
+<p>nc0     :   netCDF file
+nc1     :   netCDF file
+t       :   times index to difference
+energy  :   kinetic or total
+lower   :   lowest level, hPa
+upper   :   highest level, hPa</p>
+<p>Outputs:</p>
+<p>data    :   2D array.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="WEM.postWRF.postWRF.stats.DKE_power_spectrum">
+<code class="descclassname">WEM.postWRF.postWRF.stats.</code><code class="descname">DKE_power_spectrum</code><span class="sig-paren">(</span><em>data</em>, <em>dx</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.stats.DKE_power_spectrum" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return power spectrum of DKE/DTE at time(s) for wavelengths.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="WEM.postWRF.postWRF.stats.compute_diff_energy">
+<code class="descclassname">WEM.postWRF.postWRF.stats.</code><code class="descname">compute_diff_energy</code><span class="sig-paren">(</span><em>ptype</em>, <em>energy</em>, <em>files</em>, <em>times</em>, <em>upper=None</em>, <em>lower=None</em>, <em>d_save=True</em>, <em>d_return=True</em>, <em>d_fname='diff_energy_data'</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.stats.compute_diff_energy" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method computes difference kinetic energy (DKE)
+or different total energy (DTE, including temp)
+between WRFout files for a given depth of the
+atmosphere, at given time intervals</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>ptype</strong> &#8211; &#8216;2D&#8217; or &#8216;3D&#8217;.
+&#8216;2D&#8217; integrates vertically between lower and
+upper hPa and creates a time series.
+&#8216;3D&#8217; integrates over the 3D space (again between
+the upper and lower bounds) and creates 2D arrays.</li>
+<li><strong>energy</strong> &#8211; &#8216;DKE&#8217; or &#8216;DTE&#8217;</li>
+<li><strong>upper</strong> &#8211; upper limit of vertical integration</li>
+<li><strong>lower</strong> &#8211; lower limit of vertical integration</li>
+<li><strong>files</strong> &#8211; abs paths to all wrfout files</li>
+<li><strong>times</strong> &#8211; times for computations - tuple format</li>
+<li><strong>d_save</strong> &#8211; save dictionary to folder (path to folder)</li>
+<li><strong>d_return</strong> &#8211; return dictionary (True or False)</li>
+<li><strong>d_fname</strong> &#8211; custom filename</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">N.ndarray &#8211; time series or list of 2D arrays</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="WEM.postWRF.postWRF.stats.gauss_kern">
+<code class="descclassname">WEM.postWRF.postWRF.stats.</code><code class="descname">gauss_kern</code><span class="sig-paren">(</span><em>size</em>, <em>sizey=None</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.stats.gauss_kern" title="Permalink to this definition">¶</a></dt>
+<dd><p>Taken from scipy cookbook online.
+Returns a normalized 2D gauss kernel array for convolutions</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="WEM.postWRF.postWRF.stats.gauss_smooth">
+<code class="descclassname">WEM.postWRF.postWRF.stats.</code><code class="descname">gauss_smooth</code><span class="sig-paren">(</span><em>data</em>, <em>n</em>, <em>ny=None</em>, <em>pad=1</em>, <em>pad_values=0</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.stats.gauss_smooth" title="Permalink to this definition">¶</a></dt>
+<dd><p>Taken from scipy cookbook online.
+Blur the data by convolving with a gaussian kernel of typical
+size n. The optional keyword argument ny allows for a different
+size in the y direction.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>data</strong> (<em>N.ndarray</em>) &#8211; data (2D only?)</li>
+<li><strong>pad</strong> (<em>bool</em>) &#8211; put zeros on edge of length n so that output
+array equals input array size.</li>
+<li><strong>pad_values</strong> (<em>int,float</em>) &#8211; if pad, then use this value to fill edges.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="WEM.postWRF.postWRF.stats.max_filter">
+<code class="descclassname">WEM.postWRF.postWRF.stats.</code><code class="descname">max_filter</code><span class="sig-paren">(</span><em>data</em>, <em>size=11</em>, <em>shape='circle'</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.stats.max_filter" title="Permalink to this definition">¶</a></dt>
+<dd><p>blah</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="WEM.postWRF.postWRF.stats.std">
+<code class="descclassname">WEM.postWRF.postWRF.stats.</code><code class="descname">std</code><span class="sig-paren">(</span><em>ncfiles</em>, <em>vrbl</em>, <em>utc=False</em>, <em>level=False</em>, <em>other=False</em>, <em>axis=0</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.stats.std" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find standard deviation in along axis of ensemble
+members. Returns matrix x-y for plotting</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="WEM.postWRF.postWRF.stats.std_ttest">
+<code class="descclassname">WEM.postWRF.postWRF.stats.</code><code class="descname">std_ttest</code><span class="sig-paren">(</span><em>ncfiles1</em>, <em>ncfiles2</em>, <em>vrbl</em>, <em>utc=False</em>, <em>level=False</em>, <em>other=False</em>, <em>th=0</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.stats.std_ttest" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find standard deviation in along axis of ensemble
+members. Returns matrix x-y for plotting. Returns sig test</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-WEM.postWRF.postWRF.ts">
+<span id="wem-postwrf-postwrf-ts-module"></span><h2>WEM.postWRF.postWRF.ts module<a class="headerlink" href="#module-WEM.postWRF.postWRF.ts" title="Permalink to this headline">¶</a></h2>
+<p>Create time series of variable(s) for certain period at location.</p>
+<p>Can use .TS files (?)
+Can use model output.</p>
+<dl class="class">
+<dt id="WEM.postWRF.postWRF.ts.TimeSeries">
+<em class="property">class </em><code class="descclassname">WEM.postWRF.postWRF.ts.</code><code class="descname">TimeSeries</code><span class="sig-paren">(</span><em>ensemble</em>, <em>latlon</em>, <em>locname</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.ts.TimeSeries" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.ts.TimeSeries.meteogram">
+<code class="descname">meteogram</code><span class="sig-paren">(</span><em>vrbl</em>, <em>utc=False</em>, <em>outdir=False</em>, <em>ncf=False</em>, <em>nct=False</em>, <em>dom=1</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.ts.TimeSeries.meteogram" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-WEM.postWRF.postWRF.wrfout">
+<span id="wem-postwrf-postwrf-wrfout-module"></span><h2>WEM.postWRF.postWRF.wrfout module<a class="headerlink" href="#module-WEM.postWRF.postWRF.wrfout" title="Permalink to this headline">¶</a></h2>
+<p>Compute or load data from netCDF file.</p>
+<p>Dimensions of 4D variable X are X.dimensions:
+(Time,bottom_top,south_north,west_east_stag)
+Time, levels, latitude, longitude</p>
+<dl class="class">
+<dt id="WEM.postWRF.postWRF.wrfout.WRFOut">
+<em class="property">class </em><code class="descclassname">WEM.postWRF.postWRF.wrfout.</code><code class="descname">WRFOut</code><span class="sig-paren">(</span><em>fpath</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.wrfout.WRFOut" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>An instance of WRFOut contains all the methods that are used to
+access and process netCDF data.</p>
+<p>Initialisation fetches and computes basic user-friendly
+variables that are most oftenly accessed.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>fpath</strong> (<em>str</em>) &#8211; absolute path to netCDF4 (wrfout) file</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.wrfout.WRFOut.check_compute">
+<code class="descname">check_compute</code><span class="sig-paren">(</span><em>vrbl</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.wrfout.WRFOut.check_compute" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method returns the required variables
+that need to be loaded from the netCDF file.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>vrbl</strong> (<em>str</em>) &#8211; WRF variable desired</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">bool &#8211; True if variable exists in wrfout file.
+False if the variable needs computing.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.wrfout.WRFOut.check_destagger">
+<code class="descname">check_destagger</code><span class="sig-paren">(</span><em>var</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.wrfout.WRFOut.check_destagger" title="Permalink to this definition">¶</a></dt>
+<dd><p>Looks up dimensions of netCDF file without loading data.</p>
+<p>Returns dimension number that requires destaggering</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.wrfout.WRFOut.check_vcs">
+<code class="descname">check_vcs</code><span class="sig-paren">(</span><em>z1</em>, <em>z2</em>, <em>exception=1</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.wrfout.WRFOut.check_vcs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check the vertical coordinate systems</p>
+<p>If identical, return the system
+If not, raise an exception.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.wrfout.WRFOut.cold_pool_depth">
+<code class="descname">cold_pool_depth</code><span class="sig-paren">(</span><em>dpt</em>, <em>heights</em>, <em>dpt_env</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.wrfout.WRFOut.cold_pool_depth" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.wrfout.WRFOut.cold_pool_strength">
+<code class="descname">cold_pool_strength</code><span class="sig-paren">(</span><em>X</em>, <em>time</em>, <em>swath_width=100</em>, <em>env=0</em>, <em>dz=0</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.wrfout.WRFOut.cold_pool_strength" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns array the same shape as WRF domain.</p>
+<dl class="docutils">
+<dt>X <span class="classifier-delimiter">:</span> <span class="classifier">cross-section object with given path</span></dt>
+<dd>This path goes front-to-back through a bow</dd>
+</dl>
+<p>km  :   width in the line-normal direction
+env :   (x,y) for location to sample environmental dpt</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.wrfout.WRFOut.compute">
+<code class="descname">compute</code><span class="sig-paren">(</span><em>vrbl</em>, <em>tidx</em>, <em>lvidx</em>, <em>lonidx</em>, <em>latidx</em>, <em>other</em>, <em>lookup=0</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.wrfout.WRFOut.compute" title="Permalink to this definition">¶</a></dt>
+<dd><p>Look up method needed to return array of data
+for required variable.</p>
+<p>Keyword arguments include settings for computation
+e.g. top and bottom of shear computation</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>vrbl</strong> (<em>str</em>) &#8211; variable name</li>
+<li><strong>tidx</strong> (<em>int,list,tuple,numpy.ndarray</em>) &#8211; time index/indices</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="docutils">
+<dt>lookup <span class="classifier-delimiter">:</span> <span class="classifier">enables a check to see if something can be</span></dt>
+<dd>computed. Returns true or false.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.wrfout.WRFOut.compute_C2">
+<code class="descname">compute_C2</code><span class="sig-paren">(</span><em>x</em>, <em>y</em>, <em>dpt</em>, <em>heights</em>, <em>dpt_env</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.wrfout.WRFOut.compute_C2" title="Permalink to this definition">¶</a></dt>
+<dd><p>C^2 as found in James et al. 2006 MWR</p>
+<p>x       :   x location in domain
+y       :   y location in domain
+dpt     :   density potential temperature slice
+heights :   height AGL slice
+dpt_env :   environmental dpt, column</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.wrfout.WRFOut.compute_CAPE">
+<code class="descname">compute_CAPE</code><span class="sig-paren">(</span><em>tidx</em>, <em>lvidx</em>, <em>lonidx</em>, <em>latidx</em>, <em>other</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.wrfout.WRFOut.compute_CAPE" title="Permalink to this definition">¶</a></dt>
+<dd><p>INCOMPLETE!</p>
+<p>CAPE method based on GEMPAK&#8217;s pdsuml.f function</p>
+<p>Inputs:</p>
+<p>tidx,lvidx,lonidx,latidx  :   dictionary of level/time/lat/lon</p>
+<p>Outputs:
+CAPE    :   convective available potential energy
+CIN     :   convective inhibition</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.wrfout.WRFOut.compute_DCAPE">
+<code class="descname">compute_DCAPE</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.wrfout.WRFOut.compute_DCAPE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.wrfout.WRFOut.compute_DCP">
+<code class="descname">compute_DCP</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.wrfout.WRFOut.compute_DCP" title="Permalink to this definition">¶</a></dt>
+<dd><p>Derecho Composite Parameter (Evans and Doswell, 2001, WAF)
+And info from SPC Mesoanalyses</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.wrfout.WRFOut.compute_PMSL_gradient">
+<code class="descname">compute_PMSL_gradient</code><span class="sig-paren">(</span><em>tidx</em>, <em>lvidx</em>, <em>lonidx</em>, <em>latidx</em>, <em>other</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.wrfout.WRFOut.compute_PMSL_gradient" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.wrfout.WRFOut.compute_Q_pert">
+<code class="descname">compute_Q_pert</code><span class="sig-paren">(</span><em>tidx</em>, <em>lvidx</em>, <em>lonidx</em>, <em>latidx</em>, <em>other</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.wrfout.WRFOut.compute_Q_pert" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.wrfout.WRFOut.compute_REFL_comp">
+<code class="descname">compute_REFL_comp</code><span class="sig-paren">(</span><em>tidx</em>, <em>lvidx</em>, <em>lonidx</em>, <em>latidx</em>, <em>other</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.wrfout.WRFOut.compute_REFL_comp" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.wrfout.WRFOut.compute_RH">
+<code class="descname">compute_RH</code><span class="sig-paren">(</span><em>tidx</em>, <em>lvidx</em>, <em>lonidx</em>, <em>latidx</em>, <em>other</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.wrfout.WRFOut.compute_RH" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.wrfout.WRFOut.compute_T2_gradient">
+<code class="descname">compute_T2_gradient</code><span class="sig-paren">(</span><em>tidx</em>, <em>lvidx</em>, <em>lonidx</em>, <em>latidx</em>, <em>other</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.wrfout.WRFOut.compute_T2_gradient" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.wrfout.WRFOut.compute_T2_pertub">
+<code class="descname">compute_T2_pertub</code><span class="sig-paren">(</span><em>tidx</em>, <em>lvidx</em>, <em>lonidx</em>, <em>latidx</em>, <em>other</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.wrfout.WRFOut.compute_T2_pertub" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.wrfout.WRFOut.compute_Td">
+<code class="descname">compute_Td</code><span class="sig-paren">(</span><em>tidx</em>, <em>lvidx</em>, <em>lonidx</em>, <em>latidx</em>, <em>other</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.wrfout.WRFOut.compute_Td" title="Permalink to this definition">¶</a></dt>
+<dd><p>Using HootPy equation</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.wrfout.WRFOut.compute_Td_2">
+<code class="descname">compute_Td_2</code><span class="sig-paren">(</span><em>tidx</em>, <em>lvidx</em>, <em>lonidx</em>, <em>latidx</em>, <em>other='C'</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.wrfout.WRFOut.compute_Td_2" title="Permalink to this definition">¶</a></dt>
+<dd><p>Another version of Td
+From p70 Djuric Weather Analysis</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.wrfout.WRFOut.compute_accum_rain">
+<code class="descname">compute_accum_rain</code><span class="sig-paren">(</span><em>utc</em>, <em>accum_hr</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.wrfout.WRFOut.compute_accum_rain" title="Permalink to this definition">¶</a></dt>
+<dd><p>Needs to be expanded to include other precip</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.wrfout.WRFOut.compute_ave">
+<code class="descname">compute_ave</code><span class="sig-paren">(</span><em>va</em>, <em>z1</em>, <em>z2</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.wrfout.WRFOut.compute_ave" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute average values for variable in layer</p>
+<p>Inputs:
+va      :   variable
+z1      :   height at bottom
+z2      :   height at top</p>
+<p>Output:
+data    :   the averaged variable</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.wrfout.WRFOut.compute_buoyancy">
+<code class="descname">compute_buoyancy</code><span class="sig-paren">(</span><em>tidx</em>, <em>lvidx</em>, <em>lonidx</em>, <em>latidx</em>, <em>other=False</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.wrfout.WRFOut.compute_buoyancy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method from Adams-Selin et al., 2013, WAF</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.wrfout.WRFOut.compute_comp_ref">
+<code class="descname">compute_comp_ref</code><span class="sig-paren">(</span><em>tidx</em>, <em>lvidx</em>, <em>lonidx</em>, <em>latidx</em>, <em>other</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.wrfout.WRFOut.compute_comp_ref" title="Permalink to this definition">¶</a></dt>
+<dd><p>Amend this so variables obtain at start fetch only correct date, lats, lons
+All levels need to be fetched as this is composite reflectivity</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.wrfout.WRFOut.compute_cpdz">
+<code class="descname">compute_cpdz</code><span class="sig-paren">(</span><em>x</em>, <em>y</em>, <em>dpt</em>, <em>heights</em>, <em>dpt_env</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.wrfout.WRFOut.compute_cpdz" title="Permalink to this definition">¶</a></dt>
+<dd><p>Cold pool depth</p>
+<p>x       :   x location in domain
+y       :   y location in domain
+dpt     :   density potential temperature slice
+heights :   height AGL slice
+dpt_env :   environmental dpt, column</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.wrfout.WRFOut.compute_density">
+<code class="descname">compute_density</code><span class="sig-paren">(</span><em>tidx</em>, <em>lvidx</em>, <em>lonidx</em>, <em>latidx</em>, <em>other</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.wrfout.WRFOut.compute_density" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.wrfout.WRFOut.compute_derivatives">
+<code class="descname">compute_derivatives</code><span class="sig-paren">(</span><em>U</em>, <em>V</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.wrfout.WRFOut.compute_derivatives" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.wrfout.WRFOut.compute_divergence">
+<code class="descname">compute_divergence</code><span class="sig-paren">(</span><em>U</em>, <em>V</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.wrfout.WRFOut.compute_divergence" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.wrfout.WRFOut.compute_dpt">
+<code class="descname">compute_dpt</code><span class="sig-paren">(</span><em>tidx</em>, <em>lvidx</em>, <em>lonidx</em>, <em>latidx</em>, <em>other</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.wrfout.WRFOut.compute_dpt" title="Permalink to this definition">¶</a></dt>
+<dd><p>Potential: if surface level is requested, choose sigma level just
+about the surface. I don&#8217;t think this affects any
+other dictionaries around...</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.wrfout.WRFOut.compute_dptp">
+<code class="descname">compute_dptp</code><span class="sig-paren">(</span><em>tidx</em>, <em>lvidx</em>, <em>lonidx</em>, <em>latidx</em>, <em>other</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.wrfout.WRFOut.compute_dptp" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.wrfout.WRFOut.compute_dryairmass">
+<code class="descname">compute_dryairmass</code><span class="sig-paren">(</span><em>tidx</em>, <em>lvidx</em>, <em>lonidx</em>, <em>latidx</em>, <em>other</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.wrfout.WRFOut.compute_dryairmass" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.wrfout.WRFOut.compute_drybulb">
+<code class="descname">compute_drybulb</code><span class="sig-paren">(</span><em>tidx</em>, <em>lvidx</em>, <em>lonidx</em>, <em>latidx</em>, <em>other='K'</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.wrfout.WRFOut.compute_drybulb" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.wrfout.WRFOut.compute_fluid_trapping_diagnostic">
+<code class="descname">compute_fluid_trapping_diagnostic</code><span class="sig-paren">(</span><em>tidx</em>, <em>lvidx</em>, <em>lonidx</em>, <em>latidx</em>, <em>other</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.wrfout.WRFOut.compute_fluid_trapping_diagnostic" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.wrfout.WRFOut.compute_frontogenesis">
+<code class="descname">compute_frontogenesis</code><span class="sig-paren">(</span><em>time</em>, <em>level</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.wrfout.WRFOut.compute_frontogenesis" title="Permalink to this definition">¶</a></dt>
+<dd><p>Note that all variables fetched with self.get have been
+destaggered and are at the same location.</p>
+<p>Output:
+Front       :   Frontgenesis in Kelvin per second.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.wrfout.WRFOut.compute_geopotential">
+<code class="descname">compute_geopotential</code><span class="sig-paren">(</span><em>tidx</em>, <em>lvidx</em>, <em>lonidx</em>, <em>latidx</em>, <em>other</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.wrfout.WRFOut.compute_geopotential" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.wrfout.WRFOut.compute_geopotential_height">
+<code class="descname">compute_geopotential_height</code><span class="sig-paren">(</span><em>tidx</em>, <em>lvidx</em>, <em>lonidx</em>, <em>latidx</em>, <em>other</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.wrfout.WRFOut.compute_geopotential_height" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.wrfout.WRFOut.compute_instantaneous_local_Lyapunov">
+<code class="descname">compute_instantaneous_local_Lyapunov</code><span class="sig-paren">(</span><em>tidx</em>, <em>lvidx</em>, <em>lonidx</em>, <em>latidx</em>, <em>other</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.wrfout.WRFOut.compute_instantaneous_local_Lyapunov" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.wrfout.WRFOut.compute_mixing_ratios">
+<code class="descname">compute_mixing_ratios</code><span class="sig-paren">(</span><em>tidx</em>, <em>lvidx</em>, <em>lonidx</em>, <em>latidx</em>, <em>other=False</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.wrfout.WRFOut.compute_mixing_ratios" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.wrfout.WRFOut.compute_olr">
+<code class="descname">compute_olr</code><span class="sig-paren">(</span><em>tidx</em>, <em>lvidx</em>, <em>lonidx</em>, <em>latidx</em>, <em>other</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.wrfout.WRFOut.compute_olr" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.wrfout.WRFOut.compute_omega">
+<code class="descname">compute_omega</code><span class="sig-paren">(</span><em>tidx</em>, <em>lvidx</em>, <em>lonidx</em>, <em>latidx</em>, <em>other</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.wrfout.WRFOut.compute_omega" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.wrfout.WRFOut.compute_pmsl">
+<code class="descname">compute_pmsl</code><span class="sig-paren">(</span><em>tidx</em>, <em>lvidx</em>, <em>lonidx</em>, <em>latidx</em>, <em>other</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.wrfout.WRFOut.compute_pmsl" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.wrfout.WRFOut.compute_pressure">
+<code class="descname">compute_pressure</code><span class="sig-paren">(</span><em>tidx</em>, <em>lvidx</em>, <em>lonidx</em>, <em>latidx</em>, <em>other</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.wrfout.WRFOut.compute_pressure" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.wrfout.WRFOut.compute_qtotal">
+<code class="descname">compute_qtotal</code><span class="sig-paren">(</span><em>tidx</em>, <em>lvidx</em>, <em>lonidx</em>, <em>latidx</em>, <em>other</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.wrfout.WRFOut.compute_qtotal" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.wrfout.WRFOut.compute_satvappres">
+<code class="descname">compute_satvappres</code><span class="sig-paren">(</span><em>tidx</em>, <em>lvidx</em>, <em>lonidx</em>, <em>latidx</em>, <em>other</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.wrfout.WRFOut.compute_satvappres" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.wrfout.WRFOut.compute_shear">
+<code class="descname">compute_shear</code><span class="sig-paren">(</span><em>tidx</em>, <em>lvidx</em>, <em>lonidx</em>, <em>latidx</em>, <em>other=False</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.wrfout.WRFOut.compute_shear" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Params other:</th><td class="field-body">dictionary of &#8216;top&#8217; and &#8216;bottom&#8217; levels, km</td>
+</tr>
+</tbody>
+</table>
+<p>Could make this faster with numpy.digitize()?</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.wrfout.WRFOut.compute_shear_deformation">
+<code class="descname">compute_shear_deformation</code><span class="sig-paren">(</span><em>U</em>, <em>V</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.wrfout.WRFOut.compute_shear_deformation" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.wrfout.WRFOut.compute_simref_atlevel">
+<code class="descname">compute_simref_atlevel</code><span class="sig-paren">(</span><em>level=1</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.wrfout.WRFOut.compute_simref_atlevel" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.wrfout.WRFOut.compute_spechum">
+<code class="descname">compute_spechum</code><span class="sig-paren">(</span><em>tidx</em>, <em>lvidx</em>, <em>lonidx</em>, <em>latidx</em>, <em>other</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.wrfout.WRFOut.compute_spechum" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.wrfout.WRFOut.compute_stretch_deformation">
+<code class="descname">compute_stretch_deformation</code><span class="sig-paren">(</span><em>U</em>, <em>V</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.wrfout.WRFOut.compute_stretch_deformation" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.wrfout.WRFOut.compute_strongest_wind">
+<code class="descname">compute_strongest_wind</code><span class="sig-paren">(</span><em>tidx</em>, <em>lvidx</em>, <em>lonidx</em>, <em>latidx</em>, <em>other</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.wrfout.WRFOut.compute_strongest_wind" title="Permalink to this definition">¶</a></dt>
+<dd><p>Pass the array of time indices and it will find the max
+along that axis.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.wrfout.WRFOut.compute_temp_advection">
+<code class="descname">compute_temp_advection</code><span class="sig-paren">(</span><em>tidx</em>, <em>lvidx</em>, <em>lonidx</em>, <em>latidx</em>, <em>other</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.wrfout.WRFOut.compute_temp_advection" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.wrfout.WRFOut.compute_theta">
+<code class="descname">compute_theta</code><span class="sig-paren">(</span><em>tidx</em>, <em>lvidx</em>, <em>lonidx</em>, <em>latidx</em>, <em>other</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.wrfout.WRFOut.compute_theta" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.wrfout.WRFOut.compute_thetae">
+<code class="descname">compute_thetae</code><span class="sig-paren">(</span><em>tidx</em>, <em>lvidx</em>, <em>lonidx</em>, <em>latidx</em>, <em>other</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.wrfout.WRFOut.compute_thetae" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.wrfout.WRFOut.compute_total_deformation">
+<code class="descname">compute_total_deformation</code><span class="sig-paren">(</span><em>U</em>, <em>V</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.wrfout.WRFOut.compute_total_deformation" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.wrfout.WRFOut.compute_vappres">
+<code class="descname">compute_vappres</code><span class="sig-paren">(</span><em>tidx</em>, <em>lvidx</em>, <em>lonidx</em>, <em>latidx</em>, <em>other</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.wrfout.WRFOut.compute_vappres" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.wrfout.WRFOut.compute_vorticity">
+<code class="descname">compute_vorticity</code><span class="sig-paren">(</span><em>U</em>, <em>V</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.wrfout.WRFOut.compute_vorticity" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.wrfout.WRFOut.compute_wind">
+<code class="descname">compute_wind</code><span class="sig-paren">(</span><em>tidx</em>, <em>lvidx</em>, <em>lonidx</em>, <em>latidx</em>, <em>other</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.wrfout.WRFOut.compute_wind" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.wrfout.WRFOut.compute_wind10">
+<code class="descname">compute_wind10</code><span class="sig-paren">(</span><em>tidx</em>, <em>lvidx</em>, <em>lonidx</em>, <em>latidx</em>, <em>other</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.wrfout.WRFOut.compute_wind10" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.wrfout.WRFOut.create_slice">
+<code class="descname">create_slice</code><span class="sig-paren">(</span><em>vrbl</em>, <em>tidx</em>, <em>lvidx</em>, <em>lonidx</em>, <em>latidx</em>, <em>dim_names</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.wrfout.WRFOut.create_slice" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create slices from indices of level, time, lat, lon.
+False mean pick all indices.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.wrfout.WRFOut.destagger">
+<code class="descname">destagger</code><span class="sig-paren">(</span><em>data</em>, <em>ax</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.wrfout.WRFOut.destagger" title="Permalink to this definition">¶</a></dt>
+<dd><p>Destagger data which needs it doing.</p>
+<p>data    :   numpy array of data requiring destaggering
+ax      :   axis requiring destaggering</p>
+<p>Theta always has unstaggered points in all three spatial dimensions (axes=1,2,3).</p>
+<p>Data should be 4D but just the slice required to reduce unnecessary computation time.</p>
+<p>Don&#8217;t destagger in x/y for columns</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.wrfout.WRFOut.edit_namelist">
+<code class="descname">edit_namelist</code><span class="sig-paren">(</span><em>fpath</em>, <em>old</em>, <em>new</em>, <em>incolumn=1</em>, <em>col=23</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.wrfout.WRFOut.edit_namelist" title="Permalink to this definition">¶</a></dt>
+<dd><p>col=23 is default for wps namelists.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.wrfout.WRFOut.find_gust_front">
+<code class="descname">find_gust_front</code><span class="sig-paren">(</span><em>wind_slice</em>, <em>T2_slice</em>, <em>angle</em>, <em>method=3</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.wrfout.WRFOut.find_gust_front" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find location of maximum shear in the horizontal wind along a
+1D slice.</p>
+<p>wind_slice      :   1D numpy array
+T2_slice        :   temp 2m slice
+angle           :   angle of slice cross-section
+method          :   way to locate gust front</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.wrfout.WRFOut.get">
+<code class="descname">get</code><span class="sig-paren">(</span><em>vrbl</em>, <em>utc=False</em>, <em>level=False</em>, <em>lats=False</em>, <em>lons=False</em>, <em>smooth=1</em>, <em>other=False</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.wrfout.WRFOut.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get data.</p>
+<p>Will interpolate onto pressure, height coordinates if needed.
+Will smooth if needed.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>vrbl</strong> (<em>str</em>) &#8211; WRF or computed variable required</li>
+<li><strong>utc</strong> &#8211; indices (&lt;500): integer/N.ndarray of integers.
+time tuple: 6-item tuple or list/tuple of these.
+datenum: integer &gt;500 or list of them.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Level:
+* indices: integer or N.ndarray of integers
+* pressure: string ending in &#8216;hPa&#8217;
+* height: string ending in &#8216;m&#8217; or &#8216;km&#8217;
+* isentropic: string ending in &#8216;K&#8217;</p>
+<p>Lats:
+* indices: integer or N.ndarray of integers
+* lats: float or N.ndarray of floats</p>
+<p>Lons:
+* indices: integer or N.ndarray of integers
+* lons: float or N.ndarray of floats</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.wrfout.WRFOut.get_XY">
+<code class="descname">get_XY</code><span class="sig-paren">(</span><em>lat</em>, <em>lon</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.wrfout.WRFOut.get_XY" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return grid indices for lat/lon pair.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.wrfout.WRFOut.get_dims">
+<code class="descname">get_dims</code><span class="sig-paren">(</span><em>var</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.wrfout.WRFOut.get_dims" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.wrfout.WRFOut.get_lat_idx">
+<code class="descname">get_lat_idx</code><span class="sig-paren">(</span><em>lat</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.wrfout.WRFOut.get_lat_idx" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.wrfout.WRFOut.get_limited_domain">
+<code class="descname">get_limited_domain</code><span class="sig-paren">(</span><em>da</em>, <em>skip=1</em>, <em>return_array='idx'</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.wrfout.WRFOut.get_limited_domain" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return smaller array of lats, lons depending on
+input dictionary of N, E, S, W limits.</p>
+<p>skip            :   for creating thinned domains
+return_type     :   if idx, return array of idx</p>
+<blockquote>
+<div>if slice, return slice only
+if latlon, return lat/lon values</div></blockquote>
+</dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.wrfout.WRFOut.get_limits">
+<code class="descname">get_limits</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.wrfout.WRFOut.get_limits" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.wrfout.WRFOut.get_lon_idx">
+<code class="descname">get_lon_idx</code><span class="sig-paren">(</span><em>lon</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.wrfout.WRFOut.get_lon_idx" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.wrfout.WRFOut.get_missing_axes">
+<code class="descname">get_missing_axes</code><span class="sig-paren">(</span><em>dims</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.wrfout.WRFOut.get_missing_axes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.wrfout.WRFOut.get_p">
+<code class="descname">get_p</code><span class="sig-paren">(</span><em>vrbl</em>, <em>tidx=False</em>, <em>level=False</em>, <em>lonidx=False</em>, <em>latidx=False</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.wrfout.WRFOut.get_p" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return an pressure level isosurface of given variable.
+Interpolation is linear so watch out.</p>
+<p>Dimensions returns as (height,lat,lon)
+Or is it (height,lon, lat!?)</p>
+<p>TODO: Need to include limited domain functionality</p>
+<p>if vrbl==&#8217;pressure&#8217;,create constant grid.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.wrfout.WRFOut.get_time_idx">
+<code class="descname">get_time_idx</code><span class="sig-paren">(</span><em>utc</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.wrfout.WRFOut.get_time_idx" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>utc</strong> (<em>tuple,list,int</em>) &#8211; time</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns tidx:</th><td class="field-body">int &#8211; closest index to desired time</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.wrfout.WRFOut.interp_to_p_fortran">
+<code class="descname">interp_to_p_fortran</code><span class="sig-paren">(</span><em>config</em>, <em>nc_path</em>, <em>var</em>, <em>lv</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.wrfout.WRFOut.interp_to_p_fortran" title="Permalink to this definition">¶</a></dt>
+<dd><p>Uses p_interp fortran code to put data onto a pressure
+level specified.</p>
+<p>Input:
+config  :   contains directory of p_interp files
+nc_path :   path to original netCDF file data
+var     :   variable(s) to compute
+lv      :   pressure level(s) to compute</p>
+<p>Returns:
+fpath   :   path to new netCDF file with p co-ords</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.wrfout.WRFOut.load">
+<code class="descname">load</code><span class="sig-paren">(</span><em>vrbl</em>, <em>tidx</em>, <em>lvidx</em>, <em>lonidx</em>, <em>latidx</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.wrfout.WRFOut.load" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fetch netCDF data for a given variable, for given time, level,
+latitude, and longitude indices.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>vrbl</strong> (<em>str</em>) &#8211; WRF variable</li>
+<li><strong>tidx</strong> (<em>bool,int,numpy.ndarray</em>) &#8211; time index. False fetches all.</li>
+<li><strong>lvidx</strong> (<em>boot, int, numpy.ndarray</em>) &#8211; level index. False fetches all</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>TODO: Get rid of integer arguments earlier in the method chain, and
+make them single-element numpy arrays.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.wrfout.WRFOut.make_4D">
+<code class="descname">make_4D</code><span class="sig-paren">(</span><em>datain</em>, <em>vrbl=False</em>, <em>missing_axis=False</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.wrfout.WRFOut.make_4D" title="Permalink to this definition">¶</a></dt>
+<dd><p>If vrbl, look up the wrfout file&#8217;s variable dimensions and
+adjust accordingly to get into 4D structure. If not vrbl,
+for instance a computed variable, the user needs to specify
+which axes are missing in a tuple.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.wrfout.WRFOut.return_axis_of_dilatation_components">
+<code class="descname">return_axis_of_dilatation_components</code><span class="sig-paren">(</span><em>tidx</em>, <em>lvidx=False</em>, <em>lonidx=False</em>, <em>latidx=False</em>, <em>other=False</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.wrfout.WRFOut.return_axis_of_dilatation_components" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.wrfout.WRFOut.return_tbl">
+<code class="descname">return_tbl</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.wrfout.WRFOut.return_tbl" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a dictionary to look up method for computing a variable</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.wrfout.WRFOut.return_tidx_range">
+<code class="descname">return_tidx_range</code><span class="sig-paren">(</span><em>utc0</em>, <em>utc1</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.wrfout.WRFOut.return_tidx_range" title="Permalink to this definition">¶</a></dt>
+<dd><p>Give a start and end time. Returns an array of
+all indices. Useful for self.get() to return an
+array of data with all times between utc0 and utc1.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.wrfout.WRFOut.wrftime_to_datenum">
+<code class="descname">wrftime_to_datenum</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.wrfout.WRFOut.wrftime_to_datenum" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert wrf&#8217;s weird Times variable to datenum time.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-WEM.postWRF.postWRF.xsection">
+<span id="wem-postwrf-postwrf-xsection-module"></span><h2>WEM.postWRF.postWRF.xsection module<a class="headerlink" href="#module-WEM.postWRF.postWRF.xsection" title="Permalink to this headline">¶</a></h2>
+<p>Create cross-sections through WRF data.</p>
+<p>This can be time-height or distance-height.
+The height can be pressure, model, geometric, or geopotential</p>
+<p>The output can be saved to a pickle file.
+This can be useful for creating composites</p>
+<p>Input lat/lon can be either specified or from x,y co-ords
+calculated from manually clicking on a map with overlaid
+data (reflectivity, etc).</p>
+<dl class="class">
+<dt id="WEM.postWRF.postWRF.xsection.CrossSection">
+<em class="property">class </em><code class="descclassname">WEM.postWRF.postWRF.xsection.</code><code class="descname">CrossSection</code><span class="sig-paren">(</span><em>wrfout</em>, <em>latA=0</em>, <em>lonA=0</em>, <em>latB=0</em>, <em>lonB=0</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.xsection.CrossSection" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#WEM.postWRF.postWRF.figure.Figure" title="WEM.postWRF.postWRF.figure.Figure"><code class="xref py py-class docutils literal"><span class="pre">WEM.postWRF.postWRF.figure.Figure</span></code></a></p>
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.xsection.CrossSection.create_linenormal_xs">
+<code class="descname">create_linenormal_xs</code><span class="sig-paren">(</span><em>x</em>, <em>y</em>, <em>length_pts=3</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.xsection.CrossSection.create_linenormal_xs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a cross-section that runs normal to the
+existing cross-section contained in self.</p>
+<p>x,y         :   coordinates of intersection
+length_pts  :   length of normal line in grid points</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.xsection.CrossSection.draw_transect">
+<code class="descname">draw_transect</code><span class="sig-paren">(</span><em>outpath</em>, <em>fname</em>, <em>radar=True</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.xsection.CrossSection.draw_transect" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.xsection.CrossSection.get_height">
+<code class="descname">get_height</code><span class="sig-paren">(</span><em>t</em>, <em>x</em>, <em>y</em>, <em>z</em>, <em>pts</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.xsection.CrossSection.get_height" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return terrain heights along cross-section</p>
+<p>TODO: What&#8217;s the diff between the outputs?</p>
+<p>Inputs:
+t       :   time index as int
+x       :   x indices, as int
+y       :   y imdices, as int
+z       :   number of levels, as int
+pts     :   number of points along the x-sec</p>
+<p>Outputs:
+terrain_z   :   ter0,rain height
+heighthalf  :   who knows?</p>
+<p>Assuming t=0</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.xsection.CrossSection.get_latlon_from_xy">
+<code class="descname">get_latlon_from_xy</code><span class="sig-paren">(</span><em>x</em>, <em>y</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.xsection.CrossSection.get_latlon_from_xy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Look up lat/lon in wrfout file from x and
+y coordinates.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.xsection.CrossSection.get_wrfout_slice">
+<code class="descname">get_wrfout_slice</code><span class="sig-paren">(</span><em>vrbl</em>, <em>utc=False</em>, <em>level=False</em>, <em>x=False</em>, <em>y=False</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.xsection.CrossSection.get_wrfout_slice" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.xsection.CrossSection.get_xs_slice">
+<code class="descname">get_xs_slice</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.xsection.CrossSection.get_xs_slice" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.xsection.CrossSection.get_xy_from_latlon">
+<code class="descname">get_xy_from_latlon</code><span class="sig-paren">(</span><em>lat</em>, <em>lon</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.xsection.CrossSection.get_xy_from_latlon" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return x and y coordinates for given lat/lon.</p>
+<p>exactlat, exactlon      :   exact coordinates of closest x/y</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.xsection.CrossSection.interp">
+<code class="descname">interp</code><span class="sig-paren">(</span><em>geopot</em>, <em>pres</em>, <em>p</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.xsection.CrossSection.interp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the interpolated geopotential at p using the values in pres.
+The geopotential for an element in pres must be given by the corresponding
+element in geopot. The length of the geopot and pres arrays must be the same.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.xsection.CrossSection.mouseclick">
+<code class="descname">mouseclick</code><span class="sig-paren">(</span><em>event</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.xsection.CrossSection.mouseclick" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.xsection.CrossSection.plot_average">
+<code class="descname">plot_average</code><span class="sig-paren">(</span><em>vrbl</em>, <em>avepts</em>, <em>ttime</em>, <em>outpath</em>, <em>clvs=0</em>, <em>ztop=0</em>, <em>f_suffix=False</em>, <em>cmap='jet'</em>, <em>contour_vrbl='skip'</em>, <em>contour_clvs=False</em>, <em>cflabel=False</em>, <em>cftix=False</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.xsection.CrossSection.plot_average" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.xsection.CrossSection.plot_xs">
+<code class="descname">plot_xs</code><span class="sig-paren">(</span><em>vrbl</em>, <em>ttime</em>, <em>outpath</em>, <em>clvs=0</em>, <em>ztop=0</em>, <em>f_suffix=False</em>, <em>cmap='jet'</em>, <em>contour_vrbl='skip'</em>, <em>contour_clvs=False</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.xsection.CrossSection.plot_xs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Inputs:
+vrbl        :   variable to plot, from this list:</p>
+<blockquote>
+<div>parawind,perpwind,wind,U,V,W,T,RH,</div></blockquote>
+<p>ttime       :   time in ... format
+outpath     :   absolute path to directory to save output</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.xsection.CrossSection.popup_transect">
+<code class="descname">popup_transect</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.xsection.CrossSection.popup_transect" title="Permalink to this definition">¶</a></dt>
+<dd><p>Pops up window for user to select start and
+end point for the cross-section.</p>
+<p>Optional: this map can be overlaid with data
+to better guide the decision.</p>
+<p>Optional: the transect can be saved as an image
+with/without the overlaid data, useful for publication.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="WEM.postWRF.postWRF.xsection.CrossSection.translate_xs">
+<code class="descname">translate_xs</code><span class="sig-paren">(</span><em>sh</em><span class="sig-paren">)</span><a class="headerlink" href="#WEM.postWRF.postWRF.xsection.CrossSection.translate_xs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Translate the cross-section up or down a certain number of
+points.
+For simplicity with grid spacing, the logic allows for
+45 degree translation only.</p>
+<p>sh  :   number of points to shift</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-WEM.postWRF.postWRF">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-WEM.postWRF.postWRF" title="Permalink to this headline">¶</a></h2>
+<p>In main you will find the heart at the controls
+of the public API, which hides more complicated
+stuff from the user.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">WEM</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="tutorial.html">WEM package</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="WEM.html">WEM package</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="WEM.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="WEM.lazyWRF.html">WEM.lazyWRF package</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="WEM.postWRF.html">WEM.postWRF package</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="WEM.postWRF.html#subpackages">Subpackages</a></li>
+<li class="toctree-l4"><a class="reference internal" href="WEM.postWRF.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="WEM.postWRF.html#wem-postwrf-setup-module">WEM.postWRF.setup module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="WEM.postWRF.html#module-WEM.postWRF">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="WEM.utils.html">WEM.utils package</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="WEM.html#module-WEM">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2014, John Lawson.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.8</a>
+      
+      |
+      <a href="_sources/WEM.postWRF.postWRF.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
