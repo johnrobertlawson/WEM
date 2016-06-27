@@ -1,0 +1,211 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>WEM package &mdash; WEM 0.9.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.9.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="WEM 0.9.0 documentation" href="index.html" />
+    <link rel="next" title="WEM package" href="WEM.html" />
+    <link rel="prev" title="Welcome to .’s documentation!" href="index.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="wem-package">
+<h1>WEM package<a class="headerlink" href="#wem-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="tutorial">
+<h2>Tutorial<a class="headerlink" href="#tutorial" title="Permalink to this headline">¶</a></h2>
+<p>This will lead you through an example for automating WRF runs,
+creating statistics from an ensemble, and plotting data!</p>
+</div>
+<div class="section" id="installation">
+<h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
+<p>Ensure you have <cite>git</cite> installed on your system or server. Then execute <code class="docutils literal"><span class="pre">git</span>
+<span class="pre">clone</span> <span class="pre">https://github.com/johnrobertlawson/WEM.git</span></code>. The example scripts are
+located in <code class="docutils literal"><span class="pre">WEM/postWRF/bin/</span></code>. You can copy a <cite>.py</cite> file from there into your
+own personal scripts folder. WEM works best when you don&#8217;t interact directly
+with the codebase, but only change the top-level script.</p>
+<p>Let&#8217;s look at the bare minimum to get plotting. First, you should have the
+following:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">sys</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;path/to/WEM&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Make sure you change the path to where you have downloaded the WEM codebase
+from GitHub. Next:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">WEM.postWRF</span> <span class="kn">import</span> <span class="n">WRFEnviron</span>
+<span class="n">p</span> <span class="o">=</span> <span class="n">WRFEnviron</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>This creates an instance of the environment. Now you can use postWRF functions
+to generate data and plot figures by calling, for example, <code class="docutils literal"><span class="pre">p.plot2D()</span></code>.
+Before this, though, define the location of the netCDF data files you use, and
+the location to which you want figures saving.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">outdir</span> <span class="o">=</span> <span class="s1">&#39;/absolute/path/to/figures/&#39;</span>
+<span class="n">ncdir</span> <span class="o">=</span> <span class="s1">&#39;/absolute/path/to/data&#39;</span>
+
+<span class="c1"># If there is more than one netCDF file in the folder,</span>
+<span class="c1"># choose one of the following ways to make the selection</span>
+<span class="c1"># unambiguous:</span>
+
+<span class="c1"># Time of initiation</span>
+<span class="n">nct</span> <span class="o">=</span> <span class="p">(</span><span class="mi">2006</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">10</span><span class="p">,</span><span class="mi">12</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+<span class="c1"># Or filename</span>
+<span class="n">ncf</span> <span class="o">=</span> <span class="s1">&#39;wrfout_do1...&#39;</span>
+</pre></div>
+</div>
+<p>You can also generate a sequence of times. This is useful for iterating plots
+over numerous plot times. Don&#8217;t forget you can iterate over levels, contour
+level settings, etc., with the basic Python loops.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">itime</span> <span class="o">=</span> <span class="p">(</span><span class="mi">2006</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">10</span><span class="p">,</span><span class="mi">18</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">ftime</span> <span class="o">=</span> <span class="p">(</span><span class="mi">2006</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">11</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">hourly</span> <span class="o">=</span> <span class="mi">3</span>
+<span class="n">times</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">generate_times</span><span class="p">(</span><span class="n">itime</span><span class="p">,</span><span class="n">ftime</span><span class="p">,</span><span class="n">hourly</span><span class="o">*</span><span class="mi">60</span><span class="o">*</span><span class="mi">60</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Now here are some example of plots:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="c1"># This plots simulated composite reflectivity</span>
+<span class="c1"># Ignore level argument (it is set to False if not specified)</span>
+<span class="c1"># as cref does not have a level.</span>
+<span class="n">p</span><span class="o">.</span><span class="n">plot2D</span><span class="p">(</span><span class="s1">&#39;cref&#39;</span><span class="p">,</span><span class="n">utc</span><span class="o">=</span><span class="n">itime</span><span class="p">,</span><span class="n">outdir</span><span class="o">=</span><span class="n">outdir</span><span class="p">,</span><span class="n">ncdir</span><span class="o">=</span><span class="n">ncdir</span><span class="p">,</span><span class="n">ncf</span><span class="o">=</span><span class="n">ncf</span><span class="p">,</span>
+            <span class="n">nct</span><span class="o">=</span><span class="n">nct</span><span class="p">,</span><span class="n">legend</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+<span class="n">p</span><span class="o">.</span><span class="n">plotstreamlines</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>All that&#8217;s left is executing the script with <code class="docutils literal"><span class="pre">python</span> <span class="pre">script.py</span></code>, where
+<cite>script.py</cite> is your file&#8217;s name.</p>
+<p>More information on the various plots and statistics can be found in the API
+section for <a class="reference internal" href="WEM.postWRF.postWRF.html#module-WEM.postWRF.postWRF.main" title="WEM.postWRF.postWRF.main"><code class="xref py py-class docutils literal"><span class="pre">WEM.postWRF.postWRF.main</span></code></a>.</p>
+</div>
+<div class="section" id="examples">
+<h2>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h2>
+<p>Here are some other useful functions. First, to plot simulated composite
+reflectivity for a given time and domain, and then save a second figure showing
+verification composite reflectivity (over the US CONUS) on the same domain and
+projection, with the same colourbar, use the following:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">p</span><span class="o">.</span><span class="n">plot_radar</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>To plot accumulated rainfall (combined grid-scale and cumulus
+parameterisation), amassed over a number of hours, try this:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">p</span><span class="o">.</span><span class="n">plot_accum_rain</span><span class="p">(</span><span class="n">utc</span><span class="p">,</span><span class="n">accum_hr</span><span class="p">,</span><span class="n">ncdir</span><span class="o">=</span><span class="n">ncdir</span><span class="p">,</span><span class="n">outdir</span><span class="o">=</span><span class="n">outdir</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>To plot Difference Kinetic Energy, integrated up to 500 hPa, over a domain,
+every six hours, you would first compute the fields (as it is time-consuming,
+and it makes sense to save data to file first, in case of reuse), and next plot
+this data.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">p</span><span class="o">.</span><span class="p">)</span>
+<span class="n">p</span><span class="o">.</span>
+</pre></div>
+</div>
+<p>Many functions can accept and return matplotlib figure/axis objects, in case
+you want to use WEM&#8217;s processing capability, but use your own plots. Here&#8217;s an
+example where frontogenesis fields form a four-panel plot (suitable for
+publication, for instance):</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>You can pass a dictionary of locations and their latitude/longitude, and have
+these places plotted on the map. It currently works for <code class="docutils literal"><span class="pre">plot2D()</span></code> and
+<code class="docutils literal"><span class="pre">plot_accum_rain()</span></code>. This is an example usage:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="c1"># locs = {&#39;label&#39;:(latitude,longitude),etc}</span>
+<span class="n">locs</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;Norman&#39;</span><span class="p">:(</span><span class="mf">35.22</span><span class="p">,</span><span class="o">-</span><span class="mf">97.44</span><span class="p">),</span><span class="s1">&#39;Topeka&#39;</span><span class="p">:(</span><span class="mf">39.06</span><span class="p">,</span><span class="o">-</span><span class="mf">95.69</span><span class="p">)}</span>
+<span class="n">p</span><span class="o">.</span><span class="n">plot2D</span><span class="p">(</span><span class="s1">&#39;RAINNC&#39;</span><span class="p">,</span><span class="n">utc</span><span class="p">,</span><span class="n">ncdir</span><span class="o">=</span><span class="n">wrf_sd</span><span class="p">,</span><span class="n">outdir</span><span class="o">=</span><span class="n">out_sd</span><span class="p">,</span><span class="n">locations</span><span class="o">=</span><span class="n">locs</span><span class="p">,</span><span class="n">clvs</span><span class="o">=</span><span class="n">N</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">100</span><span class="p">,</span><span class="mi">2</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">WEM</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="">WEM package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#tutorial">Tutorial</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#installation">Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#examples">Examples</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="WEM.html">WEM package</a></li>
+</ul>
+
+
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2014, John Lawson.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.8</a>
+      
+      |
+      <a href="_sources/tutorial.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
