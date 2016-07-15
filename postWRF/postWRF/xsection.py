@@ -18,7 +18,7 @@ import pdb
 import matplotlib.pyplot as plt
 
 import WEM.utils as utils
-import metconstants as mc
+from WEM.utils import metconstants as mc
 from .scales import Scales
 from .birdseye import BirdsEye
 # from defaults import Defaults

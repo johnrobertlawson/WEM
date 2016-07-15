@@ -19,7 +19,7 @@ import os
 from .figure import Figure
 from .wrfout import WRFOut
 import WEM.utils as utils
-import metconstants as mc
+from WEM.utils import metconstants as mc
 
 class Profile(Figure):
     def __init__(self,nc=0):

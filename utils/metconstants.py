@@ -1,7 +1,9 @@
 Tb = 300.0 # Base temperature
 Tz = 273.15 # 0 C in Kelvin
 L = 2.501e6 # Latent heat of vaporisation
+Lv = L
 R = 287.04  # gas constant air  
+Rd = R
 Rv = 461.5  # gas constant vapour
 cp = 1005.0
 cv = 718.0

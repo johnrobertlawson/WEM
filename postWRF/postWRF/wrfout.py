@@ -18,7 +18,7 @@ import scipy.interpolate
 import datetime
 
 import WEM.utils as utils
-import metconstants as mc
+from WEM.utils import metconstants as mc
 
 debug_get = 0
 
@@ -609,6 +609,8 @@ class WRFOut(object):
     def compute_drybulb(self,tidx,lvidx,lonidx,latidx,other='K'):
         theta = self.get('theta',tidx,lvidx,lonidx,latidx)
         P = self.get('pressure',tidx,lvidx,lonidx,latidx)
+
+        # Theta-e at level 2
         drybulb = theta*((P/100000.0)**(287.04/1004.0))
         if other=='K':
             return drybulb
