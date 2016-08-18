@@ -26,8 +26,7 @@ class BirdsEye(Figure):
     def __init__(self,nc=False,ax=0,fig=0):
         super(BirdsEye,self).__init__(nc=nc,ax=ax,fig=fig)
 
-    def get_plot_arguments(self,cmap=False,clvs=False,color=False,
-            ideal=False):
+    def get_plot_arguments(self,cmap=False,clvs=False,color=False):
         """
         Returns colourmap and contouring levels
 
@@ -113,9 +112,9 @@ class BirdsEye(Figure):
         """
         # INITIALISE
         self.data = data
-        # pdb.set_trace()
+        pdb.set_trace()
         if ideal:
-            self.bmap = self.ax
+            self.bmap = plt
             self.x = N.arange(len(data[:,0]))
             self.y = N.arange(len(data[0,:]))
 
@@ -136,7 +135,7 @@ class BirdsEye(Figure):
         # self.la_n = self.data.shape[-2]
         # self.lo_n = self.data.shape[-1]
 
-        plotargs, plotkwargs = self.get_plot_arguments(clvs=clvs,cmap=cmap,color=color,ideal=ideal)
+        plotargs, plotkwargs = self.get_plot_arguments(clvs=clvs,cmap=cmap,color=color)
 
         # import pdb; pdb.set_trace()
         if plottype == 'contour':
@@ -163,8 +162,6 @@ class BirdsEye(Figure):
             print("Specify correct plot type.")
             raise Exception
 
-        if ideal:
-            self.ax.set_aspect('equal')
         if isinstance(locations,dict):
             for k,v in locations.items():
                 if isinstance(v,tuple) and len(v) == 2:

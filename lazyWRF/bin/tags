@@ -54,6 +54,7 @@ GIS_tools.py	/home/johnlawson/WEM/utils/GIS_tools.py	1;"	F
 Gallus_plot.py	/home/johnlawson/WEM/postWRF/bin/Gallus_plot.py	1;"	F
 HEAT	/home/johnlawson/WEM/postWRF/bin/heatmap_bow.py	/^        HEAT = pickle.load(f)$/;"	v
 HEAT	/home/johnlawson/WEM/postWRF/bin/paper3_spread.py	/^        HEAT = {}$/;"	v
+HeatMap	/home/johnlawson/WEM/postWRF/postWRF/heatmap.py	/^class HeatMap(Figure):$/;"	c
 IC	/home/johnlawson/WEM/lazyWRF/bin/sensitivity_ensemble_example.py	/^IC = 'GEFSR2' # Model for initial\/boundary conditions in WRF$/;"	v
 IC	/home/johnlawson/WEM/postWRF/bin/DKE.py	/^IC = 'GEFS'$/;"	v
 IC	/home/johnlawson/WEM/postWRF/bin/RUC_plot.py	/^IC = 'GEFSR2'$/;"	v
@@ -103,24 +104,28 @@ MP	/home/johnlawson/WEM/postWRF/bin/postage.py	/^MP = 'Thompson' # For SKEB$/;"	
 MP	/home/johnlawson/WEM/postWRF/bin/skewT_JRL.py	/^MP = 'ICBC'$/;"	v
 MPn	/home/johnlawson/WEM/lazyWRF/bin/sensitivity_ensemble_example.py	/^MPn = 8 # For SKEB: pick constant MP scheme$/;"	v
 MPs	/home/johnlawson/WEM/postWRF/bin/DKE.py	/^MPs = ['ICBC','WSM6_Grau','WSM6_Hail','Kessler','Ferrier','WSM5',$/;"	v
+MWtemphum	/home/johnlawson/WEM/lazyWRF/lazyWRF/create_sounding.py	/^    def MWtemphum(self):$/;"	m	class:Profile
+MWwind	/home/johnlawson/WEM/lazyWRF/lazyWRF/create_sounding.py	/^    def MWwind(self):$/;"	m	class:Profile
 Map	/home/johnlawson/WEM/postWRF/postWRF/map.py	/^class Map(Figure):$/;"	c
 NAM_list	/home/johnlawson/WEM/postWRF/bin/paper3_spread.py	/^NAM_list = {}$/;"	v
 NAMdir	/home/johnlawson/WEM/postWRF/bin/paper3_spread.py	/^NAMdir = '\/chinook2\/jrlawson\/bowecho\/paper3_NAMdata'$/;"	v
 NAMdir	/home/johnlawson/WEM/postWRF/bin/paper3_spread.py	/^NAMdir = '\/chinook2\/jrlawson\/bowecho\/paper3_NAMdata\/'$/;"	v
 NAMdir	/home/johnlawson/WEM/postWRF/bin/paper4_SAL.py	/^NAMdir = '\/chinook2\/jrlawson\/bowecho\/paper4_NAMdata'$/;"	v
 NC	/home/johnlawson/WEM/postWRF/bin/GEFS_NAM_compare.py	/^NC = {'NEOK06':{$/;"	v
+NC	/home/johnlawson/WEM/postWRF/postWRF/ncfile.py	/^class NC(object):$/;"	c
 Nlim	/home/johnlawson/WEM/postWRF/bin/domains.py	/^Nlim = 50.0$/;"	v
 Nlim	/home/johnlawson/WEM/postWRF/bin/paper3_spread.py	/^Nlim = N.ceil(lats.max())$/;"	v
 OKb	/home/johnlawson/WEM/postWRF/bin/paper3_spread.py	/^            OKb = ('S','P') $/;"	v
 Obs	/home/johnlawson/WEM/postWRF/postWRF/obs.py	/^class Obs(object):$/;"	c
 P0	/home/johnlawson/WEM/postWRF/postWRF/constants.py	/^P0 = 100000.0$/;"	v
 P0	/home/johnlawson/WEM/utils/metconstants.py	/^P0 = 10**5 # Reference pressure$/;"	v
-P1	/home/johnlawson/WEM/lazyWRF/bin/profile_test.py	/^P1 = Profile(z,zL,E,m,hodotype,n,V,fdir,test_old_b=testsw)$/;"	v
+P2	/home/johnlawson/WEM/lazyWRF/bin/profile_test.py	/^    P2 = Profile(z,fdir,method='WK82',qv0=q*10**-3,Us=u,fname=fname,$/;"	v
 PLOT	/home/johnlawson/WEM/postWRF/bin/GEFS_NAM_compare.py	/^PLOT = {'Z':collections.OrderedDict()}$/;"	v
 PLOTS	/home/johnlawson/WEM/postWRF/bin/MAX_ensemble_compare.py	/^PLOTS = {$/;"	v
 PLOTS	/home/johnlawson/WEM/postWRF/bin/SALmedians_compare.py	/^PLOTS = {$/;"	v
 PLOTS	/home/johnlawson/WEM/postWRF/bin/pressure_gradients.py	/^PLOTS = {$/;"	v
 PLOTS	/home/johnlawson/WEM/postWRF/bin/zoom_in_bow.py	/^PLOTS = {$/;"	v
+PPP	/home/johnlawson/WEM/lazyWRF/lazyWRF/create_sounding.py	/^    def PPP(self,Z):$/;"	m	class:Profile
 P_to_z	/home/johnlawson/WEM/lazyWRF/lazyWRF/create_sounding.py	/^    def P_to_z(self,T,Pa,refPa=100000):$/;"	m	class:Profile
 PkBlfloat	/home/johnlawson/WEM/postWRF/postWRF/colourtables.py	/^def PkBlfloat(datarange):$/;"	f
 Profile	/home/johnlawson/WEM/lazyWRF/lazyWRF/create_sounding.py	/^class Profile(object):$/;"	c
@@ -133,6 +138,7 @@ RC	/home/johnlawson/WEM/postWRF/bin/barents_plot.py	/^    RC = Settings()$/;"	v
 RC	/home/johnlawson/WEM/postWRF/bin/bowecho_plot.py	/^    RC = Settings()$/;"	v
 RC	/home/johnlawson/WEM/postWRF/bin/hires_bowecho_plot.py	/^        RC = Settings()$/;"	v
 REALcmd	/home/johnlawson/WEM/lazyWRF/bin/sensitivity_ensemble_example.py	/^    REALcmd = ' '.join(('qsub','-d',pathtoWRF,'real_run.sh'))$/;"	v
+RH_invert_RV	/home/johnlawson/WEM/lazyWRF/lazyWRF/create_sounding.py	/^    def RH_invert_RV(self,P,T,RV):$/;"	m	class:Profile
 RMSE	/home/johnlawson/WEM/postWRF/bin/paper3_spread.py	/^                        RMSE = N.sqrt(((ECz - data)**2).mean())$/;"	v
 RUC	/home/johnlawson/WEM/postWRF/bin/barents_plot.py	/^        RUC = RUCPlot(RC,t,wrfdir=WRF_dir)$/;"	v
 RUC	/home/johnlawson/WEM/postWRF/bin/bowecho_plot.py	/^        RUC = RUCPlot(RC,t,wrfdir=WRF_dir)$/;"	v
@@ -197,6 +203,8 @@ U	/home/johnlawson/WEM/postWRF/bin/difference_plots.py	/^    U = DATA[nest]['U']
 U2	/home/johnlawson/WEM/postWRF/bin/difference_plots.py	/^    U2 = U[::n,::n]$/;"	v
 U_diff	/home/johnlawson/WEM/postWRF/bin/difference_plots.py	/^U_diff = DATA['SINGLE']['U'] - DATA['NESTED']['U']$/;"	v
 U_diff2	/home/johnlawson/WEM/postWRF/bin/difference_plots.py	/^    U_diff2 = -1* U_diff[::n,::n]$/;"	v
+U_range	/home/johnlawson/WEM/lazyWRF/bin/profile_test.py	/^U_range = N.arange(0.0,51.0,1.0)$/;"	v
+U_range	/home/johnlawson/WEM/lazyWRF/bin/slurm_ideal.py	/^U_range = N.arange(0.0,52.0,2.0)$/;"	v
 V	/home/johnlawson/WEM/lazyWRF/bin/profile_test.py	/^V = 12$/;"	v
 V	/home/johnlawson/WEM/postWRF/bin/DKE.py	/^    V = list(range(250,5250,250))$/;"	v
 V	/home/johnlawson/WEM/postWRF/bin/DKEold.py	/^V = list(range(200,2200,200))$/;"	v
@@ -230,7 +238,7 @@ Wlim	/home/johnlawson/WEM/postWRF/bin/domains.py	/^Wlim = -115.0$/;"	v
 Wlim	/home/johnlawson/WEM/postWRF/bin/paper3_spread.py	/^Wlim = N.floor(lons.min())$/;"	v
 Zplot	/home/johnlawson/WEM/postWRF/bin/forecastfunnel.py	/^Zplot = 1$/;"	v
 __init__	/home/johnlawson/WEM/lazyWRF/bin/lazysettings.py	/^    def __init__(self,case):$/;"	m	class:LazySettings
-__init__	/home/johnlawson/WEM/lazyWRF/lazyWRF/create_sounding.py	/^    def __init__(self,z,zL,E,m,hodotype,n,V,fdir,PW=30,$/;"	m	class:Profile
+__init__	/home/johnlawson/WEM/lazyWRF/lazyWRF/create_sounding.py	/^    def __init__(self,z,fdir,zL=False,E=2000,m=4.0,hodotype='curved',$/;"	m	class:Profile
 __init__	/home/johnlawson/WEM/lazyWRF/lazyWRF/main.py	/^    def __init__(self,config):$/;"	m	class:Lazy
 __init__	/home/johnlawson/WEM/postWRF/bin/DKE_settings.py	/^    def __init__(self):$/;"	m	class:Settings
 __init__	/home/johnlawson/WEM/postWRF/bin/barents_settings.py	/^    def __init__(self):$/;"	m	class:Settings
@@ -241,9 +249,11 @@ __init__	/home/johnlawson/WEM/postWRF/postWRF/birdseye.py	/^    def __init__(sel
 __init__	/home/johnlawson/WEM/postWRF/postWRF/clicker.py	/^    def __init__(self,wrfout,data=0,fig=0,ax=0,clvs=False,cmap=False):$/;"	m	class:Clicker
 __init__	/home/johnlawson/WEM/postWRF/postWRF/defaults.py	/^    def __init__(self):$/;"	m	class:Defaults
 __init__	/home/johnlawson/WEM/postWRF/postWRF/ecmwf.py	/^    def __init__(self,fpath,config):$/;"	m	class:ECMWF
-__init__	/home/johnlawson/WEM/postWRF/postWRF/figure.py	/^    def __init__(self,nc=False,ax=0,fig=0,plotn=(1,1),layout='normal'):$/;"	m	class:Figure
+__init__	/home/johnlawson/WEM/postWRF/postWRF/figure.py	/^    def __init__(self,nc=False,ax=0,fig=0,plotn=(1,1),layout='normal',$/;"	m	class:Figure
+__init__	/home/johnlawson/WEM/postWRF/postWRF/heatmap.py	/^    def __init__(self,data,ax=False,fig=False):$/;"	m	class:HeatMap
 __init__	/home/johnlawson/WEM/postWRF/postWRF/lookuptable.py	/^    def __init__(self):$/;"	m	class:LookUpTable
-__init__	/home/johnlawson/WEM/postWRF/postWRF/main.py	/^    def __init__(self):$/;"	m	class:WRFEnviron
+__init__	/home/johnlawson/WEM/postWRF/postWRF/main.py	/^    def __init__(self,em='em_real'):$/;"	m	class:WRFEnviron
+__init__	/home/johnlawson/WEM/postWRF/postWRF/ncfile.py	/^    def __init__(self,fpath):$/;"	m	class:NC
 __init__	/home/johnlawson/WEM/postWRF/postWRF/obs.py	/^    def __init__(self,fpath):$/;"	m	class:Obs
 __init__	/home/johnlawson/WEM/postWRF/postWRF/obs.py	/^    def __init__(self,fpath,):$/;"	m	class:StormReports
 __init__	/home/johnlawson/WEM/postWRF/postWRF/obs.py	/^    def __init__(self,utc,datadir,wind=True,hail=True,torn=True):$/;"	m	class:SPCReports
@@ -256,7 +266,7 @@ __init__	/home/johnlawson/WEM/postWRF/postWRF/skewt.py	/^    def __init__(self,n
 __init__	/home/johnlawson/WEM/postWRF/postWRF/skewt.py	/^    def __init__(self,nc=False):$/;"	m	class:SkewT
 __init__	/home/johnlawson/WEM/postWRF/postWRF/skewt2.py	/^    def __init__(self, *args, **kwargs):$/;"	m	class:SkewXAxis
 __init__	/home/johnlawson/WEM/postWRF/postWRF/ts.py	/^    def __init__(self,ensemble,latlon,locname):$/;"	m	class:TimeSeries
-__init__	/home/johnlawson/WEM/postWRF/postWRF/wrfout.py	/^    def __init__(self,fpath):$/;"	m	class:WRFOut
+__init__	/home/johnlawson/WEM/postWRF/postWRF/wrfout.py	/^    def __init__(self,fpath,fmt='em_real',ncks=False):$/;"	m	class:WRFOut
 __init__	/home/johnlawson/WEM/postWRF/postWRF/xsection.py	/^    def __init__(self,wrfout,latA=0,lonA=0,latB=0,lonB=0):$/;"	m	class:CrossSection
 __init__.py	/home/johnlawson/WEM/__init__.py	1;"	F
 __init__.py	/home/johnlawson/WEM/lazyWRF/__init__.py	1;"	F
@@ -280,6 +290,7 @@ all_3D_dte	/home/johnlawson/WEM/postWRF/bin/bowecho_plot.py	/^all_3D_dte = 1 # T
 all_3D_dte	/home/johnlawson/WEM/postWRF/bin/hires_bowecho_plot.py	/^all_3D_dte = 0 # To produce line graphs for all averages$/;"	v
 all_error_growth	/home/johnlawson/WEM/postWRF/postWRF/main.py	/^    def all_error_growth(self,outdir,infodict,ylim=False,f_prefix=False,$/;"	m	class:WRFEnviron
 all_taSAL_plot	/home/johnlawson/WEM/postWRF/bin/paper4_SAL.py	/^all_taSAL_plot = 0$/;"	v
+already_done	/home/johnlawson/WEM/lazyWRF/bin/slurm_ideal.py	/^already_done = glob.glob(ncksdir+'\/*')$/;"	v
 arg	/home/johnlawson/WEM/lazyWRF/bin/setup_gefs.py	/^    arg = sys.argv[1]$/;"	v
 arr	/home/johnlawson/WEM/postWRF/bin/heatmap_bow.py	/^arr = N.zeros([14,ntimes])$/;"	v
 arrERR	/home/johnlawson/WEM/postWRF/bin/SAL.py	/^            arrERR = {}$/;"	v
@@ -481,7 +492,7 @@ compute_L1	/home/johnlawson/WEM/postWRF/postWRF/sal.py	/^    def compute_L1(self
 compute_L2	/home/johnlawson/WEM/postWRF/postWRF/sal.py	/^    def compute_L2(self,):$/;"	m	class:SAL
 compute_Lv	/home/johnlawson/WEM/lazyWRF/lazyWRF/create_sounding.py	/^    def compute_Lv(self,T):$/;"	m	class:Profile
 compute_PMSL_gradient	/home/johnlawson/WEM/postWRF/postWRF/wrfout.py	/^    def compute_PMSL_gradient(self,tidx,lvidx,lonidx,latidx,other):$/;"	m	class:WRFOut
-compute_P_at_z	/home/johnlawson/WEM/lazyWRF/lazyWRF/create_sounding.py	/^    def compute_P_at_z(self,P,T,dz):$/;"	m	class:Profile
+compute_P_at_z	/home/johnlawson/WEM/lazyWRF/lazyWRF/create_sounding.py	/^    def compute_P_at_z(self,Pbot,T,r,dz):$/;"	m	class:Profile
 compute_P_levels	/home/johnlawson/WEM/lazyWRF/lazyWRF/create_sounding.py	/^    def compute_P_levels(self,zz,theta):$/;"	m	class:Profile
 compute_Q_pert	/home/johnlawson/WEM/postWRF/postWRF/wrfout.py	/^    def compute_Q_pert(self,tidx,lvidx,lonidx,latidx,other):$/;"	m	class:WRFOut
 compute_REFL_comp	/home/johnlawson/WEM/postWRF/postWRF/wrfout.py	/^    def compute_REFL_comp(self,tidx,lvidx,lonidx,latidx,other):$/;"	m	class:WRFOut
@@ -490,6 +501,7 @@ compute_RH	/home/johnlawson/WEM/postWRF/postWRF/wrfout.py	/^    def compute_RH(s
 compute_T2_gradient	/home/johnlawson/WEM/postWRF/postWRF/wrfout.py	/^    def compute_T2_gradient(self,tidx,lvidx,lonidx,latidx,other):$/;"	m	class:WRFOut
 compute_T2_pertub	/home/johnlawson/WEM/postWRF/postWRF/wrfout.py	/^    def compute_T2_pertub(self,tidx,lvidx,lonidx,latidx,other):$/;"	m	class:WRFOut
 compute_TL	/home/johnlawson/WEM/lazyWRF/lazyWRF/create_sounding.py	/^    def compute_TL(self,TK,rh):$/;"	m	class:Profile
+compute_TLCL	/home/johnlawson/WEM/lazyWRF/lazyWRF/create_sounding.py	/^    def compute_TLCL(self,Td,T):$/;"	m	class:Profile
 compute_T_invert_thetae	/home/johnlawson/WEM/lazyWRF/lazyWRF/create_sounding.py	/^    def compute_T_invert_thetae(self,thetae,P,r,TLCL):$/;"	m	class:Profile
 compute_T_with_LCL	/home/johnlawson/WEM/lazyWRF/lazyWRF/create_sounding.py	/^    def compute_T_with_LCL(self,P,PLCL,TLCL):$/;"	m	class:Profile
 compute_Td	/home/johnlawson/WEM/lazyWRF/lazyWRF/create_sounding.py	/^    def compute_Td(self,T,RH):$/;"	m	class:Profile
@@ -506,7 +518,7 @@ compute_comp_ref	/home/johnlawson/WEM/postWRF/postWRF/wrfout.py	/^    def comput
 compute_cpdz	/home/johnlawson/WEM/postWRF/postWRF/wrfout.py	/^    def compute_cpdz(self,x,y,dpt,heights,dpt_env):$/;"	m	class:WRFOut
 compute_d	/home/johnlawson/WEM/postWRF/postWRF/sal.py	/^    def compute_d(self):$/;"	m	class:SAL
 compute_density	/home/johnlawson/WEM/postWRF/postWRF/wrfout.py	/^    def compute_density(self,tidx,lvidx,lonidx,latidx,other):$/;"	m	class:WRFOut
-compute_derivatives	/home/johnlawson/WEM/postWRF/postWRF/wrfout.py	/^    def compute_derivatives(self,U,V):$/;"	m	class:WRFOut
+compute_derivatives	/home/johnlawson/WEM/postWRF/postWRF/wrfout.py	/^    def compute_derivatives(self,U,V,axis=None):$/;"	m	class:WRFOut
 compute_diff_energy	/home/johnlawson/WEM/postWRF/postWRF/main.py	/^    def compute_diff_energy(self,*args,**kwargs):$/;"	m	class:WRFEnviron
 compute_diff_energy	/home/johnlawson/WEM/postWRF/postWRF/stats.py	/^def compute_diff_energy(ptype,energy,files,times,upper=None,lower=None,$/;"	f
 compute_divergence	/home/johnlawson/WEM/postWRF/postWRF/wrfout.py	/^    def compute_divergence(self,U,V):$/;"	m	class:WRFOut
@@ -552,7 +564,11 @@ compute_theta	/home/johnlawson/WEM/postWRF/postWRF/wrfout.py	/^    def compute_t
 compute_theta_2	/home/johnlawson/WEM/lazyWRF/lazyWRF/create_sounding.py	/^    def compute_theta_2(self,P,T):$/;"	m	class:Profile
 compute_thetae	/home/johnlawson/WEM/lazyWRF/lazyWRF/create_sounding.py	/^    def compute_thetae(self,T,r,P,Td=None,RH=None):$/;"	m	class:Profile
 compute_thetae	/home/johnlawson/WEM/postWRF/postWRF/wrfout.py	/^    def compute_thetae(self,tidx,lvidx,lonidx,latidx,other):$/;"	m	class:WRFOut
+compute_thetae_2	/home/johnlawson/WEM/lazyWRF/lazyWRF/create_sounding.py	/^    def compute_thetae_2(self,theta,r,TLCL):$/;"	m	class:Profile
+compute_thetae_3	/home/johnlawson/WEM/lazyWRF/lazyWRF/create_sounding.py	/^    def compute_thetae_3(self,theta,P,Td,T,r,TL=False):$/;"	m	class:Profile
+compute_thetae_4	/home/johnlawson/WEM/lazyWRF/lazyWRF/create_sounding.py	/^    def compute_thetae_4(self,T,p,r,TL):$/;"	m	class:Profile
 compute_thetae_profile	/home/johnlawson/WEM/lazyWRF/lazyWRF/create_sounding.py	/^    def compute_thetae_profile(self,TK,p,r,RH):$/;"	m	class:Profile
+compute_thetaep	/home/johnlawson/WEM/lazyWRF/lazyWRF/create_sounding.py	/^    def compute_thetaep(self,p,r,T,RH):$/;"	m	class:Profile
 compute_thetapert	/home/johnlawson/WEM/lazyWRF/lazyWRF/create_sounding.py	/^    def compute_thetapert(self,B,T,r):$/;"	m	class:Profile
 compute_total_deformation	/home/johnlawson/WEM/postWRF/postWRF/wrfout.py	/^    def compute_total_deformation(self,U,V):$/;"	m	class:WRFOut
 compute_vappres	/home/johnlawson/WEM/postWRF/postWRF/wrfout.py	/^    def compute_vappres(self,tidx,lvidx,lonidx,latidx,other):$/;"	m	class:WRFOut
@@ -588,12 +604,13 @@ cp	/home/johnlawson/WEM/utils/metconstants.py	/^cp = 1005.0$/;"	v
 create_colorbar	/home/johnlawson/WEM/postWRF/postWRF/figure.py	/^    def create_colorbar(self,fpath,fname,cf,label='',tix=False):$/;"	m	class:Figure
 create_ensemble	/home/johnlawson/WEM/postWRF/bin/bowecho_plot.py	/^def create_ensemble():$/;"	f
 create_fname	/home/johnlawson/WEM/postWRF/postWRF/figure.py	/^    def create_fname(self,*naming):$/;"	m	class:Figure
-create_fname	/home/johnlawson/WEM/postWRF/postWRF/main.py	/^    def create_fname(self,vrbl,utc=False,level=False,other=False,$/;"	m	class:WRFEnviron
+create_fname	/home/johnlawson/WEM/postWRF/postWRF/main.py	/^    def create_fname(self,vrbl,utc=None,level=False,other=False,$/;"	m	class:WRFEnviron
 create_linenormal_xs	/home/johnlawson/WEM/postWRF/postWRF/xsection.py	/^    def create_linenormal_xs(self,x,y,length_pts=3):$/;"	m	class:CrossSection
 create_quicklook	/home/johnlawson/WEM/lazyWRF/bin/sensitivity_ensemble_example.py	/^def create_quicklook(datestring,ICmodel,ensembletype,ICens,ens,pathtonc):$/;"	f
 create_slice	/home/johnlawson/WEM/postWRF/postWRF/wrfout.py	/^    def create_slice(self,vrbl,tidx,lvidx,lonidx,latidx,dim_names):$/;"	m	class:WRFOut
 create_sounding.py	/home/johnlawson/WEM/lazyWRF/lazyWRF/create_sounding.py	1;"	F
 create_textfile	/home/johnlawson/WEM/lazyWRF/lazyWRF/create_sounding.py	/^    def create_textfile(self):$/;"	m	class:Profile
+create_textfile	/home/johnlawson/WEM/lazyWRF/lazyWRF/create_sounding.py	/^    def create_textfile(self,):$/;"	m	class:Profile
 csvprocess	/home/johnlawson/WEM/utils/GIS_tools.py	/^def csvprocess(data,names,convert=0):$/;"	f
 ctrl_fpath	/home/johnlawson/WEM/postWRF/bin/SAL.py	/^                        ctrl_fpath = False$/;"	v
 ctrl_fpath	/home/johnlawson/WEM/postWRF/bin/SAL.py	/^                    ctrl_fpath = os.path.join(ctrl_dir,W_fname)$/;"	v
@@ -628,8 +645,11 @@ debug_get	/home/johnlawson/WEM/postWRF/postWRF/ruc.py	/^debug_get = 0$/;"	v
 debug_get	/home/johnlawson/WEM/postWRF/postWRF/wrfout.py	/^debug_get = 0$/;"	v
 decompose_wind	/home/johnlawson/WEM/utils/GIS_tools.py	/^def decompose_wind(wspd,wdir,convert=0):$/;"	f
 defaults.py	/home/johnlawson/WEM/postWRF/postWRF/defaults.py	1;"	F
+delcmd	/home/johnlawson/WEM/lazyWRF/bin/slurm_ideal.py	/^    delcmd = 'rm {0}'.format(wrfinputpath)$/;"	v
 delcmd	/home/johnlawson/WEM/postWRF/bin/paper3_spread.py	/^                delcmd = 'rm {0} -f'.format(d)$/;"	v
 delcmd	/home/johnlawson/WEM/postWRF/bin/paper3_spread.py	/^        delcmd = 'rm {0} -f'.format(tar)$/;"	v
+delcmd_p	/home/johnlawson/WEM/lazyWRF/bin/slurm_ideal.py	/^    delcmd_p = subprocess.Popen(delcmd,cwd=wrfdir,shell=True)$/;"	v
+delete_files	/home/johnlawson/WEM/lazyWRF/bin/slurm_ideal.py	/^def delete_files(*args,**kwargs):$/;"	f
 delete_files	/home/johnlawson/WEM/postWRF/bin/paper3_spread.py	/^def delete_files(*args):$/;"	f
 delete_files	/home/johnlawson/WEM/postWRF/bin/paper4_SAL.py	/^def delete_files(*args):$/;"	f
 delta_diff_energy	/home/johnlawson/WEM/postWRF/postWRF/main.py	/^    def delta_diff_energy(self,vrbl,utc0,utc1,energy,datadir,outdir,$/;"	m	class:WRFEnviron
@@ -708,6 +728,8 @@ edit_namelist_input	/home/johnlawson/WEM/lazyWRF/bin/sensitivity_ensemble_exampl
 edit_namelist_input	/home/johnlawson/WEM/lazyWRF/bin/sensitivity_ensemble_old.py	/^def edit_namelist_input(old,new,pathtoWRF=pathtoWRF):$/;"	f
 ee	/home/johnlawson/WEM/postWRF/bin/spread_compare.py	/^    ee = N.intersect1d(aa,bb)$/;"	v
 ee	/home/johnlawson/WEM/postWRF/bin/spread_compare_v2.py	/^    ee = N.intersect1d(aa,bb)$/;"	v
+elapsed	/home/johnlawson/WEM/lazyWRF/bin/slurm_ideal.py	/^    elapsed = startsleep$/;"	v
+em_real_init	/home/johnlawson/WEM/postWRF/postWRF/wrfout.py	/^    def em_real_init(self):$/;"	m	class:WRFOut
 email	/home/johnlawson/WEM/lazyWRF/bin/lazywrf_example.py	/^email = 0$/;"	v
 en	/home/johnlawson/WEM/postWRF/bin/barents_plot.py	/^    en = ensnames[0]$/;"	v
 en	/home/johnlawson/WEM/postWRF/bin/bowecho_plot.py	/^        en = 'p09'$/;"	v
@@ -803,7 +825,7 @@ ext	/home/johnlawson/WEM/postWRF/bin/paper3_spread.py	/^            ext = '.grb2
 ext	/home/johnlawson/WEM/postWRF/bin/paper3_spread.py	/^        ext = '.grib'$/;"	v
 fdate	/home/johnlawson/WEM/lazyWRF/bin/lazywrf_example.py	/^fdate = (2006,0o5,27,12,0,0)$/;"	v
 fdate_s	/home/johnlawson/WEM/lazyWRF/bin/lazywrf_example.py	/^    fdate_s = "'"+y2+"-"+mth2+"-"+d2+'_'+h2+':'+min2+":"+s2+"',"$/;"	v
-fdir	/home/johnlawson/WEM/lazyWRF/bin/profile_test.py	/^fdir = '\/home\/johnlawson'$/;"	v
+fdir	/home/johnlawson/WEM/lazyWRF/bin/profile_test.py	/^fdir = '\/home\/johnlawson\/idealised\/WK82_profiles_2'$/;"	v
 ff	/home/johnlawson/WEM/postWRF/bin/spread_compare.py	/^    ff = N.intersect1d(cc,dd)$/;"	v
 ff	/home/johnlawson/WEM/postWRF/bin/spread_compare_v2.py	/^    ff = N.intersect1d(cc,dd)$/;"	v
 fhr	/home/johnlawson/WEM/postWRF/bin/SAL.py	/^                    fhr = '{0:02d}'.format(totalsec\/(60*60))$/;"	v
@@ -829,8 +851,12 @@ finished	/home/johnlawson/WEM/lazyWRF/bin/sensitivity_ensemble_example.py	/^    
 finished	/home/johnlawson/WEM/lazyWRF/bin/sensitivity_ensemble_example.py	/^    finished = 0$/;"	v
 finished	/home/johnlawson/WEM/lazyWRF/bin/sensitivity_ensemble_old.py	/^            finished = 1$/;"	v
 finished	/home/johnlawson/WEM/lazyWRF/bin/sensitivity_ensemble_old.py	/^    finished = 0$/;"	v
+finished	/home/johnlawson/WEM/lazyWRF/bin/slurm_ideal.py	/^            finished = True$/;"	v
+finished	/home/johnlawson/WEM/lazyWRF/bin/slurm_ideal.py	/^    finished = False$/;"	v
 flist	/home/johnlawson/WEM/postWRF/bin/paper3_spread.py	/^                flist = glob.glob(os.path.join(GEFSdir,'*'))$/;"	v
 fmt	/home/johnlawson/WEM/postWRF/bin/difference_plots.py	/^                    fmt='latlon',**lims)$/;"	v
+fname	/home/johnlawson/WEM/lazyWRF/bin/profile_test.py	/^    fname = gen_fname(q,u)$/;"	v
+fname	/home/johnlawson/WEM/lazyWRF/bin/slurm_ideal.py	/^    fname = gen_fname(q,u)$/;"	v
 fname	/home/johnlawson/WEM/postWRF/bin/GEFS_NAM_compare.py	/^fname = 'GEFS_NAM_compare'$/;"	v
 fname	/home/johnlawson/WEM/postWRF/bin/ILIN11_reports_radar.py	/^fname = 'ILIN11_reports_radar.png'$/;"	v
 fname	/home/johnlawson/WEM/postWRF/bin/SALmedians_compare.py	/^fname = 'SAL_medians_compare_KSOK13.png'$/;"	v
@@ -880,6 +906,8 @@ fpath	/home/johnlawson/WEM/postWRF/bin/spread_compare.py	/^    fpath = os.path.j
 fpath	/home/johnlawson/WEM/postWRF/bin/spread_compare_v2.py	/^    fpath = os.path.join(outdir,fname)$/;"	v
 fpath	/home/johnlawson/WEM/postWRF/bin/storm_reports.py	/^fpath = '\/home\/jrlawson\/storm_data_search_results.csv'$/;"	v
 fpath	/home/johnlawson/WEM/postWRF/bin/zoom_in_bow.py	/^fpath = os.path.join(outdir,fname)$/;"	v
+fpath_nc	/home/johnlawson/WEM/lazyWRF/bin/slurm_ideal.py	/^    fpath_nc = os.path.join(wrfoutdir,'wrfout_ideal')$/;"	v
+fpath_ncks	/home/johnlawson/WEM/lazyWRF/bin/slurm_ideal.py	/^    fpath_ncks = ncks(fpath_nc,vrbls)$/;"	v
 fps	/home/johnlawson/WEM/postWRF/bin/SAL.py	/^fps = [199,]$/;"	v
 frontogenesis	/home/johnlawson/WEM/postWRF/bin/bowecho_plot.py	/^frontogenesis = 0$/;"	v
 frontogenesis	/home/johnlawson/WEM/postWRF/bin/hires_bowecho_plot.py	/^frontogenesis = 0$/;"	v
@@ -957,6 +985,8 @@ gefsdir	/home/johnlawson/WEM/lazyWRF/bin/setup_gefs.py	/^gefsdir = '.\/gefsfiles
 gefsdir	/home/johnlawson/WEM/lazyWRF/bin/setup_gefs_isu.py	/^gefsdir = '.\/gefsfiles\/' + datestr + '\/'$/;"	v
 gefslv	/home/johnlawson/WEM/postWRF/bin/paper3_spread.py	/^gefslv = 500$/;"	v
 gefsmembers	/home/johnlawson/WEM/postWRF/bin/paper3_spread.py	/^gefsmembers = ['c00',] + ['p{0:02d}'.format(n) for n in range(1,11)]$/;"	v
+gen_fname	/home/johnlawson/WEM/lazyWRF/bin/profile_test.py	/^def gen_fname(q,u):$/;"	f
+gen_fname	/home/johnlawson/WEM/lazyWRF/bin/slurm_ideal.py	/^def gen_fname(q,u):$/;"	f
 generate_basemap	/home/johnlawson/WEM/postWRF/postWRF/obs.py	/^    def generate_basemap(self,fig,ax,Nlim=False,Elim=False,Slim=False,$/;"	m	class:Radar
 generate_colours	/home/johnlawson/WEM/utils/GIS_tools.py	/^def generate_colours(M,n):$/;"	f
 generate_date	/home/johnlawson/WEM/lazyWRF/lazyWRF/main.py	/^    def generate_date(self,date,outstyle='wps'):$/;"	m	class:Lazy
@@ -964,7 +994,7 @@ generate_times	/home/johnlawson/WEM/postWRF/postWRF/main.py	/^    def generate_t
 generate_times	/home/johnlawson/WEM/utils/GIS_tools.py	/^def generate_times(idate,fdate,interval):$/;"	f
 get	/home/johnlawson/WEM/postWRF/postWRF/ecmwf.py	/^    def get(self,va,lv,t):$/;"	m	class:ECMWF
 get	/home/johnlawson/WEM/postWRF/postWRF/rucplot.py	/^    def get(self,va,**kwargs):$/;"	m	class:RUCPlot
-get	/home/johnlawson/WEM/postWRF/postWRF/wrfout.py	/^    def get(self,vrbl,utc=False,level=False,lats=False,lons=False,$/;"	m	class:WRFOut
+get	/home/johnlawson/WEM/postWRF/postWRF/wrfout.py	/^    def get(self,vrbl,utc=None,level=None,lats=None,lons=None,$/;"	m	class:WRFOut
 getXY	/home/johnlawson/WEM/utils/GIS_tools.py	/^def getXY(lats,lons,ptlat,ptlon):$/;"	f
 get_218fcst	/home/johnlawson/WEM/postWRF/bin/getdata.py	/^    def get_218fcst(dates,hours,Tmax,Tint):$/;"	f	function:getnam
 get_218fcst	/home/johnlawson/WEM/utils/getdata.py	/^    def get_218fcst(dates,hours,Tmax,Tint):$/;"	f	function:getnam
@@ -1015,13 +1045,15 @@ get_nc	/home/johnlawson/WEM/postWRF/bin/paper3_spread.py	/^def get_nc(typ,date,m
 get_netcdf	/home/johnlawson/WEM/postWRF/postWRF/main.py	/^    def get_netcdf(self,ncdir,ncf=False,nct=False,dom=1,path_only=False):$/;"	m	class:WRFEnviron
 get_netcdf_naming	/home/johnlawson/WEM/utils/GIS_tools.py	/^def get_netcdf_naming(model,t,dom=0):$/;"	f
 get_p	/home/johnlawson/WEM/postWRF/postWRF/ruc.py	/^    def get_p(self,vrbl,tidx,level,lonidx,latidx):$/;"	m	class:RUC
-get_p	/home/johnlawson/WEM/postWRF/postWRF/wrfout.py	/^    def get_p(self,vrbl,tidx=False,level=False,lonidx=False,latidx=False):$/;"	m	class:WRFOut
+get_p	/home/johnlawson/WEM/postWRF/postWRF/wrfout.py	/^    def get_p(self,vrbl,tidx=None,level=None,lonidx=None,latidx=None):$/;"	m	class:WRFOut
 get_pickle_dirs	/home/johnlawson/WEM/postWRF/bin/bowecho_plot.py	/^def get_pickle_dirs(en):$/;"	f
 get_plot_arguments	/home/johnlawson/WEM/postWRF/postWRF/birdseye.py	/^    def get_plot_arguments(self,cmap=False,clvs=False,color=False):$/;"	m	class:BirdsEye
 get_radar_fname	/home/johnlawson/WEM/postWRF/postWRF/obs.py	/^    def get_radar_fname(self):$/;"	m	class:Radar
 get_radar_url	/home/johnlawson/WEM/postWRF/postWRF/obs.py	/^    def get_radar_url(self):$/;"	m	class:Radar
 get_radar_verif	/home/johnlawson/WEM/postWRF/postWRF/sal.py	/^    def get_radar_verif(self,utc,datapath):$/;"	m	class:SAL
 get_sequence	/home/johnlawson/WEM/utils/GIS_tools.py	/^def get_sequence(x,sos=0):$/;"	f
+get_stdP	/home/johnlawson/WEM/lazyWRF/lazyWRF/create_sounding.py	/^    def get_stdP(self,z):$/;"	m	class:Profile
+get_stdT	/home/johnlawson/WEM/lazyWRF/lazyWRF/create_sounding.py	/^    def get_stdT(self,z):$/;"	m	class:Profile
 get_subdomain	/home/johnlawson/WEM/postWRF/postWRF/obs.py	/^    def get_subdomain(self,Nlim,Elim,Slim,Wlim,overwrite=False):$/;"	m	class:Radar
 get_time_idx	/home/johnlawson/WEM/postWRF/postWRF/wrfout.py	/^    def get_time_idx(self,utc):$/;"	m	class:WRFOut
 get_time_seq	/home/johnlawson/WEM/postWRF/postWRF/ruc.py	/^    def get_time_seq(self):$/;"	m	class:RUC
@@ -1068,6 +1100,7 @@ haversine_baker	/home/johnlawson/WEM/utils/GIS_tools.py	/^def haversine_baker(lo
 heat	/home/johnlawson/WEM/postWRF/bin/paper3_spread.py	/^heat = 'NAMskill'$/;"	v
 heatmap	/home/johnlawson/WEM/postWRF/bin/heatmap_bow.py	/^                heatmap = ax.pcolor(rel_norm, cmap=cmap, alpha=0.8)$/;"	v
 heatmap	/home/johnlawson/WEM/postWRF/bin/paper3_spread.py	/^            heatmap = ax.pcolor(N.swapaxes(rel_norm,1,0), cmap=M.cm.PuRd, alpha=0.8)$/;"	v
+heatmap.py	/home/johnlawson/WEM/postWRF/postWRF/heatmap.py	1;"	F
 heatmap_bow.py	/home/johnlawson/WEM/postWRF/bin/heatmap_bow.py	1;"	F
 height_m	/home/johnlawson/WEM/postWRF/bin/spread_compare.py	/^            height_m = W.dy*(W.y_dim-1)$/;"	v
 hgt_from_sigma	/home/johnlawson/WEM/utils/GIS_tools.py	/^def hgt_from_sigma(nc):$/;"	f
@@ -1095,6 +1128,8 @@ i_start	/home/johnlawson/WEM/lazyWRF/bin/lazywrf_example.py	/^i_start = (1,) # S
 idate	/home/johnlawson/WEM/lazyWRF/bin/lazywrf_example.py	/^idate = (2006,0o5,26,0,0,0)$/;"	v
 idate_s	/home/johnlawson/WEM/lazyWRF/bin/lazywrf_example.py	/^    idate_s = "'"+y1+"-"+mth1+"-"+d1+'_'+h1+':'+min1+":"+s1+"',"$/;"	v
 ideal.py	/home/johnlawson/WEM/postWRF/bin/ideal.py	1;"	F
+ideal_init	/home/johnlawson/WEM/postWRF/postWRF/wrfout.py	/^    def ideal_init(self):$/;"	m	class:WRFOut
+ideal_p	/home/johnlawson/WEM/lazyWRF/bin/slurm_ideal.py	/^    ideal_p = subprocess.Popen(path_to_ideal, cwd=wrfdir,shell=True)$/;"	v
 identify_objects	/home/johnlawson/WEM/postWRF/postWRF/sal.py	/^    def identify_objects(self,):$/;"	m	class:SAL
 idx0	/home/johnlawson/WEM/postWRF/bin/heatmap_bow.py	/^                    idx0 = centre_idx-12$/;"	v
 idx1	/home/johnlawson/WEM/postWRF/bin/heatmap_bow.py	/^                    idx1 = centre_idx+6$/;"	v
@@ -1122,6 +1157,7 @@ inittime	/home/johnlawson/WEM/postWRF/bin/multiple.py	/^    inittime = (2006,5,2
 inittime	/home/johnlawson/WEM/postWRF/bin/multiple.py	/^    inittime = (2009,9,10,23,0,0)$/;"	v
 inittime	/home/johnlawson/WEM/postWRF/bin/multiple.py	/^    inittime = (2011,4,19,0,0,0)$/;"	v
 inittime	/home/johnlawson/WEM/postWRF/bin/multiple.py	/^    inittime = (2013,8,15,0,0,0)$/;"	v
+insoundpath	/home/johnlawson/WEM/lazyWRF/bin/slurm_ideal.py	/^    insoundpath = os.path.join(wrfdir,'input_sounding')$/;"	v
 install_requires	/home/johnlawson/WEM/postWRF/setup.py	/^    install_requires=[$/;"	v
 int_hr	/home/johnlawson/WEM/postWRF/bin/combine_png.py	/^        int_hr = 2$/;"	v
 int_hr	/home/johnlawson/WEM/postWRF/bin/combine_png.py	/^        int_hr = 3$/;"	v
@@ -1136,6 +1172,7 @@ interp2point	/home/johnlawson/WEM/utils/GIS_tools.py	/^def interp2point(data,lat
 interp_latlon	/home/johnlawson/WEM/utils/GIS_tools.py	/^def interp_latlon(data,lat,lon,lats,lons):$/;"	f
 interp_to_p_fortran	/home/johnlawson/WEM/postWRF/postWRF/wrfout.py	/^    def interp_to_p_fortran(self,config,nc_path,var,lv):$/;"	m	class:WRFOut
 interpolate_nans	/home/johnlawson/WEM/postWRF/bin/heatmap_bow.py	/^                    def interpolate_nans(arr1d):$/;"	f
+interpolate_nans	/home/johnlawson/WEM/postWRF/postWRF/heatmap.py	/^    def interpolate_nans(self,arr1d):$/;"	m	class:HeatMap
 interval	/home/johnlawson/WEM/lazyWRF/bin/lazywrf_example.py	/^interval = 6.0 # In hours, as a float$/;"	v
 interval	/home/johnlawson/WEM/postWRF/bin/MAX_ensemble_compare.py	/^interval = 60*60$/;"	v
 interval	/home/johnlawson/WEM/postWRF/bin/SALmedians_compare.py	/^interval = 60*60*3$/;"	v
@@ -1202,7 +1239,9 @@ jobid	/home/johnlawson/WEM/lazyWRF/bin/sensitivity_ensemble_example.py	/^    job
 jobid	/home/johnlawson/WEM/lazyWRF/bin/sensitivity_ensemble_example.py	/^    jobid = child.before[2:7]$/;"	v
 jobid	/home/johnlawson/WEM/lazyWRF/bin/sensitivity_ensemble_old.py	/^    jobid = p_real.stdout.read()[:5] # Assuming first five digits = job ID.$/;"	v
 jobid	/home/johnlawson/WEM/lazyWRF/bin/setup_gefs.py	/^    jobid = p.stdout.read()[:5]$/;"	v
+jobpath	/home/johnlawson/WEM/lazyWRF/bin/slurm_ideal.py	/^    jobpath = os.path.join(wrfdir,'submit_wrf.job')$/;"	v
 just_one_colorbar	/home/johnlawson/WEM/postWRF/postWRF/figure.py	/^    def just_one_colorbar(self,fpath,fname,cf,label=False,tix=False):$/;"	m	class:Figure
+k2z	/home/johnlawson/WEM/lazyWRF/bin/profile_test.py	/^k2z = 250$/;"	v
 kappa	/home/johnlawson/WEM/postWRF/postWRF/constants.py	/^kappa = 0.2854$/;"	v
 kappa	/home/johnlawson/WEM/utils/metconstants.py	/^kappa = (cp-cv)\/cp$/;"	v
 kenzie_climo.py	/home/johnlawson/WEM/postWRF/bin/kenzie_climo.py	1;"	F
@@ -1219,6 +1258,7 @@ labels	/home/johnlawson/WEM/postWRF/bin/zoom_in_bow.py	/^labels = iter(list(stri
 labpos	/home/johnlawson/WEM/postWRF/bin/domains.py	/^labpos = ('lc','lc')$/;"	v
 landc	/home/johnlawson/WEM/postWRF/bin/domains.py	/^landc = 'darkgrey'$/;"	v
 lastens	/home/johnlawson/WEM/lazyWRF/bin/setup_gefs.py	/^                    lastens = n$/;"	v
+lastrmrls_p	/home/johnlawson/WEM/lazyWRF/bin/slurm_ideal.py	/^    lastrmrls_p = subprocess.Popen(rslrmcmd,shell=True)$/;"	v
 latA	/home/johnlawson/WEM/postWRF/bin/difference_plots.py	/^latA = 40.3$/;"	v
 latA	/home/johnlawson/WEM/postWRF/bin/xsection.py	/^latA = 40.3$/;"	v
 latB	/home/johnlawson/WEM/postWRF/bin/difference_plots.py	/^latB = 39.0$/;"	v
@@ -1262,6 +1302,8 @@ link_to_IC_data	/home/johnlawson/WEM/lazyWRF/lazyWRF/main.py	/^    def link_to_I
 link_to_met_em	/home/johnlawson/WEM/lazyWRF/lazyWRF/main.py	/^    def link_to_met_em(self):$/;"	m	class:Lazy
 link_to_soil_Vtable	/home/johnlawson/WEM/lazyWRF/lazyWRF/main.py	/^    def link_to_soil_Vtable(self):$/;"	m	class:Lazy
 link_to_soil_data	/home/johnlawson/WEM/lazyWRF/lazyWRF/main.py	/^    def link_to_soil_data(self):$/;"	m	class:Lazy
+linkcmd	/home/johnlawson/WEM/lazyWRF/bin/slurm_ideal.py	/^    linkcmd = 'ln -sf {0} {1}'.format(soundpath,insoundpath)$/;"	v
+linkcmd_p	/home/johnlawson/WEM/lazyWRF/bin/slurm_ideal.py	/^    linkcmd_p = subprocess.Popen(linkcmd,cwd=wrfdir,shell=True)$/;"	v
 linkonly	/home/johnlawson/WEM/lazyWRF/bin/setup_gefs_isu.py	/^linkonly = 0 # Don't submit jobs, just link met_em files$/;"	v
 list_ncfiles	/home/johnlawson/WEM/postWRF/postWRF/main.py	/^    def list_ncfiles(self,ncdirs,nct=False,ncf=False,dom=0,path_only=1):$/;"	m	class:WRFEnviron
 list_t	/home/johnlawson/WEM/postWRF/bin/paper3_spread.py	/^list_t = (12,24,36)$/;"	v
@@ -1337,6 +1379,7 @@ metconstants.py	/home/johnlawson/WEM/utils/metconstants.py	1;"	F
 meteogram	/home/johnlawson/WEM/postWRF/bin/bolttest.py	/^meteogram = 0$/;"	v
 meteogram	/home/johnlawson/WEM/postWRF/postWRF/main.py	/^    def meteogram(self,vrbl,loc,ncfiles,outdir=False,ncf=False,nct=False,dom=1):$/;"	m	class:WRFEnviron
 meteogram	/home/johnlawson/WEM/postWRF/postWRF/ts.py	/^    def meteogram(self,vrbl,utc=False,outdir=False,ncf=False,$/;"	m	class:TimeSeries
+method	/home/johnlawson/WEM/lazyWRF/bin/profile_test.py	/^method='WK82'$/;"	v
 method1	/home/johnlawson/WEM/postWRF/bin/paper4_SAL.py	/^method1 = 1$/;"	v
 method2	/home/johnlawson/WEM/postWRF/bin/paper4_SAL.py	/^method2 = 0$/;"	v
 method3	/home/johnlawson/WEM/postWRF/bin/paper4_SAL.py	/^method3 = 0$/;"	v
@@ -1356,12 +1399,15 @@ mod_fpath	/home/johnlawson/WEM/postWRF/bin/SAL.py	/^                        mod_
 moist_adiabats	/home/johnlawson/WEM/postWRF/postWRF/skewt.py	/^    def moist_adiabats(self,):$/;"	m	class:SkewT
 mouseclick	/home/johnlawson/WEM/postWRF/postWRF/xsection.py	/^    def mouseclick(self,event):$/;"	m	class:CrossSection
 move_wrfout	/home/johnlawson/WEM/lazyWRF/bin/lazywrf_example.py	/^move_wrfout = 0 # WORK IN PROGRESS$/;"	v
+movefpath	/home/johnlawson/WEM/lazyWRF/bin/slurm_ideal.py	/^    movefpath = os.path.join(ncksdir,ncksname)$/;"	v
 mst	/home/johnlawson/WEM/postWRF/bin/paper4_SAL.py	/^    mst = 'RBS'$/;"	v
 mst	/home/johnlawson/WEM/postWRF/bin/paper4_SAL.py	/^    mst = 'SBS'$/;"	v
 mst	/home/johnlawson/WEM/postWRF/bin/paper4_SAL.py	/^    mst = 'gdata_px_rand2'$/;"	v
 mth	/home/johnlawson/WEM/postWRF/bin/heatmap_bow.py	/^                    mth = int(casedate[4:6])$/;"	v
 mth	/home/johnlawson/WEM/postWRF/bin/heatmap_bow.py	/^        mth = int(day1[4:6])$/;"	v
 multiple.py	/home/johnlawson/WEM/postWRF/bin/multiple.py	1;"	F
+mvcmd	/home/johnlawson/WEM/lazyWRF/bin/slurm_ideal.py	/^    mvcmd = 'mv {0} {1}'.format(fpath_ncks,movefpath)$/;"	v
+mvcmd_p	/home/johnlawson/WEM/lazyWRF/bin/slurm_ideal.py	/^    mvcmd_p = subprocess.Popen(mvcmd,shell=True)$/;"	v
 n	/home/johnlawson/WEM/lazyWRF/bin/profile_test.py	/^n = 2$/;"	v
 n	/home/johnlawson/WEM/postWRF/bin/difference_plots.py	/^    n = 3$/;"	v
 name	/home/johnlawson/WEM/postWRF/postWRF/skewt2.py	/^    name = 'skewx'$/;"	v	class:SkewXAxes
@@ -1390,15 +1436,19 @@ ncfile	/home/johnlawson/WEM/postWRF/bin/difference_plots.py	/^ncfile = 'wrfout_d
 ncfile	/home/johnlawson/WEM/postWRF/bin/pressure_gradients.py	/^ncfile = 'wrfout_d01_2013-08-15_00:00:00'$/;"	v
 ncfile	/home/johnlawson/WEM/postWRF/bin/xsection.py	/^ncfile = 'wrfout_d01_2013-08-15_00:00:00'$/;"	v
 ncfile	/home/johnlawson/WEM/postWRF/bin/zoom_in_bow.py	/^ncfile = 'wrfout_d01_2013-08-15_00:00:00'$/;"	v
+ncfile.py	/home/johnlawson/WEM/postWRF/postWRF/ncfile.py	1;"	F
 ncfiles	/home/johnlawson/WEM/postWRF/bin/bolttest.py	/^ncfiles = [os.path.join(ncroot,'SGp{0:02d}'.format(n)) for n in range(1,11)]$/;"	v
 ncfiles	/home/johnlawson/WEM/postWRF/bin/spread_compare.py	/^    ncfiles = [os.path.join(BOW[plot]['ncroot'],e,BOW[plot]['ncf']) $/;"	v
 ncfiles1	/home/johnlawson/WEM/postWRF/bin/spread_compare_v2.py	/^    ncfiles1 = [os.path.join(BOW[plot]['ncroot'],e,BOW[plot]['ncf']) $/;"	v
 ncfiles2	/home/johnlawson/WEM/postWRF/bin/spread_compare_v2.py	/^    ncfiles2 = [os.path.join(BOW[plot]['ncroot'],e,BOW[plot]['ncf']) $/;"	v
+ncks	/home/johnlawson/WEM/lazyWRF/bin/slurm_ideal.py	/^def ncks(fpath,vrbls):$/;"	f
 ncks	/home/johnlawson/WEM/postWRF/bin/paper3_spread.py	/^def ncks(fpath,vrbls):$/;"	f
 ncks	/home/johnlawson/WEM/postWRF/bin/paper3_spread.py	/^def ncks(typ,fpath_old,vrbl=False,Nlim=False,Elim=False,Slim=False,Wlim=False,$/;"	f
 ncks	/home/johnlawson/WEM/postWRF/bin/paper4_SAL.py	/^def ncks(fpath,vrbls):$/;"	f
 ncks_fname	/home/johnlawson/WEM/postWRF/bin/paper3_spread.py	/^                ncks_fname = '{0}_{1:04d}{2:02d}{3:02d}{4:02d}_{5}_ncks.nc'.format($/;"	v
 ncks_fpath	/home/johnlawson/WEM/postWRF/bin/paper3_spread.py	/^                    ncks_fpath = ncks('GEFSR2',nc_fpath,vrbl=False,Wlim=Wlim,Nlim=Nlim,Elim=Elim,$/;"	v
+ncksdir	/home/johnlawson/WEM/lazyWRF/bin/slurm_ideal.py	/^ncksdir = '\/scratch\/johnlawson\/idealised'$/;"	v
+ncksname	/home/johnlawson/WEM/lazyWRF/bin/slurm_ideal.py	/^    ncksname = '{0}.nc'.format(fname)$/;"	v
 ncol	/home/johnlawson/WEM/postWRF/bin/GEFS_NAM_compare.py	/^ncol = 3$/;"	v
 ncol	/home/johnlawson/WEM/postWRF/bin/multiple.py	/^    ncol = 5$/;"	v
 ncols	/home/johnlawson/WEM/postWRF/bin/SALmedians_compare.py	/^ncols = len(plotnames)$/;"	v
@@ -1467,6 +1517,8 @@ nwps	/home/johnlawson/WEM/lazyWRF/bin/lazywrf_example.py	/^nwps = open('namelist
 nwps	/home/johnlawson/WEM/lazyWRF/bin/setup_gefs.py	/^nwps = open('namelist.wps','r').readlines()$/;"	v
 object_operators	/home/johnlawson/WEM/postWRF/postWRF/sal.py	/^    def object_operators(self,dic,typ=False):$/;"	m	class:SAL
 obs.py	/home/johnlawson/WEM/postWRF/postWRF/obs.py	1;"	F
+offset_dir	/home/johnlawson/WEM/lazyWRF/bin/profile_test.py	/^offset_dir = 90$/;"	v
+offset_spd	/home/johnlawson/WEM/lazyWRF/bin/profile_test.py	/^offset_spd = 5$/;"	v
 ofname	/home/johnlawson/WEM/postWRF/bin/DKE.py	/^    ofname = pfname + '_2D'$/;"	v
 ofname	/home/johnlawson/WEM/postWRF/bin/DKE.py	/^    ofname = pfname$/;"	v
 ofname	/home/johnlawson/WEM/postWRF/bin/bowecho_plot.py	/^        ofname = pfname$/;"	v
@@ -1591,9 +1643,11 @@ paper3_spread.py	/home/johnlawson/WEM/postWRF/bin/paper3_spread.py	1;"	F
 paper4_SAL.py	/home/johnlawson/WEM/postWRF/bin/paper4_SAL.py	1;"	F
 parent_grid_ratio	/home/johnlawson/WEM/lazyWRF/bin/lazywrf_example.py	/^parent_grid_ratio = (1,) # Same length as num of domains; ratio of each parent to its child$/;"	v
 password	/home/johnlawson/WEM/lazyWRF/bin/sensitivity_ensemble_example.py	/^    password = 'password' # Change this to use .ssh keys!!$/;"	v
+path_to_ideal	/home/johnlawson/WEM/lazyWRF/bin/slurm_ideal.py	/^    path_to_ideal = os.path.join(wrfdir,'ideal.exe')$/;"	v
 path_to_plots	/home/johnlawson/WEM/postWRF/bin/DKEold.py	/^        path_to_plots = os.path.join(outdir,foldername)$/;"	v
 path_to_plots	/home/johnlawson/WEM/postWRF/bin/DKEold.py	/^path_to_plots = os.path.join(outdir,initdate)$/;"	v
 path_to_plots	/home/johnlawson/WEM/postWRF/bin/casestudy.py	/^path_to_plots = p.dir_from_naming(config.output_root,casenames,init_time,ICs,sens,IC_n,sens_n)$/;"	v
+path_to_rsl	/home/johnlawson/WEM/lazyWRF/bin/slurm_ideal.py	/^    path_to_rsl = os.path.join(wrfdir,'rsl.error.0000')$/;"	v
 path_to_wrfouts	/home/johnlawson/WEM/postWRF/bin/DKE.py	/^    path_to_wrfouts = []$/;"	v
 path_to_wrfouts	/home/johnlawson/WEM/postWRF/bin/DKEold.py	/^        path_to_wrfouts = utils.wrfout_files_in(runfolder,dom=1)$/;"	v
 path_to_wrfouts	/home/johnlawson/WEM/postWRF/bin/bowecho_plot.py	/^    path_to_wrfouts = []$/;"	v
@@ -1636,6 +1690,7 @@ plot	/home/johnlawson/WEM/postWRF/bin/heatmap_bow.py	/^plot = 1$/;"	v
 plot	/home/johnlawson/WEM/postWRF/bin/spread_compare_v2.py	/^    plot = 'hires3'$/;"	v
 plot	/home/johnlawson/WEM/postWRF/bin/spread_compare_v2.py	/^    plot = 'normal'$/;"	v
 plot	/home/johnlawson/WEM/postWRF/postWRF/ecmwf.py	/^    def plot(self,va,lv,times,**kwargs):$/;"	m	class:ECMWF
+plot	/home/johnlawson/WEM/postWRF/postWRF/heatmap.py	/^    def plot(self,outdir,flipsign=False,cmap=M.cm.Reds,alpha=0.99,$/;"	m	class:HeatMap
 plot	/home/johnlawson/WEM/postWRF/postWRF/obs.py	/^    def plot(self,reports,itime,ftime,fname,outdir,Nlim=False,$/;"	m	class:StormReports
 plot	/home/johnlawson/WEM/postWRF/postWRF/ruc.py	/^    def plot(self,variables,lv,**kwargs):$/;"	m	class:RUC
 plot	/home/johnlawson/WEM/postWRF/postWRF/rucplot.py	/^    def plot(self,variables,lv,**kwargs):$/;"	m	class:RUCPlot
@@ -1728,6 +1783,8 @@ ptlat	/home/johnlawson/WEM/postWRF/bin/heatmap_bow.py	/^                        
 ptlon	/home/johnlawson/WEM/postWRF/bin/heatmap_bow.py	/^                        ptlon = float(case['bowlon'])$/;"	v
 ptlon	/home/johnlawson/WEM/postWRF/bin/heatmap_bow.py	/^                        ptlon = float(case['initlon'])$/;"	v
 pvalues	/home/johnlawson/WEM/postWRF/bin/spread_compare_v2.py	/^pvalues = []$/;"	v
+qv0_range	/home/johnlawson/WEM/lazyWRF/bin/profile_test.py	/^qv0_range = N.arange(10.0,16.1,0.1)#*10**-3$/;"	v
+qv0_range	/home/johnlawson/WEM/lazyWRF/bin/slurm_ideal.py	/^qv0_range = N.arange(10.0,15.8,0.2)$/;"	v
 rE	/home/johnlawson/WEM/utils/GIS_tools.py	/^rE = 6378100 # radius of Earth in metres$/;"	v
 radar_datadir	/home/johnlawson/WEM/postWRF/bin/SAL.py	/^                        radar_datadir = False$/;"	v
 radar_datadir	/home/johnlawson/WEM/postWRF/bin/SAL.py	/^                    radar_datadir = os.path.join('\/chinook2\/jrlawson\/bowecho\/',case[:8],'VERIF')$/;"	v
@@ -1761,8 +1818,12 @@ return_data	/home/johnlawson/WEM/postWRF/postWRF/skewt.py	/^    def return_data(
 return_subdomain	/home/johnlawson/WEM/utils/GIS_tools.py	/^def return_subdomain(data,lats,lons,Nlim,Elim,Slim,Wlim,$/;"	f
 return_tbl	/home/johnlawson/WEM/postWRF/postWRF/wrfout.py	/^    def return_tbl(self):$/;"	m	class:WRFOut
 return_tidx_range	/home/johnlawson/WEM/postWRF/postWRF/wrfout.py	/^    def return_tidx_range(self,utc0,utc1):$/;"	m	class:WRFOut
+return_vorticity	/home/johnlawson/WEM/postWRF/postWRF/wrfout.py	/^    def return_vorticity(self,tidx,lvidx,lonidx,latidx,other):$/;"	m	class:WRFOut
 right_url	/home/johnlawson/WEM/postWRF/bin/getdata.py	/^    def right_url(d,h):$/;"	f	function:getruc
 rootdir	/home/johnlawson/WEM/postWRF/bin/DKEold.py	/^rootdir = '\/uufs\/chpc.utah.edu\/common\/home\/horel-group2\/lawson2\/'$/;"	v
+rsldel_p	/home/johnlawson/WEM/lazyWRF/bin/slurm_ideal.py	/^    rsldel_p = subprocess.Popen(rslrmcmd, cwd=wrfdir,shell=True)$/;"	v
+rslpaths	/home/johnlawson/WEM/lazyWRF/bin/slurm_ideal.py	/^    rslpaths = os.path.join(wrfdir,'rsl*')$/;"	v
+rslrmcmd	/home/johnlawson/WEM/lazyWRF/bin/slurm_ideal.py	/^    rslrmcmd = 'rm {0}'.format(rslpaths)$/;"	v
 ruc.py	/home/johnlawson/WEM/postWRF/postWRF/ruc.py	1;"	F
 rucplot	/home/johnlawson/WEM/postWRF/bin/barents_plot.py	/^rucplot = 0$/;"	v
 rucplot	/home/johnlawson/WEM/postWRF/bin/bowecho_plot.py	/^rucplot = 0$/;"	v
@@ -1833,6 +1894,7 @@ skillplot	/home/johnlawson/WEM/postWRF/bin/paper3_spread.py	/^skillplot = 0$/;"	
 skipcase	/home/johnlawson/WEM/postWRF/bin/kenzie_climo.py	/^skipcase = 0$/;"	v
 skipfirst	/home/johnlawson/WEM/lazyWRF/bin/sensitivity_ensemble_example.py	/^skipfirst = 0 # Needing to start halfway through an ensemble$/;"	v
 skl_list	/home/johnlawson/WEM/postWRF/bin/paper3_spread.py	/^skl_list = {}$/;"	v
+slurm_ideal.py	/home/johnlawson/WEM/lazyWRF/bin/slurm_ideal.py	1;"	F
 sm	/home/johnlawson/WEM/postWRF/bin/GEFS_NAM_compare.py	/^sm = 5$/;"	v
 sm	/home/johnlawson/WEM/postWRF/bin/multiple.py	/^                sm = 1$/;"	v
 sm	/home/johnlawson/WEM/postWRF/bin/multiple.py	/^                sm = 7$/;"	v
@@ -1843,6 +1905,8 @@ snow1	/home/johnlawson/WEM/postWRF/postWRF/colourtables.py	/^def snow1(*args):$/
 snow2	/home/johnlawson/WEM/postWRF/postWRF/colourtables.py	/^def snow2(*args):$/;"	f
 softlink	/home/johnlawson/WEM/lazyWRF/bin/setup_gefs.py	/^        softlink = os.readlink(griblinks[0])$/;"	v
 soil_levs	/home/johnlawson/WEM/lazyWRF/bin/lazywrf_example.py	/^    soil_levs = 4$/;"	v
+sounddir	/home/johnlawson/WEM/lazyWRF/bin/slurm_ideal.py	/^sounddir = '\/home\/johnlawson\/idealised\/WK82_profiles'$/;"	v
+soundpath	/home/johnlawson/WEM/lazyWRF/bin/slurm_ideal.py	/^    soundpath = os.path.join(sounddir,fname)$/;"	v
 sp_fname	/home/johnlawson/WEM/postWRF/bin/multiple.py	/^    sp_fname = p.create_fname(vrbl,utc=tstr,level=lv,f_prefix=IC,f_suffix=enstype)$/;"	v
 sp_fpath	/home/johnlawson/WEM/postWRF/bin/multiple.py	/^    sp_fpath = os.path.join(sp_outdir,sp_fname)$/;"	v
 spaghetti	/home/johnlawson/WEM/postWRF/bin/bowecho_plot.py	/^spaghetti = 0$/;"	v
@@ -1860,6 +1924,7 @@ stack	/home/johnlawson/WEM/postWRF/bin/paper3_spread.py	/^                      
 start_dt	/home/johnlawson/WEM/postWRF/bin/heatmap_bow.py	/^                    start_dt = datetime.datetime(year,mth,day,4,0,0)$/;"	v
 startdate	/home/johnlawson/WEM/postWRF/bin/paper4_SAL.py	/^startdate = datetime.datetime(2015,4,1,0,0,0)$/;"	v
 starthr	/home/johnlawson/WEM/postWRF/bin/heatmap_bow.py	/^starthr = 4$/;"	v
+startsleep	/home/johnlawson/WEM/lazyWRF/bin/slurm_ideal.py	/^    startsleep = 1$/;"	v
 stats.py	/home/johnlawson/WEM/postWRF/postWRF/stats.py	1;"	F
 stchmp	/home/johnlawson/WEM/postWRF/bin/bowecho_plot.py	/^            stchmp = 'morrh'$/;"	v
 stchmp	/home/johnlawson/WEM/postWRF/bin/bowecho_plot.py	/^            stchmp = 'thomp'$/;"	v
@@ -1885,22 +1950,25 @@ streamlines	/home/johnlawson/WEM/postWRF/bin/nonsquare.py	/^streamlines = 0$/;"	
 string_from_time	/home/johnlawson/WEM/utils/GIS_tools.py	/^def string_from_time(usage,t,dom=0,strlen=0,conven=0,**kwargs):$/;"	f
 strongestwind	/home/johnlawson/WEM/postWRF/bin/bowecho_plot.py	/^strongestwind = 0$/;"	v
 strongestwind	/home/johnlawson/WEM/postWRF/bin/hires_bowecho_plot.py	/^strongestwind = 0$/;"	v
+subcmd	/home/johnlawson/WEM/lazyWRF/bin/slurm_ideal.py	/^    subcmd = 'sbatch {0}'.format(jobpath) $/;"	v
 submit_job	/home/johnlawson/WEM/lazyWRF/bin/lazywrf_example.py	/^submit_job = 1$/;"	v
 submit_job	/home/johnlawson/WEM/lazyWRF/bin/setup_gefs.py	/^submit_job = 1$/;"	v
 submit_job	/home/johnlawson/WEM/lazyWRF/bin/setup_gefs_isu.py	/^def submit_job(linkonly=0):$/;"	f
 submit_job	/home/johnlawson/WEM/lazyWRF/lazyWRF/main.py	/^    def submit_job(self):$/;"	m	class:Lazy
 t	/home/johnlawson/WEM/postWRF/bin/GEFS_NAM_compare.py	/^t = 0$/;"	v
 t	/home/johnlawson/WEM/postWRF/bin/ideal.py	/^t = (2000,1,1,1,30,0)$/;"	v
+tailcmd	/home/johnlawson/WEM/lazyWRF/bin/slurm_ideal.py	/^    tailcmd = 'tail {0}'.format(path_to_rsl)$/;"	v
+tailout	/home/johnlawson/WEM/lazyWRF/bin/slurm_ideal.py	/^        tailout = tailrsl.stdout.read()$/;"	v
 tailoutput	/home/johnlawson/WEM/lazyWRF/bin/sensitivity_ensemble_example.py	/^        tailoutput = tailrsl.stdout.read()$/;"	v
 tailoutput	/home/johnlawson/WEM/lazyWRF/bin/sensitivity_ensemble_old.py	/^        tailoutput = tailrsl.stdout.read()$/;"	v
 tailrsl	/home/johnlawson/WEM/lazyWRF/bin/sensitivity_ensemble_example.py	/^        tailrsl = subprocess.Popen('tail '+pathtoWRF+'rsl.error.0000',shell=True,stdout=subprocess.PIPE)$/;"	v
 tailrsl	/home/johnlawson/WEM/lazyWRF/bin/sensitivity_ensemble_old.py	/^        tailrsl = subprocess.Popen('tail '+pathtoWRF+'rsl.error.0000',shell=True,stdout=subprocess.PIPE)$/;"	v
+tailrsl	/home/johnlawson/WEM/lazyWRF/bin/slurm_ideal.py	/^        tailrsl = subprocess.Popen(tailcmd,shell=True,stdout=subprocess.PIPE)$/;"	v
 tarfiles	/home/johnlawson/WEM/postWRF/bin/paper3_spread.py	/^    tarfiles = glob.glob(os.path.join(NAMdir,'*.tar'))$/;"	v
 tarfs	/home/johnlawson/WEM/postWRF/bin/paper3_spread.py	/^        tarfs = []$/;"	v
 td	/home/johnlawson/WEM/postWRF/postWRF/skewt.py	/^    def td(self,e):$/;"	m	class:SkewT
 temperature	/home/johnlawson/WEM/postWRF/postWRF/skewt.py	/^    def temperature(self,nc,time,y,x,P,linestyle='solid',color='black'):$/;"	m	class:SkewT
 temperature_real	/home/johnlawson/WEM/postWRF/postWRF/skewt.py	/^    def temperature_real(self,T,P,color='red',linestyle='dashed'):$/;"	m	class:SkewT
-testsw	/home/johnlawson/WEM/lazyWRF/bin/profile_test.py	/^testsw=0$/;"	v
 th	/home/johnlawson/WEM/postWRF/bin/spread_compare_v2.py	/^th = 15$/;"	v
 thetae	/home/johnlawson/WEM/postWRF/postWRF/colourtables.py	/^def thetae(*args):$/;"	f
 thinned_barbs	/home/johnlawson/WEM/utils/GIS_tools.py	/^def thinned_barbs(pres):$/;"	f
@@ -2004,6 +2072,7 @@ viridis	/home/johnlawson/WEM/postWRF/bin/cm_list.py	/^viridis = [[0.267004, 0.00
 vrbl	/home/johnlawson/WEM/postWRF/bin/postage.py	/^vrbl = 'cref'$/;"	v
 vrbl	/home/johnlawson/WEM/postWRF/bin/pressure_gradients.py	/^vrbl = 'wind10'$/;"	v
 vrbl	/home/johnlawson/WEM/postWRF/bin/zoom_in_bow.py	/^vrbl = 'Q_pert'$/;"	v
+vrbls	/home/johnlawson/WEM/lazyWRF/bin/slurm_ideal.py	/^vrbls = ['U','V','W','T','P','QVAPOR','PH','REFL_10CM','PB','PHB','RAINNC']$/;"	v
 vrbls	/home/johnlawson/WEM/postWRF/bin/API_test.py	/^vrbls = ('cref',)$/;"	v
 vrbls	/home/johnlawson/WEM/postWRF/bin/bolttest.py	/^vrbls = ['T2','wind10']$/;"	v
 vrbls	/home/johnlawson/WEM/postWRF/bin/heatmap_bow.py	/^    vrbls = {'lyapunov':(500,)}$/;"	v
@@ -2026,12 +2095,15 @@ windmag	/home/johnlawson/WEM/postWRF/bin/difference_plots.py	/^    windmag = N.s
 wrf_nc_load	/home/johnlawson/WEM/utils/GIS_tools.py	/^def wrf_nc_load(dom,var,ncfolder,datestr,thin,Nlim=0,Elim=0,Slim=0,Wlim=0):$/;"	f
 wrf_sds	/home/johnlawson/WEM/postWRF/bin/bowecho_plot.py	/^    wrf_sds = [] $/;"	v
 wrf_sds	/home/johnlawson/WEM/postWRF/bin/hires_bowecho_plot.py	/^        wrf_sds = [] $/;"	v
+wrfdir	/home/johnlawson/WEM/lazyWRF/bin/slurm_ideal.py	/^wrfdir = '\/home\/johnlawson\/WRF_v3.8\/WRFV3\/run'$/;"	v
+wrfinputpath	/home/johnlawson/WEM/lazyWRF/bin/slurm_ideal.py	/^    wrfinputpath = os.path.join(wrfdir,'wrfinput_d01')$/;"	v
 wrfout.py	/home/johnlawson/WEM/postWRF/postWRF/wrfout.py	1;"	F
 wrfout_dir	/home/johnlawson/WEM/postWRF/bin/casestudy.py	/^wrfout_dir = p.dir_from_naming(config.wrfout_root,casenames,init_time,ICs,sens,IC_n,sens_n)$/;"	v
 wrfout_files_in	/home/johnlawson/WEM/utils/GIS_tools.py	/^def wrfout_files_in(folders,dom=0,init_time='notset',descend=1,avoid=0,$/;"	f
 wrfoutdir	/home/johnlawson/WEM/lazyWRF/bin/sensitivity_ensemble_example.py	/^        wrfoutdir = os.path.join('\/chinook2','jrlawson','bowecho',datestring,IC,ICens,MP,ens)$/;"	v
 wrfoutdir	/home/johnlawson/WEM/lazyWRF/bin/sensitivity_ensemble_example.py	/^        wrfoutdir = os.path.join('\/chinook2','jrlawson','bowecho',datestring,IC,ICens,ens)$/;"	v
 wrfoutdir	/home/johnlawson/WEM/lazyWRF/bin/sensitivity_ensemble_old.py	/^    wrfoutdir = '\/ptmp\/jrlawson\/predictability\/'+datestring+'\/wrfout\/'+ensembletype+'\/'+ens+'\/'$/;"	v
+wrfoutdir	/home/johnlawson/WEM/lazyWRF/bin/slurm_ideal.py	/^wrfoutdir = '\/scratch\/johnlawson\/wrfout'$/;"	v
 wrfouts	/home/johnlawson/WEM/postWRF/bin/DKEold.py	/^        wrfouts = ['\/uufs\/chpc.utah.edu\/common\/home\/horel-group2\/lawson2\/201111{0}00\/{1}\/wrfout_d01_2011-11-{2}_00:00:00_PLEV'.format(rundate,e,rundate)$/;"	v
 wrfouts	/home/johnlawson/WEM/postWRF/bin/domains.py	/^wrfouts = ('\/chinook2\/jrlawson\/bowecho\/20130815_hires\/wrfout_d01_2013-08-15_00:00:00',$/;"	v
 wrftime_to_datenum	/home/johnlawson/WEM/postWRF/postWRF/wrfout.py	/^    def wrftime_to_datenum(self):$/;"	m	class:WRFOut
@@ -2057,8 +2129,9 @@ ylimits	/home/johnlawson/WEM/postWRF/bin/bowecho_plot.py	/^    ylimits = [0,2e8]
 ylimits	/home/johnlawson/WEM/postWRF/bin/hires_bowecho_plot.py	/^            ylimits = [0,2e8]$/;"	v
 ylimits	/home/johnlawson/WEM/postWRF/bin/hires_bowecho_plot.py	/^        ylimits = [0,2e8]$/;"	v
 yy	/home/johnlawson/WEM/postWRF/bin/paper3_spread.py	/^yy = N.arange(500,3550,50)*1000.0$/;"	v
-z	/home/johnlawson/WEM/lazyWRF/bin/profile_test.py	/^z = N.arange(0,18000,100)$/;"	v
-zL	/home/johnlawson/WEM/lazyWRF/bin/profile_test.py	/^zL = 500$/;"	v
+z	/home/johnlawson/WEM/lazyWRF/bin/profile_test.py	/^z = N.hstack((N.array([0,10,35]),N.arange(100,18000,100)))$/;"	v
+zL	/home/johnlawson/WEM/lazyWRF/bin/profile_test.py	/^zL = 454$/;"	v
+zT	/home/johnlawson/WEM/lazyWRF/bin/profile_test.py	/^zT = 12000$/;"	v
 z_to_P	/home/johnlawson/WEM/lazyWRF/lazyWRF/create_sounding.py	/^    def z_to_P(self,T,z,refPa=100000):$/;"	m	class:Profile
 zoom	/home/johnlawson/WEM/postWRF/bin/paper3_spread.py	/^zoom = 0 $/;"	v
 zoom_in_bow.py	/home/johnlawson/WEM/postWRF/bin/zoom_in_bow.py	1;"	F

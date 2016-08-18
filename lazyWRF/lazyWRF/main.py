@@ -7,9 +7,37 @@ import subprocess
 import WEM.utils as utils
 
 class Lazy:
-    def __init__(self,config):
-        self.C = config
+    def __init__(self,sched,path_to_WRF,path_to_wrfout,submit_fname,
+                    submit_ideal_fname=False,path_to_storage=False,
+                    submit_real_fname=False,
+                    path_to_WPS=False,path_to_atmos=False,path_to_soil=False):
+        self.sched = sched
+        self.path_to_WRF = path_to_WRF
+        self.path_to_wrfout = path_to_wrfout
+        self.path_to_WPS = path_to_WPS
+        if path_to_WPS:
+            self.doWPS = True
+            self.init_WPS()
+        else:
+            self.doWPS = False
+        self.path_to_storage = path_to_storage
+        self.path_to_atmos = path_to_atmos
+        self.path_to_soil = path_to_soil
+        self.submit_fname = submit_fname
+        self.submit_fpath = os.path.join(path_to_WRF,submit_fname)
+        if submit_ideal_fname:
+            self.dofirst = 'ideal'
+            self.submit_first_fname = submit_ideal_fname
+        else:   
+            self.dofirst = 'real'
+            self.submit_first_fname = submit_real_fname
+        self.submit_first_fpath = os.path.join(path_to_WRF,self.submit_first_fname)
+
     
+    def init_WPS(self,soilVtable_fname='Vtable.GFS_soilonly'):
+        self.path_to_soilVtable = os.path.join(
+                self.path_to_WPS,'ungrib/Variable_tables',soilVtable_fname)
+
     def go(self,casestr,IC,experiment,ensnames,**kwargs):
         """
         Inputs: (all folder names)
@@ -118,7 +146,7 @@ class Lazy:
             os.system('rm -f rsl.error* rsl.out*')
             
                 
-    def copy_files(self,tofolder):
+    def copy_files(self,fromfolder,tofolder,matchfs=False):
         """Move wrfout files to folder.
         Create folder if it doesn't exist
 
@@ -130,64 +158,90 @@ class Lazy:
         args = names of folder tree, in order of depth.
 
         """
-        root = self.C.path_to_storage
-        topath = os.path.join(root,tofolder)
+        root = self.path_to_storage
+        # topath = os.path.join(root,tofolder)
         
-        utils.trycreate(topath)
+        utils.trycreate(tofolder)
         
-        files = {'wrfout_d0*':'mv','namelist.input':'cp',
+        if not matchfs:
+            files = {'wrfout_d0*':'mv','namelist.input':'cp',
                     'rsl.error.0000':'cp'}
+        else:
+            files = matchfs
 
-        if len(glob.glob('*.TS')):
-            # hi-res time series files
-            files['*.TS'] = 'mv'
-            files['tslist'] = 'cp'
+        # if len(glob.glob('*.TS')):
+            # files['*.TS'] = 'mv'
+            # files['tslist'] = 'cp'
         
         for f,transfer in files.items():
-            fs = os.path.join(self.C.path_to_WRF,f)
-            command = '%s %s %s' %(transfer,fs,topath)
+            fs = os.path.join(fromfolder,f)
+            fout = os.path.join(tofolder,f)
+            command = '{0} {1} {2}'.format(transfer,fs,fout)
             os.system(command)
             del command
 
-        # Finally the namelist.wps.
-        path_to_namelistwps = os.path.join(self.C.path_to_WPS,'namelist.wps')
-        'cp %s %s' %(path_to_namelistwps,topath)
+        if self.doWPS:
+            # Finally the namelist.wps.
+            path_to_namelistwps = os.path.join(self.path_to_WPS,'namelist.wps')
+            fout = os.path.join(tofolder,'namelist.wps')
+            'cp {0} {1}'.format(path_to_namelistwps,fout)
 
-    def submit_job(self):
-        # Soft link data netCDFs files from WPS to WRF
-        self.link_to_met_em()
+    def submit_job(self,waitmin=10,sleepmin=5,wrf_only=False,first_only=False):
+        if self.doWPS:
+            # Soft link data netCDFs files from WPS to WRF
+            self.link_to_met_em()
         
-        print("Submitting real.exe.")
-        real_cmd = 'qsub -d %s real_run.sh' %(self.C.path_to_WRF)
-        p_real = subprocess.Popen(real_cmd,cwd=self.C.path_to_WRF,shell=True,stdout=subprocess.PIPE)
-        p_real.wait()
-        jobid = p_real.stdout.read()[:5] # Assuming first five digits = job ID.
-        
-        # Run WRF but wait until real.exe has finished without errors
-        print('Now submitting wrf.exe.')
-        wrf_cmd = 'qsub -d %s wrf_run.sh -W depend=afterok:%s' %(self.C.path_to_WRF,jobid)
-        p_wrf = subprocess.Popen(wrf_cmd,cwd=self.C.path_to_WRF,shell=True)
-        p_wrf.wait()
-
-        time.sleep(self.C.roughguesshr*60*60) # Wait specified hours
-        
-        # Makes sure real.exe has finished and wrf.exe is writing to rsl files
-        finished = 0
-        while not finished:
-            path_to_rsl = os.path.join(self.C.path_to_WRF,'rsl.error.0000')
-            tail_cmd = 'tail %s' %(path_to_rsl)
-            tailrsl = subprocess.Popen(tail_cmd,shell=True,stdout=subprocess.PIPE)
-            tailoutput = tailrsl.stdout.read()
-            if "SUCCESS COMPLETE WRF" in tailoutput:
-                finished = 1
-                print("WRF has finished; moving to next case.")
+        if not wrf_only:
+            if self.dofirst is 'real':
+                print("Submitting real.exe.")
             else:
-                # Need to check if job has died! If so, kill script, warn user
-                time.sleep(5*60) # Try again in 5 min
+                print("Submitting ideal.exe.")
+
+            if self.sched is 'rocks':
+                scmd = 'qsub -d {0}'.format(self.path_to_WRF)
+            elif self.sched is 'slurm':
+                scmd = 'sbatch'
+                real_cmd = '{0} {1}'.format(scmd,self.submit_first_fpath)
+            p_real = subprocess.Popen(real_cmd,cwd=self.path_to_WRF,shell=True,stdout=subprocess.PIPE)
+            p_real.wait()
+            jobid = p_real.stdout.read()[:5] # Assuming first five digits = job ID.
         
+        if not first_only:
+            print("Submitting wrf.exe")
+            if not wrf_only:
+                aftercmd = 'depend=afterok:{0}'.format(jobid)
+            else:
+                aftercmd = ''
+
+            # Run WRF but wait until real.exe has finished without errors
+            if self.sched is 'rocks':
+                wrf_cmd = 'qsub -d {0} {1} -W {2}' %(self.path_to_WRF,
+                                    self.submit_fpath,aftercmd)
+            else:
+                wrf_cmd = 'sbatch {0} {1}'.format(self.submit_fpath,aftercmd)
+
+            p_wrf = subprocess.Popen(wrf_cmd,cwd=self.path_to_WRF,shell=True)
+            p_wrf.wait()
+
+            time.sleep(waitmin*60) # Wait specified mins
+            
+            # Makes sure real.exe has finished and wrf.exe is writing to rsl files
+            finished = 0
+            while not finished:
+                path_to_rsl = os.path.join(self.path_to_WRF,'rsl.error.0000')
+                tail_cmd = 'tail {0}'.format(path_to_rsl)
+                tailrsl = subprocess.Popen(tail_cmd,shell=True,stdout=subprocess.PIPE)
+                tailoutput = tailrsl.stdout.read()
+                if b"SUCCESS COMPLETE WRF" in tailoutput:
+                    finished = 1
+                    print("WRF has finished; moving to next case.")
+                else:
+                    # Need to check if job has died! If so, kill script, warn user
+                    time.sleep(sleepmin*60) # Try again in x min
+            
     def link_to_met_em(self):
-        path_to_met_em = os.path.join(self.C.path_to_WPS,'met_em*')
-        command = 'ln -sf %s %s' %(path_to_met_em,self.C.path_to_WRF)
+        path_to_met_em = os.path.join(self.path_to_WPS,'met_em*')
+        command = 'ln -sf %s %s' %(path_to_met_em,self.path_to_WRF)
         os.system(command)
              
     def link_to_IC_data(self,IC,*args):
@@ -202,7 +256,7 @@ class Lazy:
             csh = './link_grib.csh'
             nextens = args[0]
             gribfiles = '_'.join((self.casestr,nextens,'f*'))
-            gribpath = os.path.join(self.C.path_to_GEFSR2,self.casestr,gribfiles)
+            gribpath = os.path.join(self.path_to_GEFSR2,self.casestr,gribfiles)
             command = ' '.join((csh,gribpath))
        
         #pdb.set_trace() 
@@ -210,20 +264,20 @@ class Lazy:
 
     def link_to_IC_Vtable(self,IC):
         if IC == 'GEFSR2':
-            path = os.path.join(self.C.path_to_WPS,'ungrib/Variable_Tables',
-                            self.C.GEFSR2_Vtable)
+            path = os.path.join(self.path_to_WPS,'ungrib/Variable_Tables',
+                            self.GEFSR2_Vtable)
             command = 'ln -sf %s Vtable' %(path)
         
         os.system(command)
 
     def link_to_soil_data(self):
         csh = './link_grib.csh'
-        command = ' '.join((csh,self.C.path_to_soil))
+        command = ' '.join((csh,self.path_to_soil))
         os.system(command)
         
     def link_to_soil_Vtable(self):
-        path = os.path.join(self.C.path_to_WPS,'ungrib/Variable_Tables',
-                            self.C.soil_Vtable)
+        path = os.path.join(self.path_to_WPS,'ungrib/Variable_Tables',
+                            self.soil_Vtable)
         command = 'ln -sf %s Vtable' %(path)
         os.system(command)
         
@@ -242,14 +296,13 @@ class Lazy:
         """
 
         if suffix == 'wps':
-            f = os.path.join(self.C.path_to_WPS,'namelist.wps')
+            f = os.path.join(self.path_to_WPS,'namelist.wps')
         elif suffix == 'input':
-            f = os.path.join(self.C.path_to_WRF,'namelist.input')
+            f = os.path.join(self.path_to_WRF,'namelist.input')
         flines = open(f,'r').readlines()
         for idx, line in enumerate(flines):
             if sett in line:
-                # Prefix for soil intermediate data filename
-                flines[idx] = newval + " \n"
+                flines[idx] = "{0} = {1}, \n".format(sett,newval)
                 nameout = open(f,'w')
                 nameout.writelines(flines)
                 nameout.close()
@@ -266,13 +319,13 @@ class Lazy:
         #if not exe.endswith('.exe'):
         #    f,suffix = exe.split('.')            
         
-        command = os.path.join('./',self.C.path_to_WPS,exe)
+        command = os.path.join('./',self.path_to_WPS,exe)
         print(command)
         os.system(command)
         
         # Wait until complete, then check tail file
         name,suffix = exe.split('.')
-        log = os.path.join(self.C.path_to_WPS,name + '.log')
+        log = os.path.join(self.path_to_WPS,name + '.log')
         l = open(log,'r').readlines()
         lastline = l[-1]
         if 'Successful completion' in lastline:
@@ -294,9 +347,9 @@ class Lazy:
             """
             t = time.strftime("%Y%m%d_%H%M")
             if suffix == 'wps':
-                f = os.path.join(self.C.path_to_WPS,'namelist.wps') # Original 
+                f = os.path.join(self.path_to_WPS,'namelist.wps') # Original 
             elif suffix == 'input':
-                f = os.path.join(self.C.path_to_WRF,'namelist.input') # Original    
+                f = os.path.join(self.path_to_WRF,'namelist.input') # Original    
                 
             f2 = '_'.join((f,t)) # Backup file
             # pdb.set_trace()

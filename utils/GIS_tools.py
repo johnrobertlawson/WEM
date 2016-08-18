@@ -766,7 +766,7 @@ def check_vertical_coordinate(level):
     """ Check to see what type of level is requested by user.
 
     """
-    if isinstance(level,(str,int)):
+    if isinstance(level,(str,int,type(None))):
         lv = level
     elif isinstance(level,(list,tuple,N.ndarray)):
         lv = level[0]
@@ -781,7 +781,10 @@ def check_vertical_coordinate(level):
             return 'index'
         else:
             return 'isobaric'
-    if lv.endswith('hPa'):
+    elif (lv is 'all') or (lv is None):
+        return 'eta'
+
+    elif lv.endswith('hPa'):
         # import pdb; pdb.set_trace()
         if lv[:4] == '2000':
             return 'surface'
@@ -799,9 +802,6 @@ def check_vertical_coordinate(level):
 
     elif lv.endswith('km'):
         return 'geometric'
-
-    elif lv == 'all':
-        return 'eta'
 
     else:
         print('Unknown vertical coordinate.')

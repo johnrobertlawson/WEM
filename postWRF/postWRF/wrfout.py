@@ -28,7 +28,7 @@ class WRFOut(object):
     An instance of WRFOut contains all the methods that are used to
     access and process netCDF data.
     """
-    def __init__(self,fpath):
+    def __init__(self,fpath,fmt='em_real',ncks=False):
         """
         Initialisation fetches and computes basic user-friendly
         variables that are most oftenly accessed.
@@ -36,16 +36,47 @@ class WRFOut(object):
         :param fpath:   absolute path to netCDF4 (wrfout) file
         :type fpath:    str
 
+        ncks (bool): whether WRFOut file has been stripped to a few variables.
+                        Hence check for KeyErrors for variables
+
         """
 
         self.path = fpath
         self.nc = Dataset(fpath,'r')
-
-        self.wrf_times = self.nc.variables['Times'][:]
+    
         self.dx = self.nc.DX
         self.dy = self.nc.DY
+        self.t_dim = len(self.nc.dimensions['Time'])
+        self.x_dim = len(self.nc.dimensions['west_east'])
+        self.y_dim = len(self.nc.dimensions['south_north'])
+        self.z_dim = len(self.nc.dimensions['bottom_top'])
 
-        #self.lvs =
+        # if ncks:
+        try:
+            self.wrf_times = self.nc.variables['Times'][:]
+        except KeyError:
+            self.wrf_times = N.arange(self.t_dim)
+        else:
+            # Get times in nicer format
+            self.utc = self.wrftime_to_datenum()
+            self.dt = self.utc[2]-self.utc[1]
+
+        if not ncks:
+            self.P_top = self.nc.variables['P_TOP'][0]
+
+        # Loads variable lists
+        self.fields = list(self.nc.variables.keys())
+        self.computed_fields = list(self.return_tbl().keys())
+        self.available_vrbls = self.fields + self.computed_fields
+
+        # Now do specific loads for idealised or real runs
+        if fmt is "em_real":
+            self.em_real_init()
+
+        elif fmt is "ideal":
+            self.ideal_init()
+
+    def em_real_init(self):
         self.lats = self.nc.variables['XLAT'][0,...] # Might fail if only one time?
         self.lons = self.nc.variables['XLONG'][0,...]
 
@@ -56,19 +87,11 @@ class WRFOut(object):
         self.cen_lon = float(self.nc.CEN_LON)
         self.truelat1 = float(self.nc.TRUELAT1)
         self.truelat2 = float(self.nc.TRUELAT2)
-        self.x_dim = len(self.nc.dimensions['west_east'])
-        self.y_dim = len(self.nc.dimensions['south_north'])
-        self.z_dim = len(self.nc.dimensions['bottom_top'])
 
-        self.P_top = self.nc.variables['P_TOP'][0]
-        # Loads variable lists
-        self.fields = list(self.nc.variables.keys())
-        self.computed_fields = list(self.return_tbl().keys())
-        self.available_vrbls = self.fields + self.computed_fields
 
-        # Get times in nicer format
-        self.utc = self.wrftime_to_datenum()
-        # import pdb; pdb.set_trace()
+    def ideal_init(self):
+        pass
+
 
     def wrftime_to_datenum(self):
         """
@@ -79,7 +102,7 @@ class WRFOut(object):
         wrf_times_epoch = N.zeros([times.shape[0]])
 
         for n,t in enumerate(times):
-            tstr = ''.join(t)
+            tstr = ''.join(t.astype(str))
 
             yr = int(tstr[0:4])
             mth = int(tstr[5:7])
@@ -136,7 +159,7 @@ class WRFOut(object):
         return N.arange(idx0,idx1)
 
 
-    def get(self,vrbl,utc=False,level=False,lats=False,lons=False,
+    def get(self,vrbl,utc=None,level=None,lats=None,lons=None,
                 smooth=1,other=False):
         """
         Get data.
@@ -167,13 +190,19 @@ class WRFOut(object):
         """
         # import pdb; pdb.set_trace()
         # Time
-        if utc is False:
-            tidx = False
-        elif isinstance(utc,int) and utc<500:
-            tidx = utc
+
+        if utc is None:
+            tidx = None
+        elif isinstance(utc,int) and (utc<500):
+        # elif isinstance(utc,(int,N.int64)) and utc<500:
+            if utc < 0:
+                # Logic to allow negative indices
+                tidx = self.t_dim + utc
+            else:
+                tidx = utc
         elif isinstance(utc,(list,tuple,int,datetime.datetime)): # and len(utc[0])==6:
             tidx = self.get_time_idx(utc)
-        elif isinstance(utc,N.ndarray) and isinstance(utc[0],int):
+        elif isinstance(utc,N.ndarray): #and isinstance(utc[0],int):
             tidx = utc
         else:
             print("Invalid time selection.")
@@ -181,10 +210,10 @@ class WRFOut(object):
 
         # Level
         # if not level:
-        # import pdb; pdb.set_trace()
         coords = utils.check_vertical_coordinate(level)
-        if level is False:
-            lvidx = False
+        # import pdb; pdb.set_trace()
+        if (level is None) or (coords is 'eta'):
+            lvidx = None
         elif coords == 'index':
             lvidx = level
         elif isinstance(coords,str):
@@ -200,17 +229,17 @@ class WRFOut(object):
         if not type(lats)==type(lons):
             # What about case where all lats with one lon?
             raise Exception
-        if lats is False:
-            lonidx = False
-            latidx = False
+        if lats is None:
+            lonidx = None
+            latidx = None
         elif isinstance(lons,(list,tuple,N.ndarray)):
             if isinstance(lons[0],int):
                 lonidx = lons
                 latidx = lats
             elif isinstance(lons[0],float):
                 # Interpolate to lat/lon
-                lonidx = False
-                latidx = False
+                lonidx = None
+                latidx = None
         elif isinstance(lons,int):
             lonidx = lons
             latidx = lats
@@ -231,9 +260,8 @@ class WRFOut(object):
             if debug_get:
                 print(("Variable {0} exists in dataset.".format(vrbl)))
             if lvidx is 'isobaric':
-                data = self.get_p(vrbl,tidx,level,lonidx,
-                            latidx)
-            elif isinstance(lvidx,(tuple,list,N.ndarray,int)):
+                data = self.get_p(vrbl,tidx,level,lonidx,latidx)
+            elif isinstance(lvidx,(tuple,list,N.ndarray,int,type(None))):
                 data = self.load(vrbl,tidx,lvidx,lonidx,latidx)
             else:
                 raise Exception
@@ -252,9 +280,9 @@ class WRFOut(object):
             # data = data[N.newaxis,:,:,:]
         # if len(data.shape) == 3:
             # data = N.expand_dims(data,axis=0)
+        # import pdb; pdb.set_trace()
         data = self.make_4D(data,vrbl=vrbl)
 
-        # import pdb; pdb.set_trace()
         return data
 
     def load(self,vrbl,tidx,lvidx,lonidx,latidx):
@@ -281,11 +309,11 @@ class WRFOut(object):
 
         vrbldata = self.nc.variables[vrbl]
         sl = self.create_slice(vrbl,tidx,lvidx,lonidx,latidx,dim_names)
-        # import pdb; pdb.set_trace()
         # If that dimension has a slice of indices, it doesn't need staggering.
         if destag_dim and isinstance(sl[destag_dim],N.ndarray):
             destag_dim = None
 
+        # import pdb; pdb.set_trace()
         data = self.destagger(vrbldata[sl],destag_dim)
         return data
 
@@ -298,7 +326,7 @@ class WRFOut(object):
         sl = []
         # pdb.set_trace()
         if any('Time' in p for p in dim_names):
-            if tidx is False:
+            if tidx is None:
                 sl.append(slice(None,None))
             elif isinstance(tidx,slice) or isinstance(tidx,N.ndarray):
                 sl.append(tidx)
@@ -306,7 +334,7 @@ class WRFOut(object):
                 sl.append(slice(tidx,tidx+1))
 
         if any('bottom' in p for p in dim_names):
-            if lvidx is False:
+            if lvidx is None:
                 sl.append(slice(None,None))
             elif isinstance(lvidx,int):
                 sl.append(slice(lvidx,lvidx+1))
@@ -316,7 +344,7 @@ class WRFOut(object):
                 sl.append(slice(None,None))
 
         if any('west' in p for p in dim_names):
-            if lonidx is False:
+            if lonidx is None:
                 sl.append(slice(None,None))
             elif isinstance(lonidx,slice) or isinstance(lonidx,N.ndarray):
                 sl.append(lonidx)
@@ -326,7 +354,7 @@ class WRFOut(object):
                 sl.append(slice(None,None))
 
         if any('north' in p for p in dim_names):
-            if latidx is False:
+            if latidx is None:
                 sl.append(slice(None,None))
             elif isinstance(latidx,slice) or isinstance(latidx,N.ndarray):
                 sl.append(latidx)
@@ -436,6 +464,7 @@ class WRFOut(object):
         tbl['PMSL_gradient'] = self.compute_PMSL_gradient
         tbl['T2_gradient'] = self.compute_T2_gradient
         tbl['Q_pert'] = self.compute_Q_pert
+        tbl['vorticity'] = self.return_vorticity
 
         return tbl
 
@@ -1040,7 +1069,7 @@ class WRFOut(object):
         lon_idx = N.where(abs(self.lons-lon) == abs(self.lons-lon).min())[0][0]
         return lon_idx
 
-    def get_p(self,vrbl,tidx=False,level=False,lonidx=False,latidx=False):
+    def get_p(self,vrbl,tidx=None,level=None,lonidx=None,latidx=None):
         """
         Return an pressure level isosurface of given variable.
         Interpolation is linear so watch out.
@@ -1052,6 +1081,7 @@ class WRFOut(object):
 
         if vrbl=='pressure',create constant grid.
         """
+        # print('GET_P:',vrbl,tidx,level)
         if isinstance(level,str) and level.endswith('hPa'):
             hPa = 100.0*int(level.split('h')[0])
             nlv = 1
@@ -1068,25 +1098,27 @@ class WRFOut(object):
         # If this breaks, user is requesting non-4D data
         # Duck-typing for the win
         
-        P = self.get('pressure',utc=tidx,lons=lonidx,lats=latidx)[0,...]
+        P = self.get('pressure',utc=tidx,lons=lonidx,lats=latidx)[...]
 
         if vrbl=='pressure':
-            dataout = N.ones([nlv,P.shape[-2],P.shape[-1]])*hPa
+            dataout = N.ones([P.shape[0],nlv,P.shape[-2],P.shape[-1]])*hPa
         else:
-            datain = self.get(vrbl,utc=tidx,lons=lonidx,lats=latidx)[0,...]
+            datain = self.get(vrbl,utc=tidx,lons=lonidx,lats=latidx)[...]
             # import pdb; pdb.set_trace()
             # What about RUC, pressure coords
             # dataout = N.zeros([nlv,P.shape[-1],P.shape[-2]])
-            dataout = N.zeros([nlv,P.shape[-2],P.shape[-1]])
+            dataout = N.zeros([P.shape[0],nlv,P.shape[-2],P.shape[-1]])
             # pdb.set_trace()
-            for (i,j), p in N.ndenumerate(dataout[0,:,:]):
-                dataout[:,i,j] = N.interp(hPa,P[:,i,j][::-1],datain[:,i,j][::-1])
+            for t in range(P.shape[0]):
+                for (i,j), p in N.ndenumerate(dataout[0,0,:,:]):
+                    dataout[t,:,i,j] = N.interp(hPa,P[t,:,i,j][::-1],datain[t,:,i,j][::-1])
             # dataout = scipy.interpolate.griddata(P.flatten(),datain.flatten(),hPa)
-        if nlv == 1:
+        # if nlv == 1:
             # Return 2D if only one level requested
-            return self.make_4D(dataout[0,:,:])
-        else:
-            return self.make_4D(dataout)
+            # return self.make_4D(dataout[:,0,:,:])
+        # else:
+            # return self.make_4D(dataout)
+        return dataout
 
     def interp_to_p_fortran(self,config,nc_path,var,lv):
         """ Uses p_interp fortran code to put data onto a pressure
@@ -1455,10 +1487,21 @@ class WRFOut(object):
             Td =+ 273.15
         return Td
 
-    def compute_derivatives(self,U,V):
-        # import pdb; pdb.set_trace()
-        dudx, dudy = N.gradient(U,self.dx,self.dx)
-        dvdx, dvdy = N.gradient(V,self.dx,self.dx)
+    def compute_derivatives(self,U,V,axis=None):
+        dargs = (self.dx,self.dx)
+        dkwargs = {'axis':None}
+        if len(U.shape) == 2:
+            dudx, dudy = N.gradient(U,self.dx,self.dx)
+            dvdx, dvdy = N.gradient(V,self.dx,self.dx)
+        elif len(U.shape) == 3:
+            nt = U.shape[0]
+            dudx = N.zeros_like(U)
+            dvdx = N.zeros_like(U)
+            dudy = N.zeros_like(U)
+            dvdy = N.zeros_like(U)
+            for t in range(nt):
+                dudx[t,...], dudy[t,...] = N.gradient(U[t,...],self.dx,self.dx)
+                dvdx[t,...], dvdy[t,...] = N.gradient(V[t,...],self.dx,self.dx)
         return dudx, dudy, dvdx, dvdy
 
     def compute_stretch_deformation(self,U,V):
@@ -1478,8 +1521,16 @@ class WRFOut(object):
         return E
 
     def compute_vorticity(self,U,V):
-        dudx, dudy, dvdx, dvdy = self.compute_derivatives(U,V)
+        # Axis = 1 for vertical vorticity, if there's no time selected?
+        dudx, dudy, dvdx, dvdy = self.compute_derivatives(U,V,)#axis=1)
         zeta = dvdx - dudy
+        return zeta
+
+    def return_vorticity(self,tidx,lvidx,lonidx,latidx,other):
+        # pdb.set_trace()
+        U = self.get('U',tidx,lvidx,lonidx,latidx)[:,0,:,:]
+        V = self.get('V',tidx,lvidx,lonidx,latidx)[:,0,:,:]
+        zeta = self.compute_vorticity(U,V)
         return zeta
 
     def compute_fluid_trapping_diagnostic(self,tidx,lvidx,lonidx,latidx,other):

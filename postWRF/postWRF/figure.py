@@ -16,7 +16,8 @@ import WEM.utils as utils
 from .defaults import Defaults
 
 class Figure(object):
-    def __init__(self,nc=False,ax=0,fig=0,plotn=(1,1),layout='normal'):
+    def __init__(self,nc=False,ax=0,fig=0,plotn=(1,1),layout='normal',
+                        figsize=(8,6)):
         """
         C   :   configuration settings
         W   :   data
@@ -41,7 +42,7 @@ class Figure(object):
             self.ax0 = plt.subplot(self.gs[0])
             self.ax1 = plt.subplot(self.gs[1])
         else:
-            self.fig, self.ax = plt.subplots(nrows=plotn[0],ncols=plotn[1])
+            self.fig, self.ax = plt.subplots(nrows=plotn[0],ncols=plotn[1],figsize=figsize)
         self.fig.set_dpi(self.D.dpi)
         # self.ax = self.fig.add_subplot(111)
 

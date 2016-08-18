@@ -4,7 +4,7 @@ import copy
 import pdb
 
 import numpy as N
-N.set_printoptions(precision=2,suppress=True)
+N.set_printoptions(precision=4,suppress=True)
 import scipy.integrate as integrate
 
 import WEM.utils as utils
@@ -51,7 +51,7 @@ class Profile(object):
                     n=1,V=12.0,PW=30,thT=343,tT=213,th0=300,qv0=16E-3,Us=25,
                     fname='profile',H=14500,zT=14000,RH=0.9,zs=3000,
                     method='MW01',k2P=96500,k2T=296.65,k2Td=296.15,
-                    k2z=250,test_old_b=False):
+                    k2z=250,offset_spd=0,offset_dir=0):
         """Create profile text file.
 
         Parameters
@@ -88,6 +88,8 @@ class Profile(object):
             Pressure at "model level 2", Pa
         k2T, k2Td   :   int, float, optional
             Drybumb, dewpoint at "mdel level 2", C
+        offset_spd, offset_dir  :   int, float
+            Speed and direction of background flow
        
 
         """
@@ -107,6 +109,8 @@ class Profile(object):
             self.qv0 = qv0
             self.Us = Us
             self.zs = zs
+            self.offset_spd = offset_spd
+            self.offset_dir = offset_dir
             self.profile_th, self.profile_rv = self.MWtemphum()
             self.profile_u, self.profile_v = self.MWwind()
         
@@ -469,7 +473,7 @@ class Profile(object):
 
     def compute_theta(self,thetae,r,TLCL):
         # L = mc.Lv
-        # TLCL = TLCL-273.15
+        TLCL = TLCL-273.15
         # L = self.compute_Lv(TLCL)
         R = r * 1000
         # R = r
@@ -486,7 +490,7 @@ class Profile(object):
                 # 1.0723 * 10E-6 * (L/TLCL_C) *
                 # r*(1+(0.81*r*10**-3)))
         # pdb.set_trace()
-        return theta
+        return theta+273.15
 
     def compute_Lv(self,T):
         TC = T-273.15
@@ -624,13 +628,22 @@ class Profile(object):
 
     def RH_invert_RV(self,P,T,RV):
         es = self.compute_es(T)
+        
+        P = P/100
+        es = es/100
 
-        RH = e/es
+        # RH = (P*(RV+0.622))/(0.622*es)
+        RH = 1/( ((0.622*es)/P) * ( (1/RV)+(1/0.622)))
         return RH
 
-    def compute_P_at_z(self,P,T,dz):
-        dP = (-dz*P*mc.g)/(mc.R*T)
-        return dP
+    def compute_P_at_z(self,Pbot,T,r,dz):
+        # dP = (-dz*P*mc.g)/(mc.R*T)
+        Tv = self.compute_Tv(T,r)
+        H = (mc.Rd * Tv)/mc.g
+        Ptop = Pbot * N.exp(-1*(dz/H))
+        # pdb.set_trace()
+        return Ptop 
+        # return dP
 
     def compute_T_with_LCL(self,P,PLCL,TLCL):
         TLCL = TLCL - 273.15
@@ -658,7 +671,7 @@ class Profile(object):
         TC = T-273.15
         R = r
         Tv = TC * ((1+(R/0.622))/(1+R))
-        return T+273.15
+        return Tv+273.15
 
     def compute_thetapert(self,B,T,r):
         Tv_env = self.compute_Tv(T,r)
@@ -670,53 +683,80 @@ class Profile(object):
         Theta = N.zeros_like(self.z,dtype=N.dtype('f8'))
         RH = N.zeros_like(Theta)
         P = N.zeros_like(Theta)
+        # P = self.get_stdP(self.z)
         RV = N.zeros_like(Theta)
         T = N.zeros_like(Theta)
 
+        # P[0] = 101325
         P[0] = 100000
+        # P[0] = 99500
         T[0] = self.th0
 
         for idx,z in enumerate(self.z):
             if z <= self.zT:
                 Theta[idx] = self.th0 + ((self.thT - self.th0)*(
                                             (z/self.zT)**1.25))
-                RH[idx] = 1 - 0.75*((z/self.zT)**1.25)
+                RH[idx] = 1 - (0.75*((z/self.zT)**1.25))
             else:
                 Theta[idx] = self.thT * N.exp(
                             (mc.g/(mc.cp*self.tT))*(z-self.zT))
                 RH[idx] = 0.25
 
-            if idx != 0:
+        for idx,z in enumerate(self.z):
+            if idx > 0:
                 dZ = self.z[idx] - self.z[idx-1]
+                # dZZ = self.z[idx]
+
                 # dP = self.compute_P_at_z(P[idx-1],DryBulb[idx-1]-(6.5*dZ*10**-3),dZ)
                 # dP = self.compute_P_at_z(P[idx-1],T[idx-1],dZ)
-                dP = self.compute_P_at_z(P[idx-1],T[idx-1]-(6.5*dZ*10**-3),dZ)
-                P[idx] = P[idx-1] + dP
+                # dP = self.compute_P_at_z(P[idx-1],T[idx-1]-(7*dZ*10**-3),dZ)
+                mT = T[idx-1] - (7*0.5*dZ*10**-3)
+                # mT = T[idx-1]
+                P[idx] = self.compute_P_at_z(P[idx-1],mT,RH[idx],dZ)
+                # P[idx] = P[idx-1] + (1.0*dP)
                 T[idx] = self.compute_drybulb(Theta[idx],P[idx])
+                pass
 
         # pdb.set_trace()
-        RV = self.compute_rv(P,T,RH)
+        T = self.compute_drybulb(Theta,P)
+        T_D = self.compute_Td(T,RH)
+        # RV = self.compute_rv(P,T,RH)
+        RV = self.compute_rv(P,Td=T_D)
+        RV = RV*0.85
         # Set constant mixing ratio at surface
         # PBLidx = N.argmax(P<85000)
-        PBLidx = N.argmax(RV<self.qv0)-2
+        PBLidx = N.argmax(RV<self.qv0)#-2
         # RV_const = RV[PBLidx+1]
         RV_const = self.qv0
         RV[0:PBLidx] = RV_const
 
+        RH2 = self.RH_invert_RV(P,T,RV)
+
+        # Fix constant theta-e in lowest layer
+        # hLCL = ( 20 + ((T[0]-273.15)/5)) * (100-(100*RH2[0]))
+        # pdb.set_trace()
+        # LCLidx = N.argmax(self.z>hLCL)#-2
+        # thE = self.compute_thetaep(P[LCLidx],RV[LCLidx],T[LCLidx],RH[LCLidx])
+        # Theta[0:LCLidx] = self.compute_theta(thE,RV[0:LCLidx],T[LCLidx])
+        # pdb.set_trace()
+
         test_plot = False
         if test_plot:
             # Recalculate RH in PBL
-            ES = self.compute_es(T)
-            RVs = 0.622*(ES/(P-ES))
-            RH[0:PBLidx] = RV[:PBLidx]/RVs[:PBLidx]
-            T_D = self.compute_Td(T,RH)
-            sT.plot_profile(P/100,T-273.15,T_D-273.15,self.fdir)
+            # ES = self.compute_es(T)
+            # RVs = 0.622*(ES/(P-ES))
+            # RH2 = RV/RVs
+            # T_D = self.compute_Td(T,RH2)
+            # T = self.compute_drybulb(Theta,P)
+            T_D = self.compute_Td(T,RH2)
+            sT.plot_profile(P/100,T-273.15,T_D-273.15,'/home/johnlawson')
+        # pdb.set_trace()
         return Theta, RV
 
     def MWwind(self):
         # U = N.zeros_like(self.z,dtype=N.dtype('f8'))
         U = self.Us * (N.tanh(self.z/self.zs))
-        u,v = utils.decompose_wind(U-7,255)
+        u,v = utils.decompose_wind(U-self.offset_spd,self.offset_dir)
         return u,v
 
     def create_textfile(self,):
@@ -726,6 +766,8 @@ class Profile(object):
         TH = self.profile_th
         RV = self.profile_rv
         Z = self.z
+        blanks = N.zeros_like(U)
+        blanks[:] = 0
         space = '    '
 
         data = N.zeros([len(Z),5])
@@ -735,12 +777,38 @@ class Profile(object):
         data[:,1] = TH
         data[:,2] = RV*1000.0
         data[:,3] = U
+        # data[0,4] = ''
         data[:,4] = V
+        # data[0,5] = ''
+        fmts = ('%8.4f','%8.4f','%8.4f','%8.4f','%8.4f')
 
         # for u,v,th,rv,z in zip(U,V,TH,RV,Z):
             # lgen = '{0}{1:.4f}{0}{2:.4f}{0}{3:.4f}{0}{4:.4f}{0}{5:.4f}'.format(
                         # space,z,th,r,u,v)
-        N.savetxt(fpath,data,fmt='%8.4f',delimiter='\t',)
+        N.savetxt(fpath,data,fmt='%8.4f',delimiter=space,)
         print("Saved profile to {0}.".format(fpath))
         return
 
+    def get_stdT(self,z):
+        stdT = N.zeros_like(z,dtype=N.dtype('f8'))
+        stdT[0] = 288.15
+        for idx in range(1,len(stdT)):
+            dZ = z[idx] - z[idx-1]
+            stdT[idx] = stdT[idx-1] - (dZ * 0.0065)
+        return stdT
+
+    def get_stdP(self,z):
+        stdT = self.get_stdT(z)
+        stdP = N.zeros_like(z,dtype=N.dtype('f8'))
+        stdP[0] = 101325
+        for idx in range(1,len(stdP)):
+            dZ = z[idx] 
+            mT = N.mean(stdT[:idx])
+            mP = N.mean(stdT[:idx])
+            stdP[idx] = stdP[0] - ((dZ*mP*mc.g)/(mc.R*mT))
+        pdb.set_trace()
+        return stdP
+
+    def PPP(self,Z):
+        P = 1013.25 * ((1-(Z/(0.3048*145366.45)))**(1/0.19))
+        return P*100

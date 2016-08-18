@@ -56,12 +56,13 @@ from .ts import TimeSeries
 class WRFEnviron(object):
     """Main environment API.
     """
-    def __init__(self):
+    def __init__(self,em='em_real'):
         """ This currently only loads default settings.
         """
         # Set defaults
         self.D = Defaults()
 
+        self.em = em
         #self.font_prop = getattr(self.C,'font_prop',self.D.font_prop)
         #self.usetex = getattr(self.C,'usetex',self.D.usetex)
         #self.plot_titles = getattr(self.C,'plot_titles',self.D.plot_titles)
@@ -69,7 +70,7 @@ class WRFEnviron(object):
         #M.rc('font',**self.font_prop)
         #M.rcParams['savefig.dpi'] = self.dpi
 
-    def plot2D(self,vrbl,utc,level=False,ncdir=False,outdir=False,
+    def plot2D(self,vrbl,utc,level=None,ncdir=False,outdir=False,
                 ncf=False,nct=False,f_prefix=0,f_suffix=False,
                 dom=1,plottype='contourf',smooth=1,
                 fig=False,ax=False,clvs=False,cmap=False,
@@ -164,6 +165,9 @@ class WRFEnviron(object):
         # TODO: lats/lons False when no bounding, and selected with limited
         # domain.
 
+        if self.em is not 'em_real':
+            ideal = True
+
         if ncdir is False:
             ncdir = os.path.expanduser("~")
         if outdir is False:
@@ -174,7 +178,7 @@ class WRFEnviron(object):
 
         # Match domain
         if not Nlim and isinstance(match_nc,str):
-            MATCH = WRFOut(match_nc)
+            MATCH = WRFOut(match_nc,fmt=ideal)
             Nlim, Elim, Slim, Wlim = MATCH.get_limits()
 
             
@@ -187,7 +191,7 @@ class WRFEnviron(object):
                 raise Exception("Set accumulation period")
             data = self.W.compute_accum_rain(utc,accum_hr)[0,0,:,:]
         else:
-            data = self.W.get(vrbl,utc=utc,level=level,lons=False,lats=False,other=other)[0,0,:,:]
+            data = self.W.get(vrbl,utc=utc,level=level,lons=None,lats=None,other=other)[0,0,:,:]
         # Needs to be shape [1,1,nlats,nlons].
         if smooth>1:
             data = stats.gauss_smooth(data,smooth)
@@ -201,18 +205,19 @@ class WRFEnviron(object):
 
         # Scales
         cmap, clvs = self.get_cmap_clvs(vrbl,level,cmap=cmap,clvs=clvs)
+        # pdb.set_trace()
 
 
         # Figure
         fname = self.create_fname(vrbl,utc,level,f_suffix=f_suffix, f_prefix=f_prefix,other=other)
         F = BirdsEye(self.W,fig=fig,ax=ax)
-        # import pdb; pdb.set_trace()
         cb = F.plot2D(data,fname,outdir,lats=lats,lons=lons,
                     plottype=plottype,smooth=smooth,
                     clvs=clvs,cmap=cmap,locations=locations,
                     cb=cb,color=color,inline=inline,lw=lw,
                     extend=extend,save=save,cblabel=cblabel,
                     ideal=ideal)
+        print(data.max())
         return cb
 
     def get_cmap_clvs(self,vrbl,level,clvs=False,cmap=False):
@@ -229,7 +234,7 @@ class WRFEnviron(object):
             cmap = S.cm
         return cmap,clvs
 
-    def create_fname(self,vrbl,utc=False,level=False,other=False,
+    def create_fname(self,vrbl,utc=None,level=False,other=False,
                         f_prefix=False,f_suffix=False,
                         extension='png'):
         """
@@ -258,9 +263,12 @@ class WRFEnviron(object):
         if level:
             strs.append('{0}'.format(level))
 
-        if utc:
-            time_str = utils.string_from_time('output',utc)
-            strs.append(time_str)
+        if utc is not None:
+            if isinstance(utc,int) and utc<500:
+                strs.append('t{0:03d}'.format(utc))
+            else:
+                time_str = utils.string_from_time('output',utc)
+                strs.append(time_str)
 
         if isinstance(other,dict):
             for k,v in other.items():
@@ -280,7 +288,7 @@ class WRFEnviron(object):
 
         return fname
 
-    def get_netcdf(self,ncdir,ncf=False,nct=False,dom=1,path_only=False):
+    def get_netcdf(self,ncdir,ncf=False,nct=False,dom=1,path_only=False,model='wrfout'):
         """
         Returns the WRFOut, ECMWF, or RUC instance.
 
@@ -305,7 +313,8 @@ class WRFEnviron(object):
         """
         if ncf:
             fpath = os.path.join(ncdir,ncf)
-            model = utils.determine_model(ncf)
+            if not model:
+                model = utils.determine_model(ncf)
         else:
             fpath, model = utils.netcdf_files_in(ncdir,init_time=nct,
                                                     dom=dom,return_model=True)
@@ -320,7 +329,7 @@ class WRFEnviron(object):
                 # import pdb; pdb.set_trace()
                 return RUC(fpath)
             elif model=='wrfout':
-                return WRFOut(fpath)
+                return WRFOut(fpath,self.em)
             else:
                 print(("Unrecognised netCDF4 file type at {0}".format(fpath)))
 

@@ -240,7 +240,7 @@ Wlim	/home/johnlawson/WEM/postWRF/bin/paper3_spread.py	/^Wlim = N.floor(lons.min
 Zplot	/home/johnlawson/WEM/postWRF/bin/forecastfunnel.py	/^Zplot = 1$/;"	v
 __init__	/home/johnlawson/WEM/lazyWRF/bin/lazysettings.py	/^    def __init__(self,case):$/;"	m	class:LazySettings
 __init__	/home/johnlawson/WEM/lazyWRF/lazyWRF/create_sounding.py	/^    def __init__(self,z,fdir,zL=False,E=2000,m=4.0,hodotype='curved',$/;"	m	class:Profile
-__init__	/home/johnlawson/WEM/lazyWRF/lazyWRF/main.py	/^    def __init__(self,path_to_WRF,path_to_wrfout,path_to_storage=False,$/;"	m	class:Lazy
+__init__	/home/johnlawson/WEM/lazyWRF/lazyWRF/main.py	/^    def __init__(self,config):$/;"	m	class:Lazy
 __init__	/home/johnlawson/WEM/postWRF/bin/DKE_settings.py	/^    def __init__(self):$/;"	m	class:Settings
 __init__	/home/johnlawson/WEM/postWRF/bin/barents_settings.py	/^    def __init__(self):$/;"	m	class:Settings
 __init__	/home/johnlawson/WEM/postWRF/bin/casestudy_settings.py	/^    def __init__(self):$/;"	m	class:Settings
@@ -1146,7 +1146,6 @@ img	/home/johnlawson/WEM/postWRF/bin/postage.py	/^                    img = M.im
 img	/home/johnlawson/WEM/postWRF/bin/postage.py	/^                    img = M.image.imread(veriffiles[0])$/;"	v
 img	/home/johnlawson/WEM/postWRF/bin/postage.py	/^                img = M.image.imread(fpath)$/;"	v
 img	/home/johnlawson/WEM/postWRF/bin/postage.py	/^            img = M.image.imread(fpath)$/;"	v
-init_WPS	/home/johnlawson/WEM/lazyWRF/lazyWRF/main.py	/^    def init_WPS(self,soilVtable_fname='Vtable.GFS_soilonly'):$/;"	m	class:Lazy
 init_data	/home/johnlawson/WEM/lazyWRF/bin/lazywrf_example.py	/^init_data = 'gfs'$/;"	v
 init_prefix	/home/johnlawson/WEM/lazyWRF/bin/lazywrf_example.py	/^    init_prefix = 'gfsanl'$/;"	v
 init_prefix	/home/johnlawson/WEM/lazyWRF/bin/lazywrf_example.py	/^    init_prefix = 'namanl'$/;"	v
@@ -1960,7 +1959,7 @@ subcmd	/home/johnlawson/WEM/lazyWRF/bin/slurm_ideal.py	/^    subcmd = 'sbatch {0
 submit_job	/home/johnlawson/WEM/lazyWRF/bin/lazywrf_example.py	/^submit_job = 1$/;"	v
 submit_job	/home/johnlawson/WEM/lazyWRF/bin/setup_gefs.py	/^submit_job = 1$/;"	v
 submit_job	/home/johnlawson/WEM/lazyWRF/bin/setup_gefs_isu.py	/^def submit_job(linkonly=0):$/;"	f
-submit_job	/home/johnlawson/WEM/lazyWRF/lazyWRF/main.py	/^    def submit_job(self,roughguess):$/;"	m	class:Lazy
+submit_job	/home/johnlawson/WEM/lazyWRF/lazyWRF/main.py	/^    def submit_job(self):$/;"	m	class:Lazy
 t	/home/johnlawson/WEM/postWRF/bin/GEFS_NAM_compare.py	/^t = 0$/;"	v
 t	/home/johnlawson/WEM/postWRF/bin/ideal.py	/^t = (2000,1,1,1,30,0)$/;"	v
 tailcmd	/home/johnlawson/WEM/lazyWRF/bin/slurm_ideal.py	/^    tailcmd = 'tail {0}'.format(path_to_rsl)$/;"	v

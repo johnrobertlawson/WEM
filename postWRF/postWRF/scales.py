@@ -26,6 +26,7 @@ import WEM.utils as utils
 
 class Scales(object):
     def __init__(self,vrbl,lv,clvs=0):
+        self.lv = lv
         self.A = self.get_dict_of_levels()
         # Variable and vertical level determine contour scale
 
@@ -35,7 +36,7 @@ class Scales(object):
         if isinstance(lv,str) and lv.endswith('hPa'):
             lv = int(lv.split('h')[0])
 
-        if clvs:
+        if isinstance(clvs,(list,tuple,N.ndarray)):
             # Custom range set by user
             self.clvs = N.arange(*clvs)
         else:
@@ -115,15 +116,15 @@ class Scales(object):
         
         # Simulated reflectivity
         A['cref'] = {'cmap':ct.reflect_ncdc}
-        A['cref'][0] = (5,90,5)
+        A['cref'][self.lv] = (5,90,5)
         
         # Simulated reflectivity
         A['REFL_10CM'] = {'cmap':ct.reflect_ncdc}
-        A['REFL_10CM'][0] = (5,90,5)
+        A['REFL_10CM'][self.lv] = (5,90,5)
 
         # Simulated reflectivity
         A['REFL_comp'] = {'cmap':ct.reflect_ncdc}
-        A['REFL_comp'][0] = (5,90,5)
+        A['REFL_comp'][self.lv] = (5,90,5)
 
         # Precipitation
         A['precip'] = {'cmap':ct.precip1}
