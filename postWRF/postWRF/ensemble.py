@@ -196,6 +196,8 @@ class Ensemble(object):
                             Elim=False,Slim=False,Wlim=False):
         """
         Return probability of exceeding or reaching a threshold.
+        
+        Arguments:
         vrbl        :   variable or field
         overunder   :   'over' or 'under'
         threshold   :   the threshold in SI units
