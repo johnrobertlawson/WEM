@@ -1,9 +1,11 @@
-import string
 import os
 import pdb
 import datetime
 
 import numpy as N
+
+import WEM.utils as utils
+from .wrfout import WRFOut
 
 """This module contains the Ensemble class only.
 
@@ -15,10 +17,12 @@ Todo:
     * Two
 """
 
+# Dummy variable in place of proper subclass of WRFOut
+AuxWRFOut = object
+
 class Ensemble(object):
     def __init__(self,rootdir,initutc,doms=1,ctrl='ctrl',aux=False,
-        model='wrf',fmt='em_real',f_prefix=None,
-        output_t=False,history_sec=None,loadobj=True):
+        model='wrf',fmt='em_real',f_prefix=None,loadobj=True):
         """Class containing all ensemble members. Default is a
             deterministic forecast (i.e. ensemble of one control member).
             Each ensemble member needs to have a separate folder (named
@@ -46,86 +50,120 @@ class Ensemble(object):
                 ensemble member's main data files. Must be length /doms/.
                 Default is None, which then uses a method to determine
                 the file name using default outputs from e.g. WRF.
-            output_t (list, optional): Future extension that allows multiple data
-                files for each time.
-            history_sec (int, optional): Difference between history output
-                intervals. If all data is contained in one file, use None
-                (default). Methods will keep looking for history output
-                files until a file error is raised.
         """
         self.ctrl = ctrl
-        self.model = string.lower(model)
+        self.model = model.lower()
         self.rootdir = rootdir
         self.initutc = initutc
         self.doms = doms
         self.fmt = fmt
-        self.dt = history_sec
         self.loadobj = loadobj
-        #self.aux = aux
+        self.aux = aux
 
         self.isaux = True if isinstance(self.aux,dict) else False
-        if len(f_prefix) is not doms:
+        if f_prefix is not None and len(f_prefix) is not doms:
             raise Exception("Length of main datafile prefixes must "
                                 "match number of domains.")
         self.isctrl = True if ctrl else False
-        self.nperts = len(pertnames) if pertnames is not False else 0
-        self.nmems = self.nperts + self.isctrl
-        self.ndoms = len(self.doms)
+        # self.ndoms = len(self.doms)
         self.member_names = []
-        self.members = self.get_members()
+        self.members, self.fdt = self.get_members()
+        self.nmems = len(self.member_names)
+        self.nperts = self.nmems - self.isctrl
+
+        # Get start and end of whole dataset (inclusive)
+        self.filetimes = self.list_of_filetimes(arb=True)
+        # self.fdt = self.compute_fdt()
+        self.nt_per_file = self.compute_nt_per_file()
+        self.itime = self.filetimes[0]
+        self.ftime = self.filetimes[-1] + (
+                    (self.nt_per_file-1)*datetime.timedelta(seconds=self.fdt))
+
+        # Difference in output times across whole dataset
+        # Might be split between history files
+
+        self.hdt = self.compute_history_dt()
+
+    def compute_fdt(self):
+        """Compute the difference in time between each data file's first entry.
+
+        Returns the difference in seconds.
+        """
+        f_diff = self.filetimes[1] - self.filetimes[0]
+        return f_diff.seconds
 
     def get_members(self,):
         """Create a dictionary with all data.
 
         Format is:
         members[member][domain][time][data]
+
+        Returns:
+            members (dict): Dictionary of ensemble members
+            fdt (int): Seconds between output files.
         """
         members = {}
-        for dom in range(1,self.ndoms+1):
+        fdt = None
+        for dom in range(1,self.doms+1):
             # Get file name for initialisation time and domain
-            main_fname = self.get_data_fname(dom=dom,prod='main')
-            if dom in self.aux:
-                aux_fname = self.get_data_fname(dom=dom,prod='aux')
+            # main_fname = self.get_data_fname(dom=dom,prod='main')
+            main_fname = utils.get_netcdf_naming(self.model,self.initutc,dom)
+            # if dom in self.aux:
+                # aux_fname = self.get_data_fname(dom=dom,prod='aux')
             # Each ensemble member has a domain
             for dirname,subdirs,files in os.walk(self.rootdir):
                 # If ensemble size = 1, there will be no subdirs.
                 if main_fname in files:
+                    # pdb.set_trace()
                     member = dirname.split('/')[-1]
+                    print("Looking at member {0}".format(member))
                     if member not in members:
                         members[member] = {dom:{}}
                     if dom==1:
                         self.member_names.append(member)
-                    t = self.initt
+                    t = self.initutc
                     while True:
+                        t_fname = utils.get_netcdf_naming(self.model,t,dom)
                         # Check for history output time
-                        fpath = os.path.join(self.rootdir,dirname,main_fname)
+                        fpath = os.path.join(self.rootdir,dirname,t_fname)
                         try:
-                            dataobj = self.datafile_object(fpath)
+                            dataobj = self.datafile_object(fpath,loadobj=self.loadobj)
                         except IOError:
                             # All wrfout files have been found
                             break
                         else:
+                            # print("Assigning file path and maybe object.")
                             members[member][dom][t] = {'dataobj':dataobj,
                                                 'fpath':fpath,
                                                 'control': (member is self.ctrl)}
-                        if dom in self.aux:
+                            # print("Done.")
+                        if (self.aux is not False) and (dom in self.aux):
                             # TODO: implement
                             fpath = os.path.join(self.rootdir,dirname,aux_fname)
-                            dataobj = self.datafile_object(fpath)
+                            dataobj = self.datafile_object(fpath,loadobj=self.loadobj)
                             members[member][dom][t]['auxdataobj'] = dataobj
                             members[member][dom][t]['auxfpath'] = fpath
                             members[member][dom][t]['control'] = member is self.ctrl
                         # Move to next time
-                        t = utc + datetime.timedelta(seconds=self.dt)
-        return members
+                        if fdt is None:
+                            f1, f2 = sorted(files)[:2]
+                            fdt = utils.dt_from_fnames(f1,f2,'wrf')
 
-    def datafile_object(self,fpath,**kwargs):
+                            # Loop through files and estimate dt based on fname
+                        else:
+                            t = t + datetime.timedelta(seconds=fdt)
+
+        return members, fdt
+
+    def datafile_object(self,fpath,loadobj=False,**kwargs):
         #Extend to include other files (GEFS, RUC etc)
         #TODO: Implement auxiliary wrfout files
-        if self.loadobj:
+        # print(fpath)
+        if loadobj:
             ops = {'wrf':WRFOut,'aux':AuxWRFOut}
             answer = ops[self.model](fpath,**kwargs)
         else:
+            os.stat(fpath)
             answer = False
         return answer
 
@@ -216,54 +254,60 @@ class Ensemble(object):
 
         return self.members_names[ensidx]
 
-    def ensemble_array(self,vrbl,level=False,itime=False,ftime=False,
-                        fcsttime=False,Nlim=False,Elim=False,
-                        Slim=False,Wlim=False):
+    def ensemble_array(self,vrbl,dom=1,level=None,itime=False,ftime=False,
+                        fcsttime=False,Nlim=None,Elim=None,
+                        Slim=None,Wlim=None):
         """
-        Returns 5D array
+        Returns 5D array of data for ranges.
+
+        Needs to load WRFOut files if self.loadobj is False.
+
         Ordered in descending order on pert. members
         First dimension is ensemble members.
-        Can chop down lat/lon box.
 
         TODO: lat/lon box is in the correct projection?
+        TODO: Implement bounding lat/lon box.
         """
 
-        if self.ctrl:
-            npert = self.nmems-1
-        else:
-            npert = self.nmems
-
-        enscount = 0
-        for ens in self.members_names:
-            if ens is self.ctrl:
+        ens_no = 0
+        for nm,mem in enumerate(self.member_names):
+            print("Working on member {0}".format(mem))
+            if mem is self.ctrl:
+                print("Skipping control member.")
                 continue
             else:
-                enscount += 1
-
-                if itime and ftime:
-                    tidx = self.members[ens]['data'].return_tidx_range(
-                                                                itime,ftime)
+                ens_no += 1
+               
+               # if itime and ftime:
+                if isinstance(itime,datetime.datetime) and isinstance(
+                            ftime,datetime.datetime):
+                    # fts = N.arange(itime,ftime,self.hdt)
+                    fts = utils.generate_times(itime,ftime,self.hdt)
                 else:
-                    tidx = fcsttime
+                    fts = [fcsttime,]
 
-                if Nlim:
-                    data = self.members[ens][tidx]['data'].get(
-                                                        vrbl,level=level)
-                    ens_data,lats,lons = utils.return_subdomain(
-                                                    data,self.examplenc.lats1D,
-                                                    self.examplenc.lons1D,Nlim,
-                                                    Elim,Slim,Wlim,fmt='latlon')
-                else:
-                    ens_data = self.members[ens][tidx]['data'].get(
-                                                        vrbl,level=level,
-                                                        lons=False,lats=False)
+                # if Nlim:
+                    # data = self.members[mem][dom][t]['data'].get(
+                                                        # vrbl,level=level)
+                    # ens_data,lats,lons = utils.return_subdomain(
+                                                    # data,self.examplenc.lats1D,
+                                                    # self.examplenc.lons1D,Nlim,
+                                                    # Elim,Slim,Wlim,fmt='latlon')
+                # else:
+                # pdb.set_trace()
+                for tn, ft in enumerate(fts):
+                    print("Loading data for time {0}".format(ft))
+                    t, tidx = self.find_file_for_t(ft,mem,dom=dom)
+                    fpath = self.members[mem][dom][t]['fpath']
+                    DF = self.datafile_object(fpath,loadobj=True)
+                    m_t_data = DF.get(
+                                vrbl,utc=tidx,level=level,lons=False,lats=False)[0,...]
 
-
-                if enscount == 1:
-                    w,x,y,z = ens_data.shape
-                    all_ens_data = N.zeros((npert,w,x,y,z))
-                    del w,x,y,z
-                all_ens_data[enscount-1,...] = ens_data
+                if ens_no == 1:
+                    nz,nlats,nlons = m_t_data.shape
+                    nt = len(fts)
+                    all_ens_data = N.zeros((self.nperts,nt,nz,nlats,nlons))
+                    all_ens_data[ens_no-1,tn,:,:,:] = m_t_data
 
         if Nlim:
             return all_ens_data,lats,lons
@@ -301,3 +345,102 @@ class Ensemble(object):
             return std, lats, lons
         else:
             return std
+
+    def arbitrary_pick(self,dataobj=False,give_keys=False):
+        """Arbitrary pick of a datafile entry in the members dictionary.
+
+        Arguments:
+            dataobj (bool, optional): if True, return the DataFile subclass.
+                Otherwise, return filepath.
+            give_keys (bool, optional): if True, return a list of
+                member, domain, time keys to enter into a dictionary.
+
+        """
+        mem = self.member_names[0]
+        dom = 1
+        t = self.initutc
+        arb = self.members[mem][dom][t]
+        if dataobj:
+            if give_keys:
+                raise Exception("Pick only one of give_keys and dataobj.")
+            return self.datafile_object(arb['fpath'],loadobj=True)
+        elif give_keys:
+            return mem, dom, t
+        else:
+            return arb 
+
+    def list_of_filetimes(self,arb=False,member=False,dom=1):
+        """Return list of times for each data file's first time entry,
+        for a member and domain.
+
+        Arguments:
+            arb (bool, optional): If true, arbitrarily pick a
+                member and domain to build the time list, i.e.,
+                assuming all members/domains have same list
+            member (str, optional): Name of member to build times
+                from. Needed if arb is False.
+            dom (int, optional): Number of domain to build times
+                from. Default is 1.
+        """
+        if (arb is False) and (member is False):
+            raise Exception("Specify member name if not picking arbitrarily.")
+        elif arb is True:
+            member = self.member_names[0]
+        
+        alltimes = sorted(list(self.members[member][dom].keys()))
+        return alltimes
+
+    def compute_nt_per_file(self):
+        DF = self.arbitrary_pick(dataobj=True)
+        return DF.t_dim
+
+    def compute_history_dt(self,):
+        """Calculate time difference between each history output
+        time. This could be across multiple files or in one.
+        """
+        if self.nt_per_file == 1:
+            hdt = self.fdt
+        else:
+            # arbitrarily pick data file
+            DF = self.arbitrary_pick(dataobj=True)
+            hdt = DF.dt
+        return hdt
+
+        
+    def find_file_for_t(self,simutc,member,dom=1):
+        """Determine file to load given required time.
+
+        Raises exception if history time doesn't exist.
+        
+        Arguments:
+            utc (datetime.datetime): Desired time
+            member (str): Name of member to look up. If "arb", pick
+                a member arbitrarily (this assumes members have
+                identical structure of times in the data).
+            dom (int, optional): Domain number to look up
+
+        Returns:
+            t (datetime.datetime): members dictionary key for right file.
+            index (int): Index in that file.
+
+        TODO:
+            Give nearest time (and/or file object) if time doesn't exist.
+        """
+        if member == 'arb':
+            member = self.member_names[0]
+
+        if not ((simutc < self.ftime) and (simutc > self.itime)):
+            raise Exception("Time outside range of data times.")
+        
+        # Returns index of file containing data
+        ftidx, tdiff = utils.closest_datetime(self.filetimes,simutc,round='beforeinc')
+
+        if tdiff == 0:
+            assert self.filetimes[ftidx] == simutc
+            t = simutc
+            tidx = 0
+        else:
+            t = self.filetimes[ftidx]
+            tidx = int(self.hdt/(self.hdt + tdiff))
+
+        return t, tidx

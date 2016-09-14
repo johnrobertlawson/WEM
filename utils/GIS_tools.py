@@ -824,6 +824,64 @@ def closest(arr,val):
     idx = N.argmin(N.abs(arr - val))
     return idx
 
+def closest_datetime(times,t,round=False):
+    """Find closest value in list of datetimes.
+    Return index of closest.
+
+    Arguments:
+        times (list,tuple): collection of datetimes.
+        t (datetime.datetime): required time
+        round (bool,str): If False, return closest index only.
+            If 'afterinc', return index of first time after t.
+                (If closest time is identical to t, return that index)
+            If 'afterexc', same, but if closest time = t, return one after.
+            If 'beforeinc', return index of last time before t.
+                (If closest time is identical to t, return that index)
+            If 'beforeexc', same, but if closest time = t, return one before.
+
+    Returns:
+        idx (int): Index of times requests
+        dtss[idx] (int): Number of seconds difference between the two.
+    """
+    stimes = N.array(sorted(times))
+    dts = stimes-t
+    dtss = [(d.days*86400)+d.seconds for d in dts]
+
+    # Closest index
+    cidx = N.argmin(N.abs(dtss))
+
+    if round is False:
+        idx = cidx
+    else:
+        if dtss[cidx] == 0:
+            bidx_inc = cidx
+            aidx_inc = cidx
+            bidx_exc = cidx-1
+            aidx_exc = cidx+1
+        elif times[cidx] < t:
+            bidx_inc = idx
+            bidx_exc = idx
+            aidx_inc = idx+1
+            aidx_exc = idx+1
+        else:
+            bidx_exc = idx-1
+            bidx_inc = idx-1
+            aidx_exc = idx
+            aidx_nxc = idx
+
+        if round is 'afterinc':
+            idx = aidx_inc
+        elif round is 'afterexc':
+            idx = aidx_exc
+        elif round is 'beforeinc':
+            idx = bidx_inc
+        elif round is 'beforeexc':
+            idx = bidx_exc
+        else:
+            raise Exception("Enter valid value for round.")
+    
+    return idx, dtss[idx]
+
 def dstack_loop(data, obj):
     """
     Tries to stack numpy array (data) into 'stack' object (obj).
@@ -871,7 +929,7 @@ def vstack_loop(data, obj):
     return stack
 
 
-def generate_times(idate,fdate,interval):
+def generate_times(idate,fdate,interval,fmt='datetime'):
     """
     :param itime:       Start date/time. Format is
                         YYYY,MM,DD,HH,MM,SS (calendar.timegm).
@@ -883,10 +941,22 @@ def generate_times(idate,fdate,interval):
     :returns:           list of times in datenum format.
 
     """
+    if fmt=='datetime':
+        # idate = (idate.year,idate.month,idate,day,idate.hour,
+                    # idate.minute,idate.second)
+        # fdate = (fdate.year,fdate.month,fdate,day,fdate.hour,
+                    # fdate.minute,fdate.second)
+        idate = datetime_to_timetuple(idate)
+        fdate = datetime_to_timetuple(fdate)
     it = calendar.timegm(idate)
     ft = calendar.timegm(fdate)
     times = N.arange(it,ft,interval,dtype=int)
-    return times
+    if fmt=='datetime':
+        tttimes = [ensure_timetuple(t) for t in times]
+        dttimes = [timetuple_to_datetime(t) for t in tttimes]
+        return dttimes
+    else:
+        return times
 
 def generate_colours(M,n):
     """
@@ -993,7 +1063,7 @@ def ensure_timetuple(times,fmt='single'):
     times = (2011,12,1,18,0,0)                          #4
     times = ((2011,12,1,18,0,0),(2011,12,2,6,0,0))      #5
     """
-    if isinstance(times,int):
+    if isinstance(times,(int,N.int64)):
         tttimes = [list(time.gmtime(times)),] #1
     elif isinstance(times,str):
         print("Don't give me strings...")
@@ -1025,6 +1095,34 @@ def datetime_to_timetuple(utc):
                 utc.hour,utc.minute,utc.second)
     return tttime
 
+def timetuple_to_datetime(utc):
+    dttime = datetime.datetime(*utc[:6])
+    return dttime
+
+def dt_from_fnames(f1,f2,model):
+    """Work out time difference between two data files
+    from their naming scheme.
+
+
+    Arguments:
+        f1,f2 (str): filename, with or without extension
+        model (str): model used to generate data
+    Returns:
+        Difference between files, in seconds.
+    """
+    if f1.endswith('.nc'):
+        f1 = f1.split('.')[0]
+        f2 = f2.split('.')[0]
+    if (model=='wrfout') or (model=='wrf'):
+        # We assume default naming
+        t = []
+        for f in (f1,f2):
+            _1, _2, tstr = f.split('_',2)
+            fmt = '%Y-%m-%d_%H:%M:%S'
+            t.append(datetime.datetime.strptime(tstr,fmt))
+        dt = t[1] - t[0]
+        return dt.seconds
+
 def get_netcdf_naming(model,t,dom=0):
     """
     By default:
@@ -1033,11 +1131,13 @@ def get_netcdf_naming(model,t,dom=0):
     """
     
     # import pdb; pdb.set_trace()
-    if model=='wrfout':
+    if (model=='wrfout') or (model=='wrf'):
         if not dom:
             print("No domain specified; using domain #1.")
             dom = 1
-        fname = ('wrfout_d{0:02d}_{1:04d}-{2:02d}-{3:02d}_{4:02d}:{5:02d}:{6:02d}'.format(dom,*t))
+        # fname = ('wrfout_d{0:02d}_{1:04d}-{2:02d}-{3:02d}_{4:02d}:{5:02d}:{6:02d}'.format(dom,*t))
+        fname = ('wrfout_d{0:02d}_{1:04d}-{2:02d}-{3:02d}_{4:02d}:{5:02d}:{6:02d}'.format(dom,
+                                     t.year,t.month,t.day,t.hour,t.minute,t.second))
     elif model == 'ruc':
         # This depends on the RUC version? Will break?
 

@@ -58,7 +58,10 @@ class WRFOut(NC):
         else:
             # Get times in nicer format
             self.utc = self.wrftime_to_datenum()
-            self.dt = self.utc[2]-self.utc[1]
+            if len(self.utc) == 1:
+                self.dt = None
+            else:
+                self.dt = self.utc[2]-self.utc[1]
 
         if not ncks:
             self.P_top = self.nc.variables['P_TOP'][0]

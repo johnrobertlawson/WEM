@@ -1,3 +1,5 @@
+from netCDF4 import Dataset
+
 from WEM.postWRF.postWRF.datafile import DataFile
 
 class NC(DataFile):
