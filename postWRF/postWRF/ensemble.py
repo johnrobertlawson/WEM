@@ -258,7 +258,8 @@ class Ensemble(object):
 
     def ensemble_array(self,vrbl,dom=1,level=None,itime=False,ftime=False,
                         fcsttime=False,Nlim=None,Elim=None,
-                        Slim=None,Wlim=None):
+                        Slim=None,Wlim=None,inclusive=False,
+                        lats=None,lons=None):
         """
         Returns 5D array of data for ranges.
 
@@ -267,8 +268,13 @@ class Ensemble(object):
         Ordered in descending order on pert. members
         First dimension is ensemble members.
 
+        Arguments:
+            inclusive (bool, optional): if True, included time specified
+                at ftime in the time range. Default is False (like Python).
+
         TODO: lat/lon box is in the correct projection?
         TODO: Implement bounding lat/lon box.
+        TODO: rename to "get()" or "ensemble_get()"?
         """
 
         ens_no = 0
@@ -279,12 +285,13 @@ class Ensemble(object):
                 continue
             else:
                 ens_no += 1
-               
+
                # if itime and ftime:
                 if isinstance(itime,datetime.datetime) and isinstance(
                             ftime,datetime.datetime):
                     # fts = N.arange(itime,ftime,self.hdt)
-                    fts = utils.generate_times(itime,ftime,self.hdt)
+                    fts = utils.generate_times(itime,ftime,self.hdt,
+                                inclusive=inclusive)
                 else:
                     fts = [fcsttime,]
 
@@ -303,18 +310,48 @@ class Ensemble(object):
                     fpath = self.members[mem][dom][t]['fpath']
                     DF = self.datafile_object(fpath,loadobj=True)
                     m_t_data = DF.get(
-                                vrbl,utc=tidx,level=level,lons=False,lats=False)[0,...]
+                                vrbl,utc=tidx,level=level,lons=lons,lats=lats)[0,...]
 
                 if ens_no == 1:
                     nz,nlats,nlons = m_t_data.shape
                     nt = len(fts)
                     all_ens_data = N.zeros((self.nperts,nt,nz,nlats,nlons))
-                    all_ens_data[ens_no-1,tn,:,:,:] = m_t_data
+
+                all_ens_data[ens_no-1,tn,:,:,:] = m_t_data
 
         if Nlim:
             return all_ens_data,lats,lons
         else:
             return all_ens_data
+
+    def accumulated(self,vrbl='RAINNC',itime=0,ftime=-1,level=False,Nlim=False,
+                    Elim=False,Slim=False,Wlim=False,inclusive=False):
+        """Accumulate, for every ensemble member, at each grid point,
+        the variable specified. Usually precipitation.
+
+        TODO:
+            Logic to work out if values are for each history output
+                timestep, from the start of the simulation, from the 
+                start of the data file...
+
+        """
+        if itime==0:
+            itime = self.itime
+        if ftime==-1:
+            ftime = self.ftime
+
+        if vrbl is 'RAINNC':
+            itime_rainnc = self.ensemble_array('RAINNC',fcsttime=itime)
+            ftime_rainnc = self.ensemble_array('RAINNC',fcsttime=ftime)
+            accum = ftime_rainnc - itime_rainnc
+        else:
+            all_ens_data = self.ensemble_array(vrbl,itime=itime,ftime=ftime,
+                                        inclusive=inclusive)
+            # time axis is 1
+            accum = N.sum(all_ens_data,axis=1)
+
+        # Resulting matrix is size ( ).
+        return accum
 
     def mean(self,vrbl,fcsttime,level=False,Nlim=False,Elim=False,
              Slim=False,Wlim=False):

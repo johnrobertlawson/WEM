@@ -929,7 +929,7 @@ def vstack_loop(data, obj):
     return stack
 
 
-def generate_times(idate,fdate,interval,fmt='datetime'):
+def generate_times(idate,fdate,interval,fmt='datetime',inclusive=False):
     """
     :param itime:       Start date/time. Format is
                         YYYY,MM,DD,HH,MM,SS (calendar.timegm).
@@ -950,6 +950,8 @@ def generate_times(idate,fdate,interval,fmt='datetime'):
         fdate = datetime_to_timetuple(fdate)
     it = calendar.timegm(idate)
     ft = calendar.timegm(fdate)
+    if inclusive:
+        ft = ft + interval
     times = N.arange(it,ft,interval,dtype=int)
     if fmt=='datetime':
         tttimes = [ensure_timetuple(t) for t in times]
