@@ -191,23 +191,29 @@ class Ensemble(object):
                                 fname)),'control':ens is 'c00'}
         return members
 
-    def get_prob_threshold(self,vrbl,level,overunder,threshold,itime=False,
+    def get_prob_threshold(self,vrbl,overunder,threshold,
+                            level=None,itime=False,
                             ftime=False,fcsttime=False,Nlim=False,
                             Elim=False,Slim=False,Wlim=False):
         """
         Return probability of exceeding or reaching a threshold.
         
         Arguments:
-        vrbl        :   variable or field
-        overunder   :   'over' or 'under'
-        threshold   :   the threshold in SI units
-        itime       :   (list,tuple) - initial time
-        ftime       :   (list,tuple) - final time
-        Nlim etc    :   bounding box
+            vrbl (str,N.array): variable. If N.array, use provided data
+                (i.e. override the loading)
+            overunder (str): 'over' or 'under' for threshold evaluation
+            threshold (float,int): the threshold in SI units
+            itime (datetime.datetime): initial time
+            ftime (datetime.datetime): final time
+            Nlim, Elim, Slim, Wlim (float,optional): bounding box
         """
-        all_ens_data = self.members_array(vrbl,level,itime=itime,ftime=ftime,
+        if isinstance(vrbl,N.array):
+            all_ens_data = vrbl
+        else:
+            all_ens_data = self.members_array(vrbl,level,itime=itime,ftime=ftime,
                             fcsttime=fcsttime,Nlim=Nlim,Elim=Elim,
                             Slim=Slim,Wlim=Wlim)
+
         if Nlim:
             all_ens_data,lats,lons = all_ens_data
 
@@ -350,7 +356,7 @@ class Ensemble(object):
             # time axis is 1
             accum = N.sum(all_ens_data,axis=1)
 
-        # Resulting matrix is size ( ).
+        # Resulting matrix is size (nperts,1,nz,nlats,nlons).
         return accum
 
     def mean(self,vrbl,fcsttime,level=False,Nlim=False,Elim=False,
