@@ -50,35 +50,58 @@ from .scales import Scales
 from .obs import Obs
 from .obs import Radar
 from .ts import TimeSeries
+from .ensemble import Ensemble
 
 # TODO: Make this awesome
 
 class WRFEnviron(object):
-    """Main environment API.
-    """
-    def __init__(self,em='em_real'):
-        """ This currently only loads default settings.
+    def __init__(self,rootdir,initutc,doms=1,ctrl='ctrl',aux=False,
+                    model='wrf',fmt='em_real',f_prefix=None,
+                            output_t=False,history_sec=None):
+        """ Sets up the environment for main methods and scripts.
+
+        Args:
+            rootdir (str):  Directory at root of datafiles.
+            initutc (datetime.datetime): Initialization time.
+
+            doms (int, optional): Number of domains
+            ctrl (bool, optional): Whether ensemble has control member
+            aux (bool, dict, optional): Dictionary lists, per domain, data
+                files that contain additional variables and each
+                file's prefix. Default is False (no auxiliary files).
+                Not implemented yet.
+            enstype (str, optional): Type of ensemble. Default is for
+                Weather Research and Forecast (WRF) model.
+            fmt (str, optional): The type of simulations. Default is
+                real-world simulations (em_real from WRF).
+            f_prefix (tuple, optional): Tuple of prefixes for each
+                ensemble member's main data files. Must be length /doms/.
+                Default is None, which then uses a method to determine
+                the file name using default outputs from e.g. WRF.
+            output_t (list, optional): Future extension that allows multiple data
+                files for each time.
+            history_sec (int, optional): Difference between history output
+                intervals. If all data is contained in one file, use None
+                (default). Methods will keep looking for history output
+                files until a file error is raised.
         """
-        # Set defaults
-        self.D = Defaults()
+        self.fmt = fmt # Used to be self.em
 
-        self.em = em
-        #self.font_prop = getattr(self.C,'font_prop',self.D.font_prop)
-        #self.usetex = getattr(self.C,'usetex',self.D.usetex)
-        #self.plot_titles = getattr(self.C,'plot_titles',self.D.plot_titles)
-        #M.rc('text',usetex=self.usetex)
-        #M.rc('font',**self.font_prop)
-        #M.rcParams['savefig.dpi'] = self.dpi
+        self.ensemble = Ensemble(rootdir=rootdir,initutc=initutc,doms=doms,
+                                    ctrl=ctrl,aux=aux,model=model,fmt=fmt,
+                                    f_prefix=f_prefix,output_t=output_t,
+                                    history_sec=None)
+        
+        # If true, WRFOuts exist in ensemble.
+        # If not, they need loading when needed
+        self.loadobj = self.ensemble.loadobj
 
-    def plot2D(self,vrbl,utc,level=None,ncdir=False,outdir=False,
-                ncf=False,nct=False,f_prefix=0,f_suffix=False,
-                dom=1,plottype='contourf',smooth=1,
-                fig=False,ax=False,clvs=False,cmap=False,
-                locations=False,cb=True,match_nc=False,
-                Nlim=False,Elim=False,Slim=False,Wlim=False,
-                other=False,color='k',inline=False,lw=False,
-                extend=False,save=True,accum_hr=False,
-                cblabel=False,ideal=False):
+    def plot2D(self,vrbl,utc=0,member='ctrl',level=None,outdir=False,
+                f_prefix=False,f_suffix=False,dom=1,plottype='contourf',
+                smooth=1,fig=False,ax=False,clvs=False,cmap=False,
+                locations=False,cb=True,match_nc=False,Nlim=False,Elim=False,
+                Slim=False,Wlim=False,color='k',inline=False,lw=False,
+                extend=False,save=True,accum_hr=False,cblabel=False):
         """Basic birds-eye-view plotting.
 
         This script is top-most and decides if the variables is
@@ -148,7 +171,7 @@ class WRFEnviron(object):
         :type locations:    dict
         :param cb:          plot a colorbar.
         :type cb:           bool
-        :param match_nc:    Use domain from other netCDF file. 
+        :param match_nc:    Use domain from other netCDF file.
                             Absolute path to this netCDF file.
         :type match_nc:     str
         :param Nlim:        north limit (latitude) for plot
@@ -167,9 +190,6 @@ class WRFEnviron(object):
 
         if self.em is not 'em_real':
             ideal = True
-
-        if ncdir is False:
-            ncdir = os.path.expanduser("~")
         if outdir is False:
             outdir = os.path.expanduser("~")
 
@@ -181,47 +201,51 @@ class WRFEnviron(object):
             MATCH = WRFOut(match_nc,fmt=ideal)
             Nlim, Elim, Slim, Wlim = MATCH.get_limits()
 
-            
         # Data
-        self.W = self.get_netcdf(ncdir,ncf=ncf,nct=nct,dom=dom)
+        W = self.get_dataobj(dom=dom,utc=utc,member=member)
         # lats, lons = self.W.get_limited_domain(bounding)
         # import pdb; pdb.set_trace()
         if vrbl == 'accum_precip':
             if not accum_hr:
                 raise Exception("Set accumulation period")
-            data = self.W.compute_accum_rain(utc,accum_hr)[0,0,:,:]
+            data = W.compute_accum_rain(utc,accum_hr)[0,0,:,:]
         else:
-            data = self.W.get(vrbl,utc=utc,level=level,lons=None,lats=None,other=other)[0,0,:,:]
+            data = W.get(vrbl,utc=utc,level=level,lons=None,lats=None,
+                            other=other)[0,0,:,:]
         # Needs to be shape [1,1,nlats,nlons].
         if smooth>1:
             data = stats.gauss_smooth(data,smooth)
 
         if Nlim:
-            data,lats,lons = utils.return_subdomain(data,self.W.lats1D,self.W.lons1D,
+            data,lats,lons = utils.return_subdomain(data,W.lats1D,W.lons1D,
                                 Nlim,Elim,Slim,Wlim,fmt='latlon')
         else:
             lats = False
             lons = False
 
-        # Scales
+        # Scales for plotting
         cmap, clvs = self.get_cmap_clvs(vrbl,level,cmap=cmap,clvs=clvs)
-        # pdb.set_trace()
-
 
         # Figure
-        fname = self.create_fname(vrbl,utc,level,f_suffix=f_suffix, f_prefix=f_prefix,other=other)
-        F = BirdsEye(self.W,fig=fig,ax=ax)
-        cb = F.plot2D(data,fname,outdir,lats=lats,lons=lons,
+        fname = self.create_fname(vrbl,utc,level,f_suffix=f_suffix,
+                                    f_prefix=f_prefix,other=other)
+        F = BirdsEye(W,fig=fig,ax=ax)
+        be = F.plot2D(data,fname,outdir,lats=lats,lons=lons,
                     plottype=plottype,smooth=smooth,
                     clvs=clvs,cmap=cmap,locations=locations,
                     cb=cb,color=color,inline=inline,lw=lw,
                     extend=extend,save=save,cblabel=cblabel,
                     ideal=ideal)
-        print(data.max())
-        return cb
+        return be
+
+    def get_dataobj(self,utc=0,dom=1,member='ctrl'):
+        # logic for time
+        # for now, use datetime.datetime
+        t = utc
+        dataobj = self.ensemble[member][dom][t]['dataobj']
+        return dataobj
 
     def get_cmap_clvs(self,vrbl,level,clvs=False,cmap=False):
-       
         if clvs is False and cmap is False:
             S = Scales(vrbl,level)
             clvs = S.clvs
@@ -287,51 +311,6 @@ class WRFEnviron(object):
             fname = '.'.join((fname,extension))
 
         return fname
-
-    def get_netcdf(self,ncdir,ncf=False,nct=False,dom=1,path_only=False,model='wrfout'):
-        """
-        Returns the WRFOut, ECMWF, or RUC instance.
-
-        :param ncdir:       absolute path to directory that contains the
-                            netCDF file.
-
-        :param ncf:         filename of netcdf data file if ambiguous within ncdir.
-                            If no wrfout file is explicitly specified, the
-                            netCDF file in that folder is chosen if unambiguous.
-        :type ncf:          bool,str
-        :param nct:         initialisation time of netcdf data file, if
-                            ambiguous within ncdir.
-        :type nct:          bool,str
-        :param dom:         domain for plotting (for WRF data).
-                            If zero, the only netCDF file present will be
-                            plotted.
-        :type dom:          int
-        :param path_only:   if True, return only absolute path to file.
-                            This is useful to loop over ensemble members and
-                            generate a list of files.
-        :type path_only:    bool
-        """
-        if ncf:
-            fpath = os.path.join(ncdir,ncf)
-            if not model:
-                model = utils.determine_model(ncf)
-        else:
-            fpath, model = utils.netcdf_files_in(ncdir,init_time=nct,
-                                                    dom=dom,return_model=True)
-
-        if path_only:
-            return fpath
-        else:
-            # Check for WRF or RUC
-            # nc = Dataset(wrfpath)
-            # if 'ruc' in nc.grib_source[:3]:
-            if model=='ruc':
-                # import pdb; pdb.set_trace()
-                return RUC(fpath)
-            elif model=='wrfout':
-                return WRFOut(fpath,self.em)
-            else:
-                print(("Unrecognised netCDF4 file type at {0}".format(fpath)))
 
     def generate_times(self,itime,ftime,interval):
         """
@@ -414,7 +393,7 @@ class WRFEnviron(object):
                 # f2 = DATA[perm]['file2']
                 # Get times and info about nc files
                 # First time to save power
-                
+
                 permtimes = DATA[perm]['times']
 
                 # Find array for required time
@@ -1022,7 +1001,7 @@ class WRFEnviron(object):
 
         # import pdb; pdb.set_trace()
         data = self.W.get('strongestwind',utc=trange,level=level)[0,0,:,:]
-        
+
         F = BirdsEye(self.W,fig=fig,ax=ax)
         fname = self.create_fname('strongestwind',ftime,level=level,f_suffix='_'+deltahr)
         xx = F.plot2D(data,fname,outdir,clvs=clvs,cb=cb,cmap=cmap,
@@ -1084,9 +1063,9 @@ class WRFEnviron(object):
 
         else:
             raise Exception("Pick over or under for threshold comparison.")
-            
-        output = percent_arr[0,:,:] 
-      
+
+        output = percent_arr[0,:,:]
+
         # fname = self.create_fname(vrbl,utc,level,f_suffix=f_suffix, f_prefix=f_prefix,other=other)
         F = BirdsEye(examplewrf,fig=fig,ax=ax)
         plottype = 'contourf'
@@ -1275,7 +1254,7 @@ class WRFEnviron(object):
         # keyword arguments for plots
         line_kwargs = {}
         cps_kwargs = {}
-        
+
         # Create two-panel figure
         if twoplot:
             P2 = Figure(self.W,plotn=(1,2))
@@ -1674,7 +1653,7 @@ class WRFEnviron(object):
         if not Nlim and isinstance(match_nc,str):
             MATCH = WRFOut(match_nc)
             Nlim, Elim, Slim, Wlim = MATCH.get_limits()
-            
+
         Front = self.W.compute_frontogenesis(utc,level)
         if isinstance(Front,N.ndarray):
             if Nlim:
@@ -1725,7 +1704,7 @@ class WRFEnviron(object):
         composite allows plotting max reflectivity for a number of times
         over a given domain.
         This can show the evolution of a system.
-        
+
         Need to rewrite so plotting is done in birdseye.
         """
         # Get limits of domain
@@ -1753,7 +1732,7 @@ class WRFEnviron(object):
             R = Radar(utc[-1],datadir)
             R.data = max_pixel
 
-        else:  
+        else:
             R = Radar(utc,datadir)
 
         R.plot_radar(outdir,Nlim=Nlim,Elim=Elim,Slim=Slim,Wlim=Wlim,
@@ -1837,7 +1816,7 @@ class WRFEnviron(object):
 
         plt.close()
         print(("Saved plot to {0}.".format(fpath)))
-        
+
     def plot_delta(self,vrbl,utc,level=False,ncdir1=False,ncdir2=False,
                             outdir=False,ncf1=False,ncf2=False,nct=False,
                             f_prefix=0,f_suffix=False,
@@ -1846,7 +1825,7 @@ class WRFEnviron(object):
                             locations=False,cb=True,match_nc=False,
                             Nlim=False,Elim=False,Slim=False,Wlim=False,
                             other=False):
-        
+
         if ncdir1 is False or ncdir2 is False:
             raise Exception
         if outdir is False:
@@ -1902,7 +1881,7 @@ class WRFEnviron(object):
                     plottype=plottype,smooth=smooth,
                     clvs=clvs,cmap=cmap,locations=locations,
                     cb=cb)
-        
+
 
 
     def plot_axes_of_dilatation(self,utc,level=False,ncdir=False,outdir=False,
@@ -1928,7 +1907,7 @@ class WRFEnviron(object):
             MATCH = WRFOut(match_nc)
             Nlim, Elim, Slim, Wlim = MATCH.get_limits()
 
-            
+
         # Data
         self.W = self.get_netcdf(ncdir,ncf=ncf,nct=nct,dom=dom)
         # lats, lons = self.W.get_limited_domain(bounding)
@@ -1939,7 +1918,7 @@ class WRFEnviron(object):
         # if smooth>1:
             # data = stats.gauss_smooth(data,smooth)
 
-        # data = 
+        # data =
         xdata, ydata = self.W.return_axis_of_dilatation_components(utc)
 
         # if Nlim:
@@ -1976,11 +1955,11 @@ class WRFEnviron(object):
             kappa = (R/Cp)
             mean_energy[nc] = 0.5*(U**2 + V**2 + kappa*(T**2))
         # mean_energy
-        
+
     def meteogram(self,vrbl,loc,ncfiles,outdir=False,ncf=False,nct=False,dom=1):
         NCs = []
         for enspath in ncfiles:
             NCs.append(self.get_netcdf(enspath,ncf=ncf,nct=nct,dom=dom))
-       
+
         TS = TimeSeries(NCs,list(loc.values())[0],list(loc.keys())[0])
         TS.meteogram(vrbl,outdir=outdir)

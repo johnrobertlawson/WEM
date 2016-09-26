@@ -19,10 +19,11 @@ import datetime
 
 import WEM.utils as utils
 from WEM.utils import metconstants as mc
+from WEM.postWRF.postWRF.ncfile import NC
 
 debug_get = 0
 
-class WRFOut(object):
+class WRFOut(NC):
 
     """
     An instance of WRFOut contains all the methods that are used to
@@ -40,10 +41,8 @@ class WRFOut(object):
                         Hence check for KeyErrors for variables
 
         """
-
-        self.path = fpath
-        self.nc = Dataset(fpath,'r')
-    
+        super().__init__(fpath)
+        
         self.dx = self.nc.DX
         self.dy = self.nc.DY
         self.t_dim = len(self.nc.dimensions['Time'])
@@ -59,7 +58,10 @@ class WRFOut(object):
         else:
             # Get times in nicer format
             self.utc = self.wrftime_to_datenum()
-            self.dt = self.utc[2]-self.utc[1]
+            if len(self.utc) == 1:
+                self.dt = None
+            else:
+                self.dt = self.utc[2]-self.utc[1]
 
         if not ncks:
             self.P_top = self.nc.variables['P_TOP'][0]
@@ -591,7 +593,7 @@ class WRFOut(object):
     def compute_T2_pertub(self,tidx,lvidx,lonidx,latidx,other):
         T2 = self.get('T2',tidx,lvidx,lonidx,latidx)
         T2_mean = N.mean(T2)
-        T2p = T2-T2_mean 
+        T2p = T2-T2_mean
         return T2p
 
     def compute_Q_pert(self,tidx,lvidx,lonidx,latidx,other):
@@ -1098,7 +1100,7 @@ class WRFOut(object):
 
         # If this breaks, user is requesting non-4D data
         # Duck-typing for the win
-        
+
         P = self.get('pressure',utc=tidx,lons=lonidx,lats=latidx)[...]
 
         if vrbl=='pressure':
