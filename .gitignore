@@ -2,3 +2,4 @@
 *.bak
 *.swp
 tags
+.DS_Store
