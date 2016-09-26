@@ -54,9 +54,11 @@ class Radar(Obs):
         png = fpath+'.png'
         wld = fpath+'.wld'
 
-        self.data = scipy.ndimage.imread(png) 
+        self.data = scipy.ndimage.imread(png,mode='P') 
+        # if len(self.data.shape) == 3:
+            # self.data = self.data[:,:,0]
 
-        self.xlen, self.ylen = self.data.shape
+        self.xlen, self.ylen, = self.data.shape
 
         # Metadata
         f = open(wld,'r').readlines()
@@ -164,8 +166,10 @@ class Radar(Obs):
         if data == 'self':
             data = self.data
         
+        # pdb.set_trace()
         if self.fmt == 'n0q':
             dBZ = (data*0.5)-32
+            # dBZ = (data*0.25)-32
         elif self.fmt == 'n0r':
             dBZ = (data*5.0)-30 
         return dBZ

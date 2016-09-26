@@ -721,7 +721,8 @@ class WRFOut(object):
         return ir
 
     def compute_REFL_comp(self,tidx,lvidx,lonidx,latidx,other):
-        lvidx = False
+        # lvidx = None
+        # pdb.set_trace()
         refl = self.get('REFL_10CM',tidx,lvidx,lonidx,latidx,other)[0,:,:,:]
         refl_comp = N.max(refl,axis=0)
         return refl_comp

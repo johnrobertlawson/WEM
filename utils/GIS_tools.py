@@ -1000,6 +1000,8 @@ def ensure_timetuple(times,fmt='single'):
         raise Exception
     elif isinstance(times,datetime.datetime):
         tttimes = datetime_to_timetuple(times)
+    # elif isinstance(times[0],datetime.datetime):
+        # tttimes = datetime_to_timetuple(times)
     elif isinstance(times,(list,tuple)): #2,3,4,5
         if not isinstance(times[0],int): #5
             tttimes = times
