@@ -62,7 +62,8 @@ class Scales(object):
         except KeyError:
             self.cm = False
 
-        if isinstance(self.cm,(bool,LinearSegmentedColormap)):
+        if isinstance(self.cm,(bool,LinearSegmentedColormap,
+                                M.colors.ListedColormap)):
             pass
         else:
             self.cm = self.A[vrbl]['cmap'](clvs)    # This is for user
@@ -157,6 +158,9 @@ class Scales(object):
         # A['RH'] = {'cmap':ct.irsat}
         A['RH'] = {'cmap':M.cm.BrBG}
         A['RH'][2000] = (0,110,5)
+
+        A['probs'] = {'cmap':M.cm.magma_r}
+        A['probs'][None] = (10,110,10)
         
         A['olr'] = {'cmap':ct.irsat}
         A['olr'][0] = [-100,-90,-85,-80,-75,-70,-65,-60,-55,-50,

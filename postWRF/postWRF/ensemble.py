@@ -22,7 +22,8 @@ AuxWRFOut = object
 
 class Ensemble(object):
     def __init__(self,rootdir,initutc,doms=1,ctrl='ctrl',aux=False,
-        model='wrf',fmt='em_real',f_prefix=None,loadobj=True):
+        model='wrf',fmt='em_real',f_prefix=None,loadobj=True,
+        ncf=False):
         """Class containing all ensemble members. Default is a
             deterministic forecast (i.e. ensemble of one control member).
             Each ensemble member needs to have a separate folder (named
@@ -59,6 +60,7 @@ class Ensemble(object):
         self.fmt = fmt
         self.loadobj = loadobj
         self.aux = aux
+        self.ncf = ncf
 
         self.isaux = True if isinstance(self.aux,dict) else False
         if f_prefix is not None and len(f_prefix) is not doms:
@@ -73,16 +75,18 @@ class Ensemble(object):
 
         # Get start and end of whole dataset (inclusive)
         self.filetimes = self.list_of_filetimes(arb=True)
-        # self.fdt = self.compute_fdt()
         self.nt_per_file = self.compute_nt_per_file()
         self.itime = self.filetimes[0]
-        self.ftime = self.filetimes[-1] + (
+        self.hdt = self.compute_history_dt()
+        if self.fdt is None:
+            self.ftime = self.filetimes[-1] + self.hdt
+        else:
+            self.ftime = self.filetimes[-1] + (
                     (self.nt_per_file-1)*datetime.timedelta(seconds=self.fdt))
 
         # Difference in output times across whole dataset
         # Might be split between history files
 
-        self.hdt = self.compute_history_dt()
 
     def compute_fdt(self):
         """Compute the difference in time between each data file's first entry.
@@ -107,15 +111,27 @@ class Ensemble(object):
         for dom in range(1,self.doms+1):
             # Get file name for initialisation time and domain
             # main_fname = self.get_data_fname(dom=dom,prod='main')
-            main_fname = utils.get_netcdf_naming(self.model,self.initutc,dom)
+            if not self.ncf:
+                main_fname  = utils.get_netcdf_naming(self.model,self.initutc,dom)
+            else:
+                main_fname = self.ncf
             # if dom in self.aux:
                 # aux_fname = self.get_data_fname(dom=dom,prod='aux')
             # Each ensemble member has a domain
             for dirname,subdirs,files in os.walk(self.rootdir):
                 # If ensemble size = 1, there will be no subdirs.
+                # pdb.set_trace()
                 if main_fname in files:
                     # pdb.set_trace()
-                    member = dirname.split('/')[-1]
+                    dsp =  dirname.split('/')
+                    rsp = self.rootdir.split('/')
+
+                    # The following logic merges subdir names
+                    # e.g. ensemble grouped twice by perturbation type?
+                    if dsp[:-1] == rsp:
+                        member = dirname.split('/')[-1]
+                    elif dsp[:-2] == rsp:
+                        member = '_'.join(dirname.split('/')[-2:])
                     print("Looking at member {0}".format(member))
                     if member not in members:
                         members[member] = {dom:{}}
@@ -123,7 +139,10 @@ class Ensemble(object):
                         self.member_names.append(member)
                     t = self.initutc
                     while True:
-                        t_fname = utils.get_netcdf_naming(self.model,t,dom)
+                        if not self.ncf:
+                            t_fname = utils.get_netcdf_naming(self.model,t,dom)
+                        else:
+                            t_fname = self.ncf
                         # Check for history output time
                         fpath = os.path.join(self.rootdir,dirname,t_fname)
                         try:
@@ -145,13 +164,16 @@ class Ensemble(object):
                             members[member][dom][t]['auxfpath'] = fpath
                             members[member][dom][t]['control'] = member is self.ctrl
                         # Move to next time
-                        if fdt is None:
-                            f1, f2 = sorted(files)[:2]
-                            fdt = utils.dt_from_fnames(f1,f2,'wrf')
+                        if not self.ncf:
+                            if fdt is None:
+                                f1, f2 = sorted(files)[:2]
+                                fdt = utils.dt_from_fnames(f1,f2,'wrf')
 
-                            # Loop through files and estimate dt based on fname
+                                # Loop through files and estimate dt based on fname
+                            else:
+                                t = t + datetime.timedelta(seconds=fdt)
                         else:
-                            t = t + datetime.timedelta(seconds=fdt)
+                            break
 
         return members, fdt
 
@@ -194,7 +216,8 @@ class Ensemble(object):
     def get_prob_threshold(self,vrbl,overunder,threshold,
                             level=None,itime=False,
                             ftime=False,fcsttime=False,Nlim=False,
-                            Elim=False,Slim=False,Wlim=False):
+                            Elim=False,Slim=False,Wlim=False,
+                            dom=1):
         """
         Return probability of exceeding or reaching a threshold.
         
@@ -207,12 +230,12 @@ class Ensemble(object):
             ftime (datetime.datetime): final time
             Nlim, Elim, Slim, Wlim (float,optional): bounding box
         """
-        if isinstance(vrbl,N.array):
+        if isinstance(vrbl,N.ndarray):
             all_ens_data = vrbl
         else:
-            all_ens_data = self.members_array(vrbl,level,itime=itime,ftime=ftime,
+            all_ens_data = self.ensemble_array(vrbl,level=level,itime=itime,ftime=ftime,
                             fcsttime=fcsttime,Nlim=Nlim,Elim=Elim,
-                            Slim=Slim,Wlim=Wlim)
+                            Slim=Slim,Wlim=Wlim,dom=dom)
 
         if Nlim:
             all_ens_data,lats,lons = all_ens_data
@@ -251,7 +274,7 @@ class Ensemble(object):
         Passing latlon/box allows calculation over given area
         (Box is in grid spaces)
         """
-        all_ens_data = self.members_array(vrbl,level,fcsttime=fcsttime,
+        all_ens_data = self.ensemble_array(vrbl,level=level,fcsttime=fcsttime,
                                           Nlim=Nlim,Elim=Elim,
                                           Slim=Slim,Wlim=Wlim)
         if Nlim:
@@ -262,10 +285,10 @@ class Ensemble(object):
 
         return self.members_names[ensidx]
 
-    def ensemble_array(self,vrbl,dom=1,level=None,itime=False,ftime=False,
+    def ensemble_array(self,vrbl,level=None,itime=False,ftime=False,
                         fcsttime=False,Nlim=None,Elim=None,
                         Slim=None,Wlim=None,inclusive=False,
-                        lats=None,lons=None):
+                        lats=None,lons=None,dom=1):
         """
         Returns 5D array of data for ranges.
 
@@ -284,6 +307,12 @@ class Ensemble(object):
         """
 
         ens_no = 0
+        # pdb.set_trace()
+        if vrbl is 'accum_precip':
+            qpf = self.accumulated(vrbl='RAINNC',itime=itime,ftime=ftime,
+                            level=level,Nlim=Nlim,Elim=Elim,
+                            Slim=Slim,Wlim=Wlim,inclusive=inclusive,)
+            return qpf
         for nm,mem in enumerate(self.member_names):
             print("Working on member {0}".format(mem))
             if mem is self.ctrl:
@@ -311,8 +340,13 @@ class Ensemble(object):
                 # else:
                 # pdb.set_trace()
                 for tn, ft in enumerate(fts):
+                    if len(fts) > 1:
+                        t, tidx = self.find_file_for_t(ft,mem,dom=dom)
+                    else:
+                        t = self.initutc
+                        tidx = ft
                     print("Loading data for time {0}".format(ft))
-                    t, tidx = self.find_file_for_t(ft,mem,dom=dom)
+                    # pdb.set_trace()
                     fpath = self.members[mem][dom][t]['fpath']
                     DF = self.datafile_object(fpath,loadobj=True)
                     m_t_data = DF.get(
@@ -364,7 +398,7 @@ class Ensemble(object):
         """
         Returns mean.
         """
-        all_ens_data = self.members_array(vrbl,level=level,fcsttime=fcsttime,
+        all_ens_data = self.ensemble_array(vrbl,level=level,fcsttime=fcsttime,
                                     Nlim=Nlim,Elim=Elim,Slim=Slim,Wlim=Wlim)
         if Nlim:
             all_ens_data, lats, lons = all_ens_data
@@ -379,7 +413,7 @@ class Ensemble(object):
     def std(self,vrbl,fcsttime,level=False,Nlim=False,Elim=False,Slim=False,Wlim=False):
         """Return standard devation
         """
-        all_ens_data = self.members_array(vrbl,level=level,fcsttime=fcsttime,
+        all_ens_data = self.ensemble_array(vrbl,level=level,fcsttime=fcsttime,
                                     Nlim=Nlim,Elim=Elim,Slim=Slim,Wlim=Wlim)
         if Nlim:
             all_ens_data, lats, lons = all_ens_data
@@ -391,7 +425,7 @@ class Ensemble(object):
         else:
             return std
 
-    def arbitrary_pick(self,dataobj=False,give_keys=False):
+    def arbitrary_pick(self,dataobj=False,give_keys=False,give_path=False):
         """Arbitrary pick of a datafile entry in the members dictionary.
 
         Arguments:
@@ -411,6 +445,8 @@ class Ensemble(object):
             return self.datafile_object(arb['fpath'],loadobj=True)
         elif give_keys:
             return mem, dom, t
+        elif give_path:
+            return arb['fpath']
         else:
             return arb 
 
@@ -474,6 +510,7 @@ class Ensemble(object):
         if member == 'arb':
             member = self.member_names[0]
 
+        pdb.set_trace()
         if not ((simutc < self.ftime) and (simutc > self.itime)):
             raise Exception("Time outside range of data times.")
         

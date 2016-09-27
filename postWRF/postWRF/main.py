@@ -57,7 +57,8 @@ from .ensemble import Ensemble
 class WRFEnviron(object):
     def __init__(self,rootdir,initutc,doms=1,ctrl='ctrl',aux=False,
                     model='wrf',fmt='em_real',f_prefix=None,
-                            output_t=False,history_sec=None):
+                            output_t=False,history_sec=None,
+                            ncf=False):
         """ Sets up the environment for main methods and scripts.
 
         Args:
@@ -89,8 +90,8 @@ class WRFEnviron(object):
 
         self.ensemble = Ensemble(rootdir=rootdir,initutc=initutc,doms=doms,
                                     ctrl=ctrl,aux=aux,model=model,fmt=fmt,
-                                    f_prefix=f_prefix,output_t=output_t,
-                                    history_sec=None)
+                                    f_prefix=f_prefix,loadobj=False,
+                                    ncf=ncf)
         
         # If true, WRFOuts exist in ensemble.
         # If not, they need loading when needed
@@ -101,7 +102,8 @@ class WRFEnviron(object):
                 smooth=1,fig=False,ax=False,clvs=False,cmap=False,
                 locations=False,cb=True,match_nc=False,Nlim=False,Elim=False,
                 Slim=False,Wlim=False,color='k',inline=False,lw=False,
-                extend=False,save=True,accum_hr=False,cblabel=False):
+                extend=False,save=True,accum_hr=False,cblabel=False,
+                data=None,fname=False,ideal=False):
         """Basic birds-eye-view plotting.
 
         This script is top-most and decides if the variables is
@@ -188,7 +190,7 @@ class WRFEnviron(object):
         # TODO: lats/lons False when no bounding, and selected with limited
         # domain.
 
-        if self.em is not 'em_real':
+        if self.fmt is not 'em_real':
             ideal = True
         if outdir is False:
             outdir = os.path.expanduser("~")
@@ -198,25 +200,29 @@ class WRFEnviron(object):
 
         # Match domain
         if not Nlim and isinstance(match_nc,str):
-            MATCH = WRFOut(match_nc,fmt=ideal)
+            MATCH = WRFOut(match_nc,fmt=self.fmt)
             Nlim, Elim, Slim, Wlim = MATCH.get_limits()
 
-        # Data
-        W = self.get_dataobj(dom=dom,utc=utc,member=member)
-        # lats, lons = self.W.get_limited_domain(bounding)
-        # import pdb; pdb.set_trace()
-        if vrbl == 'accum_precip':
-            if not accum_hr:
-                raise Exception("Set accumulation period")
-            data = W.compute_accum_rain(utc,accum_hr)[0,0,:,:]
+        if data is None:
+            # Data
+            W = self.get_dataobj(dom=dom,utc=utc,member=member)
+            # lats, lons = self.W.get_limited_domain(bounding)
+            # import pdb; pdb.set_trace()
+            if vrbl == 'accum_precip':
+                if not accum_hr:
+                    raise Exception("Set accumulation period")
+                data = W.compute_accum_rain(utc,accum_hr)[0,0,:,:]
+            else:
+                data = W.get(vrbl,utc=utc,level=level,lons=None,lats=None,
+                                other=other)[0,0,:,:]
         else:
-            data = W.get(vrbl,utc=utc,level=level,lons=None,lats=None,
-                            other=other)[0,0,:,:]
+            W = MATCH
+        
         # Needs to be shape [1,1,nlats,nlons].
         if smooth>1:
             data = stats.gauss_smooth(data,smooth)
 
-        if Nlim:
+        if isinstance(Nlim,float):
             data,lats,lons = utils.return_subdomain(data,W.lats1D,W.lons1D,
                                 Nlim,Elim,Slim,Wlim,fmt='latlon')
         else:
@@ -227,7 +233,8 @@ class WRFEnviron(object):
         cmap, clvs = self.get_cmap_clvs(vrbl,level,cmap=cmap,clvs=clvs)
 
         # Figure
-        fname = self.create_fname(vrbl,utc,level,f_suffix=f_suffix,
+        if fname is False:
+            fname = self.create_fname(vrbl,utc,level,f_suffix=f_suffix,
                                     f_prefix=f_prefix,other=other)
         F = BirdsEye(W,fig=fig,ax=ax)
         be = F.plot2D(data,fname,outdir,lats=lats,lons=lons,
@@ -235,7 +242,7 @@ class WRFEnviron(object):
                     clvs=clvs,cmap=cmap,locations=locations,
                     cb=cb,color=color,inline=inline,lw=lw,
                     extend=extend,save=save,cblabel=cblabel,
-                    ideal=ideal)
+                    ideal=ideal,alpha=0.8)
         return be
 
     def get_dataobj(self,utc=0,dom=1,member='ctrl'):
@@ -1008,9 +1015,22 @@ class WRFEnviron(object):
                 extend=extend,save=save)
         return xx
 
-    def probability_threshold(self,ensemble,vrbl,overunder,threshold,itime,ftime,smooth=False,
+    def plot_probs(self,vrbl,overunder,threshold,itime,ftime=None,smooth=False,
+                    level=None,outdir=False,fname=False,dom=1,
+                    clvs=False,fig=False,ax=False,cb=True,accum_hr=False,
+                    Nlim=False,Elim=False,Slim=False,Wlim=False):
+        """Docs.
+        """
+        pc_arr = self.ensemble.get_prob_threshold(vrbl,overunder,threshold,
+                    itime=itime,level=level,Nlim=Nlim,Elim=Elim,
+                    Slim=Slim,Wlim=Wlim,dom=dom,ftime=ftime)
+        ff = self.plot2D('probs',data=pc_arr,outdir=outdir,fname=fname,
+                        match_nc=self.ensemble.arbitrary_pick(give_path=True))
+        return ff
+
+    def probability_threshold(self,vrbl,overunder,threshold,itime,ftime,smooth=False,
                             level=2000, outdir=False,f_prefix=False,f_suffix=False,bounding=False,
-                            dom=1,clvs=False,fig=False,ax=False,cb=True):
+                            dom=1,clvs=False,fig=False,ax=False,cb=True,accum_hr=False):
         """
         Create threshold contour plots.
         """

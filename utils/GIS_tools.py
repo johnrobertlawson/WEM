@@ -929,7 +929,7 @@ def vstack_loop(data, obj):
     return stack
 
 
-def generate_times(idate,fdate,interval,fmt='datetime',inclusive=False):
+def generate_times(idate,fdate,interval,fmt='timetuple',inclusive=False):
     """
     :param itime:       Start date/time. Format is
                         YYYY,MM,DD,HH,MM,SS (calendar.timegm).
@@ -1094,6 +1094,36 @@ def ensure_timetuple(times,fmt='single'):
         print("Nonsense format choice.")
         raise Exception
 
+def ensure_datetime(t):
+    """
+    Possibilities:
+    times = 123456                                      #1
+    times = (123456,)                                   #2
+    times = (123456,234567)                             #3
+    times = (2011,12,1,18,0,0)                          #4
+    times = ((2011,12,1,18,0,0),(2011,12,2,6,0,0))      #5
+    times = datetime.datetime                           #6
+    times = (datetime.datetime, datetime.datetime)      #7
+    """
+    if isinstance(t,(int,N.int64)):  #1
+        utc = timetuple_to_datetime(list(time.gmtime(t)))
+    elif isinstance(t,datetime.datetime): #6
+        utc = t
+    elif isinstance(t,(list,tuple)):
+        if isinstance(t[0],datetime.datetime): #7
+            utc = t
+        elif isinstance(t[0],(int,N.int64)):
+            if t[0] < 3000: # 4
+                utc = timetuple_to_datetime(t)
+            else: #2, 3
+                utc = [timetuple_to_datetime(list(time.gmtime(t))) for
+                        t in t]
+        elif isinstance(t[0],(list,tuple)): # 5
+            utc = [timetuple_to_datetime(t) for t in t]
+    else:
+        raise Exception("Unidentified format.")
+    return utc
+
 def datetime_to_timetuple(utc):
     tttime = (utc.year,utc.month,utc.day,
                 utc.hour,utc.minute,utc.second)
@@ -1134,6 +1164,7 @@ def get_netcdf_naming(model,t,dom=0):
     other files have .nc extension (convert first)
     """
     
+    t = ensure_datetime(t)
     # import pdb; pdb.set_trace()
     if (model=='wrfout') or (model=='wrf'):
         if not dom:

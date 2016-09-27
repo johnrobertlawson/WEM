@@ -27,7 +27,7 @@ class BirdsEye(Figure):
         super(BirdsEye,self).__init__(nc=nc,ax=ax,fig=fig)
 
     def get_plot_arguments(self,cmap=False,clvs=False,color=False,
-            ideal=False):
+            ideal=False,alpha=1.0):
         """
         Returns colourmap and contouring levels
 
@@ -50,6 +50,8 @@ class BirdsEye(Figure):
         if cmap is not False:
             # cmap = eval('M.cm.{0}'.format(cmap))
             plotkwargs['cmap'] = cmap
+
+        plotkwargs['alpha'] = alpha
         return plotargs, plotkwargs
 
     def axes_of_dilatation(self,xdata,ydata,fname,outdir,
@@ -90,7 +92,7 @@ class BirdsEye(Figure):
                     locations=False,m=False,x=False,y=False,
                     Nlim=False,Elim=False,Slim=False,Wlim=False,
                     color='k',inline=False,lw=False,extend=False,
-                    cblabel=False,ideal=False):
+                    cblabel=False,ideal=False,alpha=1.0):
 
         """
         Generic method that plots any matrix of data on a map
@@ -136,7 +138,8 @@ class BirdsEye(Figure):
         # self.la_n = self.data.shape[-2]
         # self.lo_n = self.data.shape[-1]
 
-        plotargs, plotkwargs = self.get_plot_arguments(clvs=clvs,cmap=cmap,color=color,ideal=ideal)
+        plotargs, plotkwargs = self.get_plot_arguments(clvs=clvs,cmap=cmap,color=color,
+                                alpha=alpha,ideal=ideal)
 
         # import pdb; pdb.set_trace()
         if plottype == 'contour':

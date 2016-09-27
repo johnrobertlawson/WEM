@@ -6,15 +6,17 @@ radar reflectivity, severe weather reports.
 
 import scipy.ndimage
 import pdb
-from mpl_toolkits.basemap import Basemap
 import numpy as N
 import os
-import WEM.utils as utils
-import matplotlib.pyplot as plt
 import calendar
 import glob
 import datetime
 
+from mpl_toolkits.basemap import Basemap
+import pygrib
+import matplotlib.pyplot as plt
+
+import WEM.utils as utils
 from .birdseye import BirdsEye
 
 class Obs(object):
@@ -372,16 +374,49 @@ class MRMS(Obs):
 
         super().__init__(fpath)
 
-    def generate_fpath(self,rootdir,product,utc):
+    def generate_fpath(self,rootdir,prod,utc):
         """Return an absolute path based on product and time of data
         that is required, in a root directory.
         """
         # Fill this out
         valid_products = ('PRECIPRATE',)
-        if product is not in valid_products:
+        pdb.set_trace()
+        if prod not in valid_products:
             raise Exception("Product name not valid.")
 
-        fname = '{0}.{1}{2}{3}.{4}{5}{6}'.format(product,utc.year,utc.month,
+        fname = '{0}.{1}{2}{3}.{4}{5}{6}'.format(prod,utc.year,utc.month,
                                 utc.day,utc.hour,utc.minute,utc.second)
         fpath = os.path.join(rootdir,fname)
         return fpath
+
+class StageIV(Obs):
+    def __init__(self,rootdir):
+        ST4s = os.path.join(rootdir,'ST4*')
+        fs = glob.glob(ST4s)
+        # Dictionaries for different accumulation periods
+        d1h = {}
+        d6h = {}
+        d24h = {}
+        for f in fs:
+            t = self.date_from_fname(f)
+            if f.endswith('01h'):
+                d1h[t] = load_data(f)
+            elif f.endswith('06h'):
+                d6h[t] = load_data(f)
+            elif f.endswith('24h'):
+                d24h[t] = load_data(f)
+            else:
+                pass
+
+    def date_from_fname(self,f):
+        _1, d, _2 = f.split('.')
+        fmt = '%Y%M%D%H'
+        utc = datetime.strptime(d,fmt)
+        return utc
+
+    def load_data(self,f):
+        G = pygrib.open(f)
+        return G
+
+    def return_array(self,vrbl,utc,accum_hr):
+        pass
