@@ -23,8 +23,9 @@ from .scales import Scales
 from . import stats
 
 class BirdsEye(Figure):
-    def __init__(self,nc=False,ax=0,fig=0):
+    def __init__(self,nc=False,ax=0,fig=0,ideal=False):
         super(BirdsEye,self).__init__(nc=nc,ax=ax,fig=fig)
+        self.ideal = ideal
 
     def get_plot_arguments(self,cmap=False,clvs=False,color=False,
             ideal=False,alpha=1.0):
@@ -116,10 +117,13 @@ class BirdsEye(Figure):
         # INITIALISE
         self.data = data
         # pdb.set_trace()
+        if self.ideal:
+            ideal = True
         if ideal:
             self.bmap = self.ax
-            self.x = N.arange(len(data[:,0]))
-            self.y = N.arange(len(data[0,:]))
+            # pdb.set_trace()
+            self.y = N.arange(len(data[:,0]))
+            self.x = N.arange(len(data[0,:]))
 
         elif x is False and y is False and m is False:
             if not Nlim:

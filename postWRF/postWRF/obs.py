@@ -13,11 +13,12 @@ import glob
 import datetime
 
 from mpl_toolkits.basemap import Basemap
-import pygrib
 import matplotlib.pyplot as plt
 
 import WEM.utils as utils
 from .birdseye import BirdsEye
+
+# pygrib is optional import in StageIV class.
 
 class Obs(object):
     """
@@ -391,6 +392,8 @@ class MRMS(Obs):
 
 class StageIV(Obs):
     def __init__(self,rootdir):
+        import pygrib
+
         ST4s = os.path.join(rootdir,'ST4*')
         fs = glob.glob(ST4s)
         # Dictionaries for different accumulation periods

@@ -63,7 +63,7 @@ class WRFOut(NC):
             else:
                 self.dt = self.utc[2]-self.utc[1]
 
-        if not ncks:
+        if (ncks is False) and (fmt is 'em_real'):
             self.P_top = self.nc.variables['P_TOP'][0]
 
         # Loads variable lists

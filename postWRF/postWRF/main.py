@@ -88,7 +88,8 @@ class WRFEnviron(object):
         """
         self.fmt = fmt # Used to be self.em
 
-        self.ensemble = Ensemble(rootdir=rootdir,initutc=initutc,doms=doms,
+        if rootdir is not False:
+            self.ensemble = Ensemble(rootdir=rootdir,initutc=initutc,doms=doms,
                                     ctrl=ctrl,aux=aux,model=model,fmt=fmt,
                                     f_prefix=f_prefix,loadobj=False,
                                     ncf=ncf)
