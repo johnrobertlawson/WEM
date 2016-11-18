@@ -404,6 +404,7 @@ class StageIV(GribFile):
         
         self.loadobj = loadobj
         ST4s = os.path.join(rootdir,'ST4*')
+        print("Loading files in {0}".format(ST4s))
         fps = glob.glob(ST4s)
 
         self.DATA = {}
@@ -427,6 +428,7 @@ class StageIV(GribFile):
                     pass
 
         # Assign all projection stats
+        # pdb.set_trace()
         self.projection()
 
     def date_from_fname(self,f):
