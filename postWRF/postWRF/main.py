@@ -93,7 +93,7 @@ class WRFEnviron(object):
                                     ctrl=ctrl,aux=aux,model=model,fmt=fmt,
                                     f_prefix=f_prefix,loadobj=False,
                                     ncf=ncf)
-        
+
         # If true, WRFOuts exist in ensemble.
         # If not, they need loading when needed
         self.loadobj = self.ensemble.loadobj
@@ -218,7 +218,7 @@ class WRFEnviron(object):
                                 other=other)[0,0,:,:]
         else:
             W = MATCH
-        
+
         # Needs to be shape [1,1,nlats,nlons].
         if smooth>1:
             data = stats.gauss_smooth(data,smooth)
@@ -1019,14 +1019,19 @@ class WRFEnviron(object):
     def plot_probs(self,vrbl,overunder,threshold,itime,ftime=None,smooth=False,
                     level=None,outdir=False,fname=False,dom=1,
                     clvs=False,fig=False,ax=False,cb=True,accum_hr=False,
-                    Nlim=False,Elim=False,Slim=False,Wlim=False):
+                    Nlim=False,Elim=False,Slim=False,Wlim=False,
+                    verif=False):
         """Docs.
         """
         pc_arr = self.ensemble.get_prob_threshold(vrbl,overunder,threshold,
                     itime=itime,level=level,Nlim=Nlim,Elim=Elim,
                     Slim=Slim,Wlim=Wlim,dom=dom,ftime=ftime)
+        if verif is not False:
+            obsdata = obs.return_array(itime,accum_hr=accum_hr,vrbl='accum')
+
         ff = self.plot2D('probs',data=pc_arr,outdir=outdir,fname=fname,
-                        match_nc=self.ensemble.arbitrary_pick(give_path=True))
+                        match_nc=self.ensemble.arbitrary_pick(give_path=True),)
+
         return ff
 
     def probability_threshold(self,vrbl,overunder,threshold,itime,ftime,smooth=False,
@@ -1955,7 +1960,6 @@ class WRFEnviron(object):
         # import pdb; pdb.set_trace()
         F.axes_of_dilatation(xdata,ydata,fname,outdir,
                     lats=lats,lons=lons, locations=locations)
-
 
     def plot_diff_energy_spectrum(self,energy,ncfiles,utc=False,outdir=False):
         """
