@@ -10,7 +10,7 @@ import subprocess
 # Strip down files to a few variables
 # Move them elsewhere before next run
 
-sounddir = '/home/johnlawson/idealised/WK82_profiles'
+sounddir = '/home/johnlawson/idealised/WK82_profiles_3'
 wrfdir = '/home/johnlawson/WRF_v3.8/WRFV3/run'
 # wrfoutdir = '/home/johnlawson/idealised/wrfout'
 wrfoutdir = '/scratch/johnlawson/wrfout'
@@ -37,6 +37,8 @@ def ncks(fpath,vrbls):
 
 qv0_range = N.arange(10.0,15.8,0.2)
 U_range = N.arange(0.0,52.0,2.0)
+# qv0_range = (13.0,)
+# U_range = (32.0,)
 
 def gen_fname(q,u):
     qst = q*10

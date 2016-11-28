@@ -14,6 +14,7 @@ import datetime
 
 from mpl_toolkits.basemap import Basemap
 import matplotlib.pyplot as plt
+import pygrib
 
 import WEM.utils as utils
 from .birdseye import BirdsEye
@@ -403,18 +404,18 @@ class StageIV(Obs):
         for f in fs:
             t = self.date_from_fname(f)
             if f.endswith('01h'):
-                d1h[t] = load_data(f)
+                d1h[t] = self.load_data(f)
             elif f.endswith('06h'):
-                d6h[t] = load_data(f)
+                d6h[t] = self.load_data(f)
             elif f.endswith('24h'):
-                d24h[t] = load_data(f)
+                d24h[t] = self.load_data(f)
             else:
                 pass
 
     def date_from_fname(self,f):
         _1, d, _2 = f.split('.')
-        fmt = '%Y%M%D%H'
-        utc = datetime.strptime(d,fmt)
+        fmt = '%Y%M%d%H'
+        utc = datetime.datetime.strptime(d,fmt)
         return utc
 
     def load_data(self,f):
@@ -423,3 +424,4 @@ class StageIV(Obs):
 
     def return_array(self,vrbl,utc,accum_hr):
         pass
+

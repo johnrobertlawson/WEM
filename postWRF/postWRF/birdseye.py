@@ -93,7 +93,7 @@ class BirdsEye(Figure):
                     locations=False,m=False,x=False,y=False,
                     Nlim=False,Elim=False,Slim=False,Wlim=False,
                     color='k',inline=False,lw=False,extend=False,
-                    cblabel=False,ideal=False,alpha=1.0):
+                    cblabel=False,ideal=False,alpha=1.0,):
 
         """
         Generic method that plots any matrix of data on a map

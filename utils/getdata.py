@@ -5,7 +5,6 @@ import pdb
 import sys
 import glob
 
-# sys.path.append('/home/jrlawson/gitprojects/')
 from . import GIS_tools as utils
 from . import GIS_tools
 

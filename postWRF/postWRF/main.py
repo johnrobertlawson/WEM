@@ -104,7 +104,7 @@ class WRFEnviron(object):
                 locations=False,cb=True,match_nc=False,Nlim=False,Elim=False,
                 Slim=False,Wlim=False,color='k',inline=False,lw=False,
                 extend=False,save=True,accum_hr=False,cblabel=False,
-                data=None,fname=False,ideal=False):
+                data=None,fname=False,ideal=False, return_figax=False):
         """Basic birds-eye-view plotting.
 
         This script is top-most and decides if the variables is
@@ -236,15 +236,16 @@ class WRFEnviron(object):
         # Figure
         if fname is False:
             fname = self.create_fname(vrbl,utc,level,f_suffix=f_suffix,
-                                    f_prefix=f_prefix,other=other)
+                                    f_prefix=f_prefix,other=other,)
         F = BirdsEye(W,fig=fig,ax=ax)
-        be = F.plot2D(data,fname,outdir,lats=lats,lons=lons,
+        F.plot2D(data,fname,outdir,lats=lats,lons=lons,
                     plottype=plottype,smooth=smooth,
                     clvs=clvs,cmap=cmap,locations=locations,
                     cb=cb,color=color,inline=inline,lw=lw,
                     extend=extend,save=save,cblabel=cblabel,
-                    ideal=ideal,alpha=0.8)
-        return be
+                    ideal=ideal,alpha=0.8,)
+        if return_figax:
+            return (F.fig, F.ax)
 
     def get_dataobj(self,utc=0,dom=1,member='ctrl'):
         # logic for time
@@ -1019,14 +1020,16 @@ class WRFEnviron(object):
     def plot_probs(self,vrbl,overunder,threshold,itime,ftime=None,smooth=False,
                     level=None,outdir=False,fname=False,dom=1,
                     clvs=False,fig=False,ax=False,cb=True,accum_hr=False,
-                    Nlim=False,Elim=False,Slim=False,Wlim=False):
+                    Nlim=False,Elim=False,Slim=False,Wlim=False,
+                    return_figax=False):
         """Docs.
         """
         pc_arr = self.ensemble.get_prob_threshold(vrbl,overunder,threshold,
                     itime=itime,level=level,Nlim=Nlim,Elim=Elim,
                     Slim=Slim,Wlim=Wlim,dom=dom,ftime=ftime)
         ff = self.plot2D('probs',data=pc_arr,outdir=outdir,fname=fname,
-                        match_nc=self.ensemble.arbitrary_pick(give_path=True))
+                        match_nc=self.ensemble.arbitrary_pick(give_path=True),
+                        return_figax=return_figax)
         return ff
 
     def probability_threshold(self,vrbl,overunder,threshold,itime,ftime,smooth=False,

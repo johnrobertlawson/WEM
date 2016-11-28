@@ -16,14 +16,14 @@ hodotype = 'curved'
 n = 2
 V = 12
 # fdir = os.path.abspath('./')
-fdir = '/home/johnlawson/idealised/WK82_profiles_2'
+fdir = '/home/johnlawson/idealised/WK82_profiles_3'
 method='WK82'
 # qv0 = 16E-3
 # True uses non-boosted buoyancy profile
 # testsw=0
 # Us = 25
 offset_spd = 5
-offset_dir = 90
+offset_dir = 270
 zT = 12000
 
 qv0_range = N.arange(10.0,16.1,0.1)#*10**-3
