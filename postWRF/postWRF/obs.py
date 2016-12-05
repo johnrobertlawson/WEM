@@ -483,10 +483,10 @@ class StageIV(GribFile):
         lats, lons = latlon
         return lats,lons
 
-    def return_array(self,utc,accum_hr='01h',vrbl='accum'):
+    def return_array(self,utc,accum_hr='01h'):
+        # pdb.set_trace()
         G = self.DATA[accum_hr][utc]
         return self.load_accum(G)
-        
 
     def projection(self):
         self.m = Basemap(projection='npstere',lon_0=-105.0,#lat_1=60.0,
@@ -511,9 +511,8 @@ class StageIV(GribFile):
         assert self.lats.shape == self.lons.shape
 
     def arbitrary_pick(self):
+        # pdb.set_trace()
         accum = list(self.DATA.keys())[0]
         utc = list(self.DATA[accum].keys())[0]
         return self.DATA[accum][utc]
 
-    def return_array(self,vrbl,utc,accum_hr):
-        pass

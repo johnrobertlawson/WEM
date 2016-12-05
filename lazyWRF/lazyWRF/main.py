@@ -205,6 +205,7 @@ class Lazy:
             p_real = subprocess.Popen(real_cmd,cwd=self.path_to_WRF,shell=True,stdout=subprocess.PIPE)
             p_real.wait()
             jobid = p_real.stdout.read()[:5] # Assuming first five digits = job ID.
+        # pdb.set_trace()
         
         if not first_only:
             print("Submitting wrf.exe")
@@ -281,7 +282,51 @@ class Lazy:
         command = 'ln -sf %s Vtable' %(path)
         os.system(command)
         
-    def edit_namelist(self,suffix,sett,newval,maxdom=1):
+    def add_new_namelist(self,suffix,section,sett,newval,quoted):
+        """Adds new namelist setting at end of section, before
+        the backslash."""
+
+        if quoted:
+            newval = "'{0}'".format(newval)
+
+        f = self.return_namelist_path(suffix)
+
+        flines = open(f,'r').readlines()
+        sidx = 'None'
+        for idx, line in enumerate(flines):
+            if section in line:
+                sidx = idx
+            if isinstance(sidx,int) and '/' in line[:4]:
+                spaces = 36
+                flines[idx] = " {0: <{sp}}= {1}, \n / \n ".format(sett,newval,sp=spaces)
+                nameout = open(f,'w')
+                nameout.writelines(flines)
+                nameout.close()
+                break
+                
+    def remove_namelist_line(self,suffix,sett):
+        f = self.return_namelist_path(suffix)
+        flines = open(f,'r').readlines()
+        for idx, line in enumerate(flines):
+            if sett in line:
+                flines[idx] = "\n"
+                nameout = open(f,'w')
+                nameout.writelines(flines)
+                nameout.close()
+                break
+
+
+    def return_namelist_path(self,suffix):
+        """Gives path to namelist depending on suffix argument.
+        """
+        if suffix == 'wps':
+            f = os.path.join(self.path_to_WPS,'namelist.wps')
+        elif suffix == 'input':
+            f = os.path.join(self.path_to_WRF,'namelist.input')
+        return f
+
+
+    def edit_namelist(self,suffix,sett,newval,maxdom=1,quoted=False):
         """Method edits namelist.wps or namelist.input.
         
         Args:
@@ -294,15 +339,16 @@ class Lazy:
         Returns:
             None.
         """
-
-        if suffix == 'wps':
-            f = os.path.join(self.path_to_WPS,'namelist.wps')
-        elif suffix == 'input':
-            f = os.path.join(self.path_to_WRF,'namelist.input')
+        if quoted:
+            newval = "'{0}'".format(newval)
+        f = self.return_namelist_path(suffix)
         flines = open(f,'r').readlines()
         for idx, line in enumerate(flines):
             if sett in line:
-                flines[idx] = "{0} = {1}, \n".format(sett,newval)
+                # spaces = 38 - len(sett)
+                spaces = 36
+                # print(sett,spaces)
+                flines[idx] = " {0: <{sp}}= {1}, \n".format(sett,newval,sp=spaces)
                 nameout = open(f,'w')
                 nameout.writelines(flines)
                 nameout.close()

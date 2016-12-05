@@ -13,6 +13,7 @@ import calendar
 import sys
 #sys.path.append('/home/jrlawson/gitprojects/')
 import WEM.utils as utils
+from WEM.utils import metconstants as mc
 from .figure import Figure
 from .defaults import Defaults
 from .wrfout import WRFOut
@@ -39,6 +40,11 @@ class RUC(WRFOut):
         # import pdb; pdb.set_trace()
         self.nc = Dataset(self.fpath)
         self.fields = [v for v in self.nc.variables]
+
+        self.timekey = 'dummy'
+        self.lvkey = 'lv_ISBL'
+        self.lonkey = 'xgrid'
+        self.latkey = 'ygrid'
 
         raw_time = self.nc.variables[self.fields[0]].initial_time
         self.utc = self.get_utc_time(raw_time)
@@ -134,19 +140,32 @@ class RUC(WRFOut):
         # Way to account for 2D, 3D, 4D variables in RUC
         vrbldata = self.nc.variables[vrbl]
         # import pdb; pdb.set_trace()
-        if len(vrbldata.shape) == 2:
+        dim_names = self.get_dims(vrbl)
+        sl = self.create_slice(vrbl,tidx,lvidx,lonidx,latidx,dim_names)
+        # if vrbl is 'gridlat_0':
+            # pdb.set_trace()
+        vrbldata = vrbldata[sl]
+
+        if len(vrbldata.shape) == 1:
+            vrbldata = N.expand_dims(vrbldata,axis=-1)
+            vrbldata = N.expand_dims(vrbldata,axis=-1)
+            vrbldata = N.expand_dims(vrbldata,axis=0)
+        elif len(vrbldata.shape) == 2:
             # Ugly!
             vrbldata = N.expand_dims(vrbldata,axis=0)
             vrbldata = N.expand_dims(vrbldata,axis=0)
-        if len(vrbldata.shape) == 3:
+        elif len(vrbldata.shape) == 3:
             vrbldata = N.expand_dims(vrbldata,axis=0)
+            pass
         # elif len(vrbldata.shape) == 3:
             # vrbldata = vrbldata[N.newaxis,:,:,:]
 
         # Top/bottom is different to WRF?
 
         # Don't need to destagger, again?
-        # sl = self.create_slice(vrbl,tidx,lvidx,lonidx,latidx,dim_names)
+
+        # Now add axis for time (missing)
+        # vrbldata = N.expand_dims(vrbldata,axis=0)
         # if destag_dim and isinstance(sl[destag_dim],N.ndarray):
             # destag_dim = None
         # data = self.destagger(vrbldata[sl],destag_dim)
@@ -158,7 +177,7 @@ class RUC(WRFOut):
             # Should always be the case!
             return vrbldata[:,::-1,:,:]
         else:
-            return vrbldata
+            raise Exception
 
     def get_MAYBE(self,vrbl,utc=False,level=False,lats=False,lons=False,
                 smooth=1,other=False):
@@ -562,3 +581,12 @@ class RUC(WRFOut):
         else:
             n = 13e3
         return n, n
+
+    def compute_theta(self,tidx,lvidx,lonidx,latidx,other):
+        """Override due to lack of "T" in RUC.
+        """
+        P = self.get('pressure',tidx,lvidx,lonidx,latidx)
+        T = self.get('drybulb',tidx,lvidx,lonidx,latidx)
+        theta = T*((P/100000.0)**(-mc.R/mc.cp))
+        # pdb.set_trace()
+        return theta

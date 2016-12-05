@@ -50,6 +50,11 @@ class WRFOut(NC):
         self.y_dim = len(self.nc.dimensions['south_north'])
         self.z_dim = len(self.nc.dimensions['bottom_top'])
 
+        self.timekey = 'Time'
+        self.lvkey = 'bottom'
+        self.lonkey = 'west'
+        self.latkey = 'north'
+
         # if ncks:
         try:
             self.wrf_times = self.nc.variables['Times'][:]
@@ -242,7 +247,7 @@ class WRFOut(NC):
                 # Interpolate to lat/lon
                 lonidx = None
                 latidx = None
-        elif isinstance(lons,int):
+        elif isinstance(lons,(int,N.int64)):
             lonidx = lons
             latidx = lats
         elif isinstance(lons,float):
@@ -319,6 +324,7 @@ class WRFOut(NC):
         data = self.destagger(vrbldata[sl],destag_dim)
         return data
 
+
     def create_slice(self,vrbl,tidx,lvidx,lonidx,latidx,dim_names):
         """
         Create slices from indices of level, time, lat, lon.
@@ -326,8 +332,9 @@ class WRFOut(NC):
         """
         # See which dimensions are present in netCDF file variable
         sl = []
-        # pdb.set_trace()
-        if any('Time' in p for p in dim_names):
+        # if vrbl.startswith('TMP'):
+            # pdb.set_trace()
+        if any(self.timekey in p for p in dim_names):
             if tidx is None:
                 sl.append(slice(None,None))
             elif isinstance(tidx,slice) or isinstance(tidx,N.ndarray):
@@ -335,7 +342,7 @@ class WRFOut(NC):
             else:
                 sl.append(slice(tidx,tidx+1))
 
-        if any('bottom' in p for p in dim_names):
+        if any(self.lvkey in p for p in dim_names):
             if lvidx is None:
                 sl.append(slice(None,None))
             elif isinstance(lvidx,int):
@@ -345,7 +352,7 @@ class WRFOut(NC):
             else:
                 sl.append(slice(None,None))
 
-        if any('west' in p for p in dim_names):
+        if any(self.lonkey in p for p in dim_names):
             if lonidx is None:
                 sl.append(slice(None,None))
             elif isinstance(lonidx,slice) or isinstance(lonidx,N.ndarray):
@@ -355,7 +362,7 @@ class WRFOut(NC):
             else:
                 sl.append(slice(None,None))
 
-        if any('north' in p for p in dim_names):
+        if any(self.latkey in p for p in dim_names):
             if latidx is None:
                 sl.append(slice(None,None))
             elif isinstance(latidx,slice) or isinstance(latidx,N.ndarray):
@@ -1064,13 +1071,19 @@ class WRFOut(NC):
             print("Invalid selection for return_array.")
             raise Exception
 
+    def get_latlon_idx(self,lat,lon):
+        coords = N.unravel_index(N.argmin((lat-self.lats)**2+
+                    (lon-self.lons)**2),self.lons.shape)
+        # lon, lat
+        return [int(c) for c in coords]
+
     def get_lat_idx(self,lat):
         lat_idx = N.where(abs(self.lats-lat) == abs(self.lats-lat).min())[0][0]
-        return lat_idx
+        return int(lat_idx)
 
     def get_lon_idx(self,lon):
         lon_idx = N.where(abs(self.lons-lon) == abs(self.lons-lon).min())[0][0]
-        return lon_idx
+        return int(lon_idx)
 
     def get_p(self,vrbl,tidx=None,level=None,lonidx=None,latidx=None):
         """

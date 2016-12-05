@@ -93,7 +93,7 @@ class BirdsEye(Figure):
                     locations=False,m=False,x=False,y=False,
                     Nlim=False,Elim=False,Slim=False,Wlim=False,
                     color='k',inline=False,lw=False,extend=False,
-                    cblabel=False,ideal=False,alpha=1.0,):
+                    cblabel=False,ideal=False,alpha=1.0,return_basemap=False):
 
         """
         Generic method that plots any matrix of data on a map
@@ -125,14 +125,18 @@ class BirdsEye(Figure):
             self.y = N.arange(len(data[:,0]))
             self.x = N.arange(len(data[0,:]))
 
-        elif x is False and y is False and m is False:
-            if not Nlim:
-                self.bmap,self.x,self.y = self.basemap_setup(smooth=smooth,lats=lats,
-                                                    lons=lons,)#ax=self.ax)
+        elif x is False and y is False:
+            if m is False:
+                if not Nlim:
+                    self.bmap,self.x,self.y = self.basemap_setup(smooth=smooth,lats=lats,
+                                                        lons=lons,)#ax=self.ax)
+                else:
+                    self.bmap,self.x,self.y = self.basemap_setup(smooth=smooth,lats=lats,
+                                                        lons=lons,Nlim=Nlim,Elim=Elim,
+                                                        Slim=Slim,Wlim=Wlim)
             else:
-                self.bmap,self.x,self.y = self.basemap_setup(smooth=smooth,lats=lats,
-                                                    lons=lons,Nlim=Nlim,Elim=Elim,
-                                                    Slim=Slim,Wlim=Wlim)
+                self.bmap = m
+                self.x, self.y = self.bmap(lons,lats)
 
         else:
             self.bmap = m
@@ -206,7 +210,10 @@ class BirdsEye(Figure):
             self.save(outdir,fname)
             plt.close(self.fig)
         else:
-            return f1
+            if return_basemap:
+                return self.bmap
+            else:
+                return f1
 
     def plot_streamlines(self,U,V,outdir,fname,lats=False,lons=False,smooth=1,
                             title=False,lw_speed=False,density=1.8,ideal=False):

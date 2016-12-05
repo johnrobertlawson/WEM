@@ -86,6 +86,7 @@ class Ensemble(object):
 
         # Difference in output times across whole dataset
         # Might be split between history files
+        # pdb.set_trace()
 
 
     def compute_fdt(self):

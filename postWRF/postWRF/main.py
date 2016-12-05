@@ -104,7 +104,9 @@ class WRFEnviron(object):
                 locations=False,cb=True,match_nc=False,Nlim=False,Elim=False,
                 Slim=False,Wlim=False,color='k',inline=False,lw=False,
                 extend=False,save=True,accum_hr=False,cblabel=False,
-                data=None,fname=False,ideal=False, return_figax=False):
+                data=None,fname=False,ideal=False, return_figax=False,
+                cont2_data=False,cont2_clvs=False,
+                cont2_lats=False,cont2_lons=False):
         """Basic birds-eye-view plotting.
 
         This script is top-most and decides if the variables is
@@ -238,12 +240,22 @@ class WRFEnviron(object):
             fname = self.create_fname(vrbl,utc,level,f_suffix=f_suffix,
                                     f_prefix=f_prefix,other=other,)
         F = BirdsEye(W,fig=fig,ax=ax)
-        F.plot2D(data,fname,outdir,lats=lats,lons=lons,
+        if cont2_data is not False:
+            save = False
+        m = F.plot2D(data,fname,outdir,lats=lats,lons=lons,
                     plottype=plottype,smooth=smooth,
                     clvs=clvs,cmap=cmap,locations=locations,
                     cb=cb,color=color,inline=inline,lw=lw,
                     extend=extend,save=save,cblabel=cblabel,
-                    ideal=ideal,alpha=0.8,)
+                    ideal=ideal,alpha=0.8,return_basemap=True)
+        if cont2_data is not False:
+            F.plot2D(cont2_data,fname,outdir,lats=cont2_lats,
+                    lons=cont2_lons,cb=False,
+                    plottype='contour',smooth=smooth,
+                    clvs=cont2_clvs,locations=locations,
+                    color=color,inline=inline,lw=lw,
+                    save=True,ideal=ideal,m=m)
+
         if return_figax:
             return (F.fig, F.ax)
 
@@ -1021,18 +1033,20 @@ class WRFEnviron(object):
                     level=None,outdir=False,fname=False,dom=1,
                     clvs=False,fig=False,ax=False,cb=True,accum_hr=False,
                     Nlim=False,Elim=False,Slim=False,Wlim=False,
-                    return_figax=False,verif=False)
+                    return_figax=False,verif=False):
         """Docs.
         """
         pc_arr = self.ensemble.get_prob_threshold(vrbl,overunder,threshold,
                     itime=itime,level=level,Nlim=Nlim,Elim=Elim,
                     Slim=Slim,Wlim=Wlim,dom=dom,ftime=ftime)
         if verif is not False:
-            obsdata = obs.return_array(itime,accum_hr=accum_hr,vrbl='accum')
+            obsdata = verif.return_array(ftime,accum_hr=accum_hr)
 
         ff = self.plot2D('probs',data=pc_arr,outdir=outdir,fname=fname,
                         match_nc=self.ensemble.arbitrary_pick(give_path=True),
-                        return_figax=return_figax,)
+                        return_figax=return_figax,cont2_data=obsdata,
+                        cont2_clvs=[threshold,],cont2_lats=verif.lats,
+                        cont2_lons=verif.lons)
 
         return ff
 

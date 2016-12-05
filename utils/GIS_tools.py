@@ -941,7 +941,7 @@ def generate_times(idate,fdate,interval,fmt='timetuple',inclusive=False):
     :returns:           list of times in datenum format.
 
     """
-    if fmt=='datetime':
+    if isinstance(idate,datetime.datetime):
         # idate = (idate.year,idate.month,idate,day,idate.hour,
                     # idate.minute,idate.second)
         # fdate = (fdate.year,fdate.month,fdate,day,fdate.hour,
@@ -953,8 +953,8 @@ def generate_times(idate,fdate,interval,fmt='timetuple',inclusive=False):
     if inclusive:
         ft = ft + interval
     times = N.arange(it,ft,interval,dtype=int)
+    tttimes = [ensure_timetuple(t) for t in times]
     if fmt=='datetime':
-        tttimes = [ensure_timetuple(t) for t in times]
         dttimes = [timetuple_to_datetime(t) for t in tttimes]
         return dttimes
     else:
