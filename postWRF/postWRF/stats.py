@@ -395,3 +395,35 @@ def DKE_power_spectrum(data,dx):
     powspec = N.abs(N.fft.fft2(data))**2
     # step = 1/dx
     import pdb; pdb.set_trace()
+
+def rank_hist(obdata,ensdata):
+    """
+    obdata  :   (N.ndarray) - T x surface observations (T = no. of times)
+    ensdata :   (N.ndarray) - T x N x float, ensemble analyses for N members
+    """
+    # Bottom/top bin is under/over envelope
+    nbins = ensdata.shape[1] + 1
+    bins = N.asarray(range(nbins))
+    freq = N.zeros([nbins])
+    ntimes = ensdata.shape[0]
+
+    for t in range(ntimes):
+        ob = obdata[t]
+        # If observation is missing, remove from histogram calc
+        if ob==None:
+            ntimes -= 1
+            continue
+        # Rank ensemble data from low to high
+        binidx = N.searchsorted(N.sort(ensdata[t,:]),ob)
+        # Bin the observation
+        freq[binidx] += 1
+
+    # Tally over many ob times to create a histogram of rank
+    freq_pct = freq/ntimes
+
+    # Output bin numbers starting at 1, not 0.
+    # bins_no = bins + 1
+
+    # x = number of bins; y = % for each bin
+    return bins, freq_pct
+

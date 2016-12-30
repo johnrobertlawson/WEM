@@ -133,6 +133,11 @@ class Ensemble(object):
                         member = dirname.split('/')[-1]
                     elif dsp[:-2] == rsp:
                         member = '_'.join(dirname.split('/')[-2:])
+                    else:
+                        # pdb.set_trace()
+                        # raise Exception("What is this folder structure?", dsp, rsp, dirname)
+                        print("Skipping file in {}".format(dirname))
+                        continue
                     print("Looking at member {0}".format(member))
                     if member not in members:
                         members[member] = {dom:{}}
