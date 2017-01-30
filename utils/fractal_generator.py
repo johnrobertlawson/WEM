@@ -6,7 +6,8 @@ class fractal_generator(object):
     def __init__(self,arr):
         self.arr = arr
 
-    def IFS_go(self,r,s,theta,phi,e,f):
+    def IFS_go(self,r,s,theta,phi,e,f,zoom=2):
+        new_arr = INT(self.arr,2,output=int)
         self.r = r
         self.s = s
         self.theta = theta
