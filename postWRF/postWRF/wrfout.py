@@ -45,15 +45,8 @@ class WRFOut(NC):
         
         self.dx = self.nc.DX
         self.dy = self.nc.DY
-        self.t_dim = len(self.nc.dimensions['Time'])
-        self.x_dim = len(self.nc.dimensions['west_east'])
-        self.y_dim = len(self.nc.dimensions['south_north'])
-        self.z_dim = len(self.nc.dimensions['bottom_top'])
 
-        self.timekey = 'Time'
-        self.lvkey = 'bottom'
-        self.lonkey = 'west'
-        self.latkey = 'north'
+        self.get_dimensions(fmt)
 
         # if ncks:
         try:
@@ -82,6 +75,26 @@ class WRFOut(NC):
 
         elif fmt is "ideal":
             self.ideal_init()
+        elif fmt is "met_em":
+            self.ideal_init()
+
+    def get_dimensions(self,fmt='em_real'):
+        self.t_dim = len(self.nc.dimensions['Time'])
+        self.x_dim = len(self.nc.dimensions['west_east'])
+        self.y_dim = len(self.nc.dimensions['south_north'])
+
+        self.timekey = 'Time'
+        self.lonkey = 'west'
+        self.latkey = 'north'
+
+        if fmt == 'met_em':
+            self.z_dim = len(self.nc.dimensions['num_metgrid_levels'])
+            self.lvkey = 'num_metgrid'
+        else:
+            self.z_dim = len(self.nc.dimensions['bottom_top'])
+            self.lvkey = 'bottom'
+        
+        return
 
     def em_real_init(self):
         self.lats = self.nc.variables['XLAT'][0,...] # Might fail if only one time?
@@ -1072,10 +1085,13 @@ class WRFOut(NC):
             raise Exception
 
     def get_latlon_idx(self,lat,lon):
-        coords = N.unravel_index(N.argmin((lat-self.lats)**2+
-                    (lon-self.lons)**2),self.lons.shape)
+        latidx, lonidx = utils.get_latlon_idx(self.lats,self.lons,
+                                    lat,lon)
+        # coords = N.unravel_index(N.argmin((lat-self.lats)**2+
+                    # (lon-self.lons)**2),self.lons.shape)
         # lon, lat
-        return [int(c) for c in coords]
+        # return [int(c) for c in coords]
+        return latidx, lonidx
 
     def get_lat_idx(self,lat):
         lat_idx = N.where(abs(self.lats-lat) == abs(self.lats-lat).min())[0][0]

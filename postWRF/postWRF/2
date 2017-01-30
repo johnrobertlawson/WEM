@@ -79,17 +79,15 @@ class Ensemble(object):
         self.nt_per_file = self.compute_nt_per_file()
         self.itime = self.filetimes[0]
         self.hdt = self.compute_history_dt()
-        # pdb.set_trace()
         if self.fdt is None:
-            # self.ftime = self.filetimes[-1] + datetime.timedelta(seconds=self.hdt)
-            self.timespan_sec = self.hdt*(self.nt_per_file-1)*len(self.filetimes)
-            self.ftime = self.itime + datetime.timedelta(seconds=self.timespan_sec)
+            self.ftime = self.filetimes[-1] + self.hdt
         else:
             self.ftime = self.filetimes[-1] + (
                     (self.nt_per_file-1)*datetime.timedelta(seconds=self.fdt))
 
         # Difference in output times across whole dataset
         # Might be split between history files
+        # pdb.set_trace()
 
 
     def compute_fdt(self):
@@ -294,16 +292,6 @@ class Ensemble(object):
         ensidx = N.argmin(diff,axis=0)
 
         return self.members_names[ensidx]
-
-
-    def return_DF_for_t(self,utc,member,dom=1):
-        t, tidx = self.find_file_for_t(utc,member,dom=dom)
-        if self.debug:
-            print("Loading data for time {0}".format(utc))
-        # pdb.set_trace()
-        fpath = self.members[member][dom][t]['fpath']
-        DF = self.datafile_object(fpath,loadobj=True)
-        return DF
 
     def ensemble_array(self,vrbl,level=None,itime=False,ftime=False,
                         fcsttime=False,Nlim=None,Elim=None,
@@ -545,18 +533,12 @@ class Ensemble(object):
         # Returns index of file containing data
         ftidx, tdiff = utils.closest_datetime(self.filetimes,simutc,round='beforeinc')
 
-        # Make positive
-        tdiff = abs(tdiff)
-
         if tdiff == 0:
             assert self.filetimes[ftidx] == simutc
             t = simutc
             tidx = 0
         else:
             t = self.filetimes[ftidx]
-            # tidx = int(self.hdt/(self.hdt + tdiff))
-            tidx = int(tdiff/self.hdt)
-
-        # pdb.set_trace()
+            tidx = int(self.hdt/(self.hdt + tdiff))
 
         return t, tidx

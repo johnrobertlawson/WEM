@@ -7,3 +7,8 @@ class HRRR(GribFile):
         """
         super().__init__(fpath)
 
+    def lookup_vrbl(self,vrbl):
+        LOOKUP = {}
+        LOOKUP['accum_precip'] = {'key':'Total Precipitation','idx':1}
+
+        return LOOKUP[vrbl]['key'], LOOKUP[vrbl]['idx']

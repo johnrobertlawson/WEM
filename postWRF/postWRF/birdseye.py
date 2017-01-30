@@ -93,7 +93,8 @@ class BirdsEye(Figure):
                     locations=False,m=False,x=False,y=False,
                     Nlim=False,Elim=False,Slim=False,Wlim=False,
                     color='k',inline=False,lw=False,extend=False,
-                    cblabel=False,ideal=False,alpha=1.0,return_basemap=False):
+                    cblabel=False,ideal=False,alpha=1.0,return_basemap=False,
+                    drawcounties=False):
 
         """
         Generic method that plots any matrix of data on a map
@@ -129,11 +130,11 @@ class BirdsEye(Figure):
             if m is False:
                 if not Nlim:
                     self.bmap,self.x,self.y = self.basemap_setup(smooth=smooth,lats=lats,
-                                                        lons=lons,)#ax=self.ax)
+                                                        lons=lons,drawcounties=drawcounties)#ax=self.ax)
                 else:
                     self.bmap,self.x,self.y = self.basemap_setup(smooth=smooth,lats=lats,
                                                         lons=lons,Nlim=Nlim,Elim=Elim,
-                                                        Slim=Slim,Wlim=Wlim)
+                                                        Slim=Slim,Wlim=Wlim,drawcounties=drawcounties)
             else:
                 self.bmap = m
                 self.x, self.y = self.bmap(lons,lats)
@@ -208,12 +209,12 @@ class BirdsEye(Figure):
             cb1.set_label(cblabel)
         if save:
             self.save(outdir,fname)
-            plt.close(self.fig)
+        plt.close(self.fig)
+        # pdb.set_trace()
+        if return_basemap:
+            return self.bmap
         else:
-            if return_basemap:
-                return self.bmap
-            else:
-                return f1
+            return f1
 
     def plot_streamlines(self,U,V,outdir,fname,lats=False,lons=False,smooth=1,
                             title=False,lw_speed=False,density=1.8,ideal=False):

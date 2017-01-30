@@ -49,6 +49,8 @@ class Radar(Obs):
         fpath = os.path.join(datapath,fname_root)
         for ex in ('.png','.wld'):
             scan = glob.glob(fpath+ex)
+            print("Looking in",datapath)
+            print("Contents:",scan)
 
             if len(scan) == 0:
                 url = self.get_radar_url()
@@ -180,7 +182,8 @@ class Radar(Obs):
         return dBZ
 
     def plot_radar(self,outdir,fig=False,ax=False,fname=False,Nlim=False,
-                    Elim=False, Slim=False,Wlim=False,cb=True):
+                    Elim=False, Slim=False,Wlim=False,cb=True,
+                    drawcounties=False):
         """
         Plot radar data.
         """
@@ -223,7 +226,8 @@ class Radar(Obs):
             cb = 'horizontal'
         F.plot2D(dBZ,fname,outdir,lats=lats,lons=lons,
                     cmap=radarcmap,clvs=N.arange(5,90,5),
-                    cb=cb,cblabel='Composite reflectivity (dBZ)')
+                    cb=cb,cblabel='Composite reflectivity (dBZ)',
+                    drawcounties=drawcounties)
         # im = self.ax.contourf(x,y,dBZ,alpha=0.5,cmap=radarcmap,
                                 # levels=N.arange(5.0,90.5,0.5))
         # outpath = os.path.join(outdir,fname)
@@ -400,6 +404,7 @@ class StageIV(GribFile):
             import pygrib
         except ImportError:
             print("You need to install pygrib for the StageIV class.")
+            raise Exception
         else:
             self.pygrib = pygrib
         
@@ -439,6 +444,11 @@ class StageIV(GribFile):
 
         # Assign all projection stats
         # pdb.set_trace()
+        print("All files in ",ST4s)
+        for fp in fps:
+            print(fp)
+        print("-"*10)
+
         self.projection()
 
     def date_from_fname(self,f):
@@ -466,6 +476,8 @@ class StageIV(GribFile):
                 return f
 
     def load_gribpart(self,G):
+        if G is None:
+            G = self.arbitrary_pick()
         if isinstance(G,str):
             G = self.load_data(G,loadobj=True)
         G.seek(0)
@@ -478,15 +490,24 @@ class StageIV(GribFile):
         return arr
 
     def return_latlon(self,G):
+        if G is None:
+            G = self.arbitrary_pick()
         gg = self.load_gribpart(G)
         latlon = gg.latlons()
         lats, lons = latlon
         return lats,lons
 
     def return_array(self,utc,accum_hr='01h'):
-        # pdb.set_trace()
         G = self.DATA[accum_hr][utc]
         return self.load_accum(G)
+
+    def return_point(self,utc,lat,lon,accum_hr='01h'):
+        lats, lons = self.return_latlon(None)
+        latidx,lonidx = utils.get_latlon_idx(lats,lons,lat,lon)
+        arr = self.return_array(utc,accum_hr=accum_hr)
+        # pdb.set_trace()
+        return arr[latidx,lonidx]
+
 
     def projection(self):
         self.m = Basemap(projection='npstere',lon_0=-105.0,#lat_1=60.0,

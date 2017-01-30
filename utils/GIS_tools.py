@@ -859,15 +859,15 @@ def closest_datetime(times,t,round=False):
             bidx_exc = cidx-1
             aidx_exc = cidx+1
         elif times[cidx] < t:
-            bidx_inc = idx
-            bidx_exc = idx
-            aidx_inc = idx+1
-            aidx_exc = idx+1
+            bidx_inc = cidx
+            bidx_exc = cidx
+            aidx_inc = cidx+1
+            aidx_exc = cidx+1
         else:
-            bidx_exc = idx-1
-            bidx_inc = idx-1
-            aidx_exc = idx
-            aidx_nxc = idx
+            bidx_exc = cidx-1
+            bidx_inc = cidx-1
+            aidx_exc = cidx
+            aidx_nxc = cidx
 
         if round is 'afterinc':
             idx = aidx_inc
@@ -1401,3 +1401,16 @@ def haversine_baker(lon1, lat1, lon2, lat2, radians=False, earth_rad=6371.227):
         distance[:, i] = (2. * earth_rad * N.arctan2(N.sqrt(aval), N.sqrt(1 - aval))).T
         i += 1
     return distance.ravel()
+
+def get_latlon_idx(lats,lons,lat,lon):
+    coords = N.unravel_index(N.argmin((lat-lats)**2+
+                (lon-lons)**2),lons.shape)
+    # lon, lat
+    return [int(c) for c in coords]
+
+def make_subplot_label(ax,label):
+    if not label.endswith(')'):
+        label = label + ')'
+    ax.text(0.1,0.15,label,transform=ax.transAxes,
+        bbox={'facecolor':'white'},fontsize=13,zorder=1000)
+    return ax

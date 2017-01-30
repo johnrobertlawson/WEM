@@ -8,7 +8,7 @@ from .wrfout import WRFOut
 from .obs import Radar
 
 class SAL(object):
-    def __init__(self,Wctrl_fpath,Wmod_fpath,vrbl,utc,lv=False,
+    def __init__(self,Wctrl_fpath,Wmod_fpath,vrbl=False,utc=False,lv=False,
                     accum_hr=False,radar_datadir=False,thresh=False,
                     footprint=500,ctrl_fmt='obs',mod_fmt='WRF',dx=False,dy=False,
                     f=1/15.0,datafmt=False):

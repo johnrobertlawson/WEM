@@ -18,18 +18,28 @@ class GribFile(DataFile):
         self.available_fields = N.unique(self.available_fields_array[:,1])
         self.projection()
 
-    def get_record(self,vrbl,idx=0):
+    def get_record(self,vrblkey,idx=0):
         self.G.seek(0)
-        ngg = len(self.G.select(name=vrbl))
-        print("There are {0} entries for the variable {1}.".format(ngg,vrbl))
-        gg = self.G.select(name=vrbl)[idx]
+        ngg = len(self.G.select(name=vrblkey))
+        # print(vrbl)
+        # pdb.set_trace()
+        print("There are {0} entries for the key {1}.".format(ngg,vrblkey))
+        gg = self.G.select(name=vrblkey)[idx]
+        print("Picking index {0}.".format(idx))
         return gg
 
     def get(self,vrbl,idx=0):
         # TODO: look up level in available fields array, return index
-        gg = self.get_record(vrbl,idx=idx)
+        vrblkey, idx = self.lookup_vrbl(vrbl)
+        print("Variable {0} has key {1} for HRRR data.".format(vrbl,vrblkey))
+        gg = self.get_record(vrblkey,idx=idx)
         arr = gg.values
         return arr
+
+    def lookup_vrbl(self,vrbl):
+        LOOKUP = {}
+        # Children should use the right keys/indices here
+        return (vrbl, 0)
 
     def return_latlon(self):
         gg = self.arbitrary_pick()

@@ -106,7 +106,8 @@ class WRFEnviron(object):
                 extend=False,save=True,accum_hr=False,cblabel=False,
                 data=None,fname=False,ideal=False, return_figax=False,
                 cont2_data=False,cont2_clvs=False,
-                cont2_lats=False,cont2_lons=False):
+                cont2_lats=False,cont2_lons=False,
+                drawcounties=False,other=False,return_basemap=False):
         """Basic birds-eye-view plotting.
 
         This script is top-most and decides if the variables is
@@ -192,6 +193,8 @@ class WRFEnviron(object):
         """
         # TODO: lats/lons False when no bounding, and selected with limited
         # domain.
+        # TODO: return_basemap and return_cb merged into same argument (and
+        # do this in BirdsEye()
 
         if self.fmt is not 'em_real':
             ideal = True
@@ -242,28 +245,34 @@ class WRFEnviron(object):
         F = BirdsEye(W,fig=fig,ax=ax)
         if cont2_data is not False:
             save = False
-        m = F.plot2D(data,fname,outdir,lats=lats,lons=lons,
+        rets = F.plot2D(data,fname,outdir,lats=lats,lons=lons,
                     plottype=plottype,smooth=smooth,
                     clvs=clvs,cmap=cmap,locations=locations,
                     cb=cb,color=color,inline=inline,lw=lw,
                     extend=extend,save=save,cblabel=cblabel,
-                    ideal=ideal,alpha=0.8,return_basemap=True)
+                    ideal=ideal,alpha=0.8,return_basemap=return_basemap,
+                    drawcounties=drawcounties,)
         if cont2_data is not False:
             F.plot2D(cont2_data,fname,outdir,lats=cont2_lats,
                     lons=cont2_lons,cb=False,
                     plottype='contour',smooth=smooth,
                     clvs=cont2_clvs,locations=locations,
                     color=color,inline=inline,lw=lw,
-                    save=True,ideal=ideal,m=m)
+                    save=True,ideal=ideal,m=m,)
 
         if return_figax:
             return (F.fig, F.ax)
+        else:
+            return rets
 
     def get_dataobj(self,utc=0,dom=1,member='ctrl'):
-        # logic for time
-        # for now, use datetime.datetime
-        t = utc
-        dataobj = self.ensemble[member][dom][t]['dataobj']
+        # t = utc
+        # dataobj = self.ensemble.members[member][dom][t]['dataobj']
+        # if not dataobj:
+            # fpath = self.ensemble.members[member][dom][t]['fpath']
+        # dataobj = self.ensemble.datafile_object(self,fpath,loadobj=True)
+        dataobj = self.ensemble.return_DF_for_t(utc,member,dom=1)
+            # dataobj = WRFOut(fpath)
         return dataobj
 
     def get_cmap_clvs(self,vrbl,level,clvs=False,cmap=False):
@@ -1739,7 +1748,8 @@ class WRFEnviron(object):
     def plot_radar(self,utc,datadir,outdir=False,Nlim=False,Elim=False,
                     Slim=False,Wlim=False,ncdir=False,nct=False,
                     ncf=False,dom=1,composite=False,locations=False,
-                    fig=False,ax=False,cb=True,compthresh=False):
+                    fig=False,ax=False,cb=True,compthresh=False,
+                    drawcounties=False):
         """
         Plot verification radar.
 
@@ -1778,7 +1788,7 @@ class WRFEnviron(object):
             R = Radar(utc,datadir)
 
         R.plot_radar(outdir,Nlim=Nlim,Elim=Elim,Slim=Slim,Wlim=Wlim,
-                fig=fig,ax=ax,cb=cb)
+                fig=fig,ax=ax,cb=cb,drawcounties=drawcounties)
         # print("Plotting radar for {0}".format(utc))
 
     def plot_accum_rain(self,utc,accum_hr,ncdir,outdir,ncf=False,nct=False,

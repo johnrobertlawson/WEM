@@ -105,7 +105,8 @@ class Figure(object):
         self.save(fpath,fname,tight=False)
 
     def basemap_setup(self,smooth=1,lats=False,lons=False,proj='merc',
-                        Nlim=False,Elim=False,Slim=False,Wlim=False):
+                        Nlim=False,Elim=False,Slim=False,Wlim=False,
+                        drawcounties=False):
         """
         Needs rewriting to include limited domains based on lats/lons.
         Currently, assuming whole domain is plotted.
@@ -144,6 +145,8 @@ class Figure(object):
         m.drawcoastlines()
         m.drawstates()
         m.drawcountries()
+        if isinstance(drawcounties,str):
+            m.readshapefile(drawcounties,'counties')
         # import pdb; pdb.set_trace()
         # Draw meridians etc with wrff.lat/lon spacing
         # Default should be a tenth of width of plot, rounded to sig fig
