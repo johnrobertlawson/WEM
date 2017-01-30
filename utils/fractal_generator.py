@@ -1,50 +1,65 @@
+import pdb
+
 import numpy as N
 
 import scipy.ndimage.interpolation as INT
+from scipy.interpolate import RectBivariateSpline as RBS
 
-class fractal_generator(object):
-    def __init__(self,arr):
+class FracGen(object):
+    def __init__(self,arr=False):
         self.arr = arr
+        pass
 
-    def IFS_go(self,r,s,theta,phi,e,f,zoom=2):
-        new_arr = INT(self.arr,2,output=int)
+    def IFS_go(self,r=0,s=0,theta=0,phi=0,e=0,f=0,zoom=2):
+        # new_arr = INT.zoom(self.arr,3,output=int)
+        self.xdim, self.ydim = self.arr.shape
         self.r = r
         self.s = s
         self.theta = theta
+        # Need to make phi different from theta
         self.phi = phi
-        self.e = e
-        self.f = f
-        self.xdim, self.ydim = self.arr.shape
+        self.e = e*self.xdim
+        self.f = f*self.ydim
+
+        self.xx_in = N.arange(self.xdim)
+        self.yy_in = N.arange(self.ydim)
 
         arr_mod = N.copy(self.arr)
-        arr_mod = self.apply_r(arr_mod)
-        arr_mod = self.apply_s(arr_mod)
-        arr_mod = self.apply_theta(arr_mod)
-        arr_mod = self.apply_phi(arr_mod)
-        arr_mod = self.apply_e(arr_mod)
-        arr_mod = self.apply_f(arr_mod)
+        if r != 0:
+            arr_mod = self.apply_r(arr_mod)
+        if s != 0:
+            arr_mod = self.apply_s(arr_mod)
+        if theta != 0:
+            arr_mod = self.apply_theta(arr_mod)
+        # if phi != 0:
+            # arr_mod = self.apply_phi(arr_mod)
+        if e != 0:
+            arr_mod = self.apply_e(arr_mod)
+        if f != 0:
+            arr_mod = self.apply_f(arr_mod)
 
-        self.fractal = arr_mod
-        return self.fractal
+        return arr_mod
 
     def apply_r(self,arr_in):
         # Scaling in the horizontal
-        zoom = (self.r,0)
-        arr_out = INT.zoom(arr_in,zoom)
-        return arr_out
+        xx_out = self.xx_in * self.r
+        rbs = RBS(self.yy_in,xx_out,arr_in)
+        nn = rbs(self.yy_in,self.xx_in)
+        return nn.round().astype(int)
 
     def apply_s(self,arr_in):
-        # Scaling in the horizontal
-        zoom = (0,self.s)
-        arr_out = INT.zoom(arr_in,zoom)
-        return arr_out
+        # Scaling in the vertical
+        yy_out = self.yy_in * self.r
+        rbs = RBS(yy_out,self.xx_in,arr_in)
+        nn = rbs(self.yy_in,self.xx_in)
+        return nn.round().astype(int)
 
     def apply_theta(self,arr_in):
-        arr_out = INT.rotate(arr_in,self.theta)
+        arr_out = INT.rotate(arr_in,self.theta,reshape=False)
         return arr_out
 
     def apply_phi(self,arr_in):
-        arr_out = INT.rotate(arr_in,self.phi)
+        arr_out = INT.rotate(arr_in,self.phi,reshape=False)
         return arr_out
 
     def apply_e(self,arr_in):
@@ -56,3 +71,4 @@ class fractal_generator(object):
         shift = (0,self.f)
         arr_out = INT.shift(arr_in,shift)
         return arr_out
+
