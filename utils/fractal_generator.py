@@ -13,7 +13,7 @@ class fractal_generator(object):
         self.phi = phi
         self.e = e
         self.f = f
-        self.xdim, self.ydim = arr.shape
+        self.xdim, self.ydim = self.arr.shape
 
         arr_mod = N.copy(self.arr)
         arr_mod = self.apply_r(arr_mod)
