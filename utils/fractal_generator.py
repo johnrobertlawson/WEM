@@ -15,7 +15,7 @@ class fractal_generator(object):
         self.f = f
         self.xdim, self.ydim = arr.shape
 
-        arr_mod = N.copy(arr)
+        arr_mod = N.copy(self.arr)
         arr_mod = self.apply_r(arr_mod)
         arr_mod = self.apply_s(arr_mod)
         arr_mod = self.apply_theta(arr_mod)
