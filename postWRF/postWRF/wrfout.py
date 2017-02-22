@@ -100,8 +100,8 @@ class WRFOut(NC):
         self.lats = self.nc.variables['XLAT'][0,...] # Might fail if only one time?
         self.lons = self.nc.variables['XLONG'][0,...]
 
-        self.lats1D = self.lats[:,len(self.lats)/2]
-        self.lons1D = self.lons[len(self.lons)/2,:]
+        self.lats1D = self.lats[:,int(len(self.lats)/2)]
+        self.lons1D = self.lons[int(len(self.lons)/2),:]
 
         self.cen_lat = float(self.nc.CEN_LAT)
         self.cen_lon = float(self.nc.CEN_LON)
