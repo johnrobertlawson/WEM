@@ -15,7 +15,13 @@ class GribFile(DataFile):
         self.available_fields_list = [str(gg).split(':') for gg in self.G]
         # pdb.set_trace()
         self.available_fields_array = N.array(self.available_fields_list)
-        self.available_fields = N.unique(self.available_fields_array[:,1])
+        # Remove weird variables that aren't variables
+        self.available_fields_unfiltered = N.unique(self.available_fields_array[:,1])
+        delrows = []
+        for row in N.arange(self.available_fields_unfiltered.shape[0]):
+            if len(self.available_fields_unfiltered[row]) < 5:
+                delrows.append(row)
+        self.available_fields = N.delete(self.available_fields_unfiltered,delrows)
         self.projection()
 
     def get_record(self,vrblkey,idx=0):
@@ -24,6 +30,9 @@ class GribFile(DataFile):
         # print(vrbl)
         # pdb.set_trace()
         print("There are {0} entries for the key {1}.".format(ngg,vrblkey))
+        # Not sure why this is needed - random wrong indices popping up
+        if ngg == 1:
+            idx = 0
         gg = self.G.select(name=vrblkey)[idx]
         print("Picking index {0}.".format(idx))
         return gg

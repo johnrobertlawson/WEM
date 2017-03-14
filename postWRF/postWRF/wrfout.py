@@ -345,7 +345,7 @@ class WRFOut(NC):
         """
         # See which dimensions are present in netCDF file variable
         sl = []
-        # if vrbl.startswith('TMP'):
+        # if vrbl.startswith('RAINNC'):
             # pdb.set_trace()
         if any(self.timekey in p for p in dim_names):
             if tidx is None:
@@ -370,7 +370,7 @@ class WRFOut(NC):
                 sl.append(slice(None,None))
             elif isinstance(lonidx,slice) or isinstance(lonidx,N.ndarray):
                 sl.append(lonidx)
-            elif isinstance(lonidx,int):
+            elif isinstance(lonidx,(int,N.int64)):
                 sl.append(slice(lonidx,lonidx+1))
             else:
                 sl.append(slice(None,None))
@@ -380,7 +380,7 @@ class WRFOut(NC):
                 sl.append(slice(None,None))
             elif isinstance(latidx,slice) or isinstance(latidx,N.ndarray):
                 sl.append(latidx)
-            elif isinstance(latidx,int):
+            elif isinstance(latidx,(int,N.int64)):
                 sl.append(slice(latidx,latidx+1))
             else:
                 sl.append(slice(None,None))

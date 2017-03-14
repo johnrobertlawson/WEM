@@ -399,6 +399,8 @@ class MRMS(Obs):
 class StageIV(GribFile):
     def __init__(self,rootdir,load_1h=True,load_6h=False,load_24h=False,
                     loadobj=False):
+        """"Check for 9999s (missing) or negative. Other codes
+        """
 
         try:
             import pygrib
@@ -444,10 +446,10 @@ class StageIV(GribFile):
 
         # Assign all projection stats
         # pdb.set_trace()
-        print("All files in ",ST4s)
-        for fp in fps:
-            print(fp)
-        print("-"*10)
+        # print("All files in ",ST4s)
+        # for fp in fps:
+            # print(fp)
+        # print("-"*10)
 
         self.projection()
 

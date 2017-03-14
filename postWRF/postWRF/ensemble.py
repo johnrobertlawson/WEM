@@ -305,10 +305,15 @@ class Ensemble(object):
         DF = self.datafile_object(fpath,loadobj=True)
         return DF
 
+    def get(self,*args,**kwargs):
+        # Wrapper
+        returns = self.ensemble_array(*args,**kwargs)
+        return returns
+
     def ensemble_array(self,vrbl,level=None,itime=False,ftime=False,
                         fcsttime=False,Nlim=None,Elim=None,
                         Slim=None,Wlim=None,inclusive=False,
-                        lats=None,lons=None,dom=1):
+                        lats=None,lons=None,dom=1,members=None):
         """
         Returns 5D array of data for ranges.
 
@@ -334,7 +339,15 @@ class Ensemble(object):
                             Slim=Slim,Wlim=Wlim,inclusive=inclusive,
                             lons=lons,lats=lats)
             return qpf
-        for nm,mem in enumerate(self.member_names):
+        if members is None:
+            members = self.member_names
+        elif isinstance(members,str):
+            members = (members,)
+        else:
+            pass
+            
+
+        for nm,mem in enumerate(members):
             if self.debug:
                 print("Working on member {0}".format(mem))
             if mem is self.ctrl:
@@ -373,9 +386,9 @@ class Ensemble(object):
                     fpath = self.members[mem][dom][t]['fpath']
                     # print("Filepath",fpath)
                     # print("tidx",tidx)
+                    # pdb.set_trace()
                     DF = self.datafile_object(fpath,loadobj=True)
-                    m_t_data = DF.get(
-                                vrbl,utc=tidx,level=level,lons=lons,lats=lats)[0,...]
+                    m_t_data = DF.get(vrbl,utc=tidx,level=level,lons=lons,lats=lats)[0,...]
 
                 if ens_no == 1:
                     nz,nlats,nlons = m_t_data.shape
@@ -414,7 +427,7 @@ class Ensemble(object):
             accum = ftime_rainnc - itime_rainnc
         else:
             all_ens_data = self.ensemble_array(vrbl,itime=itime,ftime=ftime,
-                                        inclusive=inclusive)
+                                        inclusive=inclusive,lats=lats,lons=lons)
             # time axis is 1
             accum = N.sum(all_ens_data,axis=1)
 
