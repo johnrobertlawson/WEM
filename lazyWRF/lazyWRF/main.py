@@ -342,17 +342,9 @@ class Lazy:
         if quoted:
             newval = "'{0}'".format(newval)
         f = self.return_namelist_path(suffix)
-        flines = open(f,'r').readlines()
-        for idx, line in enumerate(flines):
-            if sett in line:
-                # spaces = 38 - len(sett)
-                spaces = 36
-                # print(sett,spaces)
-                flines[idx] = " {0: <{sp}}= {1}, \n".format(sett,newval,sp=spaces)
-                nameout = open(f,'w')
-                nameout.writelines(flines)
-                nameout.close()
-                break
+        utils.edit_namelist(f,sett,newval)
+        return
+
 
     def run_exe(self,exe):
         """Run WPS executables, then check to see if it failed.
