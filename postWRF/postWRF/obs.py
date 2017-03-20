@@ -22,7 +22,7 @@ from .gribfile import GribFile
 
 # pygrib is optional import in StageIV class.
 
-class Obs(object):
+class Obs:
     """
     An instance represents a data set.
     """
@@ -397,9 +397,12 @@ class MRMS(Obs):
         return fpath
 
 class StageIV(GribFile):
-    def __init__(self,rootdir,load_1h=True,load_6h=False,load_24h=False,
+    def __init__(self,dir_or_file,load_1h=True,load_6h=False,load_24h=False,
                     loadobj=False):
         """"Check for 9999s (missing) or negative. Other codes
+
+        dir_or_file -   if directory, it scans for all files
+                        if file, it loads that one file.
         """
 
         try:
@@ -411,9 +414,16 @@ class StageIV(GribFile):
             self.pygrib = pygrib
         
         self.loadobj = loadobj
-        ST4s = os.path.join(rootdir,'ST4*')
-        print("Loading files in {0}".format(ST4s))
-        fps = glob.glob(ST4s)
+
+        # Determine whether to load one file or search in directory
+        try:
+            G = self.pygrib.open(dir_or_file)
+        except OSError:
+            ST4s = os.path.join(rootdir,'ST4*')
+            print("Loading files in {0}".format(ST4s))
+            fps = glob.glob(ST4s)
+        else:
+            fps = [dir_or_file,]
 
         self.DATA = {}
         if load_1h:
@@ -452,6 +462,16 @@ class StageIV(GribFile):
         # print("-"*10)
 
         self.projection()
+
+    def get(self,utc,accum_hr='01h'):
+        """
+        Get a given time, in similar manner to WRFOut.
+
+        Wrapper for return_array with reshape to 4D
+        """
+        data2D = self.return_array(utc,accum_hr=accum_hr)
+        data4D = data2D[N.newaxis,N.newaxis,:,:]
+        return data4D
 
     def date_from_fname(self,f):
         _1, d, _2 = f.split('.')
