@@ -8,7 +8,7 @@ from WEM.utils.exceptions import QCError, FormatError
 
 class Casati:
     def __init__(self,fcstdata,verifdata,thresholds=(0.5,1,4,16,64),
-                    store_all_arrays=True,calibration=True):
+                    store_all_arrays=True,recalibration=False):
         """Casati et al. 2004, Meteorol. Appl.
 
         All data in SI units (mm). 
@@ -28,6 +28,7 @@ class Casati:
         self.thresholds = thresholds
         self.raw_fcstdata = fcstdata
         self.raw_verifdata = verifdata
+        self.recalibration = recalibration
 
         # Format checks
         self.enforce_2D()
@@ -35,13 +36,17 @@ class Casati:
         self.do_QC()
 
         # Pre-processing
-        self.do_norain_pixels()
+        # self.do_norain_pixels() # NOW ELSEWHERE
         self.do_dithering()
         self.do_normalize()
-        self.do_recalibration()
+        if recalibration:
+            self.do_recalibration()
 
         # Set length scales
-        self.Ls = [2**L for L in range(1,self.L+1)]
+        # This is the number of grid spaces
+        self.ls = [int(2**L) for L in range(1,self.L+1)]
+        # This is the big L from the paper
+        self.Ls = N.log2(self.ls).astype(int)
 
         # Verification
         self.do_BED()
@@ -81,7 +86,8 @@ class Casati:
                     self.L = int(N.log2(data.shape[dim]))
         return
 
-    def do_QC(self,print_location=True,min_thresh=0.0,max_thresh=500):
+    def do_QC(self,print_location=True,min_thresh=0.0,max_thresh=500,
+                fatal_exception=False):
         """Check for stupid values in data.
         
         Optional:
@@ -89,6 +95,7 @@ class Casati:
                                 the nonsensical values exist
         min_thresh, max_thresh (float,int) - min and max values of allowable
                                                 range, to raise Exception
+        fatal_exception     -   if True, kill script if there are out-of-range vals.
         """
         for data in (self.raw_fcstdata,self.raw_verifdata):
             where_under = N.where(data < min_thresh)
@@ -101,23 +108,30 @@ class Casati:
 
             for d in range(len(where_over)):
                 if (where_over[d].size > 0) or (where_under[d].size > 0):
-                    raise QCExrror("Unacceptable data found.",pass_idx=pass_idx)
+                    if fatal_exception:
+                        raise QCExrror("Unacceptable data found.",pass_idx=pass_idx)
+                    else:
+                        print("Unacceptable data found at these idx: \n",*pass_idx)
+            # pdb.set_trace()
         return
 
     def do_dithering(self,dithrange=(1/64)):
         """Apply dithering to non-zero precipitation values.
         """
         for data in (self.raw_fcstdata,self.raw_verifdata):
-            where_zero = N.where(data > 0.0)
-            #shp = [where_zero[n].shape for n in range(len(where_zero))]
-            sze = sum([where_zero[n].size for n in range(len(where_zero))])
+            where_nonzero = N.where(data > dithrange)
+            #shp = [where_nonzero[n].shape for n in range(len(where_nonzero))]
+            sze = where_nonzero[0].size
+            # sze = sum([where_nonzero[n].size for n in range(len(where_nonzero))])
             noise = N.random.uniform(low=-1*dithrange,high=dithrange,size=sze)
-            data[where_zero] += noise
+            data[where_nonzero] += noise
         print("Dithering complete.")
         return
 
-    def do_norain_pixels(self,val=-6):
-        """Assign value to no-rain pixels.
+    def __do_norain_pixels(self,val=-6):
+        """Now incorporated into norm_func.
+
+        Assign value to no-rain pixels.
         TODO: Should be range around 0, not exactly, due to round-off?
         """
         for data in (self.raw_fcstdata,self.raw_verifdata):
@@ -125,16 +139,29 @@ class Casati:
             data[norain_idx] = val
         print("No-rain pixels now set to {}.".format(val))
 
+    def norm_func(self,orig):
+        """ More QC here with negative values?
+        """
+        if orig == 0.0:
+            new = -6.0
+        else:
+            new = N.log2(orig)
+        return new
 
     def do_normalize(self,):
-        """Normalise data by base 2.
+        """Normalise data by base 2 where it isn't -6.
         """
-        self.norm_fcstdata = N.log2(self.raw_fcstdata)
-        self.norm_verifdata = N.log2(self.raw_verifdata)
+        vf = N.vectorize(self.norm_func)
+        self.norm_fcstdata = vf(self.raw_fcstdata)
+        self.norm_verifdata = vf(self.raw_verifdata)
+        # normidx_fc = N.where(self.raw_fcstdata != -6.0)
+        # self.norm_fcstdata = N.log2(self.raw_fcstdata[normidx_fc])
+        # normidx_ve = N.where(self.raw_fcstdata != -6.0)
+        # self.norm_verifdata = N.log2(self.raw_verifdata[normidx_ve])
         print("Normalization complete.")
         return
 
-    def do_recalibration(self):
+    def do_recalibration(self,method='faster'):
         """
         Yr = (1/Fx) * Fy
 
@@ -142,14 +169,24 @@ class Casati:
         Fx = Empirical cum. dist. of verif
         Fy = Empirical cum. dist. of fcst
         """
-        # Convert calc_ecdf to a vectorized function
-        vf = N.vectorize(self.calc_ecdf)
+        if method == 'vectorize':
+            # Convert calc_ecdf to a vectorized function
+            vf = N.vectorize(self.calc_ecdf,excluded=['arr',])
 
-        Fx = vf(self.norm_verifdata,self.norm_fcstdata)
-        Fy = vf(self.norm_fcstdata,self.norm_verifdata)
-        # for fcstval in self.norm_fcstdata:
-            # Fx = calc_ecdf(self.norm_verifdata,fcstval)
-        self.recalib_fcstdata = (1/Fx) * Fy
+            print("Starting recalibration for Fx")
+            Fx = vf(arr=self.norm_verifdata,val=self.norm_fcstdata)
+            print("Starting recalibration for Fy")
+            Fy = vf(arr=self.norm_fcstdata,val=self.norm_verifdata)
+            # for fcstval in self.norm_fcstdata:
+                # Fx = calc_ecdf(self.norm_verifdata,fcstval)
+            self.recalib_fcstdata = (1/Fx) * Fy
+        else:
+            print("Starting recalibration for Fx")
+            Fx = self.calc_ecdf(self.norm_verifdata,self.norm_fcstdata)
+            print("Starting recalibration for Fy")
+            Fy = self.calc_ecdf(self.norm_fcstdata,self.norm_verifdata)
+            self.recalib_fcstdata = (1/Fx) * Fy
+        print("Recalibration complete.")
         return
 
     def calc_ecdf(self,arr,val):
@@ -158,8 +195,15 @@ class Casati:
         arr -   N.ndarray
         val -   threshold
         """
-        x = N.sort(arr)
+        # pdb.set_trace()
+        x = N.sort(arr.flatten())
+        valshape = None
+        if isinstance(val,N.ndarray):
+            valshape = val.shape
+            val = val.flatten()
         ecd = N.searchsorted(x,val,side='right') / x.size
+        if valshape is not None:
+            ecd = ecd.reshape(valshape)
         return ecd
     
     def do_BED(self,):
@@ -169,23 +213,30 @@ class Casati:
         X = Normalized analysis/verif
         Z3 = Binary error (Eq. 3 in paper)
         IYr = Binary image for recal. fcst (Eq.2 in paper)
-        IX = Binary image for norm. verif (Eq.2 in paper)
+        Ix = Binary image for norm. verif (Eq.2 in paper)
         Zf, Zm = Father and mother wavelets from Eq. 4 / Appendix in paper
         Z = binary error image, post-Haar
         """
-        X = self.self.norm_verifdata
-        Yr = self.recalib_fcstdata
+        X = self.norm_verifdata
+        if self.recalibration:
+            Yr = self.recalib_fcstdata
+        else:
+            Yr = self.norm_fcstdata
         vBED = N.vectorize(self.BED)
         self.IYr = {}
-        self.IX = {}
+        self.Ix = {}
+        self.Zl = {}
+        self.Z3 = {}
         self.Zf = {}
         self.Zm = {}
+        self.Ztotal = {}
 
         for th in self.thresholds:
-            self.IYr[th] = vBED(Yr,th)
-            self.IX[th] = vBED(X,th)
-            self.Z3[th] = self.IYr[th] - self.IX[th]
-            self.Zl[th],self.Zf[th], self.Zm[th], self.Ztotal[th] = self.Haar(self.Z[th])
+            self.IYr[th] = vBED(Yr,th).astype(bool)
+            self.Ix[th] = vBED(X,th).astype(bool)
+            self.Z3[th] = self.IYr[th] - self.Ix[th].astype(N.int64)
+            self.Zl[th],self.Zf[th], self.Zm[th], self.Ztotal[th] = self.Haar(self.Z3[th])
+        print("Binary error decomposition complete.")
         return
 
     def BED(self,pixel,thresh):
@@ -196,30 +247,36 @@ class Casati:
         """
         father = {}
         mother = {}
-        father[2] = Z
+        father[0] = Z
         Zl = {}
+        Zl[0] = Z
 
         print("Beginning Haar decomposition.")
         for Lidx,L in enumerate(self.Ls):
-            L0 = L/2
-            father[L] = uniform_filter(Z,size=L,mode='constant',cval=0)
+            l = int(2**L)
+            # l0 = int(l/2)
+            L0 = L-1
+            # pdb.set_trace()
+            father[L] = uniform_filter(Z.astype(float),size=l,mode='constant',cval=0)
+            # TODO - remove the padded zeros.
             mother[L] = father[L0]-father[L]
             Zl[L] = father[L] + mother[L] # is this the same as old Z?
 
-        assert father[-1] == 0.0
+        # assert N.all(father[self.Ls[-1]] == 0.0)
         Ztotal = father[self.Ls[-1]] + N.sum(N.dstack([mother[l] for l in self.Ls]),axis=2)
         print("Finished Haar decomposition.")
         return Zl, father, mother, Ztotal
 
     def do_MSE(self,):
         # Eq. 8 etc are ambiguous.
-        MSE = {}
-        for th in thresholds:
+        self.MSE = {}
+        for th in self.thresholds:
             self.MSE[th] = {}
             for l in self.Ls:
                 self.MSE[th][l] = N.mean(self.Zl[th][l]**2)
         self.MSE_total = N.sum([self.MSE[th][l] for l in self.Ls])
         # MSE(l=1) should equal MSE_total
+        print("MSE calculation complete.")
         return
 
     def do_SS(self,):
@@ -232,4 +289,5 @@ class Casati:
                 # Epsilon is base rate - fraction of rain vs no rain pixels
                 ep = N.sum(self.Zl[th][l])/self.Zl[th][l].size
                 self.SS[th][l] = 1 - (self.MSE[th][l]/(2*ep*(1-ep)*(1/l)))
+        print("SS calculation complete.")
 

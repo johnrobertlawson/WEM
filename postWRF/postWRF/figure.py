@@ -13,6 +13,7 @@ import os
 
 # Custom imports
 import WEM.utils as utils
+import WEM.utils.reproject as reproject
 from .defaults import Defaults
 
 class Figure(object):
@@ -64,22 +65,30 @@ class Figure(object):
         fig.set_size_inches(width,height)
         return fig
 
-    def save(self,outpath,fname,tight=True):
-        if self.save_figure:
-            # fig.tight_layout()
-            if fname[-4:] == '.png':
-                pass
-            else:
-                fname = fname + '.png'
+    def get_meshgrid_coords(self):
+        self.mx,self.my = N.meshgrid(self.xx,self.yy)
+        return
 
-            utils.trycreate(outpath)
-            fpath = os.path.join(outpath,fname)
-            #self.fig.savefig(fpath)
-            if tight:
-                self.fig.tight_layout()
-            self.fig.savefig(fpath,bbox_inches='tight')
-            print(("Saving figure {0}".format(fpath)))
-            plt.close(self.fig)
+    def save(self,outpath,fname,tight=True):
+        # if self.save_figure:
+        # fig.tight_layout()
+        if fname[-4:] == '.png':
+            pass
+        else:
+            fname = fname + '.png'
+
+        utils.trycreate(outpath)
+        fpath = os.path.join(outpath,fname)
+        #self.fig.savefig(fpath)
+        if tight:
+            self.fig.tight_layout()
+        self.fig.savefig(fpath,bbox_inches='tight')
+        print(("Saving figure {0}".format(fpath)))
+        plt.close(self.fig)
+
+    def add_colorbar(self,datacb):
+        self.fig.colorbar(datacb)
+        return
 
     def just_one_colorbar(self,fpath,fname,cf,label=False,tix=False):
         try:
@@ -103,6 +112,27 @@ class Figure(object):
         CB = plt.colorbar(cf,cax=CBax,orientation='horizontal',ticks=tix)
         CB.set_label(label)
         self.save(fpath,fname,tight=False)
+
+    def basemap_from_newgrid(self,Nlim=None,Elim=None,Slim=None,Wlim=None,proj='merc',
+                    lat_ts=None,resolution='i',nx=None,ny=None,
+                    tlat1=30.0,tlat2=60.0,cen_lat=None,cen_lon=None,
+                    lllon=None,lllat=None,urlat=None,urlon=None,
+                    drawcounties=False):
+        """Wrapper for utility method.
+        """
+        # m,lons,lats,xx,yy = reproject.create_new_grid(*args,**kwargs)
+        # return m, lons, lats, xx[0,:], yy[:,0]
+        self.m, self.lons, self.lats, self.xx, self.yy = reproject.create_new_grid(
+                    Nlim=Nlim,Elim=Elim,Slim=Slim,Wlim=Wlim,proj=proj,
+                    lat_ts=lat_ts,resolution=resolution,nx=nx,ny=ny,
+                    tlat1=tlat1,tlat2=tlat2,cen_lat=cen_lat,cen_lon=cen_lon,
+                    lllon=lllon,lllat=lllat,urlat=urlat,urlon=urlon)
+        self.m.drawcoastlines()
+        self.m.drawstates()
+        self.m.drawcountries()
+        if isinstance(drawcounties,str):
+            self.m.readshapefile(drawcounties,'counties')
+        return
 
     def basemap_setup(self,smooth=1,lats=False,lons=False,proj='merc',
                         Nlim=False,Elim=False,Slim=False,Wlim=False,
