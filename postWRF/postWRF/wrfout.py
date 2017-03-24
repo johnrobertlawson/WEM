@@ -59,7 +59,7 @@ class WRFOut(NC):
             if len(self.utc) == 1:
                 self.dt = None
             else:
-                self.dt = self.utc[2]-self.utc[1]
+                self.dt = self.utc[1]-self.utc[0]
 
         if (ncks is False) and (fmt is 'em_real'):
             self.P_top = self.nc.variables['P_TOP'][0]

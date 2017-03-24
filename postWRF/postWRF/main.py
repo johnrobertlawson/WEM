@@ -55,7 +55,7 @@ from .ensemble import Ensemble
 # TODO: Make this awesome
 
 class WRFEnviron(object):
-    def __init__(self,rootdir,initutc,doms=1,ctrl='ctrl',aux=False,
+    def __init__(self,rootdir=None,initutc=None,doms=1,ctrl='ctrl',aux=False,
                     model='wrf',fmt='em_real',f_prefix=None,
                             output_t=False,history_sec=None,
                             ncf=False):
@@ -88,15 +88,15 @@ class WRFEnviron(object):
         """
         self.fmt = fmt # Used to be self.em
 
-        if rootdir is not False:
+        if rootdir is not None:
             self.ensemble = Ensemble(rootdir=rootdir,initutc=initutc,doms=doms,
                                     ctrl=ctrl,aux=aux,model=model,fmt=fmt,
                                     f_prefix=f_prefix,loadobj=False,
                                     ncf=ncf)
 
-        # If true, WRFOuts exist in ensemble.
-        # If not, they need loading when needed
-        self.loadobj = self.ensemble.loadobj
+            # If true, WRFOuts exist in ensemble.
+            # If not, they need loading when needed
+            self.loadobj = self.ensemble.loadobj
 
     def plot2D(self,vrbl,utc=0,member='ctrl',level=None,outdir=False,
                 f_prefix=False,f_suffix=False,dom=1,plottype='contourf',
@@ -205,9 +205,10 @@ class WRFEnviron(object):
             level = self.get_level_string(level)
 
         # Match domain
-        if not Nlim and isinstance(match_nc,str):
+        if isinstance(match_nc,str):
             MATCH = WRFOut(match_nc,fmt=self.fmt)
-            Nlim, Elim, Slim, Wlim = MATCH.get_limits()
+            if not Nlim:
+                Nlim, Elim, Slim, Wlim = MATCH.get_limits()
 
         if data is None:
             # Data

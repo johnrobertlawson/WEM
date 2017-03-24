@@ -25,13 +25,17 @@ class Lazy:
         self.path_to_soil = path_to_soil
         self.submit_fname = submit_fname
         self.submit_fpath = os.path.join(path_to_WRF,submit_fname)
+        do_firstsubmit = 1
         if submit_ideal_fname:
             self.dofirst = 'ideal'
             self.submit_first_fname = submit_ideal_fname
-        else:   
+        elif submit_real_fname:   
             self.dofirst = 'real'
             self.submit_first_fname = submit_real_fname
-        self.submit_first_fpath = os.path.join(path_to_WRF,self.submit_first_fname)
+        else:
+            do_firstsubmit = 0
+        if do_firstsubmit:
+            self.submit_first_fpath = os.path.join(path_to_WRF,self.submit_first_fname)
 
     
     def init_WPS(self,soilVtable_fname='Vtable.GFS_soilonly'):
