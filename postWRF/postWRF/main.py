@@ -246,6 +246,8 @@ class WRFEnviron(object):
         F = BirdsEye(W,fig=fig,ax=ax)
         if cont2_data is not False:
             save = False
+        if (ax is not False) and (fig is not False):
+            save = False
         rets = F.plot2D(data,fname,outdir,lats=lats,lons=lons,
                     plottype=plottype,smooth=smooth,
                     clvs=clvs,cmap=cmap,locations=locations,

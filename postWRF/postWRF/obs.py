@@ -181,7 +181,7 @@ class Radar(Obs):
             dBZ = (data*5.0)-30 
         return dBZ
 
-    def plot_radar(self,outdir,fig=False,ax=False,fname=False,Nlim=False,
+    def plot_radar(self,outdir=False,fig=False,ax=False,fname=False,Nlim=False,
                     Elim=False, Slim=False,Wlim=False,cb=True,
                     drawcounties=False):
         """
@@ -224,10 +224,14 @@ class Radar(Obs):
         F = BirdsEye(fig=fig,ax=ax)
         if cb:
             cb = 'horizontal'
-        F.plot2D(dBZ,fname,outdir,lats=lats,lons=lons,
+        if (fig is not False) and (ax is not False):
+            save = False
+        else:
+            save = True
+        F.plot2D(dBZ,fname,outdir=outdir,lats=lats,lons=lons,
                     cmap=radarcmap,clvs=N.arange(5,90,5),
                     cb=cb,cblabel='Composite reflectivity (dBZ)',
-                    drawcounties=drawcounties)
+                    drawcounties=drawcounties,save=save)
         # im = self.ax.contourf(x,y,dBZ,alpha=0.5,cmap=radarcmap,
                                 # levels=N.arange(5.0,90.5,0.5))
         # outpath = os.path.join(outdir,fname)

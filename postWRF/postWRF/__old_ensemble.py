@@ -79,17 +79,15 @@ class Ensemble(object):
         self.nt_per_file = self.compute_nt_per_file()
         self.itime = self.filetimes[0]
         self.hdt = self.compute_history_dt()
-        # pdb.set_trace()
         if self.fdt is None:
-            # self.ftime = self.filetimes[-1] + datetime.timedelta(seconds=self.hdt)
-            self.timespan_sec = self.hdt*(self.nt_per_file-1)*len(self.filetimes)
-            self.ftime = self.itime + datetime.timedelta(seconds=self.timespan_sec)
+            self.ftime = self.filetimes[-1] + self.hdt
         else:
             self.ftime = self.filetimes[-1] + (
                     (self.nt_per_file-1)*datetime.timedelta(seconds=self.fdt))
 
         # Difference in output times across whole dataset
         # Might be split between history files
+        # pdb.set_trace()
 
 
     def compute_fdt(self):
@@ -295,25 +293,10 @@ class Ensemble(object):
 
         return self.members_names[ensidx]
 
-
-    def return_DF_for_t(self,utc,member,dom=1):
-        t, tidx = self.find_file_for_t(utc,member,dom=dom)
-        if self.debug:
-            print("Loading data for time {0}".format(utc))
-        # pdb.set_trace()
-        fpath = self.members[member][dom][t]['fpath']
-        DF = self.datafile_object(fpath,loadobj=True)
-        return DF
-
-    def get(self,*args,**kwargs):
-        # Wrapper
-        returns = self.ensemble_array(*args,**kwargs)
-        return returns
-
     def ensemble_array(self,vrbl,level=None,itime=False,ftime=False,
                         fcsttime=False,Nlim=None,Elim=None,
                         Slim=None,Wlim=None,inclusive=False,
-                        lats=None,lons=None,dom=1,members=None):
+                        lats=None,lons=None,dom=1):
         """
         Returns 5D array of data for ranges.
 
@@ -339,15 +322,7 @@ class Ensemble(object):
                             Slim=Slim,Wlim=Wlim,inclusive=inclusive,
                             lons=lons,lats=lats)
             return qpf
-        if members is None:
-            members = self.member_names
-        elif isinstance(members,str):
-            members = (members,)
-        else:
-            pass
-            
-
-        for nm,mem in enumerate(members):
+        for nm,mem in enumerate(self.member_names):
             if self.debug:
                 print("Working on member {0}".format(mem))
             if mem is self.ctrl:
@@ -386,9 +361,9 @@ class Ensemble(object):
                     fpath = self.members[mem][dom][t]['fpath']
                     # print("Filepath",fpath)
                     # print("tidx",tidx)
-                    # pdb.set_trace()
                     DF = self.datafile_object(fpath,loadobj=True)
-                    m_t_data = DF.get(vrbl,utc=tidx,level=level,lons=lons,lats=lats)[0,...]
+                    m_t_data = DF.get(
+                                vrbl,utc=tidx,level=level,lons=lons,lats=lats)[0,...]
 
                 if ens_no == 1:
                     nz,nlats,nlons = m_t_data.shape
@@ -427,7 +402,7 @@ class Ensemble(object):
             accum = ftime_rainnc - itime_rainnc
         else:
             all_ens_data = self.ensemble_array(vrbl,itime=itime,ftime=ftime,
-                                        inclusive=inclusive,lats=lats,lons=lons)
+                                        inclusive=inclusive)
             # time axis is 1
             accum = N.sum(all_ens_data,axis=1)
 
@@ -452,13 +427,11 @@ class Ensemble(object):
         else:
             return mean
 
-    def std(self,vrbl,fcsttime=False,itime=False,ftime=False,level=False,
-            Nlim=False,Elim=False,Slim=False,Wlim=False):
+    def std(self,vrbl,fcsttime,level=False,Nlim=False,Elim=False,Slim=False,Wlim=False):
         """Return standard devation
         """
         all_ens_data = self.ensemble_array(vrbl,level=level,fcsttime=fcsttime,
-                                    Nlim=Nlim,Elim=Elim,Slim=Slim,Wlim=Wlim,
-                                    itime=itime,ftime=ftime)
+                                    Nlim=Nlim,Elim=Elim,Slim=Slim,Wlim=Wlim)
         if Nlim:
             all_ens_data, lats, lons = all_ens_data
 
@@ -560,18 +533,12 @@ class Ensemble(object):
         # Returns index of file containing data
         ftidx, tdiff = utils.closest_datetime(self.filetimes,simutc,round='beforeinc')
 
-        # Make positive
-        tdiff = abs(tdiff)
-
         if tdiff == 0:
             assert self.filetimes[ftidx] == simutc
             t = simutc
             tidx = 0
         else:
             t = self.filetimes[ftidx]
-            # tidx = int(self.hdt/(self.hdt + tdiff))
-            tidx = int(tdiff/self.hdt)
-
-        # pdb.set_trace()
+            tidx = int(self.hdt/(self.hdt + tdiff))
 
         return t, tidx

@@ -176,7 +176,9 @@ class Figure(object):
         m.drawstates()
         m.drawcountries()
         if isinstance(drawcounties,str):
-            m.readshapefile(drawcounties,'counties')
+            # if not drawcounties.endswith('/'):
+                # drawcounties = drawcounties + '/'
+            m.readshapefile(drawcounties,'counties',linewidth=0.3,color='grey')
         # import pdb; pdb.set_trace()
         # Draw meridians etc with wrff.lat/lon spacing
         # Default should be a tenth of width of plot, rounded to sig fig

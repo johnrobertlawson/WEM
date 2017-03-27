@@ -144,6 +144,7 @@ class BirdsEye(Figure):
             self.x = x
             self.y = y
 
+        # pdb.set_trace()
         # self.la_n = self.data.shape[-2]
         # self.lo_n = self.data.shape[-1]
 
