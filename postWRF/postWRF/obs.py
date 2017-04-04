@@ -420,10 +420,11 @@ class StageIV(GribFile):
         self.loadobj = loadobj
 
         # Determine whether to load one file or search in directory
-        try:
-            G = self.pygrib.open(dir_or_file)
-        except OSError:
-            ST4s = os.path.join(rootdir,'ST4*')
+        # try:
+        G = self.pygrib.open(dir_or_file)
+        # except OSError:
+        if len(G.read()) == 0:
+            ST4s = os.path.join(dir_or_file,'ST4*')
             print("Loading files in {0}".format(ST4s))
             fps = glob.glob(ST4s)
         else:

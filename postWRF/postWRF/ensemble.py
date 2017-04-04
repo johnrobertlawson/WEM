@@ -393,7 +393,8 @@ class Ensemble(object):
                 if ens_no == 1:
                     nz,nlats,nlons = m_t_data.shape
                     nt = len(fts)
-                    all_ens_data = N.zeros((self.nperts,nt,nz,nlats,nlons))
+                    all_ens_data = N.zeros((len(members),nt,nz,nlats,nlons))
+                    # all_ens_data = N.zeros((self.nperts,nt,nz,nlats,nlons))
 
                 all_ens_data[ens_no-1,tn,:,:,:] = m_t_data
 

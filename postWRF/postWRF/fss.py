@@ -5,7 +5,7 @@ import scipy.ndimage.filters
 
 from WEM.utils.exceptions import FormatError
 
-class self.FSS():
+class FSS:
     def __init__(self,data_fcst,data_obs,itime=False,ftime=False,
                 lv=False,thresholds=(0.5,1,2,4,8),ns=None,
                 ns_step=4):
@@ -18,15 +18,15 @@ class self.FSS():
         self.enforce_2D()
         self.do_grid_check()
 
-        self.xdim = data
+        # self.xdim = data_fcst
 
         # Neighbourhoods
         if ns is None:
-            ns = N.arange(1,maxlen,ns_step)
+            ns = N.arange(1,max(self.xdim,self.ydim),ns_step)
         self.ns = ns
 
         # Computations
-        self.compute_MSE()
+        # self.compute_MSE()
         self.compute_FSS()
         return
         
@@ -57,8 +57,10 @@ class self.FSS():
     
     def compute_FSS(self):
         maxlen = max(self.ydim,self.xdim)
+        self.MSE = {}
+        self.FSS = {}
 
-        for th in threshs:
+        for th in self.thresholds:
             self.MSE[th] = {}
             self.FSS[th] = {}
             # Convert to binary using thresholds
@@ -68,7 +70,7 @@ class self.FSS():
             fc[fc >= th] = True
             ob[ob < th] = False
             ob[ob >= th] = True
-            for n in ns:
+            for n in self.ns:
                 self.MSE[th][n] = {}
                 self.FSS[th][n] = {}
                 # print("self.FSS for threshold {0} mm and n={1}.".format(th,n))

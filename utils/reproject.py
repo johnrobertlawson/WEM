@@ -11,7 +11,10 @@ class WRF_native_grid:
     def __init__(self,fpath):
         """Generates a basemap object for a WRF file's domain.  
         """
-        W = WRFOut(fpath)
+        if not isinstance(fpath,str):
+            W = fpath
+        else:
+            W = WRFOut(fpath)
         cen_lat = W.nc.CEN_LAT
         cen_lon = W.nc.CEN_LON
         tlat1 = W.nc.TRUELAT1
@@ -101,7 +104,11 @@ def reproject(data_orig,xx_orig=False,yy_orig=False,lats_orig=False,lons_orig=Fa
     # xx_new,yy_new = newgrid(lons_orig,lats_orig)
     xx_new_dim = len(xx_new)
     yy_new_dim = len(yy_new)
-    mx,my = N.meshgrid(xx_new,yy_new)
+    if len(xx_new.shape) == 1:
+        mx,my = N.meshgrid(xx_new,yy_new)
+    else:
+        mx = xx_new
+        my = yy_new
     # data_new = griddata((xx_orig.flat,yy_orig.flat),data_orig.flat,(xx_new.flat,
         # yy_new.flat)).reshape(xx_new_dim,yy_new_dim)
     data_new = griddata((xx_orig.flatten(),yy_orig.flatten()),data_orig.flatten(),
