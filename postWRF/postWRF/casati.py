@@ -282,12 +282,13 @@ class Casati:
     def do_SS(self,):
         self.SS = {}
         for th in self.thresholds:
+            ep = N.sum(self.Ix[th])/self.Ix[th].size
             self.SS[th] = {}
             for l in self.Ls:
                 # self.SS[th][l] = ((self.MSE[th] - MSErandom[th])/
                                # (MSEbest[th] - MSErandom[th]))
                 # Epsilon is base rate - fraction of rain vs no rain pixels
-                ep = N.sum(self.Zl[th][l])/self.Zl[th][l].size
-                self.SS[th][l] = 1 - (self.MSE[th][l]/(2*ep*(1-ep)*(1/l)))
+                # pdb.set_trace()
+                self.SS[th][l] = 1 - (self.MSE[th][l]/(2*ep*(1-ep)*(1/self.Ls[-1])))
         print("SS calculation complete.")
 
