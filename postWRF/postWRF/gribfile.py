@@ -3,7 +3,12 @@ import pdb
 
 import numpy as N
 
-import pygrib
+try:
+    import pygrib
+except ModuleNotFoundError:
+    print("Not using pygrib")
+    pygrib = None
+
 from .datafile import DataFile
 
 class GribFile(DataFile):
@@ -65,13 +70,13 @@ class GribFile(DataFile):
         # pdb.set_trace()
         # self.mx, self.my = N.meshgrid(self.xx,self.yy)
 
-        # lllon = -119.023 
+        # lllon = -119.023
         self.lllon = self.lons[0,0]
-        # lllat = 23.117 
+        # lllat = 23.117
         self.lllat = self.lats[0,0]
-        # urlon = -59.9044 
+        # urlon = -59.9044
         self.urlon = self.lons[-1,-1]
-        # urlat = 45.6147234 
+        # urlat = 45.6147234
         self.urlat = self.lats[-1,-1]
 
         self.shape = self.lats.shape
@@ -87,4 +92,3 @@ class GribFile(DataFile):
         for idx in vidx:
             print(self.available_fields_array[idx,:])
         return
-

@@ -14,7 +14,12 @@ import datetime
 
 from mpl_toolkits.basemap import Basemap
 import matplotlib.pyplot as plt
-import pygrib
+
+try:
+    import pygrib
+except ModuleNotFoundError:
+    print("Not using pygrib")
+    pygrib = None
 
 import WEM.utils as utils
 from .birdseye import BirdsEye
@@ -42,7 +47,7 @@ class Radar(Obs):
         :type fmt:              str
         """
         self.utc = utc
-        fname_root = self.get_radar_fname() 
+        fname_root = self.get_radar_fname()
 
         # Check for file
         # Download if not available
@@ -61,7 +66,7 @@ class Radar(Obs):
         png = fpath+'.png'
         wld = fpath+'.wld'
 
-        self.data = scipy.ndimage.imread(png,mode='P') 
+        self.data = scipy.ndimage.imread(png,mode='P')
         # if len(self.data.shape) == 3:
             # self.data = self.data[:,:,0]
 
@@ -87,7 +92,7 @@ class Radar(Obs):
 
         # y-coordinate of the center of the upper left pixel
         self.uly = float(f[5])
-       
+
         # lower right corner
         self.lrx = self.ulx + self.ylen*self.xpixel
         self.lry = self.uly + self.xlen*self.ypixel
@@ -103,14 +108,14 @@ class Radar(Obs):
 
     def get_radar_fname(self):
         tt = utils.ensure_timetuple(self.utc)
-       
+
         # Date for format change
         change = (2010,10,25,0,0,0)
 
         if tt[0] < 1995:
             print("Too early in database.")
             raise Exception
-        elif calendar.timegm(tt) < calendar.timegm(change): 
+        elif calendar.timegm(tt) < calendar.timegm(change):
             self.fmt = 'n0r'
         else:
             self.fmt = 'n0q'
@@ -172,13 +177,13 @@ class Radar(Obs):
     def get_dBZ(self,data):
         if data == 'self':
             data = self.data
-        
+
         # pdb.set_trace()
         if self.fmt == 'n0q':
             dBZ = (data*0.5)-32
             # dBZ = (data*0.25)-32
         elif self.fmt == 'n0r':
-            dBZ = (data*5.0)-30 
+            dBZ = (data*5.0)-30
         return dBZ
 
     def plot_radar(self,outdir=False,fig=False,ax=False,fname=False,Nlim=False,
@@ -199,7 +204,7 @@ class Radar(Obs):
             lats = self.lats #flip lats upside down?
             lons = self.lons
             # x,y = self.m(*N.meshgrid(lons,lats))
-            
+
         # x,y = self.m(*N.meshgrid(lons,lats))
         # x,y = self.m(*N.meshgrid(lons,lats[::-1]))
 
@@ -211,9 +216,9 @@ class Radar(Obs):
         # Convert pixel levels to dBZ
         dBZ = self.get_dBZ(data)
 
-           
+
         # dBZ[dBZ<0] = 0
-        
+
         # def plot2D(self,data,fname,outdir,plottype='contourf',
                     # save=1,smooth=1,lats=False,lons=False,
                     # clvs=False,cmap=False,title=False,colorbar=True,
@@ -296,12 +301,12 @@ class SPCReports(Obs):
 
         hr = int(timestamp[:2])
         mn = int(timestamp[2:])
-        
+
         if hr<11:
             # After midnight UTC
             hr = hr+24
-        
-        tdelta = ((hr-12)*60*60) + (mn*60)  
+
+        tdelta = ((hr-12)*60*60) + (mn*60)
         return itime_dn + tdelta
 
     def plot_reports(self,fig=False,ax=False):
@@ -316,7 +321,7 @@ class StormReports(Obs):
         self.r = N.genfromtxt(fpath,dtype=None,
                 names=True,delimiter=',',)#missing='',filling_values='none')
         # import pdb; pdb.set_trace()
-        self.convert_times() 
+        self.convert_times()
 
     def convert_times(self,):
         LOLtimes = self.r['BEGIN_TIME']
@@ -416,7 +421,7 @@ class StageIV(GribFile):
             raise Exception
         else:
             self.pygrib = pygrib
-        
+
         self.loadobj = loadobj
 
         # Determine whether to load one file or search in directory
@@ -498,7 +503,7 @@ class StageIV(GribFile):
                 return G
         else:
             # Return file path if valid grib file
-            try: 
+            try:
                 G_test = self.pygrib.open(f)
             except OSError:
                 return False
@@ -549,13 +554,13 @@ class StageIV(GribFile):
         # pdb.set_trace()
         # self.mx, self.my = N.meshgrid(self.xx,self.yy)
 
-        # lllon = -119.023 
+        # lllon = -119.023
         self.lllon = self.lons[0,0]
-        # lllat = 23.117 
+        # lllat = 23.117
         self.lllat = self.lats[0,0]
-        # urlon = -59.9044 
+        # urlon = -59.9044
         self.urlon = self.lons[-1,-1]
-        # urlat = 45.6147234 
+        # urlat = 45.6147234
         self.urlat = self.lats[-1,-1]
 
         self.shape = self.lats.shape
@@ -566,4 +571,3 @@ class StageIV(GribFile):
         accum = list(self.DATA.keys())[0]
         utc = list(self.DATA[accum].keys())[0]
         return self.DATA[accum][utc]
-
