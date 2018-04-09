@@ -2,6 +2,9 @@
 WEM
 ===
 
+**NOTE - `WEM` has been refactored. Use evac (Ensemble Verification and Creation)
+here: https://github.com/johnrobertlawson/evac.git**
+
 WRF Ensemble Management can help you create WRF ensembles from GEFS reanalysis
 data via submodule **lazyWRF**. It can also post-process the data (such as 
 computing ensemble means, creating postage-stamp plots of all members, etc)
